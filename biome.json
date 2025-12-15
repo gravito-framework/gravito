@@ -8,12 +8,12 @@
     },
     "files": {
         "includes": [
+            "packages/**/*.ts",
             "src/**/*.ts",
             "tests/**/*.ts",
-            "examples/**/*.ts",
             "build.ts",
-            "!dist",
-            "!node_modules"
+            "!**/dist",
+            "!**/node_modules"
         ]
     },
     "assist": {

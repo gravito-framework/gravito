@@ -7,33 +7,33 @@ const core = new PlanetCore();
 // 2. 測試 Hook: 註冊一個 Filter
 // 假設有一個 hook 叫做 'filter_content'，我們會把內容轉成大寫
 core.hooks.addFilter('filter_content', async (content: string) => {
-    console.log('[Filter] Transforming content to uppercase...');
-    return content.toUpperCase();
+  console.log('[Filter] Transforming content to uppercase...');
+  return content.toUpperCase();
 });
 
 // 3. 測試 Hook: 註冊一個 Action
 core.hooks.addAction('log_access', async (path: string) => {
-    console.log(`[Action] Access logged for: ${path}`);
+  console.log(`[Action] Access logged for: ${path}`);
 });
 
 // 4. 建立一個 Orbit (迷你 Hono app)
 const myOrbit = new Hono();
 
 myOrbit.get('/test', async (c) => {
-    // 觸發 Action
-    await core.hooks.doAction('log_access', '/api/test');
+  // 觸發 Action
+  await core.hooks.doAction('log_access', '/api/test');
 
-    // 原始資料
-    const originalData = 'hello ecosystem';
+  // 原始資料
+  const originalData = 'hello ecosystem';
 
-    // 應用 Filter
-    const filteredData = await core.hooks.applyFilters('filter_content', originalData);
+  // 應用 Filter
+  const filteredData = await core.hooks.applyFilters('filter_content', originalData);
 
-    return c.json({
-        original: originalData,
-        filtered: filteredData,
-        message: 'Orbit is functioning!',
-    });
+  return c.json({
+    original: originalData,
+    filtered: filteredData,
+    message: 'Orbit is functioning!',
+  });
 });
 
 // 5. 掛載 Orbit

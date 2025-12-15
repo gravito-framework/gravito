@@ -14,8 +14,9 @@ Essential utilities for building real-world applications.
 
 ## 🏗️ Phase 3: Civilizations (Standard Orbits)
 Official "First-Party" Orbits to jumpstart development.
-- [ ] **@gravito/orbit-db (Database)**: Drizzle ORM integration wrapper.
-- [ ] **@gravito/orbit-auth (Identity)**: JWT/Session authentication module.
+- [x] **Standard Database Orbit (Orbit-DB)**: Drizzle ORM integration.
+- [ ] **Auth Orbit**: JWT/Session authentication provider.
+- [ ] **Storage Orbit**: S3/Local file storage wrapper.
 - [ ] **@gravito/orbit-cache (Performance)**: Redis/InMemory caching layer.
 
 ## 🛸 Phase 4: Interstellar Travel (Ecosystem)
