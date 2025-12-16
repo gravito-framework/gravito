@@ -11,13 +11,15 @@ export class InertiaService {
     private config: InertiaConfig = {}
   ) {}
 
+  private sharedProps: Record<string, unknown> = {};
+
   /**
    * Render an Inertia component
    */
   public render(component: string, props: Record<string, unknown> = {}) {
     const page = {
       component,
-      props,
+      props: { ...this.sharedProps, ...props },
       url: this.context.req.url,
       version: this.config.version,
     };
@@ -48,7 +50,8 @@ export class InertiaService {
 
   /**
    * Share data with all responses
-   * (This ideally should be handled via middleware injecting into a shared props object)
    */
-  // public share(key: string, value: any) {}
+  public share(key: string, value: unknown) {
+    this.sharedProps[key] = value;
+  }
 }
