@@ -1,15 +1,18 @@
 {
     "name": "my-gravito-app",
     "version": "0.1.0",
+    "type": "module",
     "scripts": {
-        "dev": "bun run src/index.ts",
+        "dev": "bun run --watch src/index.ts",
         "start": "bun run src/index.ts"
     },
     "dependencies": {
-        "gravito-core": "latest",
+        "gravito-core": "workspace:*",
+        "@gravito/orbit-cache": "workspace:*",
         "hono": "^4.0.0"
     },
     "devDependencies": {
-        "bun-types": "latest"
+        "bun-types": "latest",
+        "typescript": "^5.0.0"
     }
 }

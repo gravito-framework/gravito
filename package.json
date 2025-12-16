@@ -2,7 +2,8 @@
     "name": "gravito-monorepo",
     "private": true,
     "workspaces": [
-        "packages/*"
+        "packages/*",
+        "examples"
     ],
     "scripts": {
         "build": "bun run --filter '*' build",

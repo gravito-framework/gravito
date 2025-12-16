@@ -1,0 +1,10 @@
+{
+    "name": "gravito-examples",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "gravito-core": "workspace:*",
+        "@gravito/orbit-cache": "workspace:*",
+        "hono": "^4.0.0"
+    }
+}

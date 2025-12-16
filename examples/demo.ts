@@ -1,6 +1,6 @@
-import { defineConfig, PlanetCore } from 'gravito-core';
+import { defineConfig, PlanetCore } from '../packages/core/src/index.ts';
 import { serveStatic } from 'hono/bun';
-import { OrbitCache } from '@gravito/orbit-cache';
+import { OrbitCache } from '../packages/orbit-cache/src/index.ts';
 
 // 1. Define Configuration (IoC Style)
 const config = defineConfig({
@@ -35,8 +35,8 @@ core.hooks.addFilter('api:response', async (data) => {
 });
 
 // 4. Static file serving
-core.app.use('/static/*', serveStatic({ root: './' }));
-core.app.get('/favicon.ico', serveStatic({ path: './static/favicon.ico' }));
+core.app.use('/static/*', serveStatic({ root: './templates/basic/' }));
+core.app.get('/favicon.ico', serveStatic({ path: './templates/basic/static/favicon.ico' }));
 
 // 5. HTML Page Routes
 core.app.get('/', async (c) => {
