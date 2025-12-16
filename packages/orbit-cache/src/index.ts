@@ -52,14 +52,15 @@ export class OrbitCache implements GravitoOrbit {
 
   install(core: PlanetCore): void {
     // Resolve config from options or core config (with empty fallback since cache works with defaults)
-    const config = this.options || (core.config.has('cache') ? core.config.get('cache') : {});
+    const resolvedConfig: OrbitCacheOptions =
+      this.options ?? (core.config.has('cache') ? core.config.get<OrbitCacheOptions>('cache') : {});
 
-    const { exposeAs = 'cache', defaultTTL = 60 } = config;
+    const { exposeAs = 'cache', defaultTTL = 60 } = resolvedConfig;
     const logger = core.logger;
 
     logger.info(`[OrbitCache] Initializing Cache (Exposed as: ${exposeAs})`);
 
-    const provider = config.provider || new MemoryCacheProvider();
+    const provider = resolvedConfig.provider ?? new MemoryCacheProvider();
 
     const cacheService = {
       get: (key: string) => provider.get(key),
