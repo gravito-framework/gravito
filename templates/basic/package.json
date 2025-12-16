@@ -1,0 +1,15 @@
+{
+    "name": "my-gravito-app",
+    "version": "0.1.0",
+    "scripts": {
+        "dev": "bun run src/index.ts",
+        "start": "bun run src/index.ts"
+    },
+    "dependencies": {
+        "gravito-core": "latest",
+        "hono": "^4.0.0"
+    },
+    "devDependencies": {
+        "bun-types": "latest"
+    }
+}
