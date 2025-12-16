@@ -1,0 +1,71 @@
+import { describe, expect, it, mock } from 'bun:test';
+import { PlanetCore } from '../src/PlanetCore';
+import { Router } from '../src/Router';
+
+class TestController {
+  constructor(private core: PlanetCore) {}
+
+  index(c: any) {
+    return c.text('index');
+  }
+
+  api(c: any) {
+    return c.text('api');
+  }
+}
+
+describe('Router', () => {
+  it('should register basic routes with controller binding', async () => {
+    const core = new PlanetCore();
+    const router = new Router(core);
+
+    router.get('/', [TestController, 'index']);
+
+    const res = await core.app.request('/');
+    expect(await res.text()).toBe('index');
+  });
+
+  it('should handle route groups with prefix', async () => {
+    const core = new PlanetCore();
+    const router = new Router(core);
+
+    router.prefix('/api').group((r) => {
+      r.get('/test', [TestController, 'api']);
+    });
+
+    const res = await core.app.request('/api/test');
+    expect(await res.text()).toBe('api');
+  });
+
+  it('should handle nested groups', async () => {
+    const core = new PlanetCore();
+    const router = new Router(core);
+
+    router.prefix('/api').group((api) => {
+      api.prefix('/v1').group((v1) => {
+        v1.get('/users', [TestController, 'api']);
+      });
+    });
+
+    const res = await core.app.request('/api/v1/users');
+    expect(await res.text()).toBe('api');
+  });
+
+  // Domain test is tricky because we need to mock Host header
+  it('should handle domain routing', async () => {
+    const core = new PlanetCore();
+    const router = new Router(core);
+
+    router.domain('api.example.com').group((r) => {
+      r.get('/', [TestController, 'api']);
+    });
+
+    // Match
+    const res1 = await core.app.request('/', { headers: { host: 'api.example.com' } });
+    expect(await res1.text()).toBe('api');
+
+    // No Match (fallback or 404)
+    const res2 = await core.app.request('/', { headers: { host: 'www.example.com' } });
+    expect(res2.status).toBe(404);
+  });
+});

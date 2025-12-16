@@ -24,6 +24,7 @@ export {
   PlanetCore,
   type ViewService,
 } from './PlanetCore';
+export { type ControllerClass, type RouteHandler, Router } from './Router';
 
 import type { GravitoConfig } from './PlanetCore';
 

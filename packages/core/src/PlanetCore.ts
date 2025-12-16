@@ -40,11 +40,14 @@ export type GravitoConfig = {
   orbits?: (new () => GravitoOrbit)[] | GravitoOrbit[];
 };
 
+import { Router } from './Router';
+
 export class PlanetCore {
   public app: Hono<{ Variables: Variables }>;
   public logger: Logger;
   public config: ConfigManager;
   public hooks: HookManager;
+  public router: Router;
 
   constructor(
     options: {
@@ -55,6 +58,7 @@ export class PlanetCore {
     this.logger = options.logger ?? new ConsoleLogger();
     this.config = new ConfigManager(options.config ?? {});
     this.hooks = new HookManager();
+    this.router = new Router(this);
 
     this.app = new Hono<{ Variables: Variables }>();
 
