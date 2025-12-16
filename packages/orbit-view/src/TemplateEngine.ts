@@ -41,10 +41,14 @@ export class TemplateEngine {
   }
 
   /**
-   * Load template and replace {{key}} variables
+   * Load template, process includes, and replace {{key}} variables
    */
   private loadAndInterpolate(name: string, data: Record<string, any>): string {
-    const template = this.readTemplate(name);
+    let template = this.readTemplate(name);
+    // Process includes before variable interpolation
+    template = this.processIncludes(template);
+    // Process conditionals
+    template = this.processConditionals(template, data);
     return this.interpolate(template, data);
   }
 
@@ -72,8 +76,42 @@ export class TemplateEngine {
     return content;
   }
 
+  private processIncludes(template: string, depth = 0): string {
+    if (depth > 10) {
+      throw new Error('Maximum include depth exceeded');
+    }
+
+    // Match {{ include 'name' }} or {{ include "name" }}
+    return template.replace(/\{\{\s*include\s+['"](.+?)['"]\s*\}\}/g, (_, partialName) => {
+      const partialContent = this.readTemplate(partialName);
+      // Recursively process includes in the partial
+      return this.processIncludes(partialContent, depth + 1);
+    });
+  }
+
+  private processConditionals(template: string, data: Record<string, any>): string {
+    // Handle {{#if key}}...{{/if}}
+    // note: does not support nested blocks of the same type gracefully with regex
+    template = template.replace(
+      /\{\{\s*#if\s+(\w+)\s*\}\}([\s\S]*?)\{\{\s*\/if\s*\}\}/g,
+      (_, key, content) => {
+        return data[key] ? content : '';
+      }
+    );
+
+    // Handle {{#unless key}}...{{/unless}}
+    template = template.replace(
+      /\{\{\s*#unless\s+(\w+)\s*\}\}([\s\S]*?)\{\{\s*\/unless\s*\}\}/g,
+      (_, key, content) => {
+        return !data[key] ? content : '';
+      }
+    );
+
+    return template;
+  }
+
   private interpolate(template: string, data: Record<string, any>): string {
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+    return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
       return String(data[key] ?? '');
     });
   }

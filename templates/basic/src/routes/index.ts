@@ -15,6 +15,7 @@ export function registerRoutes(core: PlanetCore): void {
   // Pages
   // ─────────────────────────────────────────────
   router.get('/', [HomeController, 'index']);
+  router.get('/about', [HomeController, 'about']);
 
   // ─────────────────────────────────────────────
   // API Routes

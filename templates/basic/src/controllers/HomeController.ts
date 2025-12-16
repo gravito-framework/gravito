@@ -29,8 +29,18 @@ export class HomeController {
         {
           title: this.core.config.get('APP_NAME') as string,
           scripts: '<script src="/static/home.js"></script>',
+          isHome: true,
         }
       )
     );
+  };
+
+  /**
+   * GET /about
+   * Render the about page
+   */
+  about = async (c: Context) => {
+    const view = c.get('view') as ViewService;
+    return c.html(view.render('about', {}, { title: 'About Us', isAbout: true }));
   };
 }

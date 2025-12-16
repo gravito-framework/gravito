@@ -73,6 +73,25 @@ export class PlanetCore {
     // Standard Error Handling
     this.app.onError((err, c) => {
       this.logger.error(`[ERROR] Application Error: ${err.message}`, err);
+
+      // Try rendering HTML if available and requested
+      const view = c.get('view') as ViewService | undefined;
+      const accept = c.req.header('Accept') || '';
+      if (view && accept.includes('text/html')) {
+        try {
+          return c.html(
+            view.render('errors/500', {
+              error: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+              debug: process.env.NODE_ENV !== 'production',
+            }),
+            500
+          );
+        } catch (renderError) {
+          // Fallback if view rendering fails
+          this.logger.error('[ERROR] Failed to render error view', renderError);
+        }
+      }
+
       return c.json(
         {
           success: false,
@@ -87,6 +106,18 @@ export class PlanetCore {
 
     this.app.notFound((c) => {
       this.logger.info(`[INFO] 404 Not Found: ${c.req.url}`);
+
+      // Try rendering HTML if available and requested
+      const view = c.get('view') as ViewService | undefined;
+      const accept = c.req.header('Accept') || '';
+      if (view && accept.includes('text/html')) {
+        try {
+          return c.html(view.render('errors/404'), 404);
+        } catch (renderError) {
+          // Fallback if view rendering fails
+        }
+      }
+
       return c.json(
         {
           success: false,
