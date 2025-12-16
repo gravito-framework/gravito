@@ -32,7 +32,7 @@ describe('gravito-core', () => {
         count++;
       });
 
-      await core.hooks.doAction('test_action');
+      await core.hooks.doAction('test_action', {});
       expect(count).toBe(1);
     });
 

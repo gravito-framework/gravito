@@ -1,6 +1,7 @@
 // biome-ignore lint/suspicious/noExplicitAny: convenient for users
 export type FilterCallback<T = any> = (value: T, ...args: unknown[]) => Promise<T> | T;
-export type ActionCallback = (...args: unknown[]) => Promise<void> | void;
+// biome-ignore lint/suspicious/noExplicitAny: convenient for users
+export type ActionCallback<TArgs = any> = (args: TArgs) => Promise<void> | void;
 
 export class HookManager {
   private filters: Map<string, FilterCallback[]> = new Map();
@@ -43,7 +44,8 @@ export class HookManager {
    * 註冊一個 Action (動作)
    * 用於觸發副作用，只進不出
    */
-  addAction(hook: string, callback: ActionCallback): void {
+  // biome-ignore lint/suspicious/noExplicitAny: convenient for users
+  addAction<TArgs = any>(hook: string, callback: ActionCallback<TArgs>): void {
     if (!this.actions.has(hook)) {
       this.actions.set(hook, []);
     }
@@ -54,12 +56,13 @@ export class HookManager {
    * 執行 Actions
    * 依序執行所有註冊的 callbacks
    */
-  async doAction(hook: string, ...args: unknown[]): Promise<void> {
+  // biome-ignore lint/suspicious/noExplicitAny: convenient for users
+  async doAction<TArgs = any>(hook: string, args: TArgs): Promise<void> {
     const callbacks = this.actions.get(hook) || [];
 
     for (const callback of callbacks) {
       try {
-        await callback(...args);
+        await callback(args);
       } catch (error) {
         console.error(`[HookManager] Error in action '${hook}':`, error);
       }

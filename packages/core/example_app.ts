@@ -12,7 +12,7 @@ core.hooks.addFilter('filter_content', async (content: string) => {
 });
 
 // 3. 測試 Hook: 註冊一個 Action
-core.hooks.addAction('log_access', async (path: string) => {
+core.hooks.addAction<{ path: string }>('log_access', async ({ path }) => {
   console.log(`[Action] Access logged for: ${path}`);
 });
 
@@ -21,7 +21,7 @@ const myOrbit = new Hono();
 
 myOrbit.get('/test', async (c) => {
   // 觸發 Action
-  await core.hooks.doAction('log_access', '/api/test');
+  await core.hooks.doAction('log_access', { path: '/api/test' });
 
   // 原始資料
   const originalData = 'hello ecosystem';
