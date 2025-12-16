@@ -15,6 +15,10 @@ export interface CacheService {
   remember<T>(key: string, ttl: number, callback: () => Promise<T>): Promise<T>;
 }
 
+export interface ViewService {
+  render(view: string, data?: Record<string, any>, options?: Record<string, any>): string;
+}
+
 // Hono Variables Type for Context Injection
 type Variables = {
   core: PlanetCore;
@@ -22,6 +26,7 @@ type Variables = {
   config: ConfigManager;
   // Optional orbit-injected variables
   cache?: CacheService;
+  view?: ViewService;
 };
 
 export interface GravitoOrbit {

@@ -9,6 +9,7 @@
     "dependencies": {
         "gravito-core": "workspace:*",
         "@gravito/orbit-cache": "workspace:*",
+        "@gravito/orbit-view": "workspace:*",
         "hono": "^4.0.0"
     },
     "devDependencies": {

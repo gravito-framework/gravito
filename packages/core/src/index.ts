@@ -17,7 +17,13 @@ export { HookManager } from './HookManager';
 export type { Logger } from './Logger';
 export { ConsoleLogger } from './Logger';
 // Core Exports
-export { type CacheService, type GravitoConfig, type GravitoOrbit, PlanetCore } from './PlanetCore';
+export {
+  type CacheService,
+  type GravitoConfig,
+  type GravitoOrbit,
+  PlanetCore,
+  type ViewService,
+} from './PlanetCore';
 
 import type { GravitoConfig } from './PlanetCore';
 

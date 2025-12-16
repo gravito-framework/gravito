@@ -1,6 +1,5 @@
-import type { CacheService, PlanetCore } from 'gravito-core';
+import type { CacheService, PlanetCore, ViewService } from 'gravito-core';
 import type { Context } from 'hono';
-import { render } from '../utils/template';
 
 /**
  * HomeController
@@ -18,8 +17,10 @@ export class HomeController {
     const count = ((await cache?.get<number>('visitor:count')) ?? 0) + 1;
     await cache?.set('visitor:count', count, 86400);
 
+    const view = c.get('view') as ViewService;
+
     return c.html(
-      render(
+      view.render(
         'home',
         {
           visitors: count,

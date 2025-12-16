@@ -1,4 +1,5 @@
 import { OrbitCache } from '@gravito/orbit-cache';
+import { OrbitView } from '@gravito/orbit-view';
 import { defineConfig, PlanetCore } from 'gravito-core';
 import { serveStatic } from 'hono/bun';
 import { registerHooks } from './hooks';
@@ -37,8 +38,9 @@ export async function bootstrap(options: AppConfig = {}) {
       PORT: port,
       APP_NAME: name,
       APP_VERSION: version,
+      VIEW_DIR: 'src/views', // Optional, defaults to src/views
     },
-    orbits: [OrbitCache],
+    orbits: [OrbitCache, OrbitView],
   });
 
   // 2. Boot
