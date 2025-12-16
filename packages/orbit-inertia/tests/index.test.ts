@@ -19,7 +19,7 @@ describe('InertiaService', () => {
     const result = service.render('TestComponent', { foo: 'bar' });
 
     expect(ctx.header).toHaveBeenCalledWith('X-Inertia', 'true');
-    expect(result).toEqual({
+    expect(result as any).toEqual({
       component: 'TestComponent',
       props: { foo: 'bar' },
       url: '/test',
@@ -44,7 +44,7 @@ describe('InertiaService', () => {
 
     const result = service.render('Dashboard');
 
-    expect(result.props).toEqual({
+    expect((result as any).props).toEqual({
       user: { name: 'Carl' },
     });
   });
