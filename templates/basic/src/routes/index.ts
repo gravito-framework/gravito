@@ -3,24 +3,34 @@ import { ApiController } from '../controllers/ApiController';
 import { HomeController } from '../controllers/HomeController';
 
 /**
- * Register all application routes
+ * Route Definitions
  *
- * This file only defines URL → Controller mapping.
- * All request handling logic is in the controllers.
+ * Maps URLs to controller methods using the Gravito Router.
+ * Supports groups, prefixes, and domains.
  */
 export function registerRoutes(core: PlanetCore): void {
-  const home = new HomeController(core);
-  const api = new ApiController(core);
+  const router = core.router;
 
   // ─────────────────────────────────────────────
   // Pages
   // ─────────────────────────────────────────────
-  core.app.get('/', home.index);
+  router.get('/', [HomeController, 'index']);
 
   // ─────────────────────────────────────────────
-  // API
+  // API Routes
   // ─────────────────────────────────────────────
-  core.app.get('/api/health', api.health);
-  core.app.get('/api/config', api.config);
-  core.app.get('/api/stats', api.stats);
+  // Example inline middleware for API logging
+  const apiLogger = async (c: any, next: any) => {
+    console.log(`[API] ${c.req.method} ${c.req.url}`);
+    await next();
+  };
+
+  router
+    .prefix('/api')
+    .middleware(apiLogger)
+    .group((api) => {
+      api.get('/health', [ApiController, 'health']);
+      api.get('/config', [ApiController, 'config']);
+      api.get('/stats', [ApiController, 'stats']);
+    });
 }

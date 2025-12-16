@@ -51,6 +51,28 @@ describe('Router', () => {
     expect(await res.text()).toBe('api');
   });
 
+  it('should handle middleware in groups', async () => {
+    const core = new PlanetCore();
+    const router = new Router(core);
+    let middlewareCalled = false;
+
+    const testMiddleware = async (c: any, next: any) => {
+      middlewareCalled = true;
+      await next();
+    };
+
+    router
+      .prefix('/mw')
+      .middleware(testMiddleware)
+      .group((r) => {
+        r.get('/test', [TestController, 'api']);
+      });
+
+    const res = await core.app.request('/mw/test');
+    expect(await res.text()).toBe('api');
+    expect(middlewareCalled).toBe(true);
+  });
+
   // Domain test is tricky because we need to mock Host header
   it('should handle domain routing', async () => {
     const core = new PlanetCore();

@@ -1,4 +1,4 @@
-import type { Handler } from 'hono';
+import type { Handler, MiddlewareHandler } from 'hono';
 import type { PlanetCore } from './PlanetCore';
 
 // Type for Controller Class Constructor
@@ -11,6 +11,7 @@ export type RouteHandler = Handler | [ControllerClass, string];
 interface RouteOptions {
   prefix?: string;
   domain?: string;
+  middleware?: MiddlewareHandler[];
 }
 
 /**
@@ -30,6 +31,16 @@ export class RouteGroup {
     return new RouteGroup(this.router, {
       ...this.options,
       prefix: (this.options.prefix || '') + path,
+    });
+  }
+
+  /**
+   * Add middleware to the current group
+   */
+  middleware(...handlers: MiddlewareHandler[]): RouteGroup {
+    return new RouteGroup(this.router, {
+      ...this.options,
+      middleware: [...(this.options.middleware || []), ...handlers],
     });
   }
 
@@ -68,6 +79,7 @@ export class RouteGroup {
  * - Controller-based routing: router.get('/', [HomeController, 'index'])
  * - Route groups with prefixes: router.prefix('/api').group(...)
  * - Domain-based routing: router.domain('api.app').group(...)
+ * - Middleware chaining: router.middleware(auth).group(...)
  */
 export class Router {
   // Singleton cache for controllers
@@ -88,6 +100,13 @@ export class Router {
    */
   domain(host: string): RouteGroup {
     return new RouteGroup(this, { domain: host });
+  }
+
+  /**
+   * Start a route group with middleware
+   */
+  middleware(...handlers: MiddlewareHandler[]): RouteGroup {
+    return new RouteGroup(this, { middleware: handlers });
   }
 
   // Standard HTTP Methods
@@ -124,28 +143,48 @@ export class Router {
       finalHandler = handler;
     }
 
-    // 3. Register with Hono
-    // If domain is present, wrap in domain check middleware
+    // 3. Prepare Handlers Stack
+    const handlers: Handler[] = [];
+
+    if (options.middleware) {
+      handlers.push(...options.middleware);
+    }
+    handlers.push(finalHandler);
+
+    // 4. Register with Hono
     if (options.domain) {
-      // Note: This creates a unique middleware per route which is fine for small apps,
-      // but optimally we would group them in a Hono sub-app via mount.
-      // For now, simple middleware check is "lightweight" enough.
-      const domainHandler: Handler = async (c, next) => {
-        const host = c.req.header('host');
-        // Simple exact match (can be improved to regex later)
-        if (host !== options.domain) {
-          // If using sub-domains, usually we want to 404 if domain doesn't match?
-          // But here we just continue to next route if strictly inside a monolithic app routing table
-          // However, Hono routing is tree-based.
-          // If we register specific path, Hono matches path first.
-          // If we return next(), Hono tries next handler.
+      // If domain is specified, we must compose handlers into a single one
+      // so we can wrap them behind a domain check.
+      const wrappedHandler: Handler = async (c, next) => {
+        // 1. Check Domain
+        if (c.req.header('host') !== options.domain) {
+          // Skip this entire route definition, look for next match
           return next();
         }
-        return finalHandler(c, next);
+
+        // 2. Execute Internal Pipeline
+        // We replicate Hono's execution model for this isolated stack
+        let index = -1;
+        const dispatch = async (i: number): Promise<any> => {
+          if (i <= index) throw new Error('next() called multiple times');
+          index = i;
+          const fn = handlers[i];
+          if (!fn) {
+            // End of stack?
+            // If we are here, it means the last handler called next()
+            // Usually finalHandler returns response, so this might not be reached.
+            // But if it is, we fall through to next route (unlikely for controller)
+            return next();
+          }
+          return fn(c, () => dispatch(i + 1));
+        };
+        return dispatch(0);
       };
-      (this.core.app as any)[method](fullPath, domainHandler);
+
+      (this.core.app as any)[method](fullPath, wrappedHandler);
     } else {
-      (this.core.app as any)[method](fullPath, finalHandler);
+      // Standard registration
+      (this.core.app as any)[method](fullPath, ...handlers);
     }
   }
 
