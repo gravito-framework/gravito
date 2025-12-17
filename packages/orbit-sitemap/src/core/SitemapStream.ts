@@ -122,10 +122,59 @@ export class SitemapStream {
     }
 
     // Videos
-    // (Implementation skipped for brevity in Phase 1, added in Phase 2)
+    if (entry.videos) {
+      for (const video of entry.videos) {
+        item += `${subIndent}<video:video>${nl}`;
+        item += `${subIndent}  <video:thumbnail_loc>${this.escape(video.thumbnail_loc)}</video:thumbnail_loc>${nl}`;
+        item += `${subIndent}  <video:title>${this.escape(video.title)}</video:title>${nl}`;
+        item += `${subIndent}  <video:description>${this.escape(video.description)}</video:description>${nl}`;
+        if (video.content_loc)
+          item += `${subIndent}  <video:content_loc>${this.escape(video.content_loc)}</video:content_loc>${nl}`;
+        if (video.player_loc)
+          item += `${subIndent}  <video:player_loc>${this.escape(video.player_loc)}</video:player_loc>${nl}`;
+        if (video.duration)
+          item += `${subIndent}  <video:duration>${video.duration}</video:duration>${nl}`;
+        if (video.view_count)
+          item += `${subIndent}  <video:view_count>${video.view_count}</video:view_count>${nl}`;
+        if (video.publication_date) {
+          const pubDate =
+            video.publication_date instanceof Date
+              ? video.publication_date
+              : new Date(video.publication_date);
+          item += `${subIndent}  <video:publication_date>${pubDate.toISOString()}</video:publication_date>${nl}`;
+        }
+        if (video.family_friendly)
+          item += `${subIndent}  <video:family_friendly>${video.family_friendly}</video:family_friendly>${nl}`;
+        if (video.tag) {
+          for (const tag of video.tag) {
+            item += `${subIndent}  <video:tag>${this.escape(tag)}</video:tag>${nl}`;
+          }
+        }
+        item += `${subIndent}</video:video>${nl}`;
+      }
+    }
 
     // News
-    // (Implementation skipped for brevity in Phase 1, added in Phase 2)
+    if (entry.news) {
+      item += `${subIndent}<news:news>${nl}`;
+      item += `${subIndent}  <news:publication>${nl}`;
+      item += `${subIndent}    <news:name>${this.escape(entry.news.publication.name)}</news:name>${nl}`;
+      item += `${subIndent}    <news:language>${this.escape(entry.news.publication.language)}</news:language>${nl}`;
+      item += `${subIndent}  </news:publication>${nl}`;
+
+      const pubDate =
+        entry.news.publication_date instanceof Date
+          ? entry.news.publication_date
+          : new Date(entry.news.publication_date);
+      item += `${subIndent}  <news:publication_date>${pubDate.toISOString()}</news:publication_date>${nl}`;
+      item += `${subIndent}  <news:title>${this.escape(entry.news.title)}</news:title>${nl}`;
+
+      if (entry.news.genres)
+        item += `${subIndent}  <news:genres>${this.escape(entry.news.genres)}</news:genres>${nl}`;
+      if (entry.news.keywords)
+        item += `${subIndent}  <news:keywords>${entry.news.keywords.map((k) => this.escape(k)).join(', ')}</news:keywords>${nl}`;
+      item += `${subIndent}</news:news>${nl}`;
+    }
 
     item += `${indent}</url>${nl}`;
     return item;

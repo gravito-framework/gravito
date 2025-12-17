@@ -7,30 +7,32 @@ export interface AlternateUrl {
 
 export interface SitemapImage {
   loc: string;
-  title?: string;
-  caption?: string;
-  geo_location?: string;
-  license?: string;
+  title?: string | undefined;
+  caption?: string | undefined;
+  geo_location?: string | undefined;
+  license?: string | undefined;
 }
 
 export interface SitemapVideo {
   thumbnail_loc: string;
   title: string;
   description: string;
-  content_loc?: string;
-  player_loc?: string;
-  duration?: number;
-  expiration_date?: Date | string;
-  rating?: number;
-  view_count?: number;
-  publication_date?: Date | string;
-  family_friendly?: 'yes' | 'no';
-  tag?: string[];
-  category?: string;
-  restriction?: {
-    relationship: 'allow' | 'deny';
-    countries: string[];
-  };
+  content_loc?: string | undefined;
+  player_loc?: string | undefined;
+  duration?: number | undefined;
+  expiration_date?: Date | string | undefined;
+  rating?: number | undefined;
+  view_count?: number | undefined;
+  publication_date?: Date | string | undefined;
+  family_friendly?: 'yes' | 'no' | undefined;
+  tag?: string[] | undefined;
+  category?: string | undefined;
+  restriction?:
+    | {
+        relationship: 'allow' | 'deny';
+        countries: string[];
+      }
+    | undefined;
 }
 
 export interface SitemapNews {
@@ -40,25 +42,25 @@ export interface SitemapNews {
   };
   publication_date: Date | string;
   title: string;
-  genres?: string;
-  keywords?: string[];
-  stock_tickers?: string[];
+  genres?: string | undefined;
+  keywords?: string[] | undefined;
+  stock_tickers?: string[] | undefined;
 }
 
 export interface SitemapEntry {
   url: string;
-  lastmod?: Date | string;
-  changefreq?: ChangeFreq;
-  priority?: number;
-  alternates?: AlternateUrl[];
-  images?: SitemapImage[];
-  videos?: SitemapVideo[];
-  news?: SitemapNews;
+  lastmod?: Date | string | undefined;
+  changefreq?: ChangeFreq | undefined;
+  priority?: number | undefined;
+  alternates?: AlternateUrl[] | undefined;
+  images?: SitemapImage[] | undefined;
+  videos?: SitemapVideo[] | undefined;
+  news?: SitemapNews | undefined;
 }
 
 export interface SitemapIndexEntry {
   url: string;
-  lastmod?: Date | string;
+  lastmod?: Date | string | undefined;
 }
 
 export interface SitemapProvider {
@@ -67,5 +69,5 @@ export interface SitemapProvider {
 
 export interface SitemapStreamOptions {
   baseUrl: string;
-  pretty?: boolean;
+  pretty?: boolean | undefined;
 }
