@@ -11,18 +11,23 @@ This is Gravito's headline feature. Compile your entire application into a stand
 ### Build Command
 
 ```bash
+# 1. Build frontend assets (if using Inertia)
+bun run build:client
+
+# 2. Compile backend into a single binary
 bun build --compile --outfile=server ./src/index.ts
 ```
 
 ### Output Structure
 
+When deploying, you need the binary and your static assets:
+
 ```
-dist/
-├── server          # Standalone binary executable
-└── public/         # Static assets folder
-    ├── css/
-    ├── js/
-    └── images/
+/opt/app/
+├── server              # Standalone binary executable
+└── static/            # Static assets folder (served by Nginx or Gravito)
+    ├── build/         # Vite output (CSS, JS)
+    └── public/        # Public images, fonts
 ```
 
 ### Advantages
@@ -30,7 +35,7 @@ dist/
 | Benefit | Description |
 |---------|-------------|
 | **Zero Dependencies** | Server doesn't need Node, npm, or Bun installed |
-| **Simple Deployment** | Just copy the binary and public folder |
+| **Simple Deployment** | Just copy the binary and static folder |
 | **Fast Startup** | Sub-millisecond cold start |
 | **Security** | Source code is compiled, not exposed |
 
@@ -38,12 +43,14 @@ dist/
 
 1. **Build on your development machine:**
    ```bash
-   bun run build
+   bun run build:client
+   bun build --compile --outfile=server ./src/index.ts
    ```
 
 2. **Copy to production server:**
    ```bash
-   scp -r dist/ user@server:/opt/app/
+   scp server user@host:/opt/app/
+   scp -r static/ user@host:/opt/app/
    ```
 
 3. **Run on Linux:**
@@ -89,6 +96,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json bun.lock ./
+# If monorepo, you might need to copy workspace packages too
+COPY packages/ ./packages/
+
 RUN bun install --frozen-lockfile
 
 # Copy source code
@@ -97,51 +107,27 @@ COPY . .
 # Build frontend assets
 RUN bun run build:client
 
-# Compile binary
-RUN bun build --compile --outfile=server ./src/index.ts
+# Compile binary (Optimization: We can run TS directly in container too)
+# RUN bun build --compile --outfile=server ./src/index.ts
+# OR run directly with Bun runtime
 
 # ============================================
 # Stage 2: Production
 # ============================================
-FROM debian:bookworm-slim
-
-# Install minimal dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-RUN useradd -m -s /bin/bash appuser
+FROM oven/bun:1-slim
 
 WORKDIR /app
 
-# Copy binary and assets from builder
-COPY --from=builder /app/server /app/server
-COPY --from=builder /app/dist/public /app/public
+# Copy built assets
+COPY --from=builder /app/static ./static
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json .
 
-# Set ownership
-RUN chown -R appuser:appuser /app
-
-USER appuser
-
+ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["/app/server"]
-```
-
-### Build & Run
-
-```bash
-# Build image
-docker build -t my-gravito-app:latest .
-
-# Run container
-docker run -d \
-  --name gravito-app \
-  -p 3000:3000 \
-  -e NODE_ENV=production \
-  -e DATABASE_URL=postgres://... \
-  my-gravito-app:latest
+CMD ["bun", "run", "src/index.ts"]
 ```
 
 ### Docker Compose Example
@@ -160,6 +146,8 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    volumes:
+       - ./static:/app/static
 
   db:
     image: postgres:16-alpine
@@ -209,6 +197,13 @@ server {
     ssl_certificate /etc/ssl/certs/example.com.pem;
     ssl_certificate_key /etc/ssl/private/example.com.key;
 
+    # Serve static files directly (Performance)
+    location /assets/ {
+        alias /opt/app/static/build/assets/;
+        expires 30d;
+        access_log off;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
@@ -232,6 +227,9 @@ server {
 ```caddyfile
 example.com {
     reverse_proxy localhost:3000
+    file_server /assets/* {
+        root /opt/app/static/build/assets
+    }
 }
 ```
 
@@ -252,15 +250,6 @@ core.app.get('/health', (c) => {
 })
 ```
 
-### Prometheus Metrics (Optional)
-
-```typescript
-import { prometheus } from '@hono/prometheus'
-
-core.app.use('*', prometheus())
-core.app.get('/metrics', prometheus.handler)
-```
-
 ---
 
 ## 🔐 Security Recommendations
@@ -270,7 +259,3 @@ core.app.get('/metrics', prometheus.handler)
 3. **Rate limiting** - Protect against DDoS
 4. **Keep dependencies updated** - Regular security audits
 5. **Use HTTPS only** - Redirect all HTTP traffic
-
----
-
-*For more details, see the [GRAVITO_AI_GUIDE.md](../../../GRAVITO_AI_GUIDE.md) in the project root.*

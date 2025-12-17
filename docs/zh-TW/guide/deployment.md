@@ -1,58 +1,65 @@
-# 🚀 佈署指南
+# 🚀 部署指南
 
-Gravito 支援兩種主要佈署策略：**Binary-First** (推薦) 和 **Docker 容器化**。
+Gravito 支援兩種主要的部署策略：**二進位優先 (Binary-First)**（推薦）與 **Docker 容器化**。
 
 ---
 
-## 📦 方案一：單一執行檔 (Binary-First) ⭐
+## 📦 選項 1: 單一執行檔 (Binary-First) ⭐
 
-這是 Gravito 的主打亮點。將整個應用程式編譯成獨立的二進位執行檔。
+這是 Gravito 的旗艦功能。將你的整個應用程式編譯為獨立的執行檔。
 
-### 編譯指令
+### 建置指令
 
 ```bash
+# 1. 建置前端資源 (如果有使用 Inertia)
+bun run build:client
+
+# 2. 編譯後端為單一執行檔
 bun build --compile --outfile=server ./src/index.ts
 ```
 
-### 產出結構
+### 輸出結構
+
+部署時，你需要此執行檔以及靜態資源資料夾：
 
 ```
-dist/
-├── server          # 獨立 Binary 執行檔
-└── public/         # 靜態資源資料夾
-    ├── css/
-    ├── js/
-    └── images/
+/opt/app/
+├── server              # 獨立的二進位執行檔
+└── static/            # 靜態資源資料夾 (由 Nginx 或 Gravito 提供服務)
+    ├── build/         # Vite 輸出的資源 (CSS, JS)
+    └── public/        # 公用圖片、字型
 ```
 
 ### 優勢
 
-| 優點 | 說明 |
+| 優點 | 描述 |
 |------|------|
-| **零依賴** | 伺服器無需安裝 Node、npm 或 Bun |
-| **簡單佈署** | 只需複製 binary 和 public 資料夾 |
+| **零依賴** | 伺服器無需安裝 Node, npm, 或 Bun |
+| **部署簡單** | 只需複製執行檔與 static 資料夾 |
 | **快速啟動** | 亞毫秒級冷啟動 |
-| **安全性** | 原始碼已編譯，不會暴露 |
+| **安全性** | 原始碼已編譯，不外洩 |
 
-### 佈署步驟
+### 部署步驟
 
-1. **在開發機器上編譯：**
+1. **在開發機上建置:**
    ```bash
-   bun run build
+   bun run build:client
+   bun build --compile --outfile=server ./src/index.ts
    ```
 
-2. **複製到正式伺服器：**
+2. **複製到生產伺服器:**
    ```bash
-   scp -r dist/ user@server:/opt/app/
+   scp server user@host:/opt/app/
+   scp -r static/ user@host:/opt/app/
    ```
 
-3. **在 Linux 上執行：**
+3. **在 Linux 上執行:**
    ```bash
    chmod +x /opt/app/server
    /opt/app/server
    ```
 
-4. **設定 systemd 服務 (選配)：**
+4. **設定 systemd service (可選):**
    ```ini
    [Unit]
    Description=Gravito Application
@@ -73,11 +80,11 @@ dist/
 
 ---
 
-## 🐳 方案二：Docker 容器化 (企業標準)
+## 🐳 選項 2: Docker 容器化 (企業標準)
 
-適合需要容器編排 (Kubernetes、Docker Swarm) 的團隊。
+適用於需要容器編排的團隊 (Kubernetes, Docker Swarm)。
 
-### Multi-stage Dockerfile
+### 多階段 Dockerfile
 
 ```dockerfile
 # ============================================
@@ -89,59 +96,34 @@ WORKDIR /app
 
 # 複製 package 檔案
 COPY package.json bun.lock ./
+# 如果是 monorepo，可能需要複製 packages 目錄
+COPY packages/ ./packages/
+
 RUN bun install --frozen-lockfile
 
 # 複製原始碼
 COPY . .
 
-# 編譯前端資源
+# 建置前端資源
 RUN bun run build:client
-
-# 編譯 Binary
-RUN bun build --compile --outfile=server ./src/index.ts
 
 # ============================================
 # Stage 2: Production
 # ============================================
-FROM debian:bookworm-slim
-
-# 安裝最小依賴
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# 建立非 root 使用者
-RUN useradd -m -s /bin/bash appuser
+FROM oven/bun:1-slim
 
 WORKDIR /app
 
-# 從 builder 複製 binary 和資源
-COPY --from=builder /app/server /app/server
-COPY --from=builder /app/dist/public /app/public
+# 複製建置好的資源
+COPY --from=builder /app/static ./static
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json .
 
-# 設定權限
-RUN chown -R appuser:appuser /app
-
-USER appuser
-
+ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["/app/server"]
-```
-
-### 建置與執行
-
-```bash
-# 建置映像檔
-docker build -t my-gravito-app:latest .
-
-# 執行容器
-docker run -d \
-  --name gravito-app \
-  -p 3000:3000 \
-  -e NODE_ENV=production \
-  -e DATABASE_URL=postgres://... \
-  my-gravito-app:latest
+CMD ["bun", "run", "src/index.ts"]
 ```
 
 ### Docker Compose 範例
@@ -160,6 +142,8 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    volumes:
+       - ./static:/app/static
 
   db:
     image: postgres:16-alpine
@@ -175,18 +159,18 @@ volumes:
 
 ---
 
-## 🔧 正式環境檢查清單
+## 🔧 生產環境檢查清單
 
-佈署到正式環境前，請確認：
+部署前，請確保：
 
-| 項目 | 指令/動作 |
-|------|----------|
+| 項目 | 指令/行動 |
+|------|-----------|
 | ✅ 執行測試 | `bun test` |
-| ✅ 編譯前端 | `bun run build:client` |
+| ✅ 建置前端 | `bun run build:client` |
 | ✅ 設定 `NODE_ENV` | `export NODE_ENV=production` |
-| ✅ 設定密鑰 | 使用環境變數，而非 `.env` |
+| ✅ 設定機密 | 使用環境變數，勿用 `.env` |
 | ✅ 啟用 HTTPS | 使用反向代理 (nginx, Caddy) |
-| ✅ 設定日誌 | 配置日誌聚合系統 |
+| ✅ 設定 Log | 設定日誌聚合 |
 | ✅ 健康檢查 | 實作 `/health` 端點 |
 
 ---
@@ -208,6 +192,13 @@ server {
 
     ssl_certificate /etc/ssl/certs/example.com.pem;
     ssl_certificate_key /etc/ssl/private/example.com.key;
+
+    # 直接服務靜態檔案 (效能優化)
+    location /assets/ {
+        alias /opt/app/static/build/assets/;
+        expires 30d;
+        access_log off;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -232,6 +223,9 @@ server {
 ```caddyfile
 example.com {
     reverse_proxy localhost:3000
+    file_server /assets/* {
+        root /opt/app/static/build/assets
+    }
 }
 ```
 
@@ -252,25 +246,12 @@ core.app.get('/health', (c) => {
 })
 ```
 
-### Prometheus 指標 (選配)
-
-```typescript
-import { prometheus } from '@hono/prometheus'
-
-core.app.use('*', prometheus())
-core.app.get('/metrics', prometheus.handler)
-```
-
 ---
 
 ## 🔐 安全建議
 
-1. **永遠不要提交密鑰** - 使用環境變數
-2. **謹慎啟用 CORS** - 在正式環境限制來源
-3. **速率限制** - 防止 DDoS 攻擊
-4. **保持依賴更新** - 定期進行安全稽核
-5. **僅使用 HTTPS** - 將所有 HTTP 流量重新導向
-
----
-
-*更多詳情，請參閱專案根目錄的 [GRAVITO_AI_GUIDE.md](../../../GRAVITO_AI_GUIDE.md)。*
+1. **絕不提交機密** - 使用環境變數
+2. **謹慎啟用 CORS** - 在生產環境限制來源 (Origin)
+3. **速率限制 (Rate limiting)** - 防止 DDoS
+4. **保持依賴更新** - 定期安全審計
+5. **僅使用 HTTPS** - 強制重定向 HTTP 流量
