@@ -1,20 +1,27 @@
-# @gravito/orbit-db
+---
+title: Orbit DB
+---
 
-> The Standard Database Orbit for Galaxy Architecture.
+# Orbit DB
+
+> Database integration as a Gravito Orbit.
+
+Package: `@gravito/orbit-db`
 
 Provides seamless integration with [Drizzle ORM](https://orm.drizzle.team/).
 
-## 📦 Installation
+## Installation
 
 ```bash
 bun add @gravito/orbit-db drizzle-orm
 ```
 
-## 🚀 Usage
+## Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
 import orbitDB from '@gravito/orbit-db';
+import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { Database } from 'bun:sqlite';
 
@@ -28,9 +35,13 @@ orbitDB(core, {
   exposeAs: 'database' // Access via c.get('database')
 });
 
-core.mountOrbit('/api', app);
+const api = new Hono();
+
+api.get('/health', (c) => c.text('ok'));
+
+core.mountOrbit('/api', api);
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `db:connected` - Fired when the DB orbit initializes.

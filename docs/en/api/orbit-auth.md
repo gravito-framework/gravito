@@ -1,16 +1,22 @@
-# @gravito/orbit-auth
+---
+title: Orbit Auth
+---
 
-> The Standard Logic Orbit for Authentication in Galaxy Architecture.
+# Orbit Auth
+
+> Authentication utilities as a Gravito Orbit.
+
+Package: `@gravito/orbit-auth`
 
 Provides simple JWT utilities and hooks for extending authentication logic.
 
-## 📦 Installation
+## Installation
 
 ```bash
 bun add @gravito/orbit-auth
 ```
 
-## 🚀 Usage
+## Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -31,7 +37,7 @@ core.app.post('/login', async (c) => {
 });
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `auth:init` - Fired when the Auth orbit initializes.
 - `auth:payload` - (Filter) Modify the JWT payload before signing.

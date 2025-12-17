@@ -114,7 +114,7 @@ export default core.liftoff(); // Automatically uses PORT from config/env
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!
-Feel free to check the [issues page](https://github.com/CarlLee1983/gravito-core/issues).
+Feel free to check the [issues page](https://github.com/CarlLee1983/gravito/issues).
 
 ## 📝 License
 

@@ -60,7 +60,7 @@ export default function Home() {
                             {trans('hero.cta_start', 'Get Started')}
                         </a>
                         <a
-                            href="https://github.com/CarlLee1983/gravito-core"
+                            href="https://github.com/CarlLee1983/gravito"
                             className="px-8 py-4 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-95"
                         >
                             {trans('hero.cta_github', 'View on GitHub')}

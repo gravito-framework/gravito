@@ -48,6 +48,56 @@ describe('InertiaService', () => {
       user: { name: 'Carl' },
     });
   });
+
+  it('should escape page JSON for single-quoted data-page attribute', () => {
+    const view = {
+      render: mock((_viewName: string, data: any) => {
+        return `<div id="app" data-page='${data.page}'></div>`;
+      }),
+    };
+
+    const req = {
+      url: '/docs/guide/core-concepts',
+      header: () => undefined,
+    };
+
+    const ctx = {
+      req,
+      get: (key: string) => (key === 'view' ? view : undefined),
+      html: mock((html: string) => html),
+    } as any;
+
+    const service = new InertiaService(ctx, { version: '1.0' });
+    const html = service.render('Docs', {
+      content: `<p>He said &quot;hi&quot; & goodbye. PlanetCore's here.</p>`,
+    }) as string;
+
+    const m = html.match(/data-page='([^']*)'/);
+    expect(m).not.toBeNull();
+
+    const attr = m![1];
+    const decoded = attr.replace(/&(amp|lt|gt|quot|#039);/g, (_full, ent) => {
+      switch (ent) {
+        case 'amp':
+          return '&';
+        case 'lt':
+          return '<';
+        case 'gt':
+          return '>';
+        case 'quot':
+          return '"';
+        case '#039':
+          return "'";
+        default:
+          return _full;
+      }
+    });
+
+    const parsed = JSON.parse(decoded);
+    expect(parsed.component).toBe('Docs');
+    expect(parsed.props.content).toContain('&quot;hi&quot;');
+    expect(parsed.props.content).toContain("PlanetCore's");
+  });
 });
 
 describe('OrbitInertia Integration', () => {

@@ -5,60 +5,65 @@ title: Gravito Core Concepts
 # Gravito Core Concepts
 
 > **"The High-Performance Framework for Artisans."**
-> 为工匠打造的高效能框架
+> 為工匠打造的高效能框架
 
 [![npm version](https://img.shields.io/npm/v/gravito-core.svg)](https://www.npmjs.com/package/gravito-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black.svg)](https://bun.sh/)
 
-Welcome to Gravito Core! 🚀 This guide covers the fundamental concepts and architecture of the framework.
+Welcome to Gravito Core. This guide covers the fundamental concepts and architecture of the framework.
 
 ---
 
-## 🎯 Product Positioning
+## Product Positioning
 
 ### Key Differentiators
 
 | vs. | Gravito Advantage |
 |-----|-------------------|
 | **Laravel** | Bun + Hono powered, millisecond startup time |
-| **Next.js** | Binary-First strategy, single executable, no `node_modules` hell |
+| **Next.js** | Binary-first distribution, deploy as a single executable without shipping `node_modules` |
 | **Express/Koa** | Enforced MVC layering, no scattered backend logic |
 
 ---
 
-## 📚 Technology Stack
+## Technology Stack
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      TypeScript (Strict)                     │
-│                    AI-friendly type hints                    │
-├─────────────────────────────────────────────────────────────┤
-│  Inertia.js              │            Vite                  │
-│  (Frontend Bridge)       │       (Build Tool)               │
-│  Backend MVC, SPA UX     │    React/Vue HMR                 │
-├──────────────────────────┴──────────────────────────────────┤
-│                         Hono                                 │
-│              World's Fastest JS Web Framework                │
-│            (Router + Request Parser)                         │
-├─────────────────────────────────────────────────────────────┤
-│                          Bun                                 │
-│           Ultra-fast JS Runtime + Bundler                    │
-└─────────────────────────────────────────────────────────────┘
-```
-
-| Layer | Technology | Role |
-|-------|------------|------|
-| **Runtime** | Bun | Ultra-fast JS runtime + bundler |
-| **HTTP Core** | Hono | World's fastest JS web framework |
-| **Frontend Bridge** | Inertia.js | Backend MVC patterns, SPA user experience |
-| **Build Tool** | Vite | React/Vue hot module replacement |
-| **Language** | TypeScript | Strict mode, AI-friendly type hints |
+<div class="not-prose my-10 font-sans grid gap-4 text-left">
+  <div class="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-6 text-center shadow-lg">
+    <div class="absolute left-0 top-0 h-1 w-full bg-blue-500"></div>
+    <h3 class="mb-2 text-xl font-bold text-gray-100">TypeScript (Strict)</h3>
+    <p class="text-sm text-gray-400">Strict typing with AI-friendly hints</p>
+  </div>
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div class="absolute left-0 top-0 h-1 w-full bg-purple-500"></div>
+      <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-gray-100">Inertia.js</h4>
+      <p class="mb-2 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Frontend Bridge</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Backend MVC patterns with SPA user experience</p>
+    </div>
+    <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div class="absolute left-0 top-0 h-1 w-full bg-yellow-400"></div>
+      <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-gray-100">Vite</h4>
+      <p class="mb-2 text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">Build Tool</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">React/Vue HMR and modern bundling</p>
+    </div>
+  </div>
+  <div class="rounded-xl bg-gradient-to-br from-orange-500 to-red-600 p-6 text-center text-white shadow-lg">
+    <h3 class="mb-1 text-xl font-bold">Hono</h3>
+    <p class="mb-1 text-sm text-orange-50">A fast JavaScript web framework</p>
+    <p class="text-xs text-orange-100/80">(Router + Request Parser)</p>
+  </div>
+  <div class="rounded-xl border border-gray-800 bg-black p-6 text-center shadow-lg">
+    <h3 class="mb-1 text-xl font-bold text-white">Bun</h3>
+    <p class="text-sm text-gray-400">Ultra-fast JavaScript runtime + bundler</p>
+  </div>
+</div>
 
 ---
 
-## 🌌 Galaxy Architecture
+## Galaxy Architecture
 
 Gravito follows a unique design pattern inspired by celestial mechanics:
 
@@ -98,16 +103,16 @@ This is where **your** code lives. Small, focused modules (e.g., `Users`, `Produ
 
 ---
 
-## ⚡ Core Engine Features
+## Core Engine Features
 
 ### A. Micro-Kernel Design
 
 - **Zero Dependency Core**: Only handles I/O and plugin orchestration
-- **Boot-time Resolution**: Routes and dependencies compiled at startup, ensuring runtime is read-only and blazing fast
+- **Boot-time Resolution**: Routes and dependencies resolved at startup, keeping runtime lean and read-only where possible
 
 ### B. Smart Context
 
-#### `ctx.view(template, props)` - Core Black Magic
+#### `ctx.view(template, props)` - Content Negotiation
 
 **Content Negotiation**: Automatically detects request origin
 
@@ -168,13 +173,13 @@ export class OrbitDB implements GravitoOrbit {
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 ```bash
 bun add gravito-core
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Structure
 
@@ -214,13 +219,13 @@ core.router.group(root => {
   root.get('/', ctx => ctx.text('Hello Galaxy!'));
 });
 
-// Liftoff 🚀
+// Liftoff
 export default core.liftoff();
 ```
 
 ### 3. Real World Example
 
-Check out the [Gravito Official Site](https://github.com/CarlLee1983/gravito-core/tree/main/examples/official-site) in the `examples/` directory for a full-featured application showcasing:
+Check out the [Gravito Official Site](https://github.com/CarlLee1983/gravito/tree/main/examples/official-site) in the `examples/` directory for a full-featured application showcasing:
 - **Inertia.js + React** frontend
 - **i18n** Internationalization
 - **Tailwind CSS v4** integration
@@ -228,7 +233,7 @@ Check out the [Gravito Official Site](https://github.com/CarlLee1983/gravito-cor
 
 ---
 
-## 📖 API Reference
+## API Reference
 
 ### `PlanetCore`
 
@@ -251,11 +256,11 @@ Check out the [Gravito Official Site](https://github.com/CarlLee1983/gravito-cor
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issues and feature requests are welcome!
-Feel free to check the [issues page](https://github.com/CarlLee1983/gravito-core/issues).
+Feel free to check the [issues page](https://github.com/CarlLee1983/gravito/issues).
 
-## 📝 License
+## License
 
 MIT © [Carl Lee](https://github.com/CarlLee1983)

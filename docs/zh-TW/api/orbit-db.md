@@ -1,16 +1,22 @@
-# @gravito/orbit-db
+---
+title: Orbit DB
+---
 
-> Gravito Galaxy 架構的標準資料庫軌道。
+# Orbit DB
+
+> 以 Gravito Orbit 形式提供資料庫整合。
+
+套件：`@gravito/orbit-db`
 
 此 Orbit 整合了 **Drizzle ORM**，提供標準化的資料庫連線、Context 注入以及 Hooks。
 
-## 📦 安裝
+## 安裝
 
 ```bash
 bun add @gravito/orbit-db drizzle-orm
 ```
 
-## 🚀 用法
+## 用法
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -36,6 +42,6 @@ core.app.get('/users', async (c) => {
 });
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `db:connected` - 當 DB Orbit 成功註冊時觸發。

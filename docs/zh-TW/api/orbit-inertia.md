@@ -2,7 +2,7 @@
 title: Orbit Inertia
 ---
 
-# 🛰️ Orbit Inertia
+# Orbit Inertia
 
 > 在後端 MVC 與前端 React/Vue 組件之間實現無縫整合。
 

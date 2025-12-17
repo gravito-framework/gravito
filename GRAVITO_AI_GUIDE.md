@@ -10,10 +10,10 @@
 ## 目錄
 
 1. [核心定位](#1-核心定位-product-positioning)
-2. [技術堆疊](#2-技術堆疊-tech-stack)
+2. [技術棧](#2-技術棧-tech-stack)
 3. [核心架構功能](#3-核心架構功能-core-architecture)
 4. [開發體驗](#4-開發體驗-dx--ai-first)
-5. [佈署戰略](#5-佈署戰略-deployment-strategy)
+5. [部署策略](#5-部署策略-deployment-strategy)
 6. [1.0 驗收標準](#6-10-驗收標準-definition-of-done)
 7. [專案結構](#7-專案結構-project-structure)
 8. [編碼規範](#8-編碼規範-coding-standards)
@@ -29,13 +29,13 @@
 
 | 比較對象 | Gravito 優勢 |
 |---------|-------------|
-| **Laravel** | 基於 Bun + Hono，毫秒級啟動，比 PHP 更快 |
-| **Next.js** | Binary-First (單一執行檔) 策略，拒絕 `node_modules` 依賴地獄 |
-| **Express/Koa** | 強制 MVC 分層，拒絕後端邏輯破碎化 |
+| **Laravel** | 基於 Bun + Hono，毫秒級啟動，兼顧開發體驗與效能 |
+| **Next.js** | Binary-First (單一執行檔) 策略，避免在正式環境配送 `node_modules` |
+| **Express/Koa** | 強制 MVC 分層，避免後端邏輯破碎化 |
 
 ---
 
-## 2. 技術堆疊 (Tech Stack)
+## 2. 技術棧 (Tech Stack)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -47,7 +47,7 @@
 │  後端 MVC，前端 SPA       │    React/Vue 熱更新              │
 ├──────────────────────────┴──────────────────────────────────┤
 │                         Hono                                 │
-│              世界最快的 JS Web 標準庫                         │
+│              高效能的 JS Web 框架                              │
 │            (Router + Request Parser)                         │
 ├─────────────────────────────────────────────────────────────┤
 │                          Bun                                 │
@@ -58,7 +58,7 @@
 | 層級 | 技術 | 角色 |
 |------|------|------|
 | **Runtime** | Bun | 極速 JS 執行環境 + 打包工具 |
-| **HTTP Core** | Hono | 世界最快的 JS Web 標準庫，提供 Router 與 Request Parser |
+| **HTTP Core** | Hono | 高效能的 JS Web 框架，提供 Router 與 Request Parser |
 | **Frontend Bridge** | Inertia.js | 讓後端寫法像 MVC，前端體驗像 SPA |
 | **Build Tool** | Vite | 負責前端 React/Vue 的熱更新與編譯 |
 | **Language** | TypeScript | 全嚴格模式，為 AI 提供型別提示 |
@@ -69,13 +69,13 @@
 
 ### A. 核心引擎 (The Kernel)
 
-- **Micro-Kernel 設計**: 核心零依賴 (Zero Dependency)，只負責 I/O 與插件調度
+- **Micro-Kernel 設計**: 核心零依賴 (Zero Dependency)，只負責 I/O 與外掛調度
 - **啟動機制**: 採用 Boot-time Resolution (啟動時編譯路由與依賴)，確保 Runtime (執行時) 為唯讀且極速
 
 ```typescript
 // 核心啟動流程
 const core = new PlanetCore({
-  orbits: [OrbitDB, OrbitAuth, OrbitInertia], // 插件選配
+  orbits: [OrbitDB, OrbitAuth, OrbitInertia], // 外掛選配
 })
 
 await core.boot() // Boot-time Resolution
@@ -84,7 +84,7 @@ await core.ignite() // 啟動服務
 
 ### B. 智能上下文 (Smart Context)
 
-#### `ctx.view(template, props)` - 核心黑科技
+#### `ctx.view(template, props)` - 內容協商 (Content Negotiation)
 
 **協商機制 (Negotiation)**: 自動判斷請求來源
 
@@ -120,12 +120,12 @@ ctx.meta({
 })
 ```
 
-### C. 插件系統 (Plugin System)
+### C. 外掛系統 (Plugin System)
 
 - **Opt-in (選配式)**: 預設不含 DB、Auth，按需引入
 - **Interface-based**: 透過 Hono Middleware 機制封裝
 
-#### 插件生命週期
+#### 外掛生命週期
 
 | 階段 | Hook | 用途 |
 |------|------|------|
@@ -133,7 +133,7 @@ ctx.meta({
 | 請求時 | `onRequest()` | 注入 Context、驗證 |
 
 ```typescript
-// 插件定義範例
+// 外掛定義範例
 export class OrbitDB implements GravitoOrbit {
   async onBoot(core: PlanetCore) {
     // 建立資料庫連線
@@ -153,7 +153,7 @@ export class OrbitDB implements GravitoOrbit {
 
 | 特性 | 說明 |
 |------|------|
-| **架構文檔** | 專案內建 `GRAVITO_AI_GUIDE.md`，定義編碼規範 |
+| **架構文件** | 專案內建 `GRAVITO_AI_GUIDE.md`，定義編碼規範 |
 | **顯式合約** | Controller 依賴 Interface 而非具體實作，讓 AI 能精準生成業務邏輯 |
 | **型別安全** | 全 TypeScript 嚴格模式，提供完整型別推導 |
 
@@ -175,9 +175,9 @@ export class ProductController {
 
 ---
 
-## 5. 佈署戰略 (Deployment Strategy)
+## 5. 部署策略 (Deployment Strategy)
 
-### 方案一：單一執行檔 (主打亮點) ⭐
+### 方案一：單一執行檔 (重點功能)
 
 ```bash
 # 編譯指令
@@ -216,11 +216,11 @@ CMD ["/app/server"]
 
 | 驗收項目 | 標準 | 狀態 |
 |---------|------|------|
-| **路由通暢** | 能夠訪問首頁 `/` 與文檔頁 `/docs` | ⬜ |
-| **畫面渲染** | 能夠看到 React/Vue 渲染的 UI，且樣式載入正確 | ⬜ |
-| **互動驗證** | 實作「訂閱電子報」表單，後端能收到 POST 資料並回傳成功 | ⬜ |
-| **SEO 驗證** | 檢視網頁原始碼，`<title>` 與 Open Graph 標籤正確顯示 | ⬜ |
-| **佈署驗證** | 成功編譯出 Binary 檔，並在乾淨的 Linux 環境跑起來 | ⬜ |
+| **路由通暢** | 能夠瀏覽首頁 `/` 與文件頁 `/docs` | 待完成 |
+| **畫面渲染** | 能夠看到 React/Vue 渲染的 UI，且樣式載入正確 | 待完成 |
+| **互動驗證** | 實作「訂閱電子報」表單，後端能收到 POST 資料並回傳成功 | 待完成 |
+| **SEO 驗證** | 檢視網頁原始碼，`<title>` 與 Open Graph 標籤正確顯示 | 待完成 |
+| **部署驗證** | 成功編譯出單一執行檔，並在乾淨的 Linux 環境執行 | 待完成 |
 
 ---
 
@@ -231,11 +231,11 @@ gravito-core/
 ├── packages/                 # 核心模組 (Monorepo)
 │   ├── cli/                  # 命令列工具 (create-gravito)
 │   ├── core/                 # PlanetCore (IoC 容器 + 生命週期)
-│   ├── orbit-auth/           # 認證插件
-│   ├── orbit-cache/          # 快取插件
-│   ├── orbit-db/             # 資料庫插件 (Drizzle ORM)
+│   ├── orbit-auth/           # 身分驗證外掛
+│   ├── orbit-cache/          # 快取外掛
+│   ├── orbit-db/             # 資料庫外掛 (Drizzle ORM)
 │   ├── orbit-inertia/        # Inertia.js 整合
-│   ├── orbit-storage/        # 儲存插件
+│   ├── orbit-storage/        # 儲存外掛
 │   └── orbit-view/           # 模板引擎
 │
 ├── templates/                # 專案模板
@@ -254,18 +254,18 @@ gravito-core/
 ### TypeScript 規範
 
 ```typescript
-// ✅ 使用 Interface 定義合約
+// 建議：使用 Interface 定義合約
 interface UserService {
   find(id: string): Promise<User>
   create(data: CreateUserDTO): Promise<User>
 }
 
-// ✅ Controller 依賴 Interface
+// 建議：Controller 依賴 Interface
 export class UserController {
   constructor(private userService: UserService) {}
 }
 
-// ❌ 避免直接依賴具體實作
+// 避免：直接依賴具體實作
 export class UserController {
   private userService = new ConcreteUserService() // Bad
 }
@@ -277,7 +277,7 @@ export class UserController {
 |------|------|------|
 | **Controller** | PascalCase + `Controller` 後綴 | `UserController` |
 | **Service** | PascalCase + `Service` 後綴 | `AuthService` |
-| **Orbit (插件)** | `Orbit` 前綴 + PascalCase | `OrbitDB`, `OrbitAuth` |
+| **Orbit (外掛)** | `Orbit` 前綴 + PascalCase | `OrbitDB`, `OrbitAuth` |
 | **路由檔案** | kebab-case | `api-routes.ts` |
 | **View 組件** | PascalCase | `UserProfile.tsx` |
 
@@ -297,6 +297,12 @@ src/
 ├── middlewares/        # 中間件
 └── bootstrap.ts        # 啟動進入點
 ```
+
+---
+
+## 文件維護提示指令 (Docs AI Prompts)
+
+日後若要用 AI 進行文件整理與改寫，請參考 `DOCS_AI_PROMPT.md`。
 
 ---
 

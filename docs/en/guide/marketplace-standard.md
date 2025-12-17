@@ -1,3 +1,7 @@
+---
+title: Plugin Marketplace Standard (GPS-001)
+---
+
 # Plugin Marketplace Standard (GPS-001)
 
 To foster a healthy ecosystem, Gravito establishes the **Gravito Plugin Standard (GPS)**. This document outlines how to package, name, and distribute your Orbits and Satellites so they can be discovered by the CLI and future marketplace.
@@ -41,7 +45,7 @@ You **SHOULD** include a `gravito` property in your `package.json` to define int
   },
   "gravito": {
     "type": "satellite",
-    "icon": "📝",
+    "icon": "blog",
     "requires": ["db", "auth"],
     "configuration": {
       "BLOG_TITLE": {

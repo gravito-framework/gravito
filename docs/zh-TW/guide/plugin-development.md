@@ -1,4 +1,8 @@
-# 🧩 插件開發指南
+---
+title: 外掛開發指南
+---
+
+# 外掛開發指南
 
 > 如何為 Gravito Galaxy 架構開發 Satellites (衛星) 與 Orbits (軌道)
 
@@ -6,17 +10,17 @@ Gravito 是一個微核心框架，其威力來自於生態系。本指南將協
 
 ---
 
-## 🪐 術語對照
+## 術語對照
 
 | 術語 | 概念 | 用途 | 範例 |
 |------|------|------|------|
 | **PlanetCore** | 微核心 | 生命週期、Hooks、設定 | `gravito-core` |
 | **Orbit** | 基礎設施模組 | 資料庫、驗證、儲存 | `@gravito/orbit-db` |
-| **Satellite** | 業務邏輯插件 | 使用 Orbit 的功能 | `user-plugin`, `blog-plugin` |
+| **Satellite** | 業務邏輯外掛 | 使用 Orbit 的功能 | `user-plugin`, `blog-plugin` |
 
 ---
 
-## 🛰️ 開發 Satellites (衛星)
+## 開發 Satellites (衛星)
 
 Satellite 主要透過 `HookManager` 與核心互動。
 
@@ -34,7 +38,7 @@ export default function mySatellite(core: PlanetCore) {
 
   // 2. 註冊 Hooks
   core.hooks.addAction('app:ready', () => {
-    core.logger.info('🛰️ Satellite 已上線')
+    core.logger.info('Satellite 已上線')
   })
 
   // 3. 註冊路由
@@ -69,7 +73,7 @@ export default function userSatellite(core: PlanetCore) {
 
 ---
 
-## 🌌 開發 Orbits (軌道)
+## 開發 Orbits (軌道)
 
 Orbit 是更底層的擴充，負責提供基礎設施服務。在 v0.3+ 中，Orbits 應實作 `GravitoOrbit` 介面以支援 IoC。
 
@@ -124,7 +128,7 @@ export class OrbitCustom implements GravitoOrbit {
     // 觸發 hook
     await core.hooks.doAction('custom:init', this.service)
     
-    core.logger.info('🛰️ OrbitCustom 已初始化')
+    core.logger.info('OrbitCustom 已初始化')
   }
 
   async onRequest(ctx: Context, next: Next): Promise<void> {
@@ -170,7 +174,7 @@ export default defineConfig({
 
 ---
 
-## 🎯 最佳實踐
+## 最佳實踐
 
 ### 命名慣例
 
@@ -222,7 +226,7 @@ describe('OrbitCustom', () => {
 
 ---
 
-## 📦 發布 Orbit
+## 發佈 Orbit
 
 1. **儲存庫結構：**
    ```

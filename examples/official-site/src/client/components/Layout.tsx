@@ -53,7 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             {trans('nav.docs', 'Docs')}
                         </a>
                         <a
-                            href="https://github.com/CarlLee1983/gravito-core"
+                            href="https://github.com/CarlLee1983/gravito"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"

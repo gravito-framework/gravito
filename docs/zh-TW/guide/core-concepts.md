@@ -10,45 +10,66 @@ title: Gravito 核心概念
 [![npm version](https://img.shields.io/npm/v/gravito-core.svg)](https://www.npmjs.com/package/gravito-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-歡迎來到 Gravito Core！🚀 本指南將介紹框架的基本概念與架構。
+歡迎來到 Gravito Core。本指南將介紹框架的基本概念與架構。
+
+<div class="my-8 not-prose rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+  <picture>
+    <source media="(min-width: 1280px)" srcset="/static/image/hero-2560.webp">
+    <source media="(min-width: 768px)" srcset="/static/image/hero-1280.webp">
+    <img src="/static/image/hero-768.webp" alt="Gravito Core Architecture" class="w-full h-auto object-cover">
+  </picture>
+</div>
 
 ---
 
-## 🎯 產品定位
+## 產品定位
 
 ### 關鍵差異
 
 | 對比 | Gravito 優勢 |
 |------|--------------|
 | **Laravel** | 基於 Bun + Hono，毫秒級啟動速度，保有優雅開發體驗 |
-| **Next.js** | 二進位優先 (Binary-First) 策略，單一執行檔部署，脫離 `node_modules` 地獄 |
+| **Next.js** | 二進位優先 (Binary-First) 策略，單一執行檔部署，不必在正式環境配送 `node_modules` |
 | **Express/Koa** | 強制 MVC 分層結構，避免後端邏輯散亂 |
 
 ---
 
-## 📚 技術棧 (Tech Stack)
+## 技術棧 (Tech Stack)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      TypeScript (Strict)                     │
-│                    AI 友善的型別提示與嚴格模式                │
-├─────────────────────────────────────────────────────────────┤
-│  Inertia.js              │            Vite                  │
-│  (Frontend Bridge)       │       (Build Tool)               │
-│  後端 MVC，SPA 體驗       │    React/Vue 熱更新 (HMR)        │
-├──────────────────────────┴──────────────────────────────────┤
-│                         Hono                                 │
-│              世界最快的 JavaScript Web 框架                    │
-│            (Router + Request Parser)                         │
-├─────────────────────────────────────────────────────────────┤
-│                          Bun                                 │
-│           超高速 JavaScript Runtime + Bundler                 │
-└─────────────────────────────────────────────────────────────┘
-```
+<div class="not-prose my-10 font-sans grid gap-4 text-left">
+  <div class="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-6 text-center shadow-lg">
+    <div class="absolute left-0 top-0 h-1 w-full bg-blue-500"></div>
+    <h3 class="mb-2 text-xl font-bold text-gray-100">TypeScript (Strict)</h3>
+    <p class="text-sm text-gray-400">AI 友善的型別提示與嚴格模式</p>
+  </div>
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div class="absolute left-0 top-0 h-1 w-full bg-purple-500"></div>
+      <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-gray-100">Inertia.js</h4>
+      <p class="mb-2 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Frontend Bridge</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">後端 MVC 架構，SPA 體驗</p>
+    </div>
+    <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div class="absolute left-0 top-0 h-1 w-full bg-yellow-400"></div>
+      <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-gray-100">Vite</h4>
+      <p class="mb-2 text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">Build Tool</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">React/Vue 極速熱更新 (HMR)</p>
+    </div>
+  </div>
+  <div class="rounded-xl bg-gradient-to-br from-orange-500 to-red-600 p-6 text-center text-white shadow-lg">
+    <h3 class="mb-1 text-xl font-bold">Hono</h3>
+    <p class="mb-1 text-sm text-orange-50">高效能的 JavaScript Web 框架</p>
+    <p class="text-xs text-orange-100/80">(Router + Request Parser)</p>
+  </div>
+  <div class="rounded-xl border border-gray-800 bg-black p-6 text-center shadow-lg">
+    <h3 class="mb-1 text-xl font-bold text-white">Bun</h3>
+    <p class="text-sm text-gray-400">超高速 JavaScript Runtime + Bundler</p>
+  </div>
+</div>
 
 ---
 
-## 🌌 銀河架構 (Galaxy Architecture)
+## 銀河架構 (Galaxy Architecture)
 
 Gravito 遵循一套受天文力學啟發的獨特設計模式：
 
@@ -65,7 +86,7 @@ Gravito 遵循一套受天文力學啟發的獨特設計模式：
 
 ```typescript
 const core = await PlanetCore.boot({
-  orbits: [OrbitDB, OrbitAuth, OrbitInertia], // 按需掛載插件
+  orbits: [OrbitDB, OrbitAuth, OrbitInertia], // 按需掛載外掛
 })
 
 export default core.liftoff() // 啟動伺服器
@@ -87,16 +108,16 @@ export default core.liftoff() // 啟動伺服器
 
 ---
 
-## ⚡ 核心引擎特性
+## 核心引擎特性
 
 ### A. 微核心設計 (Micro-Kernel)
 
-- **零依賴核心**: 僅處理 I/O 和插件編排
+- **零依賴核心**: 僅處理 I/O 和外掛編排
 - **啟動時解析 (Boot-time Resolution)**: 路由與依賴在啟動時編譯，確保 Runtime 是 Read-only 且極快
 
 ### B. 智慧 Context (Smart Context)
 
-#### `c.view(template, props)` - 核心黑魔法
+#### `ctx.view(template, props)` - 內容協商 (Content Negotiation)
 
 **內容協商**: 自動偵測請求來源
 
@@ -105,14 +126,14 @@ export default core.liftoff() // 啟動伺服器
 | **Inertia Request** | JSON | React/Vue 前端接管路由 |
 | **HTML Request** | Server-Side Rendered HTML (App Shell) | 爬蟲、首次頁面載入 |
 
-### C. 插件系統 (Plugin System)
+### C. 外掛系統 (Plugin System)
 
 - **可選用 (Opt-in)**: 預設沒有 DB 或 Auth，只加你需要的
 - **基於介面**: 透過 Hono Middleware 機制封裝
 
 ---
 
-## 🚀 快速開始
+## 快速開始
 
 ### 1. 專案結構
 
@@ -152,21 +173,21 @@ core.router.group(root => {
   root.get('/', ctx => ctx.text('你好，銀河！'));
 });
 
-// 發射升空 🚀
+// 啟動
 export default core.liftoff();
 ```
 
 ### 3. 真實範例 (Real World Example)
 
-請查看 `examples/` 目錄下的 [Gravito 官方網站範例](https://github.com/CarlLee1983/gravito-core/tree/main/examples/official-site)，展示了：
+請查看 `examples/` 目錄下的 [Gravito 官方網站範例](https://github.com/CarlLee1983/gravito/tree/main/examples/official-site)，展示了：
 - **Inertia.js + React** 前端整合
 - **i18n** 國際化多語系
 - **Tailwind CSS v4** 整合
-- **Markdown 文檔引擎**
+- **Markdown 文件引擎**
 
 ---
 
-## 📖 API 參考
+## API 參考
 
 ### `PlanetCore`
 
@@ -180,6 +201,6 @@ export default core.liftoff();
 
 ---
 
-## 📝 License
+## 授權 (License)
 
 MIT © [Carl Lee](https://github.com/CarlLee1983)

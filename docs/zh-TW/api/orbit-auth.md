@@ -1,16 +1,22 @@
-# @gravito/orbit-auth
+---
+title: Orbit Auth
+---
 
-> Gravito Galaxy 架構的標準身份驗證軌道。
+# Orbit Auth
+
+> 以 Gravito Orbit 形式提供身分驗證工具。
+
+套件：`@gravito/orbit-auth`
 
 提供簡單的 JWT 工具與 Hooks，用於擴充驗證邏輯。
 
-## 📦 安裝
+## 安裝
 
 ```bash
 bun add @gravito/orbit-auth
 ```
 
-## 🚀 用法
+## 用法
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -31,7 +37,7 @@ core.app.post('/login', async (c) => {
 });
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `auth:init` - 當 Auth Orbit 初始化時觸發。
 - `auth:payload` - (Filter) 在簽署前修改 JWT payload。

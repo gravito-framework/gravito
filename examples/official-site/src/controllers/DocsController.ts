@@ -30,6 +30,8 @@ export class DocsController {
     const t = getTranslation(locale);
     const page = await DocsService.getPage(locale, slug);
     const sidebar = DocsService.getSidebar(locale);
+    const fsLocale = locale === 'zh' ? 'zh-TW' : 'en';
+    const editUrl = `https://github.com/CarlLee1983/gravito-core/blob/main/docs/${fsLocale}/${slug}.md`;
 
     if (!page) {
       // Render 404
@@ -43,8 +45,10 @@ export class DocsController {
       title: page.title,
       content: page.content,
       metadata: page.metadata,
+      toc: page.toc,
       sidebar,
       currentPath: c.req.path,
+      editUrl,
     });
   };
 }

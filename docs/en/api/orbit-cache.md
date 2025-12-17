@@ -1,16 +1,22 @@
-# @gravito/orbit-cache
+---
+title: Orbit Cache
+---
 
-> The Standard Cache Orbit for Galaxy Architecture.
+# Orbit Cache
+
+> Caching utilities as a Gravito Orbit.
+
+Package: `@gravito/orbit-cache`
 
 Provides a unified caching interface with a built-in Memory (LRU-like) provider, extensible for Redis.
 
-## 📦 Installation
+## Installation
 
 ```bash
 bun add @gravito/orbit-cache
 ```
 
-## 🚀 Usage
+## Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -35,7 +41,7 @@ core.app.get('/heavy-data', async (c) => {
 });
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `cache:miss` - Fired when data is not found in cache.
 - `cache:hit` - Fired when data is retrieved from cache.

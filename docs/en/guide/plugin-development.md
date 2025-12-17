@@ -1,4 +1,8 @@
-# 🧩 Plugin Development Guide
+---
+title: Plugin Development Guide
+---
+
+# Plugin Development Guide
 
 > How to develop Satellites and Orbits for the Gravito Galaxy Architecture
 
@@ -6,7 +10,7 @@ Gravito is a micro-kernel framework, and its power comes from the ecosystem. Thi
 
 ---
 
-## 🪐 Terminology
+## Terminology
 
 | Term | Concept | Purpose | Example |
 |------|---------|---------|---------|
@@ -16,7 +20,7 @@ Gravito is a micro-kernel framework, and its power comes from the ecosystem. Thi
 
 ---
 
-## 🛰️ Developing Satellites (Logic Plugins)
+## Developing Satellites (Logic Plugins)
 
 Satellites interact with the core primarily through the `HookManager`.
 
@@ -34,7 +38,7 @@ export default function mySatellite(core: PlanetCore) {
 
   // 2. Register Hooks
   core.hooks.addAction('app:ready', () => {
-    core.logger.info('🛰️ Satellite is online')
+    core.logger.info('Satellite is online')
   })
 
   // 3. Register routes
@@ -69,7 +73,7 @@ export default function userSatellite(core: PlanetCore) {
 
 ---
 
-## 🌌 Developing Orbits (Infrastructure Modules)
+## Developing Orbits (Infrastructure Modules)
 
 Orbits are lower-level extensions that provide infrastructure services. In v0.3+, Orbits should implement the `GravitoOrbit` interface for IoC support.
 
@@ -124,7 +128,7 @@ export class OrbitCustom implements GravitoOrbit {
     // Trigger hook
     await core.hooks.doAction('custom:init', this.service)
     
-    core.logger.info('🛰️ OrbitCustom initialized')
+    core.logger.info('OrbitCustom initialized')
   }
 
   async onRequest(ctx: Context, next: Next): Promise<void> {
@@ -170,7 +174,7 @@ export default defineConfig({
 
 ---
 
-## 🎯 Best Practices
+## Best Practices
 
 ### Naming Conventions
 
@@ -222,7 +226,7 @@ describe('OrbitCustom', () => {
 
 ---
 
-## 📦 Publishing an Orbit
+## Publishing an Orbit
 
 1. **Repository structure:**
    ```

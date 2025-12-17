@@ -1,6 +1,10 @@
-# 插件市集標準 (GPS-001)
+---
+title: 外掛市集標準 (GPS-001)
+---
 
-為了建立一個健康的生態系，Gravito 制定了 **Gravito Plugin Standard (GPS)**。本文件說明如何打包、命名與發布您的 Orbits 和 Satellites，以便讓 CLI 與未來的市集能夠發現它們。
+# 外掛市集標準 (GPS-001)
+
+為了建立一個健康的生態系，Gravito 制定了 **Gravito Plugin Standard (GPS)**。本文件說明如何打包、命名與發佈您的 Orbits 和 Satellites，以便讓 CLI 與未來的市集能夠發現它們。
 
 ## 1. 命名規範 (Naming Conventions)
 
@@ -11,12 +15,12 @@
 *   Scoped: `@<scope>/gravito-orbit-<name>`
 *   範例: `gravito-orbit-redis`, `@my-org/gravito-orbit-payment`
 
-### Satellites (應用功能插件)
+### Satellites (應用功能外掛)
 *   格式: `gravito-plugin-<name>`
 *   Scoped: `@<scope>/gravito-plugin-<name>`
 *   範例: `gravito-plugin-blog`, `@my-org/gravito-plugin-seo`
 
-## 2. Package.json 元數據
+## 2. Package.json 中繼資料
 
 您的 `package.json` 是 Gravito 系統的清單 (Manifest)。
 
@@ -41,7 +45,7 @@
   },
   "gravito": {
     "type": "satellite",
-    "icon": "📝",
+    "icon": "blog",
     "requires": ["db", "auth"],
     "configuration": {
       "BLOG_TITLE": {
@@ -55,12 +59,12 @@
 ```
 
 *   **type**: `'satellite' | 'orbit'`
-*   **requires**: 此插件依賴的 Orbit key 陣列 (例如 `['db', 'auth']`)。如果缺少這些依賴，CLI 會警告使用者。
-*   **configuration**: 插件所需的环境变量或选项的 Schema。
+*   **requires**: 此外掛依賴的 Orbit key 陣列 (例如 `['db', 'auth']`)。如果缺少這些依賴，CLI 會警告使用者。
+*   **configuration**: 外掛所需的環境變數或選項 Schema。
 
 ## 3. 進入點標準 (Entry Point Standard)
 
-您的主要進入點 (Main Entry Point) 必須 default export 一個符合 Gravito 簽名的函式。
+您的主要進入點 (Main Entry Point) 必須以 `default export` 匯出一個符合 Gravito 簽名的函式。
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -70,8 +74,8 @@ export default function myPlugin(core: PlanetCore, options?: any) {
 }
 ```
 
-## 4. 發布
+## 4. 發佈
 
 1.  確認您的套件是公開的 (Public)。
 2.  執行 `npm publish`。
-3.  一旦被 npm 索引，您的插件將自動出現在 Gravito 的搜尋結果中。
+3.  一旦被 npm 索引，您的外掛將自動出現在 Gravito 的搜尋結果中。

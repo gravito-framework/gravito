@@ -8,6 +8,7 @@
   {{#if description}}
   <meta name="description" content="{{description}}">
   {{/if}}
+  <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -15,12 +16,12 @@
   {{ include 'partials/header' }}
 
   <main class="container">
-    {{content}}
+    {{{ content }}}
   </main>
 
   {{ include 'partials/footer' }}
 
-  {{scripts}}
+  {{{ scripts }}}
 </body>
 
 </html>

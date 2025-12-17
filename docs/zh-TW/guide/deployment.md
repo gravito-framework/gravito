@@ -2,13 +2,13 @@
 title: 部署指南
 ---
 
-# 🚀 部署指南
+# 部署指南
 
 Gravito 支援兩種主要的部署策略：**二進位優先 (Binary-First)**（推薦）與 **Docker 容器化**。
 
 ---
 
-## 📦 選項 1: 單一執行檔 (Binary-First) ⭐
+## 選項 1: 單一執行檔 (Binary-First)
 
 這是 Gravito 的旗艦功能。將你的整個應用程式編譯為獨立的執行檔。
 
@@ -84,7 +84,7 @@ bun build --compile --outfile=server ./src/index.ts
 
 ---
 
-## 🐳 選項 2: Docker 容器化 (企業標準)
+## 選項 2: Docker 容器化 (企業標準)
 
 適用於需要容器編排的團隊 (Kubernetes, Docker Swarm)。
 
@@ -163,23 +163,23 @@ volumes:
 
 ---
 
-## 🔧 生產環境檢查清單
+## 生產環境檢查清單
 
 部署前，請確保：
 
 | 項目 | 指令/行動 |
 |------|-----------|
-| ✅ 執行測試 | `bun test` |
-| ✅ 建置前端 | `bun run build:client` |
-| ✅ 設定 `NODE_ENV` | `export NODE_ENV=production` |
-| ✅ 設定機密 | 使用環境變數，勿用 `.env` |
-| ✅ 啟用 HTTPS | 使用反向代理 (nginx, Caddy) |
-| ✅ 設定 Log | 設定日誌聚合 |
-| ✅ 健康檢查 | 實作 `/health` 端點 |
+| 執行測試 | `bun test` |
+| 建置前端 | `bun run build:client` |
+| 設定 `NODE_ENV` | `export NODE_ENV=production` |
+| 設定機密 | 使用環境變數，勿用 `.env` |
+| 啟用 HTTPS | 使用反向代理 (nginx, Caddy) |
+| 設定日誌 | 設定日誌聚合 |
+| 健康檢查 | 實作 `/health` 端點 |
 
 ---
 
-## 🌐 反向代理設定
+## 反向代理設定
 
 ### Nginx
 
@@ -235,7 +235,7 @@ example.com {
 
 ---
 
-## 📊 監控
+## 監控
 
 ### 健康檢查端點
 
@@ -252,7 +252,7 @@ core.app.get('/health', (c) => {
 
 ---
 
-## 🔐 安全建議
+## 安全建議
 
 1. **絕不提交機密** - 使用環境變數
 2. **謹慎啟用 CORS** - 在生產環境限制來源 (Origin)

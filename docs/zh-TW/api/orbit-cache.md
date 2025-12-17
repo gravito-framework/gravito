@@ -1,16 +1,22 @@
-# @gravito/orbit-cache
+---
+title: Orbit Cache
+---
 
-> Gravito Galaxy 架構的標準快取軌道。
+# Orbit Cache
+
+> 以 Gravito Orbit 形式提供快取功能。
+
+套件：`@gravito/orbit-cache`
 
 提供簡單的快取抽象層，內建記憶體 (LRU-like) 提供者。
 
-## 📦 安裝
+## 安裝
 
 ```bash
 bun add @gravito/orbit-cache
 ```
 
-## 🚀 用法
+## 用法
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -20,7 +26,7 @@ const core = new PlanetCore();
 
 // 初始化 Cache Orbit
 const cache = orbitCache(core, {
-  ttl: 60, // 預設 TTL (秒)
+  defaultTTL: 60, // 預設 TTL (秒)
   exposeAs: 'cache' // 可透過 c.get('cache') 存取
 });
 
@@ -40,7 +46,7 @@ core.app.get('/cached-data', async (c) => {
 });
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `cache:init` - 當模組初始化時觸發。
 - `cache:hit` - (Action) 當快取命中時觸發。

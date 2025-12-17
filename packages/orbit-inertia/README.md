@@ -48,7 +48,7 @@ By default, Inertia looks for `src/views/app.html`. This is the "shell" of your 
 </head>
 <body>
     <!-- The data-page attribute is crucial for Inertia -->
-    <div id="app" data-page='{{ page }}'></div>
+    <div id="app" data-page='{{{ page }}}'></div>
 </body>
 </html>
 ```

@@ -2,13 +2,13 @@
 title: Deployment Guide
 ---
 
-# 🚀 Deployment Guide
+# Deployment Guide
 
 Gravito supports two primary deployment strategies: **Binary-First** (recommended) and **Docker Containerization**.
 
 ---
 
-## 📦 Option 1: Single Executable (Binary-First) ⭐
+## Option 1: Single Executable (Binary-First)
 
 This is Gravito's headline feature. Compile your entire application into a standalone binary.
 
@@ -84,7 +84,7 @@ When deploying, you need the binary and your static assets:
 
 ---
 
-## 🐳 Option 2: Docker Containerization (Enterprise Standard)
+## Option 2: Docker Containerization (Enterprise Standard)
 
 For teams requiring container orchestration (Kubernetes, Docker Swarm).
 
@@ -167,23 +167,23 @@ volumes:
 
 ---
 
-## 🔧 Production Checklist
+## Production Checklist
 
 Before deploying to production, ensure:
 
 | Item | Command/Action |
 |------|----------------|
-| ✅ Run tests | `bun test` |
-| ✅ Build frontend | `bun run build:client` |
-| ✅ Set `NODE_ENV` | `export NODE_ENV=production` |
-| ✅ Configure secrets | Use environment variables, not `.env` |
-| ✅ Enable HTTPS | Use reverse proxy (nginx, Caddy) |
-| ✅ Setup logging | Configure log aggregation |
-| ✅ Health checks | Implement `/health` endpoint |
+| Run tests | `bun test` |
+| Build frontend | `bun run build:client` |
+| Set `NODE_ENV` | `export NODE_ENV=production` |
+| Configure secrets | Use environment variables, not `.env` |
+| Enable HTTPS | Use reverse proxy (nginx, Caddy) |
+| Setup logging | Configure log aggregation |
+| Health checks | Implement `/health` endpoint |
 
 ---
 
-## 🌐 Reverse Proxy Configuration
+## Reverse Proxy Configuration
 
 ### Nginx
 
@@ -239,7 +239,7 @@ example.com {
 
 ---
 
-## 📊 Monitoring
+## Monitoring
 
 ### Health Check Endpoint
 
@@ -256,7 +256,7 @@ core.app.get('/health', (c) => {
 
 ---
 
-## 🔐 Security Recommendations
+## Security Recommendations
 
 1. **Never commit secrets** - Use environment variables
 2. **Enable CORS carefully** - Restrict origins in production

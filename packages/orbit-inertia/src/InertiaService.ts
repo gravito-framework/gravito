@@ -13,6 +13,19 @@ export class InertiaService {
 
   private sharedProps: Record<string, unknown> = {};
 
+  private escapeForSingleQuotedHtmlAttribute(value: string): string {
+    return (
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        // Also escape double quotes so templates can safely use either:
+        // data-page='{{{ page }}}' or data-page="{{{ page }}}"
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+    );
+  }
+
   /**
    * Render an Inertia component
    */
@@ -33,7 +46,7 @@ export class InertiaService {
 
     // 2. Otherwise return the root HTML with data-page attribute
     // We assume there is a ViewService that handles the root template
-    // The rootView should contain: <div id="app" data-page='{{ page }}'></div>
+    // The rootView should contain: <div id="app" data-page='{{{ page }}}'></div>
     const view = this.context.get('view');
     const rootView = this.config.rootView ?? 'app';
 
@@ -45,7 +58,7 @@ export class InertiaService {
       view.render(
         rootView,
         {
-          page: JSON.stringify(page),
+          page: this.escapeForSingleQuotedHtmlAttribute(JSON.stringify(page)),
         },
         { layout: '' }
       )

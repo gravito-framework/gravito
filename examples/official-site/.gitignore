@@ -4,3 +4,4 @@ static/build
 server
 *.log
 .DS_Store
+temp_check.js

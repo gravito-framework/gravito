@@ -13,12 +13,11 @@ export default {
     cta_github: 'View on GitHub',
   },
   features: {
-    fast_title: 'Blazing Fast',
-    fast_desc:
-      'Built on Bun + Hono. Millisecond startup time. Up to 5x faster than traditional Node.js frameworks.',
+    fast_title: 'High Performance',
+    fast_desc: 'Built on Bun + Hono. Fast startup time and low runtime overhead.',
     light_title: 'Binary First',
     light_desc:
-      'Compile your entire app into a single executable. Say goodbye to node_modules hell in production.',
+      'Compile your entire app into a single executable. Avoid shipping node_modules to production.',
     clean_title: 'MVC Structure',
     clean_desc:
       'Enforced architectural patterns. Keep your backend logic clean, organized, and scalable.',

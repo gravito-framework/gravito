@@ -1,16 +1,22 @@
-# @gravito/orbit-storage
+---
+title: Orbit Storage
+---
 
-> The Standard Storage Orbit for Galaxy Architecture.
+# Orbit Storage
+
+> File storage abstraction as a Gravito Orbit.
+
+Package: `@gravito/orbit-storage`
 
 Provides an abstraction layer for file storage, with a built-in Local Disk provider.
 
-## 📦 Installation
+## Installation
 
 ```bash
 bun add @gravito/orbit-storage
 ```
 
-## 🚀 Usage
+## Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
@@ -40,7 +46,7 @@ core.app.post('/upload', async (c) => {
 });
 ```
 
-## 🪝 Hooks
+## Hooks
 
 - `storage:init` - Fired when initialized.
 - `storage:upload` - (Filter) Modify data before upload.

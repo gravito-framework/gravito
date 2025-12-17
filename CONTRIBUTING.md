@@ -1,4 +1,4 @@
-# Contributing to gravito-core
+# Contributing to gravito
 
 First off, thanks for taking the time to contribute! 🎉
 
@@ -34,8 +34,8 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/gravito-core.git
-cd gravito-core
+git clone https://github.com/your-username/gravito.git
+cd gravito
 
 # Install dependencies
 bun install
