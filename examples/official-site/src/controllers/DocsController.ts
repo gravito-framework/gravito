@@ -15,7 +15,17 @@ export class DocsController {
   show = async (c: Context) => {
     const inertia = c.get('inertia') as InertiaService;
     const locale = (c.get('locale') as string) || 'en';
-    const slug = c.req.param('slug');
+
+    // Parse slug from path since :slug+ might be flaky with router wrapper
+    // /docs/foo/bar -> foo/bar
+    // /zh/docs/foo/bar -> foo/bar
+    let slug = c.req.path;
+
+    if (locale === 'zh') {
+      slug = slug.replace(/^\/zh\/docs\//, '');
+    } else {
+      slug = slug.replace(/^\/docs\//, '');
+    }
 
     const t = getTranslation(locale);
     const page = await DocsService.getPage(locale, slug);

@@ -1,3 +1,7 @@
+---
+title: Gravito Core Concepts
+---
+
 # Gravito Core Concepts
 
 > **"The High-Performance Framework for Artisans."**

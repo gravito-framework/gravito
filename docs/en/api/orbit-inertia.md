@@ -1,3 +1,7 @@
+---
+title: Orbit Inertia
+---
+
 # 🛰️ Orbit Inertia
 
 > Seamless integration between your Backend MVC and Frontend React/Vue components.

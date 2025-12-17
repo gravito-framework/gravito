@@ -3,9 +3,15 @@ import path from 'node:path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 
-// Assuming running from examples/official-site/
-// We need to go up two levels to find 'docs'
-const DOCS_ROOT = path.resolve(process.cwd(), '../../docs');
+// Use import.meta.dirname to be safe relative to this file
+// /src/services/DocsService.ts
+// -> /src/services (0)
+// -> /src (1)
+// -> /official-site (2)
+// -> /examples (3)
+// -> /gravito-core (4)
+// -> /gravito-core/docs (Target)
+const DOCS_ROOT = path.resolve(import.meta.dirname, '../../../../docs');
 
 export interface DocPage {
   title: string;
@@ -28,7 +34,6 @@ export class DocsService {
     const fsLocale = locale === 'zh' ? 'zh-TW' : 'en';
 
     // Construct file path: docs/{locale}/{slug}.md
-    // Security: Ensure we don't traverse out of allowed paths (simplified for demo)
     const filePath = path.join(DOCS_ROOT, fsLocale, `${slug}.md`);
 
     try {

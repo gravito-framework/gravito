@@ -20,9 +20,8 @@ export function registerRoutes(core: PlanetCore): void {
     root.get('/', [HomeController, 'index']);
     // Specific route for docs index
     root.get('/docs', [DocsController, 'index']);
-    // Wildcard for docs pages, needs to be after specific routes if order matters (Hono handles it smart usually)
-    // Using simple wildcard matching for sub-paths
-    root.get('/docs/:slug+', [DocsController, 'show']);
+    // Wildcard for docs pages
+    root.get('/docs/*', [DocsController, 'show']);
   });
 
   // ─────────────────────────────────────────────
@@ -34,7 +33,7 @@ export function registerRoutes(core: PlanetCore): void {
     .group((zh) => {
       zh.get('/', [HomeController, 'index']);
       zh.get('/docs', [DocsController, 'index']);
-      zh.get('/docs/:slug+', [DocsController, 'show']);
+      zh.get('/docs/*', [DocsController, 'show']);
     });
 
   // Newsletter

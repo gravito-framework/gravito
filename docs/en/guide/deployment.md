@@ -1,3 +1,7 @@
+---
+title: Deployment Guide
+---
+
 # 🚀 Deployment Guide
 
 Gravito supports two primary deployment strategies: **Binary-First** (recommended) and **Docker Containerization**.
