@@ -30,8 +30,10 @@ export default function Docs() {
     // Safe cast
     const props = usePage().props as unknown as DocsProps;
     const { title, content, sidebar, currentPath, toc, editUrl, locale } = props;
+    const isZh = locale === 'zh';
     const contentRef = useRef<HTMLDivElement | null>(null);
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [tocVisible, setTocVisible] = useState(true);
 
     const tocItems = useMemo(() => {
         return Array.isArray(toc) ? toc.filter((item) => item.level >= 2 && item.level <= 4) : [];
@@ -132,8 +134,8 @@ export default function Docs() {
         <Layout>
             <Head title={`${title} - Gravito Docs`} />
 
-            <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:flex lg:gap-10">
-                <aside className="hidden lg:block lg:w-64 lg:shrink-0">
+            <div className="mx-auto w-full max-w-screen-2xl px-6 py-10 lg:flex lg:gap-8">
+                <aside className="hidden lg:block lg:w-60 lg:shrink-0">
                     <div className="sticky top-24 space-y-8">
                     {sidebar.map((section, idx) => (
                         <div key={idx}>
@@ -164,15 +166,56 @@ export default function Docs() {
                 </aside>
 
                 <main className="min-w-0 flex-1">
-                    <div className="rounded-2xl border border-gray-200 bg-white/70 p-8 shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-950/40 lg:p-10">
+                    <div className="rounded-2xl border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-950/40 lg:p-8">
                         <header className="mb-10">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {trans('nav.docs', 'Docs')}
-                            </p>
+                            <div className="flex items-start justify-between gap-4">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{trans('nav.docs', 'Docs')}</p>
+                                {tocItems.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setTocVisible((v) => !v)}
+                                        className="hidden xl:inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white/50 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm backdrop-blur hover:bg-white/80 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950/30 dark:text-gray-300 dark:hover:bg-gray-950/50 dark:hover:text-gray-100"
+                                        aria-expanded={tocVisible}
+                                    >
+                                        {tocVisible
+                                            ? isZh
+                                                ? '隱藏本頁目錄'
+                                                : 'Hide table of contents'
+                                            : isZh
+                                                ? '顯示本頁目錄'
+                                                : 'Show table of contents'}
+                                    </button>
+                                )}
+                            </div>
                             <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                                 {title}
                             </h1>
                         </header>
+
+                        {tocItems.length > 0 && (
+                            <details className="not-prose mb-10 rounded-xl border border-gray-200 bg-white/50 p-4 text-sm shadow-sm dark:border-gray-800 dark:bg-gray-950/30 xl:hidden">
+                                <summary className="cursor-pointer select-none font-semibold text-gray-900 dark:text-gray-100">
+                                    {isZh ? '本頁目錄' : 'On this page'}
+                                </summary>
+                                <nav aria-label="Table of contents" className="mt-3">
+                                    <ul className="space-y-2">
+                                        {tocItems.map((item) => {
+                                            const indent = item.level === 3 ? 'pl-3' : item.level === 4 ? 'pl-6' : '';
+                                            return (
+                                                <li key={item.id} className={indent}>
+                                                    <a
+                                                        href={`#${item.id}`}
+                                                        className="block rounded-md px-2 py-1.5 leading-snug text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-900/50 dark:hover:text-gray-100"
+                                                    >
+                                                        {item.text}
+                                                    </a>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </nav>
+                            </details>
+                        )}
 
                         <div
                             ref={contentRef}
@@ -202,38 +245,40 @@ export default function Docs() {
                     </div>
                 </main>
 
-                <aside className="hidden xl:block xl:w-60 xl:shrink-0">
-                    <div className="sticky top-24">
-                        {tocItems.length > 0 && (
-                            <div className="rounded-2xl border border-gray-200 bg-white/60 p-5 text-sm shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-950/40">
-                                <div className="mb-4 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-                                    {locale === 'zh' ? '本頁目錄' : 'On this page'}
+                {tocVisible && (
+                    <aside className="hidden xl:block xl:w-56 xl:shrink-0">
+                        <div className="sticky top-24">
+                            {tocItems.length > 0 && (
+                                <div className="rounded-2xl border border-gray-200 bg-white/60 p-4 text-sm shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-950/40">
+                                    <div className="mb-3 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                                        {isZh ? '本頁目錄' : 'On this page'}
+                                    </div>
+                                    <nav aria-label="Table of contents">
+                                        <ul className="space-y-2">
+                                            {tocItems.map((item) => {
+                                                const isActive = activeId === item.id;
+                                                const indent = item.level === 3 ? 'pl-3' : item.level === 4 ? 'pl-6' : '';
+                                                return (
+                                                    <li key={item.id} className={indent}>
+                                                        <a
+                                                            href={`#${item.id}`}
+                                                            className={`-mx-2 block rounded-md px-2 py-2 leading-snug transition-colors ${isActive
+                                                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/25 dark:text-blue-300'
+                                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/50 dark:hover:text-gray-200'
+                                                                }`}
+                                                        >
+                                                            {item.text}
+                                                        </a>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </nav>
                                 </div>
-                                <nav aria-label="Table of contents">
-                                    <ul className="space-y-1.5">
-                                        {tocItems.map((item) => {
-                                            const isActive = activeId === item.id;
-                                            const indent = item.level === 3 ? 'pl-3' : item.level === 4 ? 'pl-6' : '';
-                                            return (
-                                                <li key={item.id} className={indent}>
-                                                    <a
-                                                        href={`#${item.id}`}
-                                                        className={`-mx-2 block rounded-md px-2 py-1.5 leading-snug transition-colors ${isActive
-                                                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/25 dark:text-blue-300'
-                                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/50 dark:hover:text-gray-200'
-                                                            }`}
-                                                    >
-                                                        {item.text}
-                                                    </a>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </nav>
-                            </div>
-                        )}
-                    </div>
-                </aside>
+                            )}
+                        </div>
+                    </aside>
+                )}
             </div>
         </Layout>
     );
