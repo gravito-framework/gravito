@@ -3,6 +3,8 @@ import type { CacheStore } from './store';
 import { isTaggableStore } from './store';
 import { type CacheKey, type CacheTtl, normalizeCacheKey } from './types';
 
+export type CacheEventMode = 'sync' | 'async' | 'off';
+
 export type CacheEvents = {
   hit?: (key: string) => void | Promise<void>;
   miss?: (key: string) => void | Promise<void>;
@@ -15,6 +17,9 @@ export type CacheRepositoryOptions = {
   prefix?: string;
   defaultTtl?: CacheTtl;
   events?: CacheEvents;
+  eventsMode?: CacheEventMode;
+  throwOnEventError?: boolean;
+  onEventError?: (error: unknown, event: keyof CacheEvents, payload: { key?: string }) => void;
 };
 
 export class CacheRepository {
@@ -22,6 +27,64 @@ export class CacheRepository {
     protected readonly store: CacheStore,
     protected readonly options: CacheRepositoryOptions = {}
   ) {}
+
+  private emit(event: keyof CacheEvents, payload: { key?: string } = {}): void | Promise<void> {
+    const mode = this.options.eventsMode ?? 'async';
+    if (mode === 'off') {
+      return;
+    }
+
+    const fn = this.options.events?.[event];
+    if (!fn) {
+      return;
+    }
+
+    const invoke = (): void | Promise<void> => {
+      if (event === 'flush') {
+        return (fn as NonNullable<CacheEvents['flush']>)();
+      }
+      const key = payload.key ?? '';
+      return (fn as NonNullable<
+        CacheEvents['hit'] | CacheEvents['miss'] | CacheEvents['write'] | CacheEvents['forget']
+      >)(key);
+    };
+
+    const reportError = (error: unknown): void => {
+      try {
+        this.options.onEventError?.(error, event, payload);
+      } catch {
+        // ignore to keep cache ops safe
+      }
+    };
+
+    if (mode === 'sync') {
+      try {
+        return Promise.resolve(invoke()).catch((error) => {
+          reportError(error);
+          if (this.options.throwOnEventError) {
+            throw error;
+          }
+        });
+      } catch (error) {
+        reportError(error);
+        if (this.options.throwOnEventError) {
+          throw error;
+        }
+      }
+      return;
+    }
+
+    queueMicrotask(() => {
+      try {
+        const result = invoke();
+        if (result && typeof (result as Promise<void>).catch === 'function') {
+          void (result as Promise<void>).catch(reportError);
+        }
+      } catch (error) {
+        reportError(error);
+      }
+    });
+  }
 
   protected key(key: CacheKey): string {
     const normalized = normalizeCacheKey(key);
@@ -48,11 +111,17 @@ export class CacheRepository {
     const fullKey = this.key(key);
     const value = await this.store.get<T>(fullKey);
     if (value !== null) {
-      await this.options.events?.hit?.(fullKey);
+      const e = this.emit('hit', { key: fullKey });
+      if (e) {
+        await e;
+      }
       return value;
     }
 
-    await this.options.events?.miss?.(fullKey);
+    const e = this.emit('miss', { key: fullKey });
+    if (e) {
+      await e;
+    }
     if (defaultValue === undefined) {
       return null;
     }
@@ -73,7 +142,10 @@ export class CacheRepository {
   async put(key: CacheKey, value: unknown, ttl: CacheTtl): Promise<void> {
     const fullKey = this.key(key);
     await this.store.put(fullKey, value, ttl);
-    await this.options.events?.write?.(fullKey);
+    const e = this.emit('write', { key: fullKey });
+    if (e) {
+      await e;
+    }
   }
 
   async set(key: CacheKey, value: unknown, ttl?: CacheTtl): Promise<void> {
@@ -86,7 +158,10 @@ export class CacheRepository {
     const resolved = ttl ?? this.options.defaultTtl;
     const ok = await this.store.add(fullKey, value, resolved);
     if (ok) {
-      await this.options.events?.write?.(fullKey);
+      const e = this.emit('write', { key: fullKey });
+      if (e) {
+        await e;
+      }
     }
     return ok;
   }
@@ -151,23 +226,37 @@ export class CacheRepository {
 
     if (freshUntil !== null && cachedValue !== null) {
       if (now <= freshUntil) {
-        await this.options.events?.hit?.(fullKey);
+        const e = this.emit('hit', { key: fullKey });
+        if (e) {
+          await e;
+        }
         return cachedValue;
       }
 
       if (now <= freshUntil + staleMillis) {
-        await this.options.events?.hit?.(fullKey);
+        const e = this.emit('hit', { key: fullKey });
+        if (e) {
+          await e;
+        }
         void this.refreshFlexible(fullKey, metaKey, ttlSeconds, staleSeconds, callback);
         return cachedValue;
       }
     }
 
-    await this.options.events?.miss?.(fullKey);
+    const e = this.emit('miss', { key: fullKey });
+    if (e) {
+      await e;
+    }
     const value = await callback();
     const totalTtl = ttlSeconds + staleSeconds;
     await this.store.put(fullKey, value, totalTtl);
     await this.putMetaKey(metaKey, now + ttlMillis, totalTtl);
-    await this.options.events?.write?.(fullKey);
+    {
+      const e = this.emit('write', { key: fullKey });
+      if (e) {
+        await e;
+      }
+    }
     return value;
   }
 
@@ -193,7 +282,10 @@ export class CacheRepository {
       const now = Date.now();
       await this.store.put(fullKey, value, totalTtl);
       await this.putMetaKey(metaKey, now + Math.max(0, ttlSeconds) * 1000, totalTtl);
-      await this.options.events?.write?.(fullKey);
+      const e = this.emit('write', { key: fullKey });
+      if (e) {
+        await e;
+      }
     } finally {
       await lock.release();
     }
@@ -211,7 +303,10 @@ export class CacheRepository {
     const ok = await this.store.forget(fullKey);
     await this.forgetMetaKey(metaKey);
     if (ok) {
-      await this.options.events?.forget?.(fullKey);
+      const e = this.emit('forget', { key: fullKey });
+      if (e) {
+        await e;
+      }
     }
     return ok;
   }
@@ -222,7 +317,10 @@ export class CacheRepository {
 
   async flush(): Promise<void> {
     await this.store.flush();
-    await this.options.events?.flush?.();
+    const e = this.emit('flush');
+    if (e) {
+      await e;
+    }
   }
 
   async clear(): Promise<void> {
@@ -280,7 +378,10 @@ export class CacheRepository {
         const taggedKey = this.key(key);
         store.tagIndexAdd(normalizedTags, taggedKey);
         await store.put(taggedKey, value, ttl);
-        await this.options.events?.write?.(taggedKey);
+        const e = this.emit('write', { key: taggedKey });
+        if (e) {
+          await e;
+        }
       }
 
       override async forget(key: CacheKey): Promise<boolean> {
@@ -290,7 +391,10 @@ export class CacheRepository {
         store.tagIndexRemove(taggedKey);
         await this.forgetMetaKey(metaKey);
         if (ok) {
-          await this.options.events?.forget?.(taggedKey);
+          const e = this.emit('forget', { key: taggedKey });
+          if (e) {
+            await e;
+          }
         }
         return ok;
       }

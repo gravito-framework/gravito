@@ -29,6 +29,9 @@ const cache = orbitCache(core, {
   default: 'memory',
   prefix: 'app_cache:',
   defaultTtl: 60, // seconds
+  // Low-overhead hook dispatch (default: 'async')
+  // Use 'sync' + throwOnEventError for development/debug.
+  eventsMode: 'async',
   stores: {
     memory: { driver: 'memory', maxItems: 10_000 },
     file: { driver: 'file', directory: './tmp/cache' },
@@ -75,3 +78,9 @@ await cache.lock('jobs:rebuild', 10).block(5, async () => {
 - `cache:forget` - Fired when forgetting cache.
 - `cache:flush` - Fired when flushing cache.
 - `cache:init` - Fired when the orbit is installed.
+
+By default, hook events run in `async` mode and never block cache reads/writes. For debug, set:
+
+```ts
+orbitCache(core, { eventsMode: 'sync', throwOnEventError: true });
+```

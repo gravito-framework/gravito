@@ -1,12 +1,14 @@
 import type { GravitoOrbit, PlanetCore } from 'gravito-core';
-import type { Context, Next } from 'hono';
 import { CacheManager } from './CacheManager';
-import type { CacheEvents } from './CacheRepository';
+import type { CacheEventMode, CacheEvents } from './CacheRepository';
 import type { CacheStore } from './store';
 import { FileStore } from './stores/FileStore';
 import { MemoryStore } from './stores/MemoryStore';
 import { NullStore } from './stores/NullStore';
 import type { CacheTtl } from './types';
+
+type OrbitCacheContext = { set: (key: string, value: unknown) => void };
+type OrbitCacheNext = () => Promise<void>;
 
 export * from './CacheManager';
 export * from './CacheRepository';
@@ -65,6 +67,9 @@ export interface OrbitCacheOptions {
   prefix?: string;
   defaultTtl?: CacheTtl;
   stores?: Record<string, OrbitCacheStoreConfig>;
+  eventsMode?: CacheEventMode; // Default: 'async' (low-overhead)
+  throwOnEventError?: boolean; // Useful for debug when using sync mode
+  onEventError?: (error: unknown, event: keyof CacheEvents, payload: { key?: string }) => void;
 
   // Legacy options
   provider?: CacheProvider;
@@ -185,6 +190,13 @@ export class OrbitCache implements GravitoOrbit {
       flush: () => core.hooks.doAction('cache:flush', {}),
     };
 
+    const onEventError =
+      resolvedConfig.onEventError ??
+      ((error: unknown, event: keyof CacheEvents, payload: { key?: string }) => {
+        const key = payload.key ? ` (key: ${payload.key})` : '';
+        logger.error(`[OrbitCache] cache event '${event}' failed${key}`, error);
+      });
+
     const stores =
       resolvedConfig.stores ??
       (resolvedConfig.provider
@@ -198,12 +210,17 @@ export class OrbitCache implements GravitoOrbit {
         prefix,
         defaultTtl,
       },
-      events
+      events,
+      {
+        mode: resolvedConfig.eventsMode ?? 'async',
+        throwOnError: resolvedConfig.throwOnEventError,
+        onError: onEventError,
+      }
     );
 
     this.manager = manager;
 
-    core.app.use('*', async (c: Context, next: Next) => {
+    core.app.use('*', async (c: OrbitCacheContext, next: OrbitCacheNext) => {
       c.set(exposeAs, manager);
       await next();
     });

@@ -1,4 +1,4 @@
-import { type CacheEvents, CacheRepository } from './CacheRepository';
+import { type CacheEvents, type CacheEventMode, CacheRepository } from './CacheRepository';
 import type { CacheStore } from './store';
 import type { CacheTtl } from './types';
 
@@ -22,7 +22,12 @@ export class CacheManager {
   constructor(
     private readonly storeFactory: (name: string) => CacheStore,
     private readonly config: CacheConfig = {},
-    private readonly events?: CacheEvents
+    private readonly events?: CacheEvents,
+    private readonly eventOptions?: {
+      mode?: CacheEventMode;
+      throwOnError?: boolean;
+      onError?: (error: unknown, event: keyof CacheEvents, payload: { key?: string }) => void;
+    }
   ) {}
 
   store(name?: string): CacheRepository {
@@ -36,6 +41,9 @@ export class CacheManager {
       prefix: this.config.prefix,
       defaultTtl: this.config.defaultTtl,
       events: this.events,
+      eventsMode: this.eventOptions?.mode,
+      throwOnEventError: this.eventOptions?.throwOnError,
+      onEventError: this.eventOptions?.onError,
     });
     this.stores.set(storeName, repo);
     return repo;

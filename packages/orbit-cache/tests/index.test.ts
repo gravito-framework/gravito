@@ -7,7 +7,7 @@ describe('OrbitCache', () => {
     const core = new PlanetCore();
     core.hooks.doAction = mock((_hook, _args) => Promise.resolve());
 
-    const cache = orbitCache(core, { defaultTTL: 1 });
+    const cache = orbitCache(core, { defaultTTL: 1, eventsMode: 'sync' });
 
     expect(cache).toBeDefined();
 
