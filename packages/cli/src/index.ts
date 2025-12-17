@@ -8,6 +8,7 @@ import pc from 'picocolors';
 interface ProjectConfig {
   name: string;
   template: string;
+  [key: string]: unknown;
 }
 
 const cli = cac('gravito');
@@ -42,7 +43,7 @@ cli.command('create [name]', 'Create a new Gravito project').action(async (name)
         message: 'Pick a starting point:',
         options: [
           { value: 'basic', label: '🪐 Basic Planet (Core + Hono)', hint: 'Minimal setup' },
-          // Future templates can serve other options
+          { value: 'inertia-react', label: '⚛️ Inertia + React', hint: 'Full-stack SPA with Vite' },
         ],
       }),
   });
@@ -104,7 +105,9 @@ async function group<T extends Record<string, unknown>>(
   const results: Record<string, unknown> = {};
 
   for (const key of Object.keys(prompts)) {
-    const result = await prompts[key]();
+    const promptFn = prompts[key];
+    if (!promptFn) continue;
+    const result = await promptFn();
 
     if (isCancel(result)) {
       cancel('Operation cancelled.');
@@ -118,7 +121,7 @@ async function group<T extends Record<string, unknown>>(
 }
 
 cli.help();
-cli.version('0.3.0-alpha.0');
+cli.version('0.3.0-alpha.1');
 
 try {
   cli.parse();
