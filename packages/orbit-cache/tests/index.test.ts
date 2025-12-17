@@ -132,4 +132,16 @@ describe('OrbitCache', () => {
 
     expect(await cache.get('expire_me')).toBeNull();
   });
+
+  it('should throw for unknown store when stores are configured', async () => {
+    const core = new PlanetCore();
+    const cache = orbitCache(core, {
+      default: 'memory',
+      stores: {
+        memory: { driver: 'memory' },
+      },
+    });
+
+    expect(() => cache.store('unknown')).toThrow("Cache store 'unknown' is not defined.");
+  });
 });

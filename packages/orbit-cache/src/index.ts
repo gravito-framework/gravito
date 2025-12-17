@@ -87,10 +87,17 @@ function createStoreFactory(config: OrbitCacheOptions): (name: string) => CacheS
 
   return (name: string) => {
     const storeConfig = stores[name];
+    const hasExplicitStores = Object.keys(stores).length > 0;
 
     if (!storeConfig) {
       if (name === 'memory') {
         return new MemoryStore();
+      }
+      if (name === 'null') {
+        return new NullStore();
+      }
+      if (hasExplicitStores) {
+        throw new Error(`Cache store '${name}' is not defined.`);
       }
       return new MemoryStore();
     }
@@ -113,6 +120,9 @@ function createStoreFactory(config: OrbitCacheOptions): (name: string) => CacheS
 
     if (storeConfig.driver === 'provider') {
       const provider = storeConfig.provider;
+      if (!provider) {
+        throw new Error(`Cache store '${name}' is missing a provider.`);
+      }
       return {
         get: (key) => provider.get(key),
         put: (key, value, ttl) =>
@@ -145,7 +155,7 @@ function createStoreFactory(config: OrbitCacheOptions): (name: string) => CacheS
       } satisfies CacheStore;
     }
 
-    return new MemoryStore();
+    throw new Error(`Unsupported cache driver '${(storeConfig as { driver?: string }).driver}'.`);
   };
 }
 
