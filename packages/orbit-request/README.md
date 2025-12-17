@@ -4,17 +4,20 @@ title: Orbit Request
 
 # Orbit Request
 
-Form Request validation for Gravito with Zod integration.
+Form Request validation for Gravito with Zod and Valibot support.
 
 **Orbit Request** provides Laravel-style request validation for Gravito applications. Define your validation rules as classes and get type-safe validated data in your controllers.
 
 ## Features
 
-- **Type-Safe Validation**: Zod schemas with full TypeScript inference
+- **Type-Safe Validation**: Full TypeScript inference with Zod or Valibot
 - **Class-Based Requests**: Organize validation logic into reusable classes
-- **Authorization**: Built-in authorize() hook for access control
+- **Authorization Hook**: Built-in `authorize()` method for access control
 - **Multiple Data Sources**: Validate JSON, form data, query params, or route params
 - **Structured Errors**: Consistent error response format
+- **Custom Messages**: Override error messages per field
+- **i18n Support**: Pluggable MessageProvider for localization
+- **Router Integration**: Use directly in Gravito router definitions
 
 ## Installation
 
@@ -22,7 +25,7 @@ Form Request validation for Gravito with Zod integration.
 bun add @gravito/orbit-request
 ```
 
-## Usage
+## Basic Usage
 
 ### 1. Define a FormRequest
 
@@ -42,14 +45,14 @@ export class StoreUserRequest extends FormRequest {
 ### 2. Apply to Routes
 
 ```typescript
-import { validateRequest } from '@gravito/orbit-request'
 import { StoreUserRequest } from './requests/StoreUserRequest'
 
-core.router.post(
-  '/users',
-  validateRequest(StoreUserRequest),
-  [UserController, 'store']
-)
+// Direct router integration (recommended)
+core.router.post('/users', StoreUserRequest, [UserController, 'store'])
+
+// Or with explicit middleware
+import { validateRequest } from '@gravito/orbit-request'
+core.router.post('/users', validateRequest(StoreUserRequest), [UserController, 'store'])
 ```
 
 ### 3. Access Validated Data
@@ -58,21 +61,132 @@ core.router.post(
 // src/controllers/UserController.ts
 export class UserController {
   store(ctx: Context) {
-    // Type-safe validated data
     const data = ctx.get('validated') as {
       name: string
       email: string
       age?: number
     }
-
     return ctx.json({ user: data })
   }
 }
 ```
 
+## Authorization
+
+Add authorization logic to restrict access:
+
+```typescript
+import { FormRequest, z } from '@gravito/orbit-request'
+import type { Context } from 'hono'
+
+export class AdminRequest extends FormRequest {
+  schema = z.object({
+    action: z.string(),
+  })
+
+  // Return false to reject with 403
+  authorize(ctx: Context) {
+    const user = ctx.get('user')
+    return user?.role === 'admin'
+  }
+
+  // Optional: Custom authorization error message
+  authorizationMessage() {
+    return 'Admin access required'
+  }
+}
+```
+
+Failed authorization returns:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "AUTHORIZATION_ERROR",
+    "message": "Admin access required",
+    "details": []
+  }
+}
+```
+
+## Custom Error Messages
+
+Override default validation messages:
+
+```typescript
+export class StoreUserRequest extends FormRequest {
+  schema = z.object({
+    email: z.string().email(),
+    name: z.string().min(2),
+  })
+
+  // Map field.code to custom message
+  messages() {
+    return {
+      'email.invalid_string': '請輸入有效的 Email 地址',
+      'name.too_small': '名稱至少需要 2 個字元',
+    }
+  }
+}
+```
+
+## i18n Support
+
+Implement `MessageProvider` for full localization:
+
+```typescript
+import type { MessageProvider } from '@gravito/orbit-request'
+
+export class ChineseMessageProvider implements MessageProvider {
+  getMessage(code: string, field: string, defaultMessage: string): string {
+    const messages: Record<string, string> = {
+      'email.invalid_string': '電子郵件格式不正確',
+      'name.too_small': '名稱太短',
+    }
+    return messages[`${field}.${code}`] ?? defaultMessage
+  }
+
+  getValidationFailedMessage(): string {
+    return '驗證失敗'
+  }
+
+  getUnauthorizedMessage(): string {
+    return '未授權'
+  }
+}
+
+// Use in FormRequest
+export class LocalizedRequest extends FormRequest {
+  schema = z.object({ email: z.string().email() })
+
+  options = {
+    messageProvider: new ChineseMessageProvider(),
+  }
+}
+```
+
+## Valibot Support
+
+Use Valibot instead of Zod:
+
+```typescript
+import { FormRequest } from '@gravito/orbit-request'
+import * as v from 'valibot'
+
+export class StoreUserRequest extends FormRequest {
+  schema = v.object({
+    name: v.pipe(v.string(), v.minLength(2)),
+    email: v.pipe(v.string(), v.email()),
+  })
+}
+```
+
+The same FormRequest works with both libraries. Schema type is auto-detected.
+
 ## Data Sources
 
-By default, FormRequest validates JSON body. Change the source:
+Change the data source for validation:
 
 ```typescript
 class SearchRequest extends FormRequest {
@@ -92,32 +206,22 @@ class SearchRequest extends FormRequest {
 | `query` | URL query parameters |
 | `param` | Route parameters |
 
-## Authorization
+## Transform Data
 
-Add authorization logic to requests:
+Pre-process data before validation:
 
 ```typescript
-class AdminRequest extends FormRequest {
+class UppercaseRequest extends FormRequest {
   schema = z.object({
-    action: z.string(),
+    code: z.string().length(6),
   })
 
-  authorize(ctx: Context) {
-    const user = ctx.get('user')
-    return user?.role === 'admin'
-  }
-}
-```
-
-Failed authorization returns 403 with:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "AUTHORIZATION_ERROR",
-    "message": "Unauthorized",
-    "details": []
+  transform(data: unknown) {
+    const d = data as { code?: string }
+    return {
+      ...d,
+      code: d.code?.toUpperCase(),
+    }
   }
 }
 ```
@@ -134,25 +238,6 @@ Failed authorization returns 403 with:
       { "field": "email", "message": "Invalid email format", "code": "invalid_string" },
       { "field": "name", "message": "Name must be at least 2 characters", "code": "too_small" }
     ]
-  }
-}
-```
-
-## Transform Data
-
-Pre-process data before validation:
-
-```typescript
-class UppercaseRequest extends FormRequest {
-  schema = z.object({
-    code: z.string().length(6),
-  })
-
-  transform(data: any) {
-    return {
-      ...data,
-      code: data.code?.toUpperCase(),
-    }
   }
 }
 ```

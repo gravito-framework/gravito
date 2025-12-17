@@ -8,7 +8,7 @@ import type { z } from 'zod';
 export interface ValidationErrorDetail {
   field: string;
   message: string;
-  code?: string;
+  code?: string | undefined;
 }
 
 /**
@@ -29,6 +29,33 @@ export interface ValidationErrorResponse {
 export type DataSource = 'json' | 'form' | 'query' | 'param';
 
 /**
+ * i18n message provider interface
+ */
+export interface MessageProvider {
+  /** Get localized message for a validation error */
+  getMessage(code: string, field: string, defaultMessage: string): string;
+  /** Get the "Validation failed" message */
+  getValidationFailedMessage(): string;
+  /** Get the "Unauthorized" message */
+  getUnauthorizedMessage(): string;
+}
+
+/**
+ * Default message provider (passthrough)
+ */
+export class DefaultMessageProvider implements MessageProvider {
+  getMessage(_code: string, _field: string, defaultMessage: string): string {
+    return defaultMessage;
+  }
+  getValidationFailedMessage(): string {
+    return 'Validation failed';
+  }
+  getUnauthorizedMessage(): string {
+    return 'Unauthorized';
+  }
+}
+
+/**
  * FormRequest configuration options
  */
 export interface FormRequestOptions {
@@ -36,14 +63,122 @@ export interface FormRequestOptions {
   errorStatus?: ContentfulStatusCode;
   /** HTTP status code for authorization errors (default: 403) */
   authErrorStatus?: ContentfulStatusCode;
+  /** i18n message provider for localized error messages */
+  messageProvider?: MessageProvider;
+}
+
+/**
+ * Schema-agnostic validation result interface
+ */
+interface SchemaValidationResult {
+  success: boolean;
+  data?: unknown;
+  errors?: Array<{ path: string[]; message: string; code?: string | undefined }>;
+}
+
+/**
+ * Valibot-like schema interface (for duck-typing)
+ */
+interface ValibotLikeSchema {
+  _run?(
+    dataset: unknown,
+    config?: unknown
+  ): { issues?: Array<{ path?: Array<{ key: string }>; message: string; type?: string }> };
+  parse?(data: unknown): unknown;
+}
+
+/**
+ * Check if schema is Zod-like
+ */
+function isZodSchema(schema: unknown): schema is z.ZodType {
+  return (
+    schema !== null &&
+    typeof schema === 'object' &&
+    'safeParse' in schema &&
+    typeof (schema as { safeParse: unknown }).safeParse === 'function'
+  );
+}
+
+/**
+ * Check if schema is Valibot-like
+ */
+function isValibotSchema(schema: unknown): schema is ValibotLikeSchema {
+  return (
+    schema !== null &&
+    typeof schema === 'object' &&
+    ('_run' in schema || ('parse' in schema && !('safeParse' in schema)))
+  );
+}
+
+/**
+ * Validate data with Zod schema
+ */
+function validateWithZod(schema: z.ZodType, data: unknown): SchemaValidationResult {
+  const result = schema.safeParse(data);
+  if (result.success) {
+    return { success: true, data: result.data };
+  }
+  return {
+    success: false,
+    errors: result.error.errors.map((err) => ({
+      path: err.path.map(String),
+      message: err.message,
+      code: err.code,
+    })),
+  };
+}
+
+/**
+ * Validate data with Valibot schema (dynamic import not needed, uses duck-typing)
+ */
+function validateWithValibot(schema: ValibotLikeSchema, data: unknown): SchemaValidationResult {
+  try {
+    // Try using _run for Valibot v1+
+    if (schema._run) {
+      const result = schema._run({ typed: false, value: data }, {});
+      if (!result.issues || result.issues.length === 0) {
+        return { success: true, data };
+      }
+      return {
+        success: false,
+        errors: result.issues.map((issue) => ({
+          path: issue.path?.map((p) => p.key) ?? [],
+          message: issue.message,
+          code: issue.type,
+        })),
+      };
+    }
+    // Fallback to parse (throws on error)
+    if (schema.parse) {
+      const data2 = schema.parse(data);
+      return { success: true, data: data2 };
+    }
+    return { success: false, errors: [{ path: [], message: 'Invalid schema' }] };
+  } catch (err: unknown) {
+    const error = err as {
+      issues?: Array<{ path?: Array<{ key: string }>; message: string; type?: string }>;
+    };
+    if (error.issues) {
+      return {
+        success: false,
+        errors: error.issues.map((issue) => ({
+          path: issue.path?.map((p) => p.key) ?? [],
+          message: issue.message,
+          code: issue.type,
+        })),
+      };
+    }
+    return { success: false, errors: [{ path: [], message: String(err) }] };
+  }
 }
 
 /**
  * Base class for Form Request validation.
- * Extend this class to create validated request handlers.
+ * Supports both Zod and Valibot schemas.
  *
  * @example
  * ```typescript
+ * // With Zod
  * import { FormRequest } from '@gravito/orbit-request'
  * import { z } from 'zod'
  *
@@ -52,11 +187,26 @@ export interface FormRequestOptions {
  *     name: z.string().min(2),
  *     email: z.string().email(),
  *   })
+ *
+ *   authorize(ctx: Context) {
+ *     return ctx.get('user')?.role === 'admin'
+ *   }
+ * }
+ *
+ * // With Valibot
+ * import { FormRequest } from '@gravito/orbit-request'
+ * import * as v from 'valibot'
+ *
+ * export class StoreUserRequest extends FormRequest {
+ *   schema = v.object({
+ *     name: v.pipe(v.string(), v.minLength(2)),
+ *     email: v.pipe(v.string(), v.email()),
+ *   })
  * }
  * ```
  */
-export abstract class FormRequest<T extends z.ZodType = z.ZodType> {
-  /** Zod schema for request validation */
+export abstract class FormRequest<T = unknown> {
+  /** Schema for request validation (Zod or Valibot) */
   abstract schema: T;
 
   /** Data source: 'json' | 'form' | 'query' | 'param' */
@@ -68,14 +218,44 @@ export abstract class FormRequest<T extends z.ZodType = z.ZodType> {
   /**
    * Authorization check (optional).
    * Return false to reject the request with 403.
+   *
+   * @example
+   * ```typescript
+   * authorize(ctx: Context) {
+   *   const user = ctx.get('user')
+   *   return user?.role === 'admin'
+   * }
+   * ```
    */
   authorize?(ctx: Context): boolean | Promise<boolean>;
+
+  /**
+   * Custom authorization error message (optional).
+   * Override for custom messages.
+   */
+  authorizationMessage?(): string;
 
   /**
    * Transform data before validation (optional).
    * Useful for coercing types or adding defaults.
    */
   transform?(data: unknown): unknown;
+
+  /**
+   * Custom error messages (optional).
+   * Map field.code to custom message.
+   *
+   * @example
+   * ```typescript
+   * messages() {
+   *   return {
+   *     'email.invalid_string': '請輸入有效的 Email 地址',
+   *     'name.too_small': '名稱至少需要 2 個字元',
+   *   }
+   * }
+   * ```
+   */
+  messages?(): Record<string, string>;
 
   /**
    * Get raw data from context based on source
@@ -103,24 +283,58 @@ export abstract class FormRequest<T extends z.ZodType = z.ZodType> {
   }
 
   /**
+   * Get localized/custom message for a validation error
+   */
+  protected getErrorMessage(
+    field: string,
+    code: string | undefined,
+    defaultMessage: string
+  ): string {
+    // 1. Check custom messages from messages() method
+    if (this.messages) {
+      const customMessages = this.messages();
+      const key = code ? `${field}.${code}` : field;
+      if (customMessages[key]) {
+        return customMessages[key];
+      }
+      // Try field-only key
+      if (customMessages[field]) {
+        return customMessages[field];
+      }
+    }
+
+    // 2. Check i18n message provider
+    if (this.options.messageProvider) {
+      return this.options.messageProvider.getMessage(code ?? '', field, defaultMessage);
+    }
+
+    // 3. Return default
+    return defaultMessage;
+  }
+
+  /**
    * Validate request data
    */
   async validate(
     ctx: Context
   ): Promise<
-    { success: true; data: z.infer<T> } | { success: false; error: ValidationErrorResponse }
+    { success: true; data: unknown } | { success: false; error: ValidationErrorResponse }
   > {
+    const messageProvider = this.options.messageProvider ?? new DefaultMessageProvider();
+
     // 1. Authorization check
     if (this.authorize) {
       const authorized = await this.authorize(ctx);
       if (!authorized) {
+        const authMessage =
+          this.authorizationMessage?.() ?? messageProvider.getUnauthorizedMessage();
         return {
           success: false,
           error: {
             success: false,
             error: {
               code: 'AUTHORIZATION_ERROR',
-              message: 'Unauthorized',
+              message: authMessage,
               details: [],
             },
           },
@@ -136,13 +350,46 @@ export abstract class FormRequest<T extends z.ZodType = z.ZodType> {
       data = this.transform(data);
     }
 
-    // 4. Validate with Zod
-    const result = this.schema.safeParse(data);
+    // 4. Validate with appropriate schema library
+    let result: SchemaValidationResult;
+
+    if (isZodSchema(this.schema)) {
+      result = validateWithZod(this.schema, data);
+    } else if (isValibotSchema(this.schema)) {
+      result = validateWithValibot(this.schema, data);
+    } else {
+      // Unknown schema type, try duck-typing for safeParse
+      const schemaAny = this.schema as {
+        safeParse?: (data: unknown) => {
+          success: boolean;
+          data?: unknown;
+          error?: { errors: Array<{ path: unknown[]; message: string; code?: string }> };
+        };
+      };
+      if (schemaAny.safeParse) {
+        const r = schemaAny.safeParse(data);
+        if (r.success) {
+          result = { success: true, data: r.data };
+        } else {
+          result = {
+            success: false,
+            errors:
+              r.error?.errors.map((e) => ({
+                path: e.path.map(String),
+                message: e.message,
+                code: e.code,
+              })) ?? [],
+          };
+        }
+      } else {
+        throw new Error('Unsupported schema type. Use Zod or Valibot.');
+      }
+    }
 
     if (!result.success) {
-      const details: ValidationErrorDetail[] = result.error.errors.map((err) => ({
+      const details: ValidationErrorDetail[] = (result.errors ?? []).map((err) => ({
         field: err.path.join('.'),
-        message: err.message,
+        message: this.getErrorMessage(err.path.join('.'), err.code, err.message),
         code: err.code,
       }));
 
@@ -152,7 +399,7 @@ export abstract class FormRequest<T extends z.ZodType = z.ZodType> {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Validation failed',
+            message: messageProvider.getValidationFailedMessage(),
             details,
           },
         },
@@ -166,9 +413,7 @@ export abstract class FormRequest<T extends z.ZodType = z.ZodType> {
 /**
  * Create a Hono middleware from a FormRequest class
  */
-export function validateRequest<T extends z.ZodType>(
-  RequestClass: new () => FormRequest<T>
-): MiddlewareHandler {
+export function validateRequest<T>(RequestClass: new () => FormRequest<T>): MiddlewareHandler {
   return async (ctx, next) => {
     const request = new RequestClass();
     const result = await request.validate(ctx);
