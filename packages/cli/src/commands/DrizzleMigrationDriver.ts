@@ -1,15 +1,15 @@
-import { spawn } from 'bun'
-import path from 'node:path'
 import fs from 'node:fs/promises'
+import path from 'node:path'
+import { spawn } from 'bun'
 
 /**
  * Migration result interface
  */
 export interface MigrationResult {
-    success: boolean
-    message: string
-    migrations?: string[]
-    error?: string
+  success: boolean
+  message: string
+  migrations?: string[]
+  error?: string
 }
 
 /**
@@ -17,19 +17,19 @@ export interface MigrationResult {
  * Wraps drizzle-kit CLI commands
  */
 export class DrizzleMigrationDriver {
-    constructor(
-        private configPath: string = 'drizzle.config.ts',
-        private migrationsDir: string = 'src/database/migrations'
-    ) { }
+  constructor(
+    private configPath = 'drizzle.config.ts',
+    private migrationsDir = 'src/database/migrations'
+  ) {}
 
-    async generate(name: string): Promise<MigrationResult> {
-        const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
-        const filename = `${timestamp}_${name}.ts`
-        const filepath = path.join(process.cwd(), this.migrationsDir, filename)
+  async generate(name: string): Promise<MigrationResult> {
+    const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
+    const filename = `${timestamp}_${name}.ts`
+    const filepath = path.join(process.cwd(), this.migrationsDir, filename)
 
-        await fs.mkdir(path.dirname(filepath), { recursive: true })
+    await fs.mkdir(path.dirname(filepath), { recursive: true })
 
-        const content = `import { sql } from 'drizzle-orm'
+    const content = `import { sql } from 'drizzle-orm'
 
 export async function up(db: any): Promise<void> {
   // TODO: Implement migration
@@ -42,79 +42,84 @@ export async function down(db: any): Promise<void> {
 }
 `
 
-        await fs.writeFile(filepath, content, 'utf-8')
+    await fs.writeFile(filepath, content, 'utf-8')
+
+    return {
+      success: true,
+      message: `Migration created: ${filename}`,
+      migrations: [filename],
+    }
+  }
+
+  async migrate(): Promise<MigrationResult> {
+    try {
+      // Use drizzle-kit migrate for applying migration files
+      const proc = spawn(['bunx', 'drizzle-kit', 'migrate', '--config', this.configPath], {
+        cwd: process.cwd(),
+        stdout: 'pipe',
+        stderr: 'pipe',
+      })
+
+      const output = await new Response(proc.stdout).text()
+      const exitCode = await proc.exited
+
+      if (exitCode !== 0) {
+        const error = await new Response(proc.stderr).text()
+        // If migration fails, it might be because migrations folder is empty or not initialized.
+        // Fallback or explicit error?
+        // Standard behavior: migrate fails if something is wrong.
 
         return {
-            success: true,
-            message: `Migration created: ${filename}`,
-            migrations: [filename],
+          success: false,
+          message: 'Migration failed',
+          error: error || output,
         }
+      }
+
+      return {
+        success: true,
+        message: 'Migrations applied successfully',
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        message: 'Migration failed',
+        error: err.message,
+      }
     }
+  }
 
-    async migrate(): Promise<MigrationResult> {
-        try {
-            const proc = spawn(['bunx', 'drizzle-kit', 'push', '--config', this.configPath], {
-                cwd: process.cwd(),
-                stdout: 'pipe',
-                stderr: 'pipe',
-            })
+  async fresh(): Promise<MigrationResult> {
+    try {
+      const dropProc = spawn(['bunx', 'drizzle-kit', 'drop', '--config', this.configPath], {
+        cwd: process.cwd(),
+        stdout: 'pipe',
+        stderr: 'pipe',
+      })
+      await dropProc.exited
 
-            const output = await new Response(proc.stdout).text()
-            const exitCode = await proc.exited
-
-            if (exitCode !== 0) {
-                const error = await new Response(proc.stderr).text()
-                return {
-                    success: false,
-                    message: 'Migration failed',
-                    error: error || output,
-                }
-            }
-
-            return {
-                success: true,
-                message: 'Migrations applied successfully',
-            }
-        } catch (err: any) {
-            return {
-                success: false,
-                message: 'Migration failed',
-                error: err.message,
-            }
-        }
+      return this.migrate()
+    } catch (err: any) {
+      return {
+        success: false,
+        message: 'Fresh migration failed',
+        error: err.message,
+      }
     }
+  }
 
-    async fresh(): Promise<MigrationResult> {
-        try {
-            const dropProc = spawn(['bunx', 'drizzle-kit', 'drop', '--config', this.configPath], {
-                cwd: process.cwd(),
-                stdout: 'pipe',
-                stderr: 'pipe',
-            })
-            await dropProc.exited
+  async status(): Promise<{ pending: string[]; applied: string[] }> {
+    try {
+      const migrationsPath = path.join(process.cwd(), this.migrationsDir)
+      const files = await fs.readdir(migrationsPath)
+      const migrations = files.filter((f) => f.endsWith('.ts'))
 
-            return this.migrate()
-        } catch (err: any) {
-            return {
-                success: false,
-                message: 'Fresh migration failed',
-                error: err.message,
-            }
-        }
+      return {
+        pending: [],
+        applied: migrations,
+      }
+    } catch {
+      return { pending: [], applied: [] }
     }
-
-    async status(): Promise<{ pending: string[]; applied: string[] }> {
-        try {
-            const migrationsPath = path.join(process.cwd(), this.migrationsDir)
-            const files = await fs.readdir(migrationsPath)
-            const migrations = files.filter((f) => f.endsWith('.ts'))
-
-            return {
-                pending: [],
-                applied: migrations,
-            }
-        } catch {
-            return { pending: [], applied: [] }
-        }
-    }
+  }
 }

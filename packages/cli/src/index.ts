@@ -236,7 +236,9 @@ async function group<T extends Record<string, unknown>>(
 
   for (const key of Object.keys(prompts)) {
     const promptFn = prompts[key]
-    if (!promptFn) continue
+    if (!promptFn) {
+      continue
+    }
     const result = await promptFn()
 
     if (isCancel(result)) {
@@ -251,8 +253,9 @@ async function group<T extends Record<string, unknown>>(
 }
 
 import { MakeCommand } from './commands/MakeCommand'
-import { tinker } from './commands/tinker'
+import { routeCache, routeClear } from './commands/routeCache'
 import { routeList } from './commands/routeList'
+import { tinker } from './commands/tinker'
 
 // ... (existing imports)
 
@@ -263,18 +266,14 @@ cli
   .command('make:controller <name>', 'Create a new controller')
   .action((name) => make.run('controller', name))
 
-cli
-  .command('make:model <name>', 'Create a new model')
-  .action((name) => make.run('model', name))
+cli.command('make:model <name>', 'Create a new model').action((name) => make.run('model', name))
 
 cli
   .command('make:middleware <name>', 'Create a new middleware')
   .action((name) => make.run('middleware', name))
 
 // --- Tinker ---
-cli
-  .command('tinker', 'Interact with your application')
-  .action(() => tinker())
+cli.command('tinker', 'Interact with your application').action(() => tinker())
 
 // --- Route List ---
 cli
@@ -282,8 +281,20 @@ cli
   .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
   .action((options) => routeList(options))
 
+// --- Route Cache ---
+cli
+  .command('route:cache', 'Cache named routes manifest')
+  .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
+  .option('--output <file>', 'Output file (default: bootstrap/cache/routes.json)')
+  .action((options) => routeCache(options))
+
+cli
+  .command('route:clear', 'Clear cached routes manifest')
+  .option('--output <file>', 'Output file (default: bootstrap/cache/routes.json)')
+  .action((options) => routeClear(options))
+
 // --- Database Commands ---
-import { makeMigration, migrate, migrateStatus, dbSeed } from './commands/database'
+import { dbDeploy, dbSeed, makeMigration, migrate, migrateStatus } from './commands/database'
 
 cli
   .command('make:migration <name>', 'Create a new migration file')
@@ -298,14 +309,21 @@ cli
   .option('--fresh', 'Drop all tables and re-run migrations')
   .action((options) => migrate(options))
 
-cli
-  .command('migrate:status', 'Show migration status')
-  .action(() => migrateStatus())
+cli.command('migrate:status', 'Show migration status').action(() => migrateStatus())
 
 cli
   .command('db:seed', 'Seed the database')
   .option('--class <name>', 'Run a specific seeder class')
   .action((options) => dbSeed(options))
+
+cli
+  .command('db:deploy', 'Deploy database (health check + migrations)')
+  .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
+  .option('--no-migrations', 'Skip migrations')
+  .option('--seeds', 'Run seeds (requires app-provided seed functions)')
+  .option('--skip-health-check', 'Skip post-deploy health check')
+  .option('--no-validate', 'Skip pre-deploy health check')
+  .action((options) => dbDeploy(options))
 
 cli.help()
 cli.version('0.3.0-alpha.1')
