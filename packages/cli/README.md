@@ -4,9 +4,9 @@ title: Gravito CLI
 
 # Gravito CLI
 
-The official CLI for scaffolding Gravito projects.
+The official CLI for scaffolding and managing Gravito projects.
 
-Gravito CLI helps you bootstrap new Gravito projects with a single command. Choose from multiple templates and get started in seconds.
+Gravito CLI provides a comprehensive suite of tools to help you build, test, and manage your application, offering an experience similar to Laravel Artisan.
 
 ## Installation
 
@@ -14,8 +14,8 @@ Gravito CLI helps you bootstrap new Gravito projects with a single command. Choo
 # Global install (recommended)
 bun add -g @gravito/cli
 
-# Or use npx
-npx @gravito/cli create my-app
+# Or use npx/bunx
+bunx @gravito/cli create my-app
 ```
 
 ## Usage
@@ -26,26 +26,70 @@ npx @gravito/cli create my-app
 gravito create [project-name]
 ```
 
-If you don't provide a project name, the CLI will prompt you for one.
+### Scaffolding (Make Commands)
 
-### Interactive Mode
-
-Simply run:
+Generate code quickly using standard templates:
 
 ```bash
-gravito create
+# Create a Controller
+gravito make:controller UserController
+
+# Create a Model
+gravito make:model User
+
+# Create a Middleware
+gravito make:middleware EnsureAdmin
+
+# Create a Migration
+gravito make:migration create_users_table
+
+# Create a Seeder
+gravito make:seeder UserSeeder
 ```
 
-You'll be guided through:
+### Database Management
 
-1. **Project name** – The folder name for your new project.
+Manage your database migrations and seeders (wraps `drizzle-kit`):
+
+```bash
+# Run pending migrations
+gravito migrate
+
+# Drop all tables and re-run migrations
+gravito migrate --fresh
+
+# Check migration status
+gravito migrate:status
+
+# Run database seeders
+gravito db:seed
+gravito db:seed --class UserSeeder
+```
+
+### Development Utilities
+
+```bash
+# List all registered routes
+gravito route:list
+
+# Start interactive Tinker REPL (with core & container preloaded)
+gravito tinker
+```
+
 ### Scheduler Commands
 
 Manage scheduled tasks in your application:
 
-- `gravito schedule:list` - List all scheduled tasks
-- `gravito schedule:run` - Run due tasks (for cron)
-- `gravito schedule:work` - Run scheduler daemon
+```bash
+# List all scheduled tasks
+gravito schedule:list
+
+# Run due tasks (for cron integration)
+gravito schedule:run
+
+# Run scheduler in daemon mode
+gravito schedule:work
+```
 
 ## Available Templates
 
@@ -53,32 +97,6 @@ Manage scheduled tasks in your application:
 |----------|-------------|
 | `basic` | Minimal setup with PlanetCore + Hono. Great for APIs and simple backends. |
 | `inertia-react` | Full-stack monolith with Inertia.js + React + Vite. Build modern SPAs with server-side routing. |
-
-## Example
-
-```bash
-$ gravito create my-galaxy-app
-
- Gravito CLI
-
-✔ What is the name of your new universe? … my-galaxy-app
-✔ Pick a starting point: › Basic Planet (Core + Hono)
-● Scaffolding your universe...
-✔ Universe created!
-
-┌  Mission Successful
-│
-│  Project: my-galaxy-app
-│  Template: basic
-│
-└
-
-You're all set!
-
-  cd my-galaxy-app
-  bun install
-  bun run dev
-```
 
 ## Development
 
