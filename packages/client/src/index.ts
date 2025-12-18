@@ -5,22 +5,66 @@ import type { GravitoClientOptions } from './types'
 /**
  * Creates a type-safe API client for Gravito applications.
  *
- * This function wraps the Hono client to provide a seamless, type-safe development experience.
- * It strictly types the client based on your backend AppType.
+ * This function wraps the Hono client (`hc`) to provide a seamless, type-safe development experience
+ * similar to tRPC but with zero runtime overhead. It directly delegates to Hono's client, maintaining
+ * maximum performance and minimal bundle size.
  *
- * @template T - The type of your Hono app (e.g., `AppType` exported from backend)
+ * **Zero Runtime Overhead**: This is a pure type wrapper that delegates directly to `hc<T>`.
+ * No additional abstraction layers or middleware are added.
+ *
+ * **Type Support**: Supports both `AppType` (simple Hono instance) and `AppRoutes` (from `app.route()`).
+ * Both are Hono instances and work seamlessly with this function.
+ *
+ * @template T - The type of your Hono app. Can be either:
+ *   - `AppType`: `typeof app` - Direct type from Hono instance (simple scenarios)
+ *   - `AppRoutes`: `ReturnType<typeof _createTypeOnlyApp>` - Type from `app.route()` chain (recommended, matches template usage)
  * @param baseUrl - The base URL of your API server (e.g., 'http://localhost:3000')
- * @param options - Optional configuration including fetch options
+ * @param options - Optional configuration including fetch options (headers, etc.)
+ * @returns A fully typed Hono client instance that provides IntelliSense for all routes
  *
  * @example
+ * **Using AppType (simple scenario):**
  * ```typescript
+ * // server/app.ts
+ * const app = new Hono()
+ *   .post('/post', validate('json', PostSchema), (c) => {
+ *     return c.json({ id: 1, title: 'Hello' })
+ *   })
+ *
+ * export type AppType = typeof app
+ *
+ * // client.ts
  * import { createGravitoClient } from '@gravito/client'
  * import type { AppType } from '../server/app'
  *
  * const client = createGravitoClient<AppType>('http://localhost:3000')
  *
- * // Fully typed request
- * const response = await client.posts.$post({ json: { title: 'Hello' } })
+ * // Fully typed request - TypeScript will autocomplete and validate
+ * const res = await client.post.$post({
+ *   json: { title: 'Gravito' } // ✅ Type checked!
+ * })
+ * ```
+ *
+ * @example
+ * **Using AppRoutes (recommended, matches template usage):**
+ * ```typescript
+ * // server/app.ts
+ * const routes = app
+ *   .route('/api/users', userRoute)
+ *   .route('/api', apiRoute)
+ *
+ * export type AppRoutes = typeof routes
+ *
+ * // client.ts
+ * import { createGravitoClient } from '@gravito/client'
+ * import type { AppRoutes } from '../server/types'
+ *
+ * const client = createGravitoClient<AppRoutes>('http://localhost:3000')
+ *
+ * // Fully typed request with nested routes
+ * const res = await client.api.users.login.$post({
+ *   json: { username: 'user', password: 'pass' } // ✅ Type checked!
+ * })
  * ```
  */
 export function createGravitoClient<T extends Hono<any, any, any>>(
