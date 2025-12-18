@@ -7,6 +7,41 @@ import {
   type MessageProvider,
   validateRequest,
 } from '../src/FormRequest'
+import { GravitoException, ValidationException, AuthorizationException } from 'gravito-core'
+
+const createApp = () => {
+  const app = new Hono()
+  app.onError((err, c) => {
+    if (err instanceof AuthorizationException) {
+      return c.json({
+        success: false,
+        error: {
+          code: err.code,
+          message: err.message,
+        }
+      }, 403)
+    }
+
+    if (err instanceof ValidationException) {
+      return c.json({
+        success: false,
+        error: {
+          code: err.code,
+          message: err.message,
+          details: err.errors,
+        }
+      }, 422)
+    }
+
+    if (err instanceof GravitoException) {
+      return c.json({ error: err.message }, err.status)
+    }
+
+    console.error(err)
+    return c.json({ error: err.message }, 500)
+  })
+  return app
+}
 
 // =============================================================================
 // Test Request Classes
@@ -93,7 +128,7 @@ class ChineseMessageProvider implements MessageProvider {
 describe('FormRequest', () => {
   // Phase 1: Basic validation
   it('should validate JSON body successfully', async () => {
-    const app = new Hono()
+    const app = createApp()
     app.post('/users', validateRequest(StoreUserRequest), (c) => {
       const data = c.get('validated')
       return c.json({ success: true, data })
@@ -112,7 +147,7 @@ describe('FormRequest', () => {
   })
 
   it('should return validation errors for invalid data', async () => {
-    const app = new Hono()
+    const app = createApp()
     app.post('/users', validateRequest(StoreUserRequest), (c) => {
       return c.json({ success: true })
     })
@@ -130,7 +165,7 @@ describe('FormRequest', () => {
   })
 
   it('should validate query parameters', async () => {
-    const app = new Hono()
+    const app = createApp()
     app.get('/search', validateRequest(QuerySearchRequest), (c) => {
       const data = c.get('validated') as { q: string; page: number }
       return c.json({ query: data.q, page: data.page })
@@ -146,7 +181,7 @@ describe('FormRequest', () => {
 
   // Phase 3: Authorization
   it('should reject unauthorized requests', async () => {
-    const app = new Hono()
+    const app = createApp()
     app.post('/admin', validateRequest(AuthorizedRequest), (c) => {
       return c.json({ success: true })
     })
@@ -160,7 +195,7 @@ describe('FormRequest', () => {
 
     expect(res1.status).toBe(403)
     const json1 = (await res1.json()) as { error: { code: string } }
-    expect(json1.error.code).toBe('AUTHORIZATION_ERROR')
+    expect(json1.error.code).toBe('FORBIDDEN')
 
     // With X-Admin header
     const res2 = await app.request('/admin', {
@@ -173,7 +208,7 @@ describe('FormRequest', () => {
   })
 
   it('should use custom authorization message', async () => {
-    const app = new Hono()
+    const app = createApp()
     app.post('/protected', validateRequest(CustomAuthMessageRequest), (c) => {
       return c.json({ success: true })
     })
@@ -191,7 +226,7 @@ describe('FormRequest', () => {
 
   // Phase 5: Custom messages
   it('should use custom messages from messages() method', async () => {
-    const app = new Hono()
+    const app = createApp()
     app.post('/custom', validateRequest(CustomMessagesRequest), (c) => {
       return c.json({ success: true })
     })
@@ -222,7 +257,7 @@ describe('FormRequest', () => {
       }
     }
 
-    const app = new Hono()
+    const app = createApp()
     app.post('/i18n', validateRequest(I18nRequest), (c) => {
       return c.json({ success: true })
     })
@@ -255,7 +290,7 @@ describe('FormRequest', () => {
       }
     }
 
-    const app = new Hono()
+    const app = createApp()
     app.post('/i18n-auth', validateRequest(I18nAuthRequest), (c) => {
       return c.json({ success: true })
     })
@@ -282,7 +317,7 @@ describe('FormRequest', () => {
       })
     }
 
-    const app = new Hono()
+    const app = createApp()
     app.post('/nested', validateRequest(NestedRequest), (c) => {
       return c.json({ success: true })
     })
@@ -336,7 +371,7 @@ describe('FormRequest with Valibot-like schema', () => {
       schema = mockValibotSchema as any
     }
 
-    const app = new Hono()
+    const app = createApp()
     app.post('/valibot', validateRequest(ValibotRequest), (c) => {
       return c.json({ success: true, data: c.get('validated') })
     })
@@ -389,7 +424,7 @@ describe('FormRequest with Valibot-like schema', () => {
       schema = mockValibotSchema as any
     }
 
-    const app = new Hono()
+    const app = createApp()
     app.post('/valibot-parse', validateRequest(ValibotParseRequest), (c) => {
       return c.json({ success: true })
     })

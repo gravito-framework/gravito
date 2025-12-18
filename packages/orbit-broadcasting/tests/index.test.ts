@@ -41,6 +41,11 @@ describe('BroadcastManager', () => {
     const core = new PlanetCore({ logger: new ConsoleLogger() })
     const manager = new BroadcastManager(core)
 
+    manager.setDriver({
+      broadcast: async () => { },
+      authorizeChannel: async () => ({ auth: 'mock-auth' })
+    })
+
     manager.setAuthCallback(async (channel, _socketId, userId) => {
       return channel === `private-user.${userId}`
     })

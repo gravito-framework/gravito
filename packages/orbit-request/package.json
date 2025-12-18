@@ -23,7 +23,8 @@
         "access": "public"
     },
     "dependencies": {
-        "zod": "^3.23.0"
+        "zod": "^3.23.0",
+        "gravito-core": "workspace:*"
     },
     "peerDependencies": {
         "hono": "^4.0.0"

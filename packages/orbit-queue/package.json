@@ -41,17 +41,8 @@
   "dependencies": {
     "gravito-core": "workspace:*"
   },
-  "peerDependencies": {
-    "@gravito/orbit-queue-database": "*",
-    "@gravito/orbit-queue-redis": "*",
-    "@gravito/orbit-queue-kafka": "*",
-    "@gravito/orbit-queue-sqs": "*",
-    "@gravito/orbit-queue-rabbitmq": "*",
-    "@gravito/orbit-queue-nats": "*"
-  },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.9.3"
   }
 }
-
