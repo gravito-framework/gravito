@@ -225,6 +225,8 @@ export class OrbitCache implements GravitoOrbit {
       await next()
     })
 
+    // @ts-expect-error
+    core.services.set(exposeAs, manager)
     core.hooks.doAction('cache:init', manager)
   }
 

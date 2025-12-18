@@ -39,7 +39,13 @@ gravito create
 You'll be guided through:
 
 1. **Project name** – The folder name for your new project.
-2. **Template selection** – Choose your starting point.
+### Scheduler Commands
+
+Manage scheduled tasks in your application:
+
+- `gravito schedule:list` - List all scheduled tasks
+- `gravito schedule:run` - Run due tasks (for cron)
+- `gravito schedule:work` - Run scheduler daemon
 
 ## Available Templates
 

@@ -13,6 +13,136 @@ interface ProjectConfig {
 
 const cli = cac('gravito')
 
+cli
+  .command('schedule:run', 'Run due scheduled tasks')
+  .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
+  .action(async (options) => {
+    try {
+      const entryPath = path.resolve(process.cwd(), options.entry)
+      // Dynamic import of the project entry file
+      const app = await import(entryPath)
+
+      const core = app.default?.core
+
+      if (!core) {
+        console.error(
+          pc.red('❌ Could not find Gravito PlanetCore instance in entry file exports.')
+        )
+        console.error(
+          pc.gray('Ensure your src/index.ts exports the result of bootstrap() or core.liftoff()')
+        )
+        process.exit(1)
+      }
+
+      const scheduler = core.services.get('scheduler')
+      if (!scheduler) {
+        console.error(pc.yellow('⚠️ Orbit Scheduler is not installed in this planet.'))
+        process.exit(1)
+      }
+
+      await scheduler.run()
+
+      process.exit(0)
+    } catch (err) {
+      console.error(pc.red('Failed to run scheduler:'), err)
+      process.exit(1)
+    }
+  })
+
+cli
+  .command('schedule:work', 'Run scheduler in daemon mode')
+  .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
+  .action(async (options) => {
+    try {
+      const entryPath = path.resolve(process.cwd(), options.entry)
+      const app = await import(entryPath)
+      const core = app.default?.core
+
+      if (!core) {
+        console.error(pc.red('❌ Could not find Gravito PlanetCore instance.'))
+        process.exit(1)
+      }
+
+      const scheduler = core.services.get('scheduler')
+      if (!scheduler) {
+        console.error(pc.yellow('⚠️ Orbit Scheduler is not installed.'))
+        process.exit(1)
+      }
+
+      console.log(pc.green('🕐 Scheduler worker started'))
+
+      const run = async () => {
+        try {
+          await scheduler.run()
+        } catch (e) {
+          console.error(pc.red('Error running schedule:'), e)
+        }
+      }
+
+      // Basic loop
+      while (true) {
+        const now = new Date()
+        const seconds = now.getSeconds()
+        const delay = (60 - seconds) * 1000
+
+        // Align to next minute
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        await run()
+      }
+    } catch (err) {
+      console.error(pc.red('Failed to start worker:'), err)
+      process.exit(1)
+    }
+  })
+
+cli
+  .command('schedule:list', 'List scheduled tasks')
+  .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
+  .action(async (options) => {
+    try {
+      const entryPath = path.resolve(process.cwd(), options.entry)
+      const app = await import(entryPath)
+      const core = app.default?.core
+
+      if (!core) {
+        console.error(pc.red('❌ Could not find Gravito PlanetCore instance.'))
+        process.exit(1)
+      }
+
+      const scheduler = core.services.get('scheduler')
+      if (!scheduler) {
+        console.error(pc.yellow('⚠️ Orbit Scheduler is not installed.'))
+        process.exit(1)
+      }
+
+      const tasks = scheduler.getTasks()
+
+      console.log(pc.bold(`\n📅 Scheduled Tasks (${tasks.length})`))
+      console.log(pc.gray('--------------------------------------------------'))
+
+      if (tasks.length === 0) {
+        console.log('No tasks scheduled.')
+        process.exit(0)
+      }
+
+      console.log(
+        `${pc.bold('Name'.padEnd(20))} ${pc.bold('Expression'.padEnd(15))} ${pc.bold('Timezone')}`
+      )
+      console.log(pc.gray('--------------------------------------------------'))
+
+      for (const task of tasks) {
+        console.log(
+          `${pc.cyan(task.name.padEnd(20))} ${pc.yellow(task.expression.padEnd(15))} ${task.timezone}`
+        )
+      }
+      console.log('')
+      process.exit(0)
+    } catch (err) {
+      console.error(pc.red('Failed to list tasks:'), err)
+      process.exit(1)
+    }
+  })
+
 cli.command('create [name]', 'Create a new Gravito project').action(async (name) => {
   console.clear()
 

@@ -1,0 +1,85 @@
+# @gravito/orbit-scheduler
+
+Enterprise-grade distributed task scheduler for Gravito framework.
+
+## Features
+
+- **Fluent API**: Expressive syntax for defining task schedules (e.g. `.daily().at('14:00')`).
+- **Distributed Locking**: Prevents duplicate task execution across multiple servers (supports Memory, Cache, Redis).
+- **Cron Integration**: Designed to be triggered by a single system cron entry.
+- **Hooks**: Events for task success/failure.
+
+## Installation
+
+```bash
+bun add @gravito/orbit-scheduler
+```
+
+## Quick Start
+
+1. Register the orbit in your application boot:
+
+```typescript
+import { OrbitScheduler } from '@gravito/orbit-scheduler'
+import { OrbitCache } from '@gravito/orbit-cache' // Optional, for cache lock
+
+await PlanetCore.boot({
+  config: {
+    scheduler: {
+      lock: { driver: 'cache' }
+    }
+  },
+  orbits: [
+    OrbitCache,      // Load cache first if using cache driver
+    OrbitScheduler
+  ]
+})
+```
+
+2. Schedule tasks:
+
+```typescript
+// Access scheduler from core services or context
+const scheduler = core.services.get('scheduler')
+
+scheduler.task('daily-cleanup', async () => {
+    await db.cleanup()
+})
+.daily()
+.at('02:00')
+.onOneServer() // Distributed lock
+```
+
+## Distributed Locking
+
+To prevent tasks from running simultaneously on multiple servers, use `onOneServer()` (or `withoutOverlapping()`).
+The default lock driver is `memory` (single server), but you should configure `cache` or `redis` for distributed setups.
+
+## CLI Usage
+
+The Gravito CLI provides commands to run and manage your scheduled tasks.
+
+### List Tasks
+View all registered tasks and their schedules:
+```bash
+bun run gravito schedule:list
+```
+
+### Run (Cron Mode)
+Add this command to your system's crontab (e.g., `crontab -e`) to run every minute:
+```bash
+* * * * * cd /path/to/project && bun run gravito schedule:run
+```
+
+### Run (Daemon Mode)
+If you prefer a long-running process (e.g., in Docker or specific worker environments):
+```bash
+bun run gravito schedule:work
+```
+This will poll every minute to execute due tasks.
+
+### Entry Point
+By default, commands look for `src/index.ts`. If your bootstrap file is elsewhere, use `--entry`:
+```bash
+gravito schedule:list --entry src/bootstrap.ts
+```

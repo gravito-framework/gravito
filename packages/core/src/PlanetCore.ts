@@ -74,6 +74,7 @@ export class PlanetCore {
   public config: ConfigManager
   public hooks: HookManager
   public router: Router
+  public services: Map<string, unknown> = new Map()
 
   constructor(
     options: {
@@ -386,7 +387,7 @@ export class PlanetCore {
    * 啟動核心 (Liftoff)
    * 回傳用於 Bun.serve 的設定物件
    */
-  liftoff(port?: number) {
+  liftoff(port?: number): { port: number; fetch: Function; core: PlanetCore } {
     // 優先使用參數 > 設定檔 > 預設值
     const finalPort = port ?? this.config.get<number>('PORT', 3000)
 
@@ -398,6 +399,7 @@ export class PlanetCore {
     return {
       port: finalPort,
       fetch: this.app.fetch.bind(this.app),
+      core: this,
     }
   }
 }

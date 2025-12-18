@@ -1,0 +1,30 @@
+import type { CacheManager } from '@gravito/orbit-cache'
+import type { LockStore } from './LockStore'
+
+export class CacheLockStore implements LockStore {
+  constructor(
+    private cache: CacheManager,
+    private prefix = 'scheduler:lock:'
+  ) {}
+
+  private getKey(key: string): string {
+    return this.prefix + key
+  }
+
+  async acquire(key: string, ttlSeconds: number): Promise<boolean> {
+    // Attempt to add. If key exists, it fails (returns false).
+    return this.cache.add(this.getKey(key), 'LOCKED', ttlSeconds)
+  }
+
+  async release(key: string): Promise<void> {
+    await this.cache.forget(this.getKey(key))
+  }
+
+  async forceAcquire(key: string, ttlSeconds: number): Promise<void> {
+    await this.cache.put(this.getKey(key), 'LOCKED', ttlSeconds)
+  }
+
+  async exists(key: string): Promise<boolean> {
+    return this.cache.has(this.getKey(key))
+  }
+}
