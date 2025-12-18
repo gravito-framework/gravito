@@ -1,5 +1,6 @@
 import type { PlanetCore } from './PlanetCore'
-import type { Event, Listener, ShouldQueue } from './types/events'
+import { Event } from './Event'
+import type { Listener, ShouldQueue } from './Listener'
 
 /**
  * 監聽器註冊資訊
@@ -49,18 +50,18 @@ export class EventManager {
   /**
    * 廣播管理器（可選，由 orbit-broadcasting 注入）
    */
-  private broadcastManager?: {
+  private broadcastManager: {
     broadcast(event: Event, channel: string | { name: string; type: string }, data: Record<string, unknown>, eventName: string): Promise<void>
-  }
+  } | undefined
 
   /**
    * 隊列管理器（可選，由 orbit-queue 注入）
    */
-  private queueManager?: {
+  private queueManager: {
     push(job: unknown, queue?: string, connection?: string, delay?: number): Promise<void>
-  }
+  } | undefined
 
-  constructor(private core: PlanetCore) {}
+  constructor(private core: PlanetCore) { }
 
   /**
    * 註冊廣播管理器
@@ -155,7 +156,7 @@ export class EventManager {
    * ```
    */
   async dispatch<TEvent extends Event>(event: TEvent): Promise<void> {
-    const eventKey = event.constructor
+    const eventKey = event.constructor as new () => Event
     const eventName = event.constructor.name
 
     // 觸發 hooks（向後相容）

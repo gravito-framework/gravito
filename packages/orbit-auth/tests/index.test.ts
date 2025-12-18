@@ -1,25 +1,49 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { PlanetCore } from 'gravito-core'
-import orbitAuth from '../src/index'
+import orbitAuth, { CallbackUserProvider } from '../src/index'
+import type { Authenticatable } from '../src/contracts/Authenticatable'
+
+class TestUser implements Authenticatable {
+  constructor(public id: string) { }
+  getAuthIdentifier() { return this.id }
+}
 
 describe('OrbitAuth', () => {
-  it('should register auth service and hooks', async () => {
+  it('should register auth manager in context', async () => {
     const core = new PlanetCore()
-    // Mock hooks
-    core.hooks.doAction = mock((_hook, _args) => Promise.resolve())
-    core.hooks.applyFilters = mock((_hook, val) => Promise.resolve(val))
 
-    const options = { secret: 'test-secret' }
+    // Setup plugin
+    orbitAuth(core, {
+      defaults: { guard: 'api' }, // Use JWT guard for test as it's simpler? OR session
+      guards: {
+        api: { driver: 'jwt', provider: 'users', secret: 'secret' }
+      },
+      providers: {
+        users: { driver: 'callback' }
+      },
+      bindings: {
+        providers: {
+          users: (config) => new CallbackUserProvider(
+            async (id) => new TestUser(String(id)),
+            async () => true
+          )
+        }
+      }
+    })
 
-    const auth = orbitAuth(core, options)
+    // Register a route to test injection
+    core.app.get('/test', (c) => {
+      const auth = c.get('auth')
+      return c.json({
+        hasAuth: !!auth,
+        isAuthManager: auth.constructor.name === 'AuthManager'
+      })
+    })
 
-    expect(auth).toHaveProperty('sign')
-    expect(auth).toHaveProperty('verify')
-    expect(core.hooks.doAction).toHaveBeenCalledWith('auth:init', auth)
+    const res = await core.app.request('/test')
+    const json = await res.json()
 
-    // Test Sign Flow
-    const token = await auth.sign({ sub: 'user_1' })
-    expect(core.hooks.applyFilters).toHaveBeenCalledWith('auth:payload', { sub: 'user_1' })
-    expect(typeof token).toBe('string')
+    expect(json.hasAuth).toBe(true)
+    expect(json.isAuthManager).toBe(true)
   })
 })

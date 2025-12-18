@@ -80,7 +80,7 @@ export interface Channel {
  * 事件基礎類別
  * 所有事件都應該繼承此類別
  */
-export class Event {
+export abstract class Event {
   /**
    * 事件是否應該被廣播
    */

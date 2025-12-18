@@ -1,8 +1,8 @@
 # @gravito/orbit-auth
 
-> The Standard Logic Orbit for Authentication in Galaxy Architecture.
+> The Authentication and Authorization Orbit for Galaxy Architecture.
 
-Provides simple JWT utilities and hooks for extending authentication logic.
+Provides a comprehensive, Laravel-like authentication system with support for multiple guards, user providers, and authorization gates.
 
 ## 📦 Installation
 
@@ -12,26 +12,113 @@ bun add @gravito/orbit-auth
 
 ## 🚀 Usage
 
+### basic Configuration
+
 ```typescript
-import { PlanetCore } from 'gravito-core';
-import orbitAuth from '@gravito/orbit-auth';
+import { PlanetCore } from 'gravito-core'
+import { OrbitAuth, type AuthConfig } from '@gravito/orbit-auth'
 
-const core = new PlanetCore();
+const core = new PlanetCore()
 
-// Initialize Auth Orbit
-const auth = orbitAuth(core, {
-  secret: 'SUPER_SECRET_KEY',
-  exposeAs: 'auth' // Access via c.get('auth')
-});
+// Configure Authentication
+const authConfig: AuthConfig = {
+  defaults: {
+    guard: 'web',
+    passwords: 'users',
+  },
+  guards: {
+    web: {
+      driver: 'session',
+      provider: 'users',
+      sessionKey: 'auth_session'
+    },
+    api: {
+      driver: 'token',
+      provider: 'users',
+      storageKey: 'api_token',
+      inputKey: 'api_token'
+    }
+  },
+  providers: {
+    users: {
+      driver: 'callback'
+    }
+  }
+}
 
-// Use in routes
-core.app.post('/login', async (c) => {
-  const token = await auth.sign({ sub: '123', role: 'admin' });
-  return c.json({ token });
-});
+// Register Orbit
+const auth = new OrbitAuth({
+  ...authConfig,
+  bindings: {
+    // Implement user retrieval logic
+    providers: {
+      users: () => new CallbackUserProvider(
+        async (id) => db.users.find(id),
+        async (user, creds) => Hash.verify(creds.password, user.password),
+        async (identifier, token) => null, // Remember me
+        async (creds) => db.users.findByApiToken(creds.api_token) // API Token
+      )
+    }
+  }
+})
+
+auth.install(core)
 ```
 
-## 🪝 Hooks
+### Middleware
 
-- `auth:init` - Fired when the Auth orbit initializes.
-- `auth:payload` - (Filter) Modify the JWT payload before signing.
+Protect your routes using the built-in middleware.
+
+```typescript
+import { auth, guest, can } from '@gravito/orbit-auth'
+
+// Protect routes (requires authentication)
+app.get('/dashboard', auth(), (c) => c.text('Dashboard'))
+
+// Guest only (redirects if authenticated)
+app.get('/login', guest(), (c) => c.text('Login'))
+
+// Authorization checks
+app.get('/admin', auth(), can('manage-users'), (c) => c.text('Admin Panel'))
+```
+
+### Gates & Policies
+
+Define authorization logic using Gates.
+
+```typescript
+// Define logic
+const gate = c.get('gate')
+
+// Simple closure ability
+gate.define('edit-post', (user, post) => {
+  return user.id === post.user_id
+})
+
+// Check ability
+if (await gate.allows('edit-post', post)) {
+  // ...
+}
+```
+
+### Guards
+
+Access the auth manager to handle authentication state.
+
+```typescript
+const auth = c.get('auth')
+
+// Get current user
+const user = await auth.user()
+
+// Check if authenticated
+if (await auth.check()) {
+  // ...
+}
+
+// Login (Session guard)
+await auth.login(user)
+
+// Logout
+await auth.logout()
+```
