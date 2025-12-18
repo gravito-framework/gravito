@@ -67,8 +67,8 @@ export interface ModelStatic<T extends Model = Model> {
   updatedAtColumn?: string
   deletedAtColumn?: string
   usesSoftDeletes?: boolean
-  localScopes?: Map<string, (query: any) => any>
-  globalScopes?: Array<(query: any) => any>
+  localScopes?: Map<string, (query: unknown) => unknown>
+  globalScopes?: Array<(query: unknown) => unknown>
   core?: PlanetCore
   setDBService(dbService: DBService): void
   setCore(core: PlanetCore): void
@@ -77,7 +77,7 @@ export interface ModelStatic<T extends Model = Model> {
   getDBService(): DBService
   getPrimaryKey(): string
   getRelationName(model: ModelStatic): string
-  fromData(data: any): T
+  fromData(data: unknown): T
   castAttribute(
     key: string,
     value: unknown,
@@ -144,9 +144,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
   protected static tableName?: string
   protected static primaryKey = 'id'
   protected static dbService?: DBService
-  // biome-ignore lint/suspicious/noExplicitAny: relations storage
   protected static relations: Map<string, RelationDefinition> = new Map()
-  // biome-ignore lint/suspicious/noExplicitAny: casts storage
   protected static casts: CastsDefinition = {}
   protected static fillable: string[] = []
   protected static guarded: string[] = []
@@ -158,10 +156,8 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
   protected static updatedAtColumn = 'updated_at'
   protected static deletedAtColumn = 'deleted_at'
   protected static usesSoftDeletes = false
-  // biome-ignore lint/suspicious/noExplicitAny: scopes storage
-  protected static localScopes: Map<string, (query: any) => any> = new Map()
-  // biome-ignore lint/suspicious/noExplicitAny: global scopes storage
-  protected static globalScopes: Array<(query: any) => any> = []
+  protected static localScopes: Map<string, (query: unknown) => unknown> = new Map()
+  protected static globalScopes: Array<(query: unknown) => unknown> = []
   protected static core?: PlanetCore // 用於觸發事件
 
   // 實例屬性
@@ -233,7 +229,9 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     const data = await dbService.findById(table, id)
-    if (!data) return null
+    if (!data) {
+      return null
+    }
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
     return (modelClass as any).fromData(data) as T
   }
@@ -260,7 +258,9 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     const data = await dbService.findOne(table, where)
-    if (!data) return null
+    if (!data) {
+      return null
+    }
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
     return (modelClass as any).fromData(data) as T
   }
@@ -1076,7 +1076,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
   ): void {
     const modelClass = Model as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
       type: 'hasMany',
       model: related,
@@ -1098,7 +1098,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const modelClass = Model as unknown as typeof Model
     const relatedClass = related as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
       type: 'belongsTo',
       model: related,
@@ -1119,7 +1119,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
   ): void {
     const modelClass = Model as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
       type: 'hasOne',
       model: related,
@@ -1141,7 +1141,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
   ): void {
     const modelClass = Model as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
       type: 'belongsToMany',
       model: related,
@@ -1172,7 +1172,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const name = relationName || 'commentable' // 預設名稱
     const typeColumn = morphType || `${name}_type`
     const idColumn = morphId || `${name}_id`
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(name, {
       type: 'morphTo',
       morphType: typeColumn,
@@ -1201,7 +1201,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const modelClass = Model as unknown as typeof Model
     const typeColumn = morphType || `${relationName}_type`
     const idColumn = morphId || `${relationName}_id`
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
       type: 'morphMany',
       model: related,
@@ -1230,7 +1230,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const modelClass = Model as unknown as typeof Model
     const typeColumn = morphType || `${relationName}_type`
     const idColumn = morphId || `${relationName}_id`
-    const relations = modelClass.relations || new Map()
+    const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
       type: 'morphOne',
       model: related,
@@ -1511,7 +1511,9 @@ export class QueryBuilder<T extends Model> {
     const finalWhere = this.buildWhere()
 
     const data = await dbService.findOne(table, finalWhere)
-    if (!data) return null
+    if (!data) {
+      return null
+    }
     return (this.modelClass as any).fromData(data) as T
   }
 
