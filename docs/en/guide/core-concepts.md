@@ -229,6 +229,8 @@ You can customize process-level behavior via:
 ## Further Reading
 
 - [Laravel 12 MVC Parity](./laravel-12-mvc-parity.md)
+- [Routing](./routing.md)
+- [Security](./security.md)
 - [ORM Usage](./orm-usage.md)
 - [Orbit DB (API)](../api/orbit-db.md)
 

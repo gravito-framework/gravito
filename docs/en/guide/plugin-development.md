@@ -155,6 +155,14 @@ const core = await PlanetCore.boot(config)
 export default core.liftoff()
 ```
 
+### Database Integration
+
+If your Orbit requires database tables:
+
+1. **Do not run migrations automatically** in `install()`.
+2. Provide standard Drizzle migration files in your package.
+3. Instruct users to import your migrations or use `gravito migrate` with a custom config path if necessary.
+
 ---
 
 ## Best Practices

@@ -181,6 +181,20 @@ Before deploying to production, ensure:
 | Setup logging | Configure log aggregation |
 | Health checks | Implement `/health` endpoint |
 
+## Database Deployment
+
+Gravito Orbit DB provides a `deploy` command that runs migrations and health checks in a safe manner.
+
+```bash
+# In your startup script or CI/CD pipeline
+gravito db:deploy
+```
+
+This command:
+1. Checks database connectivity
+2. Runs pending migrations (`gravito migrate`)
+3. Verifies post-migration health
+
 ---
 
 ## Reverse Proxy Configuration

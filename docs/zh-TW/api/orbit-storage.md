@@ -20,29 +20,35 @@ bun add @gravito/orbit-storage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitStorage from '@gravito/orbit-storage';
+import { OrbitStorage } from '@gravito/orbit-storage';
 
-const core = new PlanetCore();
-
-// 初始化 Storage Orbit (本地)
-const storage = orbitStorage(core, {
-  local: {
-    root: './uploads',
-    baseUrl: '/uploads'
+const core = await PlanetCore.boot({
+  config: {
+    storage: {
+      exposeAs: 'storage',
+      local: {
+        root: './uploads',
+        baseUrl: '/uploads',
+      },
+    }
   },
-  exposeAs: 'storage' // 可透過 c.get('storage') 存取
+  orbits: [OrbitStorage]
 });
 
 // 在路由中使用
 core.app.post('/upload', async (c) => {
+  const storage = c.get('storage');
   const body = await c.req.parseBody();
   const file = body['file'];
   
   if (file instanceof File) {
+    // 上傳檔案
     await storage.put(file.name, file);
+    
+    // 取得 URL
     return c.json({ url: storage.getUrl(file.name) });
   }
-  return c.text('No file uploaded', 400);
+  return c.text('未上傳檔案', 400);
 });
 ```
 

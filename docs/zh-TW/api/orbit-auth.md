@@ -4,11 +4,11 @@ title: Orbit Auth
 
 # Orbit Auth
 
-> 以 Gravito Orbit 形式提供身分驗證工具。
+> Gravito 的身份驗證 Orbit。
 
-套件：`@gravito/orbit-auth`
+套件名稱：`@gravito/orbit-auth`
 
-提供簡單的 JWT 工具與 Hooks，用於擴充驗證邏輯。
+提供彈性的身份驗證系統，支援多種 Guard（Session、JWT、Token）與 User Provider。
 
 ## 安裝
 
@@ -16,54 +16,184 @@ title: Orbit Auth
 bun add @gravito/orbit-auth
 ```
 
-## 用法（JWT）
+## 設定
+
+Orbit Auth 透過 `PlanetCore` 中的 `auth` 設定物件進行設定。
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitAuth from '@gravito/orbit-auth';
-
-const core = new PlanetCore();
-
-// 初始化 Auth Orbit
-const auth = orbitAuth(core, {
-  secret: 'SUPER_SECRET_KEY',
-  exposeAs: 'auth' // 可透過 c.get('auth') 存取
-});
-
-// 在路由中使用
-core.app.post('/login', async (c) => {
-  const token = await auth.sign({ sub: '123', role: 'admin' });
-  return c.json({ token });
-});
-```
-
-## 用法（Session 登入狀態）
-
-若要比照 Laravel 的登入狀態，請搭配 `@gravito/orbit-session`，並啟用 session guard：
-
-```ts
-import { PlanetCore } from 'gravito-core'
-import { OrbitSession } from '@gravito/orbit-session'
-import { OrbitAuth } from '@gravito/orbit-auth'
+import { OrbitAuth } from '@gravito/orbit-auth';
+import { OrbitSession } from '@gravito/orbit-session';
 
 const core = await PlanetCore.boot({
   config: {
     auth: {
-      secret: 'SUPER_SECRET_KEY',
-      guard: 'session',
+      defaults: {
+        guard: 'web',
+        passwords: 'users',
+      },
+      guards: {
+        web: {
+          driver: 'session',
+          provider: 'users',
+          sessionKey: 'login_web_59ba36addc2b2f9401580f014c7f58ea4e30989d',
+        },
+        api: {
+          driver: 'jwt',
+          provider: 'users',
+          secret: process.env.JWT_SECRET || 'secret',
+          algo: 'HS256',
+        },
+      },
+      providers: {
+        users: {
+          driver: 'drizzle', // 或 'callback'
+          model: 'User', // 您的 User model
+        },
+      },
     },
   },
   orbits: [OrbitSession, OrbitAuth],
+});
+```
+
+## 基本用法
+
+### 存取 Auth Manager
+
+您可以透過 context 存取 `AuthManager`。
+
+```typescript
+core.app.get('/user', async (c) => {
+  const auth = c.get('auth');
+  
+  if (await auth.check()) {
+    const user = await auth.user();
+    return c.json({ user });
+  }
+  
+  return c.json({ message: 'Unauthenticated' }, 401);
+});
+```
+
+### 驗證操作
+
+```typescript
+// 登入 (Session Guard)
+await auth.login(user);
+
+// 登出
+await auth.logout();
+
+// 嘗試使用憑證登入
+if (await auth.attempt({ email, password })) {
+    // 成功
+}
+```
+
+### 使用特定 Guard
+
+```typescript
+// 明確存取 'api' guard
+const apiAuth = auth.guard('api');
+const user = await apiAuth.user();
+```
+
+## 密碼雜湊 (Hashing)
+
+Orbit Auth 會在 request context 中以 `hash` 暴露 `HashManager`：
+
+```ts
+core.app.post('/register', async (c) => {
+  const hash = c.get('hash')
+  const passwordHash = await hash.make('plain-password')
+  return c.json({ passwordHash })
+})
+```
+
+## 密碼重設 / 信箱驗證（Primitives）
+
+Orbit Auth 可選擇性提供用來組裝 Laravel 風格流程的 primitives：
+
+- `PasswordBroker`（context key: `passwords`）
+- `EmailVerificationService`（context key: `emailVerification`）
+
+在 options 中啟用：
+
+```ts
+new OrbitAuth({
+  // ...auth config
+  passwordReset: { enabled: true, ttlSeconds: 3600 },
+  emailVerification: { enabled: true },
+})
+```
+
+使用方式：
+
+```ts
+core.app.post('/password/forgot', async (c) => {
+  const broker = c.get('passwords')
+  if (!broker) return c.text('未啟用', 500)
+  const token = await broker.createToken('user@example.com')
+  return c.json({ token })
 })
 
-core.app.post('/login', async (c) => {
-  const auth = c.get('auth') as any
-  auth.login('user_123')
-  return c.json({ ok: true })
+core.app.get('/email/verify', (c) => {
+  const verifier = c.get('emailVerification')
+  if (!verifier) return c.text('未啟用', 500)
+  const token = c.req.query('token') ?? ''
+  const payload = verifier.verifyToken(token)
+  return payload ? c.json(payload) : c.text('無效 token', 400)
 })
+```
+
+## 授權 (Gates)
+
+Orbit Auth 包含用於授權檢查的 Gate 系統。
+
+### 定義 Gate
+
+在您的 `AppServiceProvider` 或啟動程式碼中定義 gate。
+
+```typescript
+core.app.use('*', async (c, next) => {
+  const gate = c.get('gate')
+
+  gate.define('update-post', (user, post) => {
+    return user?.id === post.user_id
+  })
+
+  await next()
+})
+```
+
+### 檢查授權
+
+```typescript
+const gate = c.get('gate')
+
+if (await gate.allows('update-post', post)) {
+  // 已授權
+}
+
+// 若未授權則拋出 403
+await gate.authorize('update-post', post);
+```
+
+### 透過 Context
+
+```typescript
+core.app.get('/posts/:id', async (c) => {
+  // ... 取得 post
+  
+  const gate = c.get('gate')
+  await gate.authorize('update-post', post)
+});
 ```
 
 ## Hooks
 
-- `auth:init` - 當 Auth Orbit 初始化時觸發。
-- `auth:payload` - (Filter) 在簽署前修改 JWT payload。
+- `auth:init` - 當 Auth orbit 初始化時觸發。
+- `auth:login` - 登入成功後觸發。
+- `auth:logout` - 登出後觸發。
+- `auth:failed` - 驗證失敗後觸發。

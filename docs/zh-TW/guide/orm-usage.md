@@ -976,37 +976,37 @@ await db.bulkDelete(users, [
 ]);
 ```
 
-## 遷移和 Seeder
+## Migration 與 Seeder
 
-### 執行遷移
+### 執行 Migration
 
-```typescript
-// 執行所有待處理的遷移
-const result = await db.migrate();
+Gravito CLI 包裝了 `drizzle-kit` 以提供一致的 migration 工作流程。
 
-// 遷移到指定版本
-const result = await db.migrateTo('001_initial');
+```bash
+# 執行待處理的 migrations
+gravito migrate
+
+# 刪除所有資料表並重新執行 migrations (Fresh)
+gravito migrate --fresh
+
+# 檢查 migration 狀態
+gravito migrate:status
 ```
 
 ### 執行 Seeder
 
+```bash
+# 執行所有 seeder
+gravito db:seed
+
+# 執行特定 seeder 類別
+gravito db:seed --class UsersSeeder
+```
+
+在程式碼中：
+
 ```typescript
 // 定義 seed 函數
-const seedUsers = async (db: any) => {
-  await db.insert(users).values([
-    { name: 'Admin', email: 'admin@example.com' },
-    { name: 'User', email: 'user@example.com' },
-  ]);
-};
-
-// 執行單個 seed
-await db.seed(seedUsers, 'users-seed');
-
-// 執行多個 seeds
-await db.seedMany([
-  { name: 'users-seed', seed: seedUsers },
-  { name: 'posts-seed', seed: seedPosts },
-]);
 ```
 
 ## 部署
@@ -1276,4 +1276,3 @@ orbit-db 提供了完整的 ORM 功能：
 - ✅ **PostgreSQL 優化** - 針對 PostgreSQL 的效能優化
 
 透過 `db.raw` 可以存取 Drizzle ORM 的完整功能，確保靈活性和擴展性。
-

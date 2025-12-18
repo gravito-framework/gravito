@@ -61,11 +61,25 @@ export class ExampleController {
   index(ctx: Context) {
     const session = ctx.get('session')
     session.put('foo', 'bar')
-    session.flash('success', 'Saved')
+    session.flash('success', '儲存成功')
     return ctx.json({ ok: true })
   }
 }
 ```
+
+## Flash Data (快閃資料)
+
+Orbit Session 支援 "flash" 資料，這類資料僅在下一次請求中可用。這通常用於狀態訊息（例如：「文章建立成功」）。
+
+```typescript
+// 儲存 flash 資料
+session.flash('message', '任務成功！');
+
+// 取得 flash 資料（在下一次請求中）
+const message = session.get('message');
+```
+
+Inertia Orbit 會自動將常見的 flash key（如 `success`、`error`）分享給前端 props。
 
 ## CSRF
 

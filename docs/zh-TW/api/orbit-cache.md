@@ -43,6 +43,30 @@ core.app.get('/heavy-data', async (c) => {
 
 ## Hooks
 
-- `cache:init` - 當快取 Orbit 初始化時觸發。
-- `cache:hit` - 當快取命中時觸發。
-- `cache:miss` - 當快取未命中時觸發。
+- `cache:init` - 當 cache orbit 初始化時觸發。
+- `cache:miss` - 當資料在快取中未找到時觸發。
+- `cache:hit` - 當資料從快取中讀取時觸發。
+
+## 流量限制 (Rate Limiting)
+
+Orbit Cache 提供了一個 Rate Limiter 驅動器，利用您的快取儲存空間來計數並限制操作。
+
+```typescript
+import { CacheManager } from '@gravito/orbit-cache';
+
+core.app.post('/send-email', async (c) => {
+  const cache = c.get('cache') as CacheManager
+  const limiter = cache.limiter()
+
+  // Key, 最大嘗試次數, 衰減秒數 (Decay Seconds)
+  const result = await limiter.attempt('send-email:123', 5, 60)
+
+  if (!result.allowed) {
+    const seconds = result.reset - Math.floor(Date.now() / 1000)
+    return c.text(`嘗試次數過多。請在 ${seconds} 秒後重試。`, 429)
+  }
+
+  // 允許操作...
+  return c.text('OK')
+})
+```

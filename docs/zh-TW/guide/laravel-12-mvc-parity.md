@@ -54,10 +54,11 @@ title: Laravel 12 MVC 對齊程度
 | 路由 + 群組 + middleware 疊加 | 已實作 | Laravel-like fluent API（基於 Hono） |
 | Controller 路由 | 已實作 | `[ControllerClass, 'method']` |
 | 路由層級的 FormRequest 驗證 | 已實作 | `Router` 以 duck-typing 整合 |
-| 命名路由 + URL 產生器 | 缺少 | 尚無 `route('name', params)` 等價能力 |
-| Route model binding | 缺少 | 需要 params → model 的綁定/解析層 |
-| Resource routes | 缺少 | 尚無 `Route::resource()` 等價能力 |
-| Rate limiting / 節流 | 缺少 | 尚無第一級 limiter middleware/driver |
+| 命名路由 + URL 產生器 | 已實作 | 支援 `router.get(...).name('home')` 與 `router.url('home')` |
+| Resource routes | 已實作 | `router.resource('users', UsersController)` |
+| Route model binding | 已實作 | `router.bind('user', async (id) => ...)`，可透過 `c.get('routeModels').user` 取得 |
+| Route cache 策略 | 部分 | CLI `route:cache` 可快取命名路由清單（manifest）供 URL 產生 |
+| Rate limiting / 節流 | 已實作 | `ThrottleRequests` middleware + Cache store 支援 |
 
 ### Session / CSRF / Cookie
 
@@ -66,7 +67,8 @@ title: Laravel 12 MVC 對齊程度
 | Session | 已實作 | `@gravito/orbit-session` |
 | CSRF 防護 | 已實作 | `@gravito/orbit-session` |
 | Flash 資料模式 | 部分 | 驗證流程可支援；仍需標準 API 介面 |
-| Cookie 加密/簽章 | 缺少 | 需要 crypto/key 管理設計 |
+| Cookie 加密 | 已實作 | `CookieJar` + AES-256-CBC Encrypter |
+| Cookie 簽章 | 缺少 | 需要第一級的簽章 primitive（含金鑰輪替策略） |
 
 ### 驗證（Validation）
 
@@ -90,14 +92,14 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Migrations（apply/status/fresh） | 部分 | CLI 已有；driver 策略仍在成熟中 |
-| Seeder 執行 | 部分 | Runner 已有；scaffolding/工作流程需要更完整 |
+| Migrations（apply/status/fresh） | 部分 | CLI 包裝 `drizzle-kit`；工作流程仍在演進中 |
+| Seeder 執行 | 部分 | CLI runner 已有；app 層級慣例仍在整理中 |
 | Active Record 風格 Model | 部分 | `Model` 已有；功能面小於 Eloquent |
 | Relations | 部分 | 常見關聯已支援；與 Eloquent 的完整度仍有差距 |
 | Model factories | 缺少 | 尚無標準化 factory 系統 |
-| Soft deletes | 缺少 | 尚無 deleted-at 模式 |
+| Soft deletes | 已實作 | `usesSoftDeletes` + `withTrashed()` / `onlyTrashed()` |
 | Polymorphic relations | 缺少 | 需要 ORM 層設計 |
-| Pagination helpers | 缺少 | 尚無標準 paginator contract |
+| Pagination helpers | 已實作 | `Model.paginate()` 與 `QueryBuilder.paginate()` |
 
 ### 認證 / 授權
 
@@ -107,15 +109,15 @@ title: Laravel 12 MVC 對齊程度
 | Auth middleware（`auth`、`guest`） | 已實作 | |
 | Gates / abilities | 已實作 | `Gate.define()` + `authorize()` |
 | Policies | 部分 | 支援手動 mapping；尚無自動 discovery/scaffolding |
-| 密碼重設 / 信箱驗證 | 缺少 | 需要 mail + token + persistence workflow |
-| 密碼雜湊（bcrypt/argon）服務 | 缺少 | 需要標準 hashing provider |
+| 密碼雜湊（bcrypt/argon）服務 | 已實作 | `HashManager`（Bun password） |
+| 密碼重設 / 信箱驗證 | 部分 | 提供 primitives（`PasswordBroker`、`EmailVerificationService`） |
 
 ### 佇列 / 排程
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
 | Jobs + workers | 已實作 | `@gravito/orbit-queue` 的 multi-driver 設計 |
-| 重試/backoff/timeout 慣例 | 部分 | 有部分概念；需要標準化 API + 文件 |
+| 重試/backoff/timeout 慣例 | 部分 | 有部分概念；需要標準化介面 + 文件 |
 | Scheduler | 已實作 | `@gravito/orbit-scheduler` |
 | 佇列儀表板（Horizon-like） | 缺少 | 尚無監控 UI |
 
@@ -155,19 +157,11 @@ title: Laravel 12 MVC 對齊程度
 
 ## Roadmap 建議（往 Laravel 風格完整度前進）
 
-### P0（先解決常見正式環境需求）
-
-- 命名路由 + URL 產生器。
-- Rate limiting middleware + driver contract。
-- Cookie 簽章/加密 primitives（含金鑰管理與輪替策略）。
-- 強化 DB 工作流程：seeder scaffolding + 一致的 migration workflow。
-
 ### P1（補齊 Eloquent/Laravel 的常用體驗）
 
-- Resource routes、route model binding、route caching 策略。
-- Pagination contract + helpers。
-- Soft deletes + model casts / accessors 慣例。
-- Auth hashing + 密碼重設/信箱驗證流程。
+- Resource routes 與 route model binding 已實作；route cache 以命名路由清單（manifest）形式提供。
+- Pagination helpers 與 soft deletes 已實作；剩餘缺口主要在 factories、polymorphic relations，以及更完整的 Eloquent-like 體驗。
+- Auth hashing 已實作；密碼重設/信箱驗證仍需端到端 app 工作流程（mail + persistence + 預設 controllers）。
 
 ### P2（生態與可觀測性）
 

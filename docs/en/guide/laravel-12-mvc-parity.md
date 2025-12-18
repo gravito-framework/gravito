@@ -54,10 +54,11 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 | Routing + route groups + middleware stacking | Implemented | Laravel-like fluent API on top of Hono |
 | Controller routing | Implemented | `[ControllerClass, 'method']` |
 | FormRequest validation at route-level | Implemented | Duck-typed integration in `Router` |
-| Named routes + URL generation | Missing | No `route('name', params)` equivalent yet |
-| Route model binding | Missing | Needs a binding/resolution layer for params → models |
-| Resource routes | Missing | No `Route::resource()` equivalent |
-| Rate limiting / throttling | Missing | No first-class limiter middleware/driver |
+| Named routes + URL generation | Implemented | `router.get(...).name('home')` and `router.url('home')` |
+| Rate limiting / throttling | Implemented | `ThrottleRequests` middleware + Cache store backing |
+| Resource routes | Implemented | `router.resource('users', UsersController)` |
+| Route model binding | Implemented | `router.bind('user', async (id) => ...)` exposes `c.get('routeModels').user` |
+| Route cache strategy | Partial | CLI `route:cache` persists named routes manifest for URL generation |
 
 ### Sessions / CSRF / Cookies
 
@@ -65,8 +66,9 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 |--------|--------|------|
 | Sessions | Implemented | `@gravito/orbit-session` |
 | CSRF protection | Implemented | `@gravito/orbit-session` |
+| Cookie encryption | Implemented | `CookieJar` + AES-256-CBC Encrypter |
+| Cookie signing | Missing | Needs a first-class signing primitive (key rotation story) |
 | “Flash” data patterns | Partial | Supported in validation flow; needs a standard API surface |
-| Cookie encryption / signing | Missing | Needs a crypto/key management design |
 
 ### Validation
 
@@ -90,14 +92,14 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Migrations (apply/status/fresh) | Partial | CLI exists; driver strategy still maturing |
-| Seed runner | Partial | Runner exists; scaffolding/workflow needs tightening |
+| Migrations (apply/status/fresh) | Partial | CLI wraps `drizzle-kit`; workflow still evolving |
+| Seed runner | Partial | CLI runner exists; app-level conventions still evolving |
 | Active Record-style models | Partial | `Model` exists; feature set is smaller than Eloquent |
 | Relations | Partial | Common relations are supported; parity with Eloquent is not complete |
 | Model factories | Missing | No standard factory system |
-| Soft deletes | Missing | No built-in deleted-at patterns |
+| Soft deletes | Implemented | `usesSoftDeletes` + `withTrashed()` / `onlyTrashed()` |
 | Polymorphic relations | Missing | Requires ORM design work |
-| Pagination helpers | Missing | No standard paginator contract yet |
+| Pagination helpers | Implemented | `Model.paginate()` and `QueryBuilder.paginate()` |
 
 ### Authentication / Authorization
 
@@ -107,8 +109,8 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 | Auth middleware (`auth`, `guest`) | Implemented | |
 | Gates / abilities | Implemented | `Gate.define()` + `authorize()` |
 | Policies | Partial | Manual mapping supported; no discovery/scaffolding |
-| Password reset / email verification | Missing | Needs mail + token + persistence workflow |
-| Hashing (bcrypt/argon) service | Missing | Needs a standard password hashing provider |
+| Hashing (bcrypt/argon) service | Implemented | `HashManager` (Bun password) |
+| Password reset / email verification | Partial | Provides primitives (`PasswordBroker`, `EmailVerificationService`) |
 
 ### Queues / Scheduler
 
@@ -155,19 +157,11 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 ## Roadmap Suggestions (Laravel-Style Completeness)
 
-### P0 (Unblock common production apps)
-
-- Named routes + URL generator.
-- Rate limiting middleware + driver contract.
-- Cookie signing/encryption primitives (key management + rotation story).
-- Tighten DB workflows: seed scaffolding + consistent migration workflow.
-
 ### P1 (Eloquent/Laravel ergonomics)
 
-- Resource routes, route model binding, route caching strategy.
-- Pagination contract + helpers.
-- Soft deletes + model “casts” / accessors patterns.
-- Auth hashing + password reset/email verification workflow.
+- Resource routes + route model binding are implemented; route cache is available as a named-routes manifest.
+- Pagination helpers and soft deletes are implemented; remaining gaps are factories, polymorphic relations, and fuller Eloquent-like ergonomics.
+- Auth hashing is implemented; password reset/email verification still needs end-to-end app workflows (mail + persistence + default controllers).
 
 ### P2 (Ecosystem and observability)
 

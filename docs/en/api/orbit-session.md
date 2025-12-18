@@ -67,6 +67,20 @@ export class ExampleController {
 }
 ```
 
+## Flash Data
+
+Orbit Session supports "flash" data, which is data that is only available for the next request. This is commonly used for status messages (e.g., "Post created successfully").
+
+```typescript
+// Store flash data
+session.flash('message', 'Task was successful!');
+
+// Retrieve flash data (in the next request)
+const message = session.get('message');
+```
+
+The Inertia Orbit automatically shares common flash keys (like `success`, `error`) with the frontend props.
+
 ## CSRF
 
 - Default verification is **header-based**: `X-CSRF-Token`

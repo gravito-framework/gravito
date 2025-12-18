@@ -1316,15 +1316,30 @@ await db.bulkDelete(users, [
 
 ### Run Migrations
 
-```typescript
-// Run all pending migrations
-const result = await db.migrate();
+Gravito CLI wraps `drizzle-kit` to provide a consistent migration workflow.
 
-// Migrate to specific version
-const result = await db.migrateTo('001_initial');
+```bash
+# Run pending migrations
+gravito migrate
+
+# Drop all tables and re-run migrations (Fresh)
+gravito migrate --fresh
+
+# Check migration status
+gravito migrate:status
 ```
 
 ### Run Seeders
+
+```bash
+# Run all seeders
+gravito db:seed
+
+# Run specific seeder class
+gravito db:seed --class UsersSeeder
+```
+
+In code:
 
 ```typescript
 // Define seed function
@@ -1624,4 +1639,3 @@ orbit-db provides complete ORM functionality, inspired by Laravel Eloquent while
 - ✅ **PostgreSQL Optimized** - Performance optimizations for PostgreSQL
 
 Access the full power of Drizzle ORM through `db.raw` for flexibility and extensibility.
-

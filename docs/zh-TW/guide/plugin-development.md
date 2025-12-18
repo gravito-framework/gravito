@@ -134,7 +134,7 @@ export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
 
 `install()` 會在啟動階段被呼叫；若需要請求層級的行為，請在 `install()` 內註冊 Hono middleware。
 
-### 使用 IoC
+### 搭配 IoC 使用
 
 ```typescript
 // gravito.config.ts
@@ -148,12 +148,20 @@ const config = defineConfig({
       timeout: 5000
     }
   },
-  orbits: [OrbitCustom] // 會自動解析設定
+  orbits: [OrbitCustom] // 自動解析設定
 })
 
 const core = await PlanetCore.boot(config)
 export default core.liftoff()
 ```
+
+### 資料庫整合
+
+若您的 Orbit 需要資料庫表格：
+
+1. **請勿在 `install()` 中自動執行 Migration**。
+2. 在您的套件中提供標準的 Drizzle migration 檔案。
+3. 指示使用者匯入您的 migrations，或在需要時使用帶有自訂設定路徑的 `gravito migrate`。
 
 ---
 

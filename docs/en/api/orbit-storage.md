@@ -20,26 +20,30 @@ bun add @gravito/orbit-storage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitStorage from '@gravito/orbit-storage';
+import { OrbitStorage } from '@gravito/orbit-storage';
 
-const core = new PlanetCore();
-
-// Initialize Storage Orbit (Local)
-const storage = orbitStorage(core, {
-  local: {
-    root: './uploads',
-    baseUrl: '/uploads'
+const core = await PlanetCore.boot({
+  config: {
+    storage: {
+      exposeAs: 'storage',
+      local: {
+        root: './uploads',
+        baseUrl: '/uploads',
+      },
+    },
   },
-  exposeAs: 'storage' // Access via c.get('storage')
-});
+  orbits: [OrbitStorage],
+})
 
 // Use in routes
 core.app.post('/upload', async (c) => {
+  const storage = c.get('storage')
   const body = await c.req.parseBody();
   const file = body['file'];
   
   if (file instanceof File) {
     await storage.put(file.name, file);
+    
     return c.json({ url: storage.getUrl(file.name) });
   }
   return c.text('No file uploaded', 400);

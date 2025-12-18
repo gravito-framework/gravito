@@ -165,17 +165,31 @@ volumes:
 
 ## 生產環境檢查清單
 
-部署前，請確保：
+部署到生產環境前，請確保：
 
-| 項目 | 指令/行動 |
+| 項目 | 指令/動作 |
 |------|-----------|
 | 執行測試 | `bun test` |
 | 建置前端 | `bun run build:client` |
 | 設定 `NODE_ENV` | `export NODE_ENV=production` |
-| 設定機密 | 使用環境變數，勿用 `.env` |
+| 設定機密資訊 | 使用環境變數，而非 `.env` |
 | 啟用 HTTPS | 使用反向代理 (nginx, Caddy) |
-| 設定日誌 | 設定日誌聚合 |
+| 設定 Logging | 設定日誌聚合 |
 | 健康檢查 | 實作 `/health` 端點 |
+
+## 資料庫部署
+
+Gravito Orbit DB 提供 `deploy` 指令，能安全地執行 Migration 與健康檢查。
+
+```bash
+# 在您的啟動腳本或 CI/CD pipeline 中
+gravito db:deploy
+```
+
+此指令會：
+1. 檢查資料庫連線
+2. 執行待處理的 Migrations (`gravito migrate`)
+3. 驗證遷移後的健康狀態
 
 ---
 
