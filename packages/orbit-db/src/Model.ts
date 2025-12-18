@@ -176,7 +176,8 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 設定 DBService（需要在應用啟動時設定）
    */
   static setDBService(dbService: DBService): void {
-    ;(Model as unknown as typeof Model).dbService = dbService
+    const modelClass = Model as unknown as typeof Model
+    modelClass.dbService = dbService
   }
 
   /**
@@ -195,7 +196,9 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const modelClass = Model as unknown as typeof Model
     const table = modelClass.table
     if (!table) {
-      throw new Error(`[Model] Table not set for ${Model.name}. Please set static table property.`)
+      throw new Error(
+        `[Model] Table not set for ${modelClass.name}. Please set static table property.`
+      )
     }
     return table
   }
@@ -208,7 +211,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const dbService = modelClass.dbService
     if (!dbService) {
       throw new Error(
-        `[Model] DBService not set for ${Model.name}. Please call Model.setDBService() or ensure db:connected hook is triggered.`
+        `[Model] DBService not set for ${modelClass.name}. Please call Model.setDBService() or ensure db:connected hook is triggered.`
       )
     }
     return dbService
@@ -226,12 +229,13 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 根據 ID 查詢（類似 Laravel 的 find）
    */
   static async find<T extends Model>(this: ModelStatic<T>, id: unknown): Promise<T | null> {
-    const dbService = Model.getDBService()
-    const table = Model.getTable()
+    const modelClass = Model as unknown as typeof Model
+    const dbService = modelClass.getDBService()
+    const table = modelClass.getTable()
     const data = await dbService.findById(table, id)
     if (!data) return null
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    return (Model as any).fromData(data) as T
+    return (modelClass as any).fromData(data) as T
   }
 
   /**
@@ -258,14 +262,14 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const data = await dbService.findOne(table, where)
     if (!data) return null
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    return (Model as any).fromData(data) as T
+    return (modelClass as any).fromData(data) as T
   }
 
   /**
    * 開始查詢建構器（鏈式查詢）
    */
   static query<T extends Model>(this: ModelStatic<T>): QueryBuilder<T> {
-    return new QueryBuilder<T>(Model as unknown as ModelStatic<T>)
+    return new QueryBuilder<T>(Model)
   }
 
   /**
@@ -305,7 +309,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
 
     const data = await dbService.findAll(table, finalWhere, options)
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    const models = data.map((item: any) => (Model as any).fromData(item))
+    const models = data.map((item: any) => (modelClass as any).fromData(item))
     return new ModelCollection(models)
   }
 
@@ -358,7 +362,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     const result = await dbService.paginate(table, options)
     return {
       // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-      data: result.data.map((item: any) => (Model as any).fromData(item)),
+      data: result.data.map((item: any) => (modelClass as any).fromData(item)),
       pagination: result.pagination,
     }
   }
@@ -405,11 +409,11 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
 
     const created = await dbService.create(table, dataToCreate)
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    const instance = (Model as any).fromData(created) as T
-    ;(instance as any).wasRecentlyCreated = true
+    const instance = (modelClass as any).fromData(created) as T
+    instance.wasRecentlyCreated = true
 
     // 觸發 created 事件
-    const core = (Model as any).core
+    const core = modelClass.core
     if (core) {
       await core.hooks.doAction('model:created', { model: instance })
       await core.hooks.doAction('model:saved', {
@@ -456,7 +460,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
 
     const result = await dbService.upsert(table, dataToUpsert, options)
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    return (Model as any).fromData(result) as T
+    return (modelClass as any).fromData(result) as T
   }
 
   /**
@@ -473,7 +477,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
 
     const result = await dbService.firstOrCreate(table, where, data)
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    return (Model as any).fromData(result) as T
+    return (modelClass as any).fromData(result) as T
   }
 
   /**
@@ -490,7 +494,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
 
     const result = await dbService.firstOrNew(table, where, data)
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    return (Model as any).fromData(result) as T
+    return (modelClass as any).fromData(result) as T
   }
 
   /**
@@ -507,7 +511,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
 
     const result = await dbService.updateOrCreate(table, where, data)
     // biome-ignore lint/suspicious/noExplicitAny: generic model creation
-    return (Model as any).fromData(result) as T
+    return (modelClass as any).fromData(result) as T
   }
 
   /**
@@ -571,14 +575,14 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    */
   protected static fromData(this: ModelStatic, data: any): Model {
     const modelClass = Model as unknown as typeof Model
-    const instance = new (Model as any)()
+    const instance = new (modelClass as any)()
     // 應用型別轉換
     const casts = modelClass.casts || {}
     const processedData: any = {}
 
     for (const [key, value] of Object.entries(data)) {
       if (casts[key]) {
-        processedData[key] = Model.castAttribute(key, value, casts[key])
+        processedData[key] = modelClass.castAttribute(key, value, casts[key])
       } else {
         processedData[key] = value
       }
