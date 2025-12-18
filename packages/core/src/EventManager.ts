@@ -163,7 +163,7 @@ export class EventManager {
     await this.core.hooks.doAction('event:dispatched', { event, eventName })
 
     // 處理廣播
-    if (event.shouldBroadcast() && this.broadcastManager) {
+    if (event instanceof Event && event.shouldBroadcast() && this.broadcastManager) {
       const channel = event.getBroadcastChannel()
       if (channel) {
         const channelName = typeof channel === 'string' ? channel : channel.name
@@ -179,7 +179,7 @@ export class EventManager {
       }
     }
 
-    // 獲取監聽器
+    // 獲取監聽器（先檢查類別，再檢查字串名稱）
     const registrations = this.listeners.get(eventKey) || []
     const stringRegistrations = this.listeners.get(eventName) || []
     const allRegistrations = [...registrations, ...stringRegistrations]

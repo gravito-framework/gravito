@@ -37,16 +37,24 @@ describe('EventManager', () => {
 
     let handled = false
 
-    class TestListener implements Listener {
-      async handle(event: unknown): Promise<void> {
-        handled = true
-        expect((event as { message: string }).message).toBe('Hello')
+    class TestEvent extends Event {
+      constructor(public message: string) {
+        super()
       }
     }
 
-    events.listen('test-event', new TestListener())
+    class TestListener implements Listener<TestEvent> {
+      async handle(event: TestEvent): Promise<void> {
+        handled = true
+        expect(event.message).toBe('Hello')
+      }
+    }
 
-    await events.dispatch({ message: 'Hello' } as Event)
+    // 註冊字串事件名稱的監聽器
+    events.listen('TestEvent', new TestListener())
+
+    // 分發事件（會使用類別名稱 'TestEvent'）
+    await events.dispatch(new TestEvent('Hello'))
 
     expect(handled).toBe(true)
   })
