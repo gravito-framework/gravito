@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'bun:test'
+import type { Context, MiddlewareHandler } from 'hono'
 import { PlanetCore } from '../src/PlanetCore'
 import { Router } from '../src/Router'
 
 class TestController {
-  index(c: any) {
+  index(c: Context) {
     return c.text('index')
   }
 
-  api(c: any) {
+  api(c: Context) {
     return c.text('api')
   }
 }
@@ -54,7 +55,7 @@ describe('Router', () => {
     const router = new Router(core)
     let middlewareCalled = false
 
-    const testMiddleware = async (_c: any, next: any) => {
+    const testMiddleware: MiddlewareHandler = async (_c, next) => {
       middlewareCalled = true
       await next()
     }
@@ -94,15 +95,15 @@ describe('Router', () => {
     const router = new Router(core)
     const callOrder: string[] = []
 
-    const mw1 = async (_c: any, next: any) => {
+    const mw1: MiddlewareHandler = async (_c, next) => {
       callOrder.push('mw1')
       await next()
     }
-    const mw2 = async (_c: any, next: any) => {
+    const mw2: MiddlewareHandler = async (_c, next) => {
       callOrder.push('mw2')
       await next()
     }
-    const mw3 = async (_c: any, next: any) => {
+    const mw3: MiddlewareHandler = async (_c, next) => {
       callOrder.push('mw3')
       await next()
     }
@@ -129,8 +130,9 @@ describe('Router', () => {
       schema = { _type: 'mock' }
       source = 'json'
 
-      async validate(ctx: any) {
-        const body = await ctx.req.json().catch(() => ({}))
+      async validate(ctx: unknown) {
+        const c = ctx as Context
+        const body = (await c.req.json().catch(() => ({}))) as { name?: string }
         if (!body.name || body.name.length < 2) {
           return {
             success: false,
@@ -182,8 +184,9 @@ describe('Router', () => {
       schema = {}
       source = 'query'
 
-      async validate(ctx: any) {
-        const query = ctx.req.query()
+      async validate(ctx: unknown) {
+        const c = ctx as Context
+        const query = c.req.query()
         if (!query.q) {
           return {
             success: false,

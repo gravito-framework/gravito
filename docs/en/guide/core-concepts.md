@@ -176,6 +176,54 @@ export interface GravitoOrbit {
 }
 ```
 
+### D. Error Handling
+
+Gravito provides request-level error handling out of the box, and also supports process-level error handling for failures outside the request lifecycle (e.g., background jobs).
+
+#### Request-level (HTTP)
+
+`PlanetCore` registers global handlers for:
+
+- Uncaught errors in route handlers and middleware (`app.onError`)
+- Unknown routes (`app.notFound`)
+
+You can customize behavior via hooks:
+
+- `error:context` (Filter): adjust status/payload/logging/HTML templates
+- `error:render` (Filter): return a custom `Response` (e.g., HTML/JSON override)
+- `error:report` (Action): report errors to external systems (Sentry, logs, alerts)
+- `notFound:context`, `notFound:render`, `notFound:report` for 404s
+
+#### Process-level (Recommended)
+
+Errors thrown outside the request lifecycle will not go through `app.onError`. For example:
+
+- Startup/boot-time async code
+- Background jobs and queue workers
+- Unhandled promise rejections
+
+Register process-level handlers:
+
+```ts
+const core = await PlanetCore.boot(config)
+
+// Register `unhandledRejection` / `uncaughtException`
+const unregister = core.registerGlobalErrorHandlers({
+  // mode: 'log' | 'exit' | 'exitInProduction' (default)
+  mode: 'exitInProduction',
+})
+
+core.hooks.addAction('processError:report', async (ctx) => {
+  // ctx.kind: 'unhandledRejection' | 'uncaughtException'
+  // ctx.error: unknown
+})
+```
+
+You can customize process-level behavior via:
+
+- `processError:context` (Filter): set `logLevel`, `logMessage`, `exit`, `exitCode`, `gracePeriodMs`
+- `processError:report` (Action): reporting side-effects
+
 ---
 
 ## Installation

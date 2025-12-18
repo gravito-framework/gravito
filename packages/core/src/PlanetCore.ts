@@ -3,6 +3,10 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { ConfigManager } from './ConfigManager'
+import {
+  type RegisterGlobalErrorHandlersOptions,
+  registerGlobalErrorHandlers,
+} from './GlobalErrorHandlers'
 import { HookManager } from './HookManager'
 import { fail } from './helpers/response'
 import { ConsoleLogger, type Logger } from './Logger'
@@ -20,6 +24,7 @@ export interface CacheService {
 }
 
 export interface ViewService {
+  // biome-ignore lint/suspicious/noExplicitAny: view engines define their own data/options shape
   render(view: string, data?: Record<string, any>, options?: Record<string, any>): string
 }
 
@@ -116,6 +121,36 @@ export class PlanetCore {
             return status >= 500 ? 'INTERNAL_ERROR' : 'HTTP_ERROR'
         }
       }
+      const messageFromStatus = (status: number): string => {
+        switch (status) {
+          case 400:
+            return 'Bad Request'
+          case 401:
+            return 'Unauthorized'
+          case 403:
+            return 'Forbidden'
+          case 404:
+            return 'Not Found'
+          case 405:
+            return 'Method Not Allowed'
+          case 409:
+            return 'Conflict'
+          case 422:
+            return 'Unprocessable Content'
+          case 429:
+            return 'Too Many Requests'
+          case 500:
+            return 'Internal Server Error'
+          case 502:
+            return 'Bad Gateway'
+          case 503:
+            return 'Service Unavailable'
+          case 504:
+            return 'Gateway Timeout'
+          default:
+            return status >= 500 ? 'Internal Server Error' : 'Request Error'
+        }
+      }
 
       // Try rendering HTML if available and requested
       const view = c.get('view') as ViewService | undefined
@@ -124,18 +159,27 @@ export class PlanetCore {
         view && accept.includes('text/html') && !accept.includes('application/json')
       )
       let status: ContentfulStatusCode = 500
-      let message = 'Internal Server Error'
+      let message = messageFromStatus(500)
       let code = 'INTERNAL_ERROR'
       let details: unknown
 
       if (err instanceof HTTPException) {
         status = err.status as ContentfulStatusCode
-        message = err.message || message
+        const rawMessage = err.message?.trim()
+        message = rawMessage ? rawMessage : messageFromStatus(status)
         code = codeFromStatus(status)
       } else if (err instanceof Error) {
-        message = err.message || message
+        if (!isProduction) {
+          message = err.message || message
+        }
       } else if (typeof err === 'string') {
-        message = err
+        if (!isProduction) {
+          message = err
+        }
+      }
+
+      if (isProduction && status >= 500) {
+        message = messageFromStatus(status)
       }
 
       if (!isProduction && err instanceof Error) {
@@ -175,10 +219,16 @@ export class PlanetCore {
       const defaultLogLevel = handlerContext.status >= 500 ? 'error' : 'none'
       const logLevel = handlerContext.logLevel ?? defaultLogLevel
       if (logLevel !== 'none') {
+        const rawErrorMessage =
+          handlerContext.error instanceof Error
+            ? handlerContext.error.message
+            : typeof handlerContext.error === 'string'
+              ? handlerContext.error
+              : handlerContext.payload.error.message
         const msg =
           handlerContext.logMessage ??
           (logLevel === 'error'
-            ? `Application Error: ${handlerContext.payload.error.message}`
+            ? `Application Error: ${rawErrorMessage || handlerContext.payload.error.message}`
             : `HTTP ${handlerContext.status}: ${handlerContext.payload.error.message}`)
 
         if (logLevel === 'error') {
@@ -221,12 +271,13 @@ export class PlanetCore {
       const view = c.get('view') as ViewService | undefined
       const accept = c.req.header('Accept') || ''
       const wantsHtml = view && accept.includes('text/html') && !accept.includes('application/json')
+      const isProduction = process.env.NODE_ENV === 'production'
 
       let handlerContext: ErrorHandlerContext = {
         core: this,
         c,
         error: new HTTPException(404, { message: 'Route not found' }),
-        isProduction: process.env.NODE_ENV === 'production',
+        isProduction,
         accept,
         wantsHtml: Boolean(wantsHtml),
         status: 404,
@@ -235,7 +286,12 @@ export class PlanetCore {
           ? {
               html: {
                 templates: ['errors/404', 'errors/500'],
-                data: { status: 404, message: 'Route not found', code: 'NOT_FOUND', debug: false },
+                data: {
+                  status: 404,
+                  message: 'Route not found',
+                  code: 'NOT_FOUND',
+                  debug: !isProduction,
+                },
               },
             }
           : {}),
@@ -283,6 +339,12 @@ export class PlanetCore {
 
       return c.json(handlerContext.payload, handlerContext.status)
     })
+  }
+
+  registerGlobalErrorHandlers(
+    options: Omit<RegisterGlobalErrorHandlersOptions, 'core'> = {}
+  ): () => void {
+    return registerGlobalErrorHandlers({ ...options, core: this })
   }
 
   /**

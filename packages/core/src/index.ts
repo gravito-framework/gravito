@@ -12,8 +12,14 @@ export const VERSION = packageJson.version
 
 // Phase 2 Exports
 export { ConfigManager } from './ConfigManager'
+export {
+  type GlobalErrorHandlersMode,
+  type GlobalProcessErrorHandlerContext,
+  type GlobalProcessErrorKind,
+  type RegisterGlobalErrorHandlersOptions,
+  registerGlobalErrorHandlers,
+} from './GlobalErrorHandlers'
 export type { ActionCallback, FilterCallback } from './HookManager'
-
 export { HookManager } from './HookManager'
 export * from './helpers'
 export type { Logger } from './Logger'

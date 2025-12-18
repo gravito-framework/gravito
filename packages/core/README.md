@@ -86,6 +86,21 @@ core.mountOrbit('/api/blog', blogOrbit);
 export default core.liftoff(); // Automatically uses PORT from config/env
 ```
 
+### 5. Process-level Error Handling (Recommended)
+
+Request-level errors are handled by `PlanetCore` automatically, but background jobs and startup code can still fail outside the request lifecycle.
+
+```ts
+// Register `unhandledRejection` / `uncaughtException`
+const unregister = core.registerGlobalErrorHandlers()
+
+// Optional: report to Sentry / custom reporter
+core.hooks.addAction('processError:report', async (ctx) => {
+  // ctx.kind: 'unhandledRejection' | 'uncaughtException'
+  // ctx.error: unknown
+})
+```
+
 ## 📖 API Reference
 
 ### `PlanetCore`
@@ -93,6 +108,7 @@ export default core.liftoff(); // Automatically uses PORT from config/env
 - **`constructor(options?)`**: Initialize the core with optional Logger and Config.
 - **`mountOrbit(path: string, app: Hono)`**: Mount a Hono app to a sub-path.
 - **`liftoff(port?: number)`**: Returns the configuration object for `Bun.serve`.
+- **`registerGlobalErrorHandlers(options?)`**: Register process-level error handlers (returns an `unregister()` function).
 - **`app`**: Access the internal Hono instance.
 - **`hooks`**: Access the HookManager.
 - **`logger`**: Access the Logger instance.

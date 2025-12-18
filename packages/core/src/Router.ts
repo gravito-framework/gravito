@@ -21,14 +21,15 @@ export interface FormRequestLike {
 /**
  * Type for FormRequest class constructor
  */
-// biome-ignore lint/suspicious/noExplicitAny: FormRequest can have any schema
 export type FormRequestClass = new () => FormRequestLike
 
 /**
  * Check if a value is a FormRequest class
  */
 function isFormRequestClass(value: unknown): value is FormRequestClass {
-  if (typeof value !== 'function') return false
+  if (typeof value !== 'function') {
+    return false
+  }
   try {
     const instance = new (value as new () => unknown)()
     return (
@@ -49,7 +50,10 @@ function isFormRequestClass(value: unknown): value is FormRequestClass {
 function formRequestToMiddleware(RequestClass: FormRequestClass): MiddlewareHandler {
   return async (ctx, next) => {
     const request = new RequestClass()
-    const result = await request.validate!(ctx)
+    if (typeof request.validate !== 'function') {
+      throw new Error('Invalid FormRequest: validate() is missing.')
+    }
+    const result = await request.validate(ctx)
 
     if (!result.success) {
       // Determine status code based on error type
@@ -305,26 +309,41 @@ export class Router {
     if (options.domain) {
       const wrappedHandler: Handler = async (c, next) => {
         if (c.req.header('host') !== options.domain) {
-          return next()
+          await next()
+          return
         }
 
         let index = -1
-        // biome-ignore lint/suspicious/noExplicitAny: Pipeline dispatch
-        const dispatch = async (i: number): Promise<any> => {
-          if (i <= index) throw new Error('next() called multiple times')
+        const dispatch = async (i: number): Promise<Response | undefined> => {
+          if (i <= index) {
+            throw new Error('next() called multiple times')
+          }
           index = i
           const fn = handlers[i]
           if (!fn) {
-            return next()
+            await next()
+            return
           }
-          return fn(c, () => dispatch(i + 1))
+          return fn(c, async () => {
+            await dispatch(i + 1)
+          })
         }
         return dispatch(0)
       }
 
-      ;(this.core.app as any)[method](fullPath, wrappedHandler)
+      const app = this.core.app as unknown as Record<string, unknown>
+      const route = app[method]
+      if (typeof route !== 'function') {
+        throw new Error(`Unsupported HTTP method: ${method}`)
+      }
+      ;(route as (path: string, ...handlers: Handler[]) => unknown)(fullPath, wrappedHandler)
     } else {
-      ;(this.core.app as any)[method](fullPath, ...handlers)
+      const app = this.core.app as unknown as Record<string, unknown>
+      const route = app[method]
+      if (typeof route !== 'function') {
+        throw new Error(`Unsupported HTTP method: ${method}`)
+      }
+      ;(route as (path: string, ...handlers: Handler[]) => unknown)(fullPath, ...handlers)
     }
   }
 

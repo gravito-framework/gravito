@@ -29,6 +29,7 @@ export async function bootstrap(options: AppConfig = {}) {
 
   // 2. Boot
   const core = await PlanetCore.boot(config)
+  core.registerGlobalErrorHandlers()
 
   // 3. Static files
   core.app.use('/static/*', serveStatic({ root: './' }))

@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from 'bun:test'
-import { abort, fail, PlanetCore } from '../src/index'
+import { abort, type ErrorHandlerContext, fail, PlanetCore } from '../src/index'
 import { ConsoleLogger } from '../src/Logger'
 
 describe('Gravito Core Phase 2 Features', () => {
@@ -93,8 +93,9 @@ describe('Gravito Core Phase 2 Features', () => {
     it('should allow custom error:render override', async () => {
       const core = new PlanetCore()
 
-      core.hooks.addFilter('error:render', (_current: Response | null, ctx: any) => {
-        return ctx.c.json({ custom: true, code: ctx.payload.error.code }, 418)
+      core.hooks.addFilter('error:render', (_current: Response | null, ctx: unknown) => {
+        const errorCtx = ctx as ErrorHandlerContext
+        return errorCtx.c.json({ custom: true, code: errorCtx.payload.error.code }, 418)
       })
 
       core.app.get('/boom', () => {
@@ -114,7 +115,7 @@ describe('Gravito Core Phase 2 Features', () => {
     it('should allow error:context to modify status and payload', async () => {
       const core = new PlanetCore()
 
-      core.hooks.addFilter('error:context', (ctx: any) => {
+      core.hooks.addFilter('error:context', (ctx: ErrorHandlerContext) => {
         ctx.status = 400
         ctx.payload = fail('Bad Request', 'BAD_REQUEST')
         return ctx
@@ -144,6 +145,90 @@ describe('Gravito Core Phase 2 Features', () => {
 
       expect(res.status).toBe(404)
       expect(body.error.code).toBe('NOT_FOUND')
+    })
+
+    it('should use status-based message for HTTPException without message', async () => {
+      const core = new PlanetCore()
+
+      core.app.get('/missing', () => {
+        abort(404)
+      })
+
+      const { fetch } = core.liftoff(0)
+      const res = await fetch(new Request('http://localhost/missing'))
+      // biome-ignore lint/suspicious/noExplicitAny: test body
+      const body = (await res.json()) as any
+
+      expect(res.status).toBe(404)
+      expect(body.error.code).toBe('NOT_FOUND')
+      expect(body.error.message).toBe('Not Found')
+    })
+
+    it('should not leak internal error messages in production', async () => {
+      const previousNodeEnv = process.env.NODE_ENV
+      process.env.NODE_ENV = 'production'
+
+      try {
+        const core = new PlanetCore()
+
+        core.app.get('/error', () => {
+          throw new Error('Sensitive internal details')
+        })
+
+        const { fetch } = core.liftoff(0)
+        const res = await fetch(new Request('http://localhost/error'))
+        // biome-ignore lint/suspicious/noExplicitAny: test body
+        const body = (await res.json()) as any
+
+        expect(res.status).toBe(500)
+        expect(body.error.code).toBe('INTERNAL_ERROR')
+        expect(body.error.message).toBe('Internal Server Error')
+        expect(body.error.details).toBeUndefined()
+      } finally {
+        if (previousNodeEnv === undefined) {
+          delete process.env.NODE_ENV
+        } else {
+          process.env.NODE_ENV = previousNodeEnv
+        }
+      }
+    })
+
+    it('should handle process-level errors (unhandledRejection) via global handlers', async () => {
+      const reportSpy = jest.fn()
+      const customLogger = {
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      }
+
+      const core = new PlanetCore({ logger: customLogger })
+      core.hooks.addAction('processError:report', reportSpy)
+
+      const before = process.listeners('unhandledRejection').length
+      const unregister1 = core.registerGlobalErrorHandlers({ mode: 'log' })
+
+      const afterRegister = process.listeners('unhandledRejection').length
+      expect(afterRegister).toBe(before + 1)
+
+      const unregister2 = core.registerGlobalErrorHandlers({ mode: 'log' })
+      const afterSecondRegister = process.listeners('unhandledRejection').length
+      expect(afterSecondRegister).toBe(afterRegister)
+
+      process.emit('unhandledRejection', new Error('Unhandled'), Promise.resolve())
+      await new Promise((r) => setTimeout(r, 0))
+
+      expect(customLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('[unhandledRejection]'),
+        expect.any(Error)
+      )
+      expect(reportSpy).toHaveBeenCalled()
+
+      unregister2()
+      unregister1()
+
+      const afterUnregister = process.listeners('unhandledRejection').length
+      expect(afterUnregister).toBe(before)
     })
   })
 })

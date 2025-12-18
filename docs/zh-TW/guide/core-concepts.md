@@ -177,7 +177,55 @@ export interface GravitoOrbit {
 }
 ```
 
-### D. Middleware / Pipeline Pattern
+### D. 錯誤處理 (Error Handling)
+
+Gravito 預設提供請求層級（HTTP）的全域錯誤處理，並支援行程層級（process-level）的錯誤處理，用來捕捉不在請求生命週期內的失敗（例如背景任務）。
+
+#### 請求層級（HTTP）
+
+`PlanetCore` 會註冊全域處理器來處理：
+
+- 路由 handler / middleware 中未捕捉的錯誤（`app.onError`）
+- 未匹配路由的 404（`app.notFound`）
+
+你可以透過 hooks 客製化行為：
+
+- `error:context`（Filter）：調整 status / payload / 日誌 / HTML templates
+- `error:render`（Filter）：回傳自訂 `Response`（例如 HTML/JSON 覆寫）
+- `error:report`（Action）：將錯誤上報到外部系統（Sentry、日誌、告警）
+- `notFound:context`、`notFound:render`、`notFound:report`：處理 404
+
+#### 行程層級（建議）
+
+不在請求生命週期內的錯誤不會進入 `app.onError`。例如：
+
+- 啟動（boot）階段的非同步程式碼
+- 背景任務 / queue worker
+- 未處理的 Promise rejection
+
+建議在啟動後註冊行程層級錯誤處理：
+
+```ts
+const core = await PlanetCore.boot(config)
+
+// 註冊 `unhandledRejection` / `uncaughtException`
+const unregister = core.registerGlobalErrorHandlers({
+  // mode: 'log' | 'exit' | 'exitInProduction'（預設）
+  mode: 'exitInProduction',
+})
+
+core.hooks.addAction('processError:report', async (ctx) => {
+  // ctx.kind: 'unhandledRejection' | 'uncaughtException'
+  // ctx.error: unknown
+})
+```
+
+你也可以透過：
+
+- `processError:context`（Filter）：設定 `logLevel`、`logMessage`、`exit`、`exitCode`、`gracePeriodMs`
+- `processError:report`（Action）：上報 / 告警等副作用
+
+### E. Middleware / Pipeline Pattern
 
 Gravito 路由支援完整的 Middleware 串接模式，讓你能在請求處理前後執行驗證、日誌、快取等邏輯。
 
