@@ -242,7 +242,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     column: string,
     value: unknown
   ): Promise<T | null> {
-    return (Model as ModelStatic<T>).whereMany({ [column]: value })
+    return (Model as unknown as ModelStatic<T>).whereMany({ [column]: value })
   }
 
   /**
@@ -275,7 +275,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     this: ModelStatic<T>,
     options?: { limit?: number; orderBy?: unknown; orderDirection?: 'asc' | 'desc' }
   ): Promise<ModelCollection<T>> {
-    return (Model as ModelStatic<T>).findAll(undefined, options)
+    return (Model as unknown as ModelStatic<T>).findAll(undefined, options)
   }
 
   /**
@@ -409,9 +409,10 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     ;(instance as any).wasRecentlyCreated = true
 
     // 觸發 created 事件
-    if (modelClass.core) {
-      await modelClass.core.hooks.doAction('model:created', { model: instance })
-      await modelClass.core.hooks.doAction('model:saved', {
+    const core = (Model as any).core
+    if (core) {
+      await core.hooks.doAction('model:created', { model: instance })
+      await core.hooks.doAction('model:saved', {
         model: instance,
         wasRecentlyCreated: true,
       })

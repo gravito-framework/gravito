@@ -1,4 +1,5 @@
 import type { PlanetCore } from 'gravito-core'
+import { EventBus } from './EventBus'
 import type {
   DatabaseType,
   DeployOptions,
@@ -130,6 +131,8 @@ export class DBServiceImpl implements DBService {
   private currentTransaction: { id: string; startTime: number; queries: QueryLogInfo[] } | null =
     null
 
+  private eventBus: EventBus
+
   constructor(
     private db: DrizzleDB,
     private core: PlanetCore,
@@ -138,10 +141,29 @@ export class DBServiceImpl implements DBService {
     private queryLogLevel: 'debug' | 'info' | 'warn' | 'error',
     private enableHealthCheck: boolean,
     private healthCheckQuery: string
-  ) {}
+  ) {
+    this.eventBus = new EventBus()
+  }
 
   get raw(): DrizzleDB {
     return this.db
+  }
+
+  /**
+   * 獲取 EventBus 實例
+   */
+  get events(): EventBus {
+    return this.eventBus
+  }
+
+  /**
+   * 觸發事件（帶來源追蹤）
+   */
+  protected async emitEvent(event: string, payload: any): Promise<void> {
+    const source = EventBus.getEventSource()
+    this.eventBus.emit(event, payload, source)
+    // 同時觸發 core hooks（保持向後相容）
+    await this.core.hooks.doAction(event, payload)
   }
 
   /**
@@ -178,15 +200,15 @@ export class DBServiceImpl implements DBService {
       this.currentTransaction = null
       return result
     } catch (error) {
-      // 觸發交易錯誤 hook
-      await this.core.hooks.doAction('db:transaction:error', {
+      // 觸發交易錯誤 hook（帶來源追蹤）
+      await this.emitEvent('db:transaction:error', {
         transactionId,
         error,
         duration: Date.now() - startTime,
       })
 
-      // 觸發交易回滾 hook
-      await this.core.hooks.doAction('db:transaction:rollback', {
+      // 觸發交易回滾 hook（帶來源追蹤）
+      await this.emitEvent('db:transaction:rollback', {
         transactionId,
         duration: Date.now() - startTime,
       })
