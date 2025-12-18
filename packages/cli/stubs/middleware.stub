@@ -1,0 +1,6 @@
+import type { MiddlewareHandler } from 'hono'
+
+export const {{ name }}: MiddlewareHandler = async (c, next) => {
+  // TODO: Implement middleware logic
+  await next()
+}

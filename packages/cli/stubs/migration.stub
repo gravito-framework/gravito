@@ -1,0 +1,19 @@
+import { sql } from 'drizzle-orm'
+import type { DBService } from '@gravito/orbit-db'
+
+export async function up(db: DBService): Promise<void> {
+  // TODO: Implement migration
+  // Example:
+  // await db.raw.execute(sql`
+  //   CREATE TABLE {{ name }} (
+  //     id SERIAL PRIMARY KEY,
+  //     created_at TIMESTAMP DEFAULT NOW()
+  //   )
+  // `)
+}
+
+export async function down(db: DBService): Promise<void> {
+  // TODO: Implement rollback
+  // Example:
+  // await db.raw.execute(sql`DROP TABLE {{ name }}`)
+}

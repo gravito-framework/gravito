@@ -250,6 +250,63 @@ async function group<T extends Record<string, unknown>>(
   return results as T
 }
 
+import { MakeCommand } from './commands/MakeCommand'
+import { tinker } from './commands/tinker'
+import { routeList } from './commands/routeList'
+
+// ... (existing imports)
+
+// --- Make Commands ---
+const make = new MakeCommand()
+
+cli
+  .command('make:controller <name>', 'Create a new controller')
+  .action((name) => make.run('controller', name))
+
+cli
+  .command('make:model <name>', 'Create a new model')
+  .action((name) => make.run('model', name))
+
+cli
+  .command('make:middleware <name>', 'Create a new middleware')
+  .action((name) => make.run('middleware', name))
+
+// --- Tinker ---
+cli
+  .command('tinker', 'Interact with your application')
+  .action(() => tinker())
+
+// --- Route List ---
+cli
+  .command('route:list', 'List all registered routes')
+  .option('--entry <file>', 'Entry file (default: src/index.ts)', { default: 'src/index.ts' })
+  .action((options) => routeList(options))
+
+// --- Database Commands ---
+import { makeMigration, migrate, migrateStatus, dbSeed } from './commands/database'
+
+cli
+  .command('make:migration <name>', 'Create a new migration file')
+  .action((name) => makeMigration(name))
+
+cli
+  .command('make:seeder <name>', 'Create a new seeder file')
+  .action((name) => make.run('seeder', name))
+
+cli
+  .command('migrate', 'Run database migrations')
+  .option('--fresh', 'Drop all tables and re-run migrations')
+  .action((options) => migrate(options))
+
+cli
+  .command('migrate:status', 'Show migration status')
+  .action(() => migrateStatus())
+
+cli
+  .command('db:seed', 'Seed the database')
+  .option('--class <name>', 'Run a specific seeder class')
+  .action((options) => dbSeed(options))
+
 cli.help()
 cli.version('0.3.0-alpha.1')
 

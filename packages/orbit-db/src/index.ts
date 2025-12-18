@@ -21,7 +21,7 @@ export interface OrbitDBOptions<TSchema extends Record<string, unknown> = Record
  * Standard Database Orbit (Class Implementation)
  */
 export class OrbitDB implements GravitoOrbit {
-  constructor(private options?: OrbitDBOptions) {}
+  constructor(private options?: OrbitDBOptions) { }
 
   install(core: PlanetCore): void {
     // Try to resolve config from core if not provided in constructor
@@ -118,3 +118,6 @@ export type {
   SeedFunction,
   SeedResult,
 } from './types'
+
+export type { MigrationDriver, MigrationResult } from './MigrationDriver'
+export { DrizzleMigrationDriver } from './MigrationDriver'
