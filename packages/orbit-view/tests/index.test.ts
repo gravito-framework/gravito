@@ -14,7 +14,7 @@ describe('OrbitView', () => {
 })
 
 describe('TemplateEngine', () => {
-  const engine = new TemplateEngine('./tests/views')
+  const _engine = new TemplateEngine('./tests/views')
 
   // Mocks would be better, but we can test logic directly
   // Note: We'd need actual files to test readTemplate fully without mocking fs module

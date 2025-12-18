@@ -1,5 +1,6 @@
 import { resolve } from 'node:path'
 import type { GravitoOrbit, PlanetCore, ViewService } from 'gravito-core'
+import { createImageHelper } from './helpers/image'
 import { TemplateEngine } from './TemplateEngine'
 
 export class OrbitView implements GravitoOrbit {
@@ -17,17 +18,22 @@ export class OrbitView implements GravitoOrbit {
     // 2. Initialize Engine
     const engine = new TemplateEngine(viewsDir)
 
-    // 3. Inject into Context via Middleware
+    // 3. Register Built-in Helpers
+    engine.registerHelper('image', createImageHelper())
+
+    // 4. Inject into Context via Middleware
     core.app.use('*', async (c, next) => {
       c.set('view', engine)
       await next()
     })
 
-    // 4. Register Helpers (Optional)
-    // Maybe we can add a global hook to inject common data?
-    // For example, 'page:rendering' hook
+    // 5. Trigger hook for additional helper registration
+    core.hooks.doAction('view:helpers:register', engine)
   }
 }
 
 export type { ViewService }
 export { TemplateEngine }
+export { Image, type ImageProps } from './components/Image'
+export { createImageHelper } from './helpers/image'
+export { type ImageOptions, ImageService } from './ImageService'

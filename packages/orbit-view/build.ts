@@ -12,7 +12,14 @@ await Bun.build({
   sourcemap: 'external',
   minify: false,
   naming: '[dir]/[name].mjs',
-  external: ['gravito-core', 'hono'],
+  external: [
+    'gravito-core',
+    'hono',
+    'react',
+    'react-dom',
+    'react/jsx-dev-runtime',
+    'react/jsx-runtime',
+  ],
 })
 
 console.log('📦 Building CJS bundle...')
@@ -24,7 +31,14 @@ await Bun.build({
   sourcemap: 'external',
   minify: false,
   naming: '[dir]/[name].cjs',
-  external: ['gravito-core', 'hono'],
+  external: [
+    'gravito-core',
+    'hono',
+    'react',
+    'react-dom',
+    'react/jsx-dev-runtime',
+    'react/jsx-runtime',
+  ],
 })
 
 console.log('📝 Generating type declarations...')

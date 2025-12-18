@@ -4,7 +4,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "description": "Standard View Orbit for Gravito - Simple Template Engine",
+    "description": "Standard View Orbit for Gravito - Template Engine with Image Optimization",
     "module": "./dist/index.mjs",
     "main": "./dist/index.cjs",
     "type": "module",
@@ -31,18 +31,33 @@
         "orbit",
         "view",
         "template",
-        "html"
+        "html",
+        "image",
+        "optimization",
+        "core-web-vitals",
+        "react"
     ],
     "author": "Carl Lee <carllee0520@gmail.com>",
     "license": "MIT",
     "peerDependencies": {
         "gravito-core": "workspace:*",
-        "hono": "^4.0.0"
+        "hono": "^4.0.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+    },
+    "peerDependenciesMeta": {
+        "react": {
+            "optional": true
+        },
+        "react-dom": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "gravito-core": "workspace:*",
         "hono": "^4.0.0",
         "@types/bun": "latest",
+        "@types/react": "^18.0.0",
         "typescript": "latest"
     }
 }
