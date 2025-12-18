@@ -1,0 +1,61 @@
+import type { PageSeoConfig } from './interfaces'
+import { JsonLdBuilder } from './JsonLdBuilder'
+import { MetaTagBuilder } from './MetaTagBuilder'
+import { OpenGraphBuilder } from './OpenGraphBuilder'
+import { TwitterCardBuilder } from './TwitterCardBuilder'
+
+export class SeoMetadata {
+  private metaBuilder: MetaTagBuilder
+  private ogBuilder?: OpenGraphBuilder
+  private twitterBuilder?: TwitterCardBuilder
+  private jsonLdBuilder?: JsonLdBuilder
+
+  constructor(config: PageSeoConfig) {
+    this.metaBuilder = new MetaTagBuilder(config.meta)
+
+    if (config.og) {
+      // Auto-fill fallback from meta if missing
+      if (!config.og.title) {
+        config.og.title = config.meta.title
+      }
+      if (!config.og.description && config.meta.description) {
+        config.og.description = config.meta.description
+      }
+      this.ogBuilder = new OpenGraphBuilder(config.og)
+    }
+
+    if (config.twitter) {
+      if (!config.twitter.title) {
+        config.twitter.title = config.meta.title
+      }
+      if (!config.twitter.description && config.meta.description) {
+        config.twitter.description = config.meta.description
+      }
+      this.twitterBuilder = new TwitterCardBuilder(config.twitter)
+    }
+
+    if (config.jsonLd) {
+      this.jsonLdBuilder = new JsonLdBuilder(config.jsonLd)
+    }
+  }
+
+  toString(): string {
+    const parts: string[] = []
+
+    parts.push(this.metaBuilder.build())
+
+    if (this.ogBuilder) {
+      parts.push(this.ogBuilder.build())
+    }
+
+    if (this.twitterBuilder) {
+      parts.push(this.twitterBuilder.build())
+    }
+
+    if (this.jsonLdBuilder) {
+      parts.push(this.jsonLdBuilder.build())
+    }
+
+    return parts.join('\n')
+  }
+}

@@ -45,18 +45,31 @@ export class ConfigLoader {
       this.validate(config)
 
       return config as SeoConfig
-    } catch (e: any) {
-      throw new Error(`[GravitoSeo] Failed to load config from ${targetPath}: ${e.message}`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      throw new Error(`[GravitoSeo] Failed to load config from ${targetPath}: ${message}`)
     }
   }
 
-  private validate(config: any) {
-    if (!config.mode) throw new Error('Config missing "mode"')
-    if (!config.baseUrl) throw new Error('Config missing "baseUrl"')
-    if (!config.resolvers && config.mode !== 'incremental') {
-      // Incremental mode might not strictly need resolvers if it's purely API driven,
-      // but typically it does initial population. Let's warn or strict?
-      // Let's be strict for now.
+  private validate(config: unknown): void {
+    if (!config || typeof config !== 'object') {
+      throw new Error('Config must be an object')
+    }
+
+    const raw = config as Record<string, unknown>
+
+    const mode = raw.mode
+    if (mode !== 'dynamic' && mode !== 'cached' && mode !== 'incremental') {
+      throw new Error('Config missing "mode"')
+    }
+
+    const baseUrl = raw.baseUrl
+    if (typeof baseUrl !== 'string' || baseUrl.trim().length === 0) {
+      throw new Error('Config missing "baseUrl"')
+    }
+
+    const resolvers = raw.resolvers
+    if (!Array.isArray(resolvers)) {
       throw new Error('Config missing "resolvers"')
     }
   }

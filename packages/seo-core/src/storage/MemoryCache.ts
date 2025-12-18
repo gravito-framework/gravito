@@ -8,7 +8,7 @@ interface CacheItem {
 export class MemoryCache {
   private cache: CacheItem | null = null
   private locked = false
-  private queue: Array<(value: void) => void> = []
+  private queue: Array<() => void> = []
 
   constructor(private ttlSeconds: number) {}
 
@@ -16,7 +16,9 @@ export class MemoryCache {
    * Get cached entries if valid
    */
   get(): SitemapEntry[] | null {
-    if (!this.cache) return null
+    if (!this.cache) {
+      return null
+    }
     if (Date.now() > this.cache.expiresAt) {
       this.cache = null
       return null

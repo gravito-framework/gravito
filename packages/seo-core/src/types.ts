@@ -10,7 +10,19 @@ export interface SeoConfig {
   baseUrl: string
 
   /** Data resolvers */
-  resolvers: any[] // Changed to avoid circular dependency, cast to SeoResolver[] in usage
+  resolvers: unknown[] // Changed to avoid circular dependency, cast to SeoResolver[] in usage
+
+  /** Robots.txt configuration */
+  robots?: {
+    rules: {
+      userAgent: string
+      allow?: string[]
+      disallow?: string[]
+      crawlDelay?: number
+    }[]
+    sitemapUrls?: string[]
+    host?: string
+  }
 
   /** Cache settings (for 'cached' mode) */
   cache?: {

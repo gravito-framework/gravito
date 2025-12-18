@@ -1,6 +1,6 @@
 import type { SitemapEntry } from '../../interfaces'
 import { MemoryCache } from '../../storage/MemoryCache'
-import type { SeoConfig, SeoResolver } from '../../types'
+import type { SeoConfig } from '../../types'
 import type { SeoStrategy } from '../interfaces'
 import { DynamicStrategy } from './DynamicStrategy'
 
@@ -8,7 +8,7 @@ export class CachedStrategy implements SeoStrategy {
   private dynamicStrategy: DynamicStrategy
   private cache: MemoryCache
 
-  constructor(private config: SeoConfig) {
+  constructor(config: SeoConfig) {
     this.dynamicStrategy = new DynamicStrategy(config)
     const ttl = config.cache?.ttl || 3600 // Default 1 hour
     this.cache = new MemoryCache(ttl)
@@ -32,7 +32,9 @@ export class CachedStrategy implements SeoStrategy {
     // 3. Double Check Cache (in case we waited and someone else filled it)
     const cachedAfterWait = this.cache.get()
     if (cachedAfterWait) {
-      if (isOwner) this.cache.unlock()
+      if (isOwner) {
+        this.cache.unlock()
+      }
       return cachedAfterWait
     }
 
