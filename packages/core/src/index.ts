@@ -21,7 +21,12 @@ export {
 } from './GlobalErrorHandlers'
 export type { ActionCallback, FilterCallback } from './HookManager'
 export { HookManager } from './HookManager'
+// Events Exports
+export { EventManager } from './EventManager'
+export type { Event, ShouldBroadcast, Channel } from './Event'
+export type { Listener, ShouldQueue } from './Listener'
 export * from './helpers'
+export * from './exceptions'
 export type { Logger } from './Logger'
 export { ConsoleLogger } from './Logger'
 // Core Exports

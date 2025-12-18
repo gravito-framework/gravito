@@ -1,6 +1,8 @@
 import type { Context, MiddlewareHandler } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { z } from 'zod'
+import { AuthorizationException, ValidationException } from 'gravito-core'
+
 
 /**
  * Validation error detail for a single field
@@ -258,9 +260,14 @@ export abstract class FormRequest<T = unknown> {
   messages?(): Record<string, string>
 
   /**
+   * Custom redirect URL for HTML validation failures (optional).
+   */
+  redirect?(): string
+
+  /**
    * Get raw data from context based on source
    */
-  protected async getData(ctx: Context): Promise<unknown> {
+  public async getData(ctx: Context): Promise<unknown> {
     switch (this.source) {
       case 'json':
         return ctx.req.json().catch(() => ({}))
@@ -419,11 +426,35 @@ export function validateRequest<T>(RequestClass: new () => FormRequest<T>): Midd
     const result = await request.validate(ctx)
 
     if (!result.success) {
-      const status: ContentfulStatusCode =
-        result.error.error.code === 'AUTHORIZATION_ERROR'
-          ? (request.options.authErrorStatus ?? 403)
-          : (request.options.errorStatus ?? 422)
+      const errorData = result.error.error
 
+      if (errorData.code === 'AUTHORIZATION_ERROR') {
+        throw new AuthorizationException(errorData.message)
+      }
+
+      if (errorData.code === 'VALIDATION_ERROR') {
+        const exception = new ValidationException(
+          errorData.details.map((d) => ({
+            field: d.field,
+            message: d.message,
+            code: d.code,
+          })),
+          errorData.message
+        )
+
+        if (request.redirect) {
+          const url = request.redirect()
+          if (url) exception.withRedirect(url)
+        }
+
+        // Attach input data for flashing
+        exception.withInput(await request.getData(ctx))
+
+        throw exception
+      }
+
+      // Fallback for unknown errors (shouldn't happen with current implementation)
+      const status: ContentfulStatusCode = request.options.errorStatus ?? 422
       return ctx.json(result.error, status)
     }
 

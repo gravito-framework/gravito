@@ -7,9 +7,12 @@ import {
   type RegisterGlobalErrorHandlersOptions,
   registerGlobalErrorHandlers,
 } from './GlobalErrorHandlers'
+import { EventManager } from './EventManager'
 import { HookManager } from './HookManager'
 import { fail } from './helpers/response'
 import { ConsoleLogger, type Logger } from './Logger'
+import { GravitoException } from './exceptions/GravitoException'
+import { ValidationException } from './exceptions/ValidationException'
 
 /**
  * CacheService interface for orbit-injected cache
@@ -53,6 +56,8 @@ type Variables = {
   // Optional orbit-injected variables
   cache?: CacheService
   view?: ViewService
+  i18n?: unknown
+  session?: unknown
 }
 
 export interface GravitoOrbit {
@@ -73,6 +78,7 @@ export class PlanetCore {
   public logger: Logger
   public config: ConfigManager
   public hooks: HookManager
+  public events: EventManager
   public router: Router
   public services: Map<string, unknown> = new Map()
 
@@ -85,6 +91,7 @@ export class PlanetCore {
     this.logger = options.logger ?? new ConsoleLogger()
     this.config = new ConfigManager(options.config ?? {})
     this.hooks = new HookManager()
+    this.events = new EventManager(this)
     this.router = new Router(this)
 
     this.app = new Hono<{ Variables: Variables }>()
@@ -155,6 +162,8 @@ export class PlanetCore {
 
       // Try rendering HTML if available and requested
       const view = c.get('view') as ViewService | undefined
+      // biome-ignore lint/suspicious/noExplicitAny: i18n service duck typing
+      const i18n = c.get('i18n') as any
       const accept = c.req.header('Accept') || ''
       const wantsHtml = Boolean(
         view && accept.includes('text/html') && !accept.includes('application/json')
@@ -164,7 +173,44 @@ export class PlanetCore {
       let code = 'INTERNAL_ERROR'
       let details: unknown
 
-      if (err instanceof HTTPException) {
+      if (err instanceof GravitoException) {
+        status = err.status as ContentfulStatusCode
+        code = err.code
+
+        if (i18n && err.i18nKey) {
+          message = i18n.t(err.i18nKey, err.i18nParams)
+        } else {
+          message = err.message
+        }
+
+        if (err instanceof ValidationException) {
+          details = err.errors
+
+          // Handle HTML Redirect for Validation
+          if (wantsHtml) {
+            // biome-ignore lint/suspicious/noExplicitAny: session duck typing
+            const session = c.get('session') as any
+            if (session) {
+              // Transform details to ErrorBag format: Record<string, string[]>
+              const errorBag: Record<string, string[]> = {}
+              for (const e of err.errors) {
+                if (!errorBag[e.field]) errorBag[e.field] = []
+                errorBag[e.field].push(e.message)
+              }
+              session.flash('errors', errorBag)
+
+              if (err.input) {
+                session.flash('_old_input', err.input)
+              }
+
+              const redirectUrl = err.redirectTo ?? c.req.header('Referer') ?? '/'
+              return c.redirect(redirectUrl)
+            }
+          }
+        } else if (err instanceof Error && !isProduction && err.cause) {
+          details = { cause: err.cause }
+        }
+      } else if (err instanceof HTTPException) {
         status = err.status as ContentfulStatusCode
         const rawMessage = err.message?.trim()
         message = rawMessage ? rawMessage : messageFromStatus(status)
@@ -183,8 +229,8 @@ export class PlanetCore {
         message = messageFromStatus(status)
       }
 
-      if (!isProduction && err instanceof Error) {
-        details = { stack: err.stack }
+      if (!isProduction && err instanceof Error && !details) {
+        details = { stack: err.stack, ...(details as object) }
       }
 
       let handlerContext: ErrorHandlerContext = {
@@ -198,17 +244,18 @@ export class PlanetCore {
         payload: fail(message, code, details),
         ...(wantsHtml
           ? {
-              html: {
-                templates: status === 500 ? ['errors/500'] : [`errors/${status}`, 'errors/500'],
-                data: {
-                  status,
-                  message,
-                  code,
-                  error: !isProduction && err instanceof Error ? err.stack : undefined,
-                  debug: !isProduction,
-                },
+            html: {
+              templates: status === 500 ? ['errors/500'] : [`errors/${status}`, 'errors/500'],
+              data: {
+                status,
+                message,
+                code,
+                error: !isProduction && err instanceof Error ? err.stack : undefined,
+                debug: !isProduction,
+                details,
               },
-            }
+            },
+          }
           : {}),
       }
 
@@ -285,16 +332,16 @@ export class PlanetCore {
         payload: fail('Route not found', 'NOT_FOUND'),
         ...(wantsHtml
           ? {
-              html: {
-                templates: ['errors/404', 'errors/500'],
-                data: {
-                  status: 404,
-                  message: 'Route not found',
-                  code: 'NOT_FOUND',
-                  debug: !isProduction,
-                },
+            html: {
+              templates: ['errors/404', 'errors/500'],
+              data: {
+                status: 404,
+                message: 'Route not found',
+                code: 'NOT_FOUND',
+                debug: !isProduction,
               },
-            }
+            },
+          }
           : {}),
       }
 

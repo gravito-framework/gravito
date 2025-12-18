@@ -7,6 +7,7 @@ export { Arr } from './helpers/Arr'
 export * from './helpers/data'
 export * from './helpers/response'
 export { Str } from './helpers/Str'
+export * from './helpers/errors'
 
 export class DumpDieError extends Error {
   override name = 'DumpDieError'
