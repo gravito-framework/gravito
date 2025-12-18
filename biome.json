@@ -36,6 +36,7 @@
       "recommended": true,
       "complexity": {
         "noExtraBooleanCast": "error",
+        "noThisInStatic": "off",
         "noUselessCatch": "error",
         "noUselessConstructor": "error",
         "noUselessLabel": "error",

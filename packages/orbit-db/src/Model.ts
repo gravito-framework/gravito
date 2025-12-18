@@ -172,7 +172,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 設定 DBService（需要在應用啟動時設定）
    */
   static setDBService(dbService: DBService): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     modelClass.dbService = dbService
   }
 
@@ -180,7 +180,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 設定表實例
    */
   static setTable(table: Table, tableName: string): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     modelClass.table = table
     modelClass.tableName = tableName
   }
@@ -189,7 +189,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 獲取表實例
    */
   protected static getTable(): Table {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const table = modelClass.table
     if (!table) {
       throw new Error(
@@ -203,7 +203,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 獲取 DBService
    */
   protected static getDBService(): DBService {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.dbService
     if (!dbService) {
       throw new Error(
@@ -217,7 +217,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 獲取主鍵名稱
    */
   protected static getPrimaryKey(): string {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     return modelClass.primaryKey || 'id'
   }
 
@@ -225,7 +225,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 根據 ID 查詢（類似 Laravel 的 find）
    */
   static async find<T extends Model>(this: ModelStatic<T>, id: unknown): Promise<T | null> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     const data = await dbService.findById(table, id)
@@ -244,7 +244,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     column: string,
     value: unknown
   ): Promise<T | null> {
-    return (Model as unknown as ModelStatic<T>).whereMany({ [column]: value })
+    return (this as unknown as ModelStatic<T>).whereMany({ [column]: value })
   }
 
   /**
@@ -254,7 +254,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     this: ModelStatic<T>,
     where: WhereCondition
   ): Promise<T | null> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     const data = await dbService.findOne(table, where)
@@ -269,7 +269,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 開始查詢建構器（鏈式查詢）
    */
   static query<T extends Model>(this: ModelStatic<T>): QueryBuilder<T> {
-    return new QueryBuilder<T>(Model)
+    return new QueryBuilder<T>(this)
   }
 
   /**
@@ -279,7 +279,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     this: ModelStatic<T>,
     options?: { limit?: number; orderBy?: unknown; orderDirection?: 'asc' | 'desc' }
   ): Promise<ModelCollection<T>> {
-    return (Model as unknown as ModelStatic<T>).findAll(undefined, options)
+    return (this as unknown as ModelStatic<T>).findAll(undefined, options)
   }
 
   /**
@@ -290,7 +290,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     where?: WhereCondition,
     options?: { limit?: number; orderBy?: unknown; orderDirection?: 'asc' | 'desc' }
   ): Promise<ModelCollection<T>> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
 
@@ -320,7 +320,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     this: ModelStatic<T>,
     where?: WhereCondition
   ): Promise<number> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     return dbService.count(table, where)
@@ -333,7 +333,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     this: ModelStatic<T>,
     where: WhereCondition
   ): Promise<boolean> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     return dbService.exists(table, where)
@@ -356,7 +356,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
       hasPrev: boolean
     }
   }> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     const result = await dbService.paginate(table, options)
@@ -371,7 +371,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 創建記錄（類似 Laravel 的 create）
    */
   static async create<T extends Model>(this: ModelStatic<T>, data: any): Promise<T> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
 
@@ -433,7 +433,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     data: any,
     options?: UpsertOptions
   ): Promise<T> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
 
@@ -471,7 +471,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     where: WhereCondition,
     data: any
   ): Promise<T> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
 
@@ -488,7 +488,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     where: WhereCondition,
     data: any
   ): Promise<T> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
 
@@ -505,7 +505,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     where: WhereCondition,
     data: any
   ): Promise<T> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
 
@@ -522,7 +522,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     column: string,
     where?: WhereCondition
   ): Promise<number> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     return dbService.sum(table, column, where)
@@ -536,7 +536,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     column: string,
     where?: WhereCondition
   ): Promise<number> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     return dbService.avg(table, column, where)
@@ -550,7 +550,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     column: string,
     where?: WhereCondition
   ): Promise<unknown> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     return dbService.min(table, column, where)
@@ -564,7 +564,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     column: string,
     where?: WhereCondition
   ): Promise<unknown> {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const dbService = modelClass.getDBService()
     const table = modelClass.getTable()
     return dbService.max(table, column, where)
@@ -574,7 +574,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 從資料建立 Model 實例
    */
   protected static fromData(this: ModelStatic, data: any): Model {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const instance = new (modelClass as any)()
     // 應用型別轉換
     const casts = modelClass.casts || {}
@@ -1074,7 +1074,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     foreignKey?: string,
     localKey?: string
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
     const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
@@ -1095,7 +1095,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     foreignKey?: string,
     ownerKey?: string
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const relatedClass = related as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
     const relations = new Map(modelClass.relations || [])
@@ -1117,7 +1117,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     foreignKey?: string,
     localKey?: string
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
     const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
@@ -1139,7 +1139,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     foreignKey?: string,
     relatedKey?: string
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const relationName = modelClass.getRelationName(related)
     const relations = new Map(modelClass.relations || [])
     relations.set(relationName, {
@@ -1168,7 +1168,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     morphId?: string,
     morphMap?: Map<string, ModelStatic>
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const name = relationName || 'commentable' // 預設名稱
     const typeColumn = morphType || `${name}_type`
     const idColumn = morphId || `${name}_id`
@@ -1198,7 +1198,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     morphType?: string,
     morphId?: string
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const typeColumn = morphType || `${relationName}_type`
     const idColumn = morphId || `${relationName}_id`
     const relations = new Map(modelClass.relations || [])
@@ -1227,7 +1227,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
     morphType?: string,
     morphId?: string
   ): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     const typeColumn = morphType || `${relationName}_type`
     const idColumn = morphId || `${relationName}_id`
     const relations = new Map(modelClass.relations || [])
@@ -1256,7 +1256,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * 設定型別轉換
    */
   static setCasts(casts: CastsDefinition): void {
-    const modelClass = Model as unknown as typeof Model
+    const modelClass = this as unknown as typeof Model
     modelClass.casts = { ...(modelClass.casts || {}), ...casts }
   }
 

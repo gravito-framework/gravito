@@ -1,4 +1,4 @@
-import typography from '@tailwindcss/typography';
+import typography from '@tailwindcss/typography'
 
 export default {
   content: ['./src/views/**/*.html', './src/client/**/*.{js,ts,jsx,tsx}', '../../docs/**/*.md'],
@@ -19,4 +19,4 @@ export default {
     },
   },
   plugins: [typography],
-};
+}
