@@ -85,10 +85,8 @@ export class RedisDriver implements QueueDriver {
       const delayKey = `${key}:delayed`
       const score = Date.now() + job.delaySeconds * 1000
       // Store delayed job in ZSET
-      if (typeof (this.client as { zadd: unknown }).zadd === 'function') {
-        await (
-          this.client as { zadd: (key: string, score: number, member: string) => Promise<number> }
-        ).zadd(delayKey, score, payload)
+      if (typeof (this.client as any).zadd === 'function') {
+        await (this.client as any).zadd(delayKey, score, payload)
       } else {
         // Fallback: push directly (no delay support)
         await this.client.lpush(key, payload)
@@ -106,27 +104,15 @@ export class RedisDriver implements QueueDriver {
 
     // Check delayed queue first
     const delayKey = `${key}:delayed`
-    if (typeof (this.client as { zrange: unknown }).zrange === 'function') {
+    if (typeof (this.client as any).zrange === 'function') {
       const now = Date.now()
-      const delayedJobs = await (
-        this.client as {
-          zrange: (
-            key: string,
-            start: number,
-            stop: number,
-            withScores: boolean
-          ) => Promise<string[]>
-          zrem: (key: string, ...members: string[]) => Promise<number>
-        }
-      ).zrange(delayKey, 0, 0, true)
+      const delayedJobs = await (this.client as any).zrange(delayKey, 0, 0, true)
 
       if (delayedJobs && delayedJobs.length >= 2) {
         const score = parseFloat(delayedJobs[1]!)
         if (score <= now) {
           const payload = delayedJobs[0]!
-          await (
-            this.client as { zrem: (key: string, ...members: string[]) => Promise<number> }
-          ).zrem(delayKey, payload)
+          await (this.client as any).zrem(delayKey, payload)
           return this.parsePayload(payload)
         }
       }

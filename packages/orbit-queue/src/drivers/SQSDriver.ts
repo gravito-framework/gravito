@@ -180,7 +180,7 @@ export class SQSDriver implements QueueDriver {
         })
       )
 
-      return parseInt(response.Attributes?.ApproximateNumberOfMessages ?? '0', 10)
+      return parseInt((response as any).Attributes?.ApproximateNumberOfMessages ?? '0', 10)
     } catch (error) {
       console.error('[SQSDriver] Error getting queue size:', error)
       return 0

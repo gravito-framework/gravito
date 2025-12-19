@@ -138,7 +138,7 @@ export class DatabaseDriver implements QueueDriver {
       data: row.payload,
       createdAt,
       attempts: row.attempts,
-      delaySeconds,
+      ...(delaySeconds !== undefined ? { delaySeconds } : {}),
     }
   }
 
@@ -174,7 +174,7 @@ export class DatabaseDriver implements QueueDriver {
     }
 
     // Batch insert within a transaction
-    await this.dbService.transaction(async (tx) => {
+    await this.dbService.transaction(async (tx: any) => {
       for (const job of jobs) {
         const availableAt = job.delaySeconds
           ? new Date(Date.now() + job.delaySeconds * 1000)

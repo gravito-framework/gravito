@@ -146,3 +146,10 @@ export class OrbitQueue implements GravitoOrbit {
     return this.queueManager
   }
 }
+
+declare module 'hono' {
+  interface ContextVariableMap {
+    queue: QueueManager
+    db?: unknown
+  }
+}

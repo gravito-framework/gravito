@@ -54,8 +54,11 @@ export class ClassNameSerializer implements JobSerializer {
     // Extract properties (exclude methods)
     const properties: Record<string, unknown> = {}
     for (const key in job) {
-      if (Object.hasOwn(job, key) && typeof (job as Record<string, unknown>)[key] !== 'function') {
-        properties[key] = (job as Record<string, unknown>)[key]
+      if (
+        Object.hasOwn(job, key) &&
+        typeof (job as unknown as Record<string, unknown>)[key] !== 'function'
+      ) {
+        properties[key] = (job as unknown as Record<string, unknown>)[key]
       }
     }
 
@@ -68,9 +71,9 @@ export class ClassNameSerializer implements JobSerializer {
         properties,
       }),
       createdAt: Date.now(),
-      delaySeconds: job.delaySeconds,
+      ...(job.delaySeconds !== undefined ? { delaySeconds: job.delaySeconds } : {}),
       attempts: job.attempts ?? 0,
-      maxAttempts: job.maxAttempts,
+      ...(job.maxAttempts !== undefined ? { maxAttempts: job.maxAttempts } : {}),
     }
   }
 

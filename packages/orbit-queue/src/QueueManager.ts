@@ -81,8 +81,8 @@ export class QueueManager {
         this.drivers.set(
           name,
           new DatabaseDriver({
-            dbService: dbService as Parameters<typeof DatabaseDriver>[0]['dbService'],
-            table: (config as { table?: string }).table,
+            dbService: dbService as any,
+            table: (config as any).table,
           })
         )
         break
@@ -100,8 +100,8 @@ export class QueueManager {
         this.drivers.set(
           name,
           new RedisDriver({
-            client: client as Parameters<typeof RedisDriver>[0]['client'],
-            prefix: (config as { prefix?: string }).prefix,
+            client: client as any,
+            prefix: (config as any).prefix,
           })
         )
         break
@@ -119,8 +119,8 @@ export class QueueManager {
         this.drivers.set(
           name,
           new KafkaDriver({
-            client: client as Parameters<typeof KafkaDriver>[0]['client'],
-            consumerGroupId: (config as { consumerGroupId?: string }).consumerGroupId,
+            client: client as any,
+            consumerGroupId: (config as any).consumerGroupId,
           })
         )
         break
@@ -138,10 +138,10 @@ export class QueueManager {
         this.drivers.set(
           name,
           new SQSDriver({
-            client: client as Parameters<typeof SQSDriver>[0]['client'],
-            queueUrlPrefix: (config as { queueUrlPrefix?: string }).queueUrlPrefix,
-            visibilityTimeout: (config as { visibilityTimeout?: number }).visibilityTimeout,
-            waitTimeSeconds: (config as { waitTimeSeconds?: number }).waitTimeSeconds,
+            client: client as any,
+            queueUrlPrefix: (config as any).queueUrlPrefix,
+            visibilityTimeout: (config as any).visibilityTimeout,
+            waitTimeSeconds: (config as any).waitTimeSeconds,
           })
         )
         break
@@ -241,6 +241,9 @@ export class QueueManager {
     // Batch push
     for (const [key, serializedJobs] of groups.entries()) {
       const [connection, queue] = key.split(':')
+      if (!connection || !queue) {
+        continue
+      }
       const driver = this.getDriver(connection)
 
       if (driver.pushMany) {

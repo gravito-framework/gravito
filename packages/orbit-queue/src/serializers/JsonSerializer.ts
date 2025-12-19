@@ -32,9 +32,9 @@ export class JsonSerializer implements JobSerializer {
         properties: { ...job },
       }),
       createdAt: Date.now(),
-      delaySeconds: job.delaySeconds,
+      ...(job.delaySeconds !== undefined ? { delaySeconds: job.delaySeconds } : {}),
       attempts: job.attempts ?? 0,
-      maxAttempts: job.maxAttempts,
+      ...(job.maxAttempts !== undefined ? { maxAttempts: job.maxAttempts } : {}),
     }
   }
 
