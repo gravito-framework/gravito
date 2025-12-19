@@ -1,0 +1,24 @@
+{
+    "name": "create-gravito-app",
+    "version": "1.0.0-beta.3",
+    "description": "Scaffold a new Gravito project in seconds",
+    "bin": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "gravito",
+        "bun",
+        "framework",
+        "create-app"
+    ],
+    "author": "Carl Lee",
+    "license": "MIT",
+    "dependencies": {
+        "@gravito/cli": "^1.0.0-beta.4"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}
