@@ -29,7 +29,8 @@ export class ModelCollection<T> extends Array<T> {
   /**
    * Find the first item that matches a predicate.
    */
-  find(callback: (item: T, index: number) => boolean): T | undefined {
+  // @ts-expect-error
+  find(callback: (item: T, index: number, array: T[]) => boolean): T | undefined {
     return super.find(callback)
   }
 
@@ -50,14 +51,16 @@ export class ModelCollection<T> extends Array<T> {
   /**
    * Map.
    */
-  map<U>(callback: (item: T, index: number) => U): ModelCollection<U> {
+  // @ts-expect-error
+  map<U>(callback: (item: T, index: number, array: T[]) => U): ModelCollection<U> {
     return new ModelCollection(super.map(callback))
   }
 
   /**
    * Filter.
    */
-  filter(callback: (item: T, index: number) => boolean): ModelCollection<T> {
+  // @ts-expect-error
+  filter(callback: (item: T, index: number, array: T[]) => boolean): ModelCollection<T> {
     return new ModelCollection(super.filter(callback))
   }
 }
