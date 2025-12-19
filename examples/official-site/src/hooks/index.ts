@@ -1,4 +1,6 @@
+import type { InertiaService } from '@gravito/orbit-inertia'
 import type { PlanetCore } from 'gravito-core'
+import type { Context } from 'hono'
 
 /**
  * Register application hooks
@@ -19,4 +21,35 @@ export function registerHooks(core: PlanetCore): void {
       poweredBy: 'Gravito',
     },
   }))
+
+  // ─────────────────────────────────────────────
+  // Custom Error Pages (Cosmic Theme)
+  // ─────────────────────────────────────────────
+
+  // Handle 404 Not Found
+  core.hooks.addFilter('notFound:render', async (_initial, ...args) => {
+    const c = args[0] as Context
+    const inertia = c.get('inertia') as InertiaService
+    if (inertia) {
+      return inertia.render('Error', { status: 404 })
+    }
+  })
+
+  // Handle 500 Internal Server Error
+  core.hooks.addFilter('error:render', async (_initial, ...args) => {
+    const c = args[0] as Context
+    const inertia = c.get('inertia') as InertiaService
+    // Optionally extract status from error if available in context
+    const status = c.error ? (c.error as any).status || 500 : 500
+
+    if (inertia) {
+      return inertia.render('Error', {
+        status,
+        message:
+          process.env.NODE_ENV === 'production'
+            ? undefined
+            : c.error?.message || 'Unknown distortion in space-time',
+      })
+    }
+  })
 }

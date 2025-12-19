@@ -18,10 +18,12 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
-        "noEmit": true
+        "noEmit": true,
+        "allowImportingTsExtensions": true
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "build-static.ts"
     ],
     "exclude": [
         "node_modules"

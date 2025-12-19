@@ -22,7 +22,22 @@ export function registerRoutes(core: PlanetCore): void {
     root.get('/docs', [DocsController, 'index'])
     // Wildcard for docs pages
     root.get('/docs/*', [DocsController, 'show'])
+    root.get('/about', [HomeController, 'about'])
   })
+
+  // ─────────────────────────────────────────────
+  // Explicit English Routes (/en)
+  // ─────────────────────────────────────────────
+  router
+    .prefix('/en')
+    .middleware(setLocale('en'))
+    .group((en) => {
+      en.get('', [HomeController, 'index'])
+      en.get('/', [HomeController, 'index'])
+      en.get('/docs', [DocsController, 'index'])
+      en.get('/docs/*', [DocsController, 'show'])
+      en.get('/about', [HomeController, 'about'])
+    })
 
   // ─────────────────────────────────────────────
   // Chinese Routes
@@ -31,9 +46,11 @@ export function registerRoutes(core: PlanetCore): void {
     .prefix('/zh')
     .middleware(setLocale('zh'))
     .group((zh) => {
+      zh.get('', [HomeController, 'index'])
       zh.get('/', [HomeController, 'index'])
       zh.get('/docs', [DocsController, 'index'])
       zh.get('/docs/*', [DocsController, 'show'])
+      zh.get('/about', [HomeController, 'about'])
     })
 
   // Newsletter

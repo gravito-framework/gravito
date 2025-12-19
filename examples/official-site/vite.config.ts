@@ -18,6 +18,22 @@ export default defineConfig({
     },
   },
   server: {
-    origin: 'http://localhost:5173', // For HMR usage later if we get advanced
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      port: 5173,
+    },
+    // 代理後端 API 請求
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      '/static': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
   },
 })

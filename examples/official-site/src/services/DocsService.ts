@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import matter from 'gray-matter'
 import { marked } from 'marked'
+import { createHighlighter } from 'shiki'
 
 // Use import.meta.dirname to be safe relative to this file
 // /src/services/DocsService.ts
@@ -153,9 +154,91 @@ export class DocsService {
     try {
       const raw = await fs.readFile(filePath, 'utf-8')
       const { data, content } = matter(raw)
-      const html = (await marked.parse(content)) as string
+
+      // Initialize shiki highlighter
+      const highlighter = await createHighlighter({
+        themes: ['rose-pine-moon', 'github-dark'],
+        langs: ['ts', 'js', 'bash', 'json', 'yaml', 'markdown', 'typescript', 'html', 'css'],
+      })
+
+      // Configure marked with shiki
+      marked.setOptions({
+        async: true,
+        highlight: (code: string, lang: string) => {
+          return highlighter.codeToHtml(code, {
+            lang: lang || 'text',
+            theme: 'rose-pine-moon',
+          })
+        },
+      } as any)
+
+      // Helper to escape HTML
+      const escapeHtml = (str: string): string => {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;')
+      }
+
+      // Add custom renderer for code blocks and links
+      const renderer = new marked.Renderer()
+
+      // Transform Markdown links to SPA routes
+      renderer.link = ({
+        href,
+        text,
+        title,
+      }: {
+        href: string
+        text: string
+        title?: string | null
+      }) => {
+        let finalHref = href
+
+        // 1. Handle .md relative links (e.g., ./routing.md -> routing)
+        if (finalHref.endsWith('.md')) {
+          finalHref = finalHref.replace(/\.md$/, '')
+        }
+
+        // 2. Ensure relative paths work within the /docs/ context
+        if (finalHref.startsWith('./')) {
+          const currentDir = slug.includes('/') ? slug.split('/').slice(0, -1).join('/') : ''
+          const target = finalHref.replace(/^\.\//, '')
+          const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+          finalHref = currentDir ? `${prefix}/${currentDir}/${target}` : `${prefix}/${target}`
+        } else if (finalHref.startsWith('../')) {
+          // Basic parent dir support
+          const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+          finalHref = finalHref.replace(/^\.\.\//, `${prefix}/`)
+        } else if (
+          !finalHref.startsWith('http') &&
+          !finalHref.startsWith('/') &&
+          !finalHref.startsWith('#')
+        ) {
+          // Case: "routing" instead of "./routing"
+          const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+          finalHref = `${prefix}/${finalHref}`
+        }
+
+        return `<a href="${finalHref}"${title ? ` title="${title}"` : ''}>${text}</a>`
+      }
+
+      renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
+        // Use simple pre/code structure without external wrapper
+        const escapedText = escapeHtml(text)
+        const langClass = lang ? `language-${lang}` : ''
+
+        return `<pre class="${langClass}"><code class="${langClass}">${escapedText}</code></pre>`
+      }
+
+      const html = (await marked.parse(content, { renderer })) as string
       const leading = DocsService.extractAndRemoveLeadingH1(html)
       const processed = DocsService.addHeadingIdsAndToc(leading.html)
+
+      // Dispose highlighter to save memory if needed (though static might keep it)
+      // highlighter.dispose()
 
       return {
         title: (data.title as string) || leading.h1Text || 'Untitled',
@@ -178,32 +261,36 @@ export class DocsService {
     const trans =
       locale === 'zh'
         ? {
-            guide: '使用指南',
+            guide: '開發指南',
+            start: '快速上手',
+            structure: '專案結構',
             core: '核心概念',
-            deploy: '部署',
-            plugins: '外掛開發',
-            marketplace: '外掛市集標準',
+            routing: '路由系統',
+            inertia: 'Inertia 全端開發',
+            seo: 'SmartMap SEO 引擎',
+            i18n: '國際化 (I18n)',
+            image: '圖片優化 (Image)',
+            deploy: '部署指南',
             api: 'API 參考',
-            auth: 'Orbit Auth',
-            cache: 'Orbit Cache',
-            db: 'Orbit DB',
-            inertia: 'Orbit Inertia',
-            session: 'Orbit Session',
-            storage: 'Orbit Storage',
+            orbit_core: 'Core 核心',
+            orbit_inertia: 'Orbit Inertia',
+            orbit_seo: 'Orbit SEO',
           }
         : {
             guide: 'Guide',
+            start: 'Getting Started',
+            structure: 'Project Structure',
             core: 'Core Concepts',
+            routing: 'Routing System',
+            inertia: 'Inertia (Inertia-React)',
+            seo: 'SmartMap SEO Engine',
+            i18n: 'Internationalization',
+            image: 'Image Optimization',
             deploy: 'Deployment',
-            plugins: 'Plugin Development',
-            marketplace: 'Marketplace Standard',
             api: 'API Reference',
-            auth: 'Orbit Auth',
-            cache: 'Orbit Cache',
-            db: 'Orbit DB',
-            inertia: 'Orbit Inertia',
-            session: 'Orbit Session',
-            storage: 'Orbit Storage',
+            orbit_core: 'Core Kernel',
+            orbit_inertia: 'Orbit Inertia',
+            orbit_seo: 'Orbit SEO',
           }
 
     return [
@@ -211,24 +298,29 @@ export class DocsService {
         title: trans.guide,
         path: '#',
         children: [
+          { title: trans.start, path: `${prefix}/guide/getting-started` },
+          { title: trans.structure, path: `${prefix}/guide/project-structure` },
           { title: trans.core, path: `${prefix}/guide/core-concepts` },
+          { title: trans.routing, path: `${prefix}/guide/routing` },
+          { title: trans.inertia, path: `${prefix}/guide/inertia-react` },
+          { title: trans.seo, path: `${prefix}/guide/seo-engine` },
+          { title: trans.i18n, path: `${prefix}/guide/i18n-guide` },
+          { title: trans.image, path: `${prefix}/guide/image-optimization` },
           { title: trans.deploy, path: `${prefix}/guide/deployment` },
-          { title: trans.plugins, path: `${prefix}/guide/plugin-development` },
-          { title: trans.marketplace, path: `${prefix}/guide/marketplace-standard` },
         ],
       },
+      // Hided for v1.0 release
+      /*
       {
         title: trans.api,
         path: '#',
         children: [
-          { title: trans.session, path: `${prefix}/api/orbit-session` },
-          { title: trans.auth, path: `${prefix}/api/orbit-auth` },
-          { title: trans.cache, path: `${prefix}/api/orbit-cache` },
-          { title: trans.db, path: `${prefix}/api/orbit-db` },
-          { title: trans.inertia, path: `${prefix}/api/orbit-inertia` },
-          { title: trans.storage, path: `${prefix}/api/orbit-storage` },
+          { title: trans.orbit_core, path: `${prefix}/api/core` },
+          { title: trans.orbit_inertia, path: `${prefix}/api/orbit-inertia` },
+          { title: trans.orbit_seo, path: `${prefix}/api/orbit-seo` },
         ],
       },
+      */
     ]
   }
 }

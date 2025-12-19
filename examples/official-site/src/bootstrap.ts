@@ -5,6 +5,7 @@ import { defineConfig, PlanetCore } from 'gravito-core'
 import { serveStatic } from 'hono/bun'
 import { registerHooks } from './hooks'
 import { registerRoutes } from './routes'
+import { setupViteProxy } from './utils/vite'
 
 export interface AppConfig {
   port?: number
@@ -12,7 +13,7 @@ export interface AppConfig {
   version?: string
 }
 
-export async function bootstrap(options: AppConfig = {}) {
+export async function bootstrap(options: AppConfig = {}): Promise<PlanetCore> {
   const { port = 3000, name = 'Gravito App', version = '1.0.0' } = options
 
   // 1. Configure
@@ -35,12 +36,24 @@ export async function bootstrap(options: AppConfig = {}) {
   core.app.use('/static/*', serveStatic({ root: './' }))
   core.app.get('/favicon.ico', serveStatic({ path: './static/favicon.ico' }))
 
-  // 4. Hooks
+  // 3.1 SEO Middleware (Eat our own dog food)
+  const { gravitoSeo } = await import('@gravito/seo-adapter-hono')
+  const { seoConfig } = await import('./config/seo')
+
+  // Mounted at root to catch /sitemap.xml and /robots.txt
+  core.app.use('*', gravitoSeo(seoConfig))
+
+  // 4. Proxy Vite dev server in development mode
+  if (process.env.NODE_ENV !== 'production') {
+    setupViteProxy(core)
+  }
+
+  // 5. Hooks
   registerHooks(core)
 
-  // 5. Routes
+  // 6. Routes
   registerRoutes(core)
 
-  // 6. Liftoff!
-  return core.liftoff()
+  // 7. Ready (but not liftoff)
+  return core
 }

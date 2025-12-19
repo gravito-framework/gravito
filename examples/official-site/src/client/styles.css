@@ -1,13 +1,10 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
-@theme {
-    --color-brand-50: #f0f9ff;
-    --color-brand-100: #e0f2fe;
-    --color-brand-500: #0ea5e9;
-    --color-brand-600: #0284c7;
-    --color-brand-900: #0c4a6e;
-}
+/* 
+ * Tailwind v4 Setup: 
+ * We import the config file to load our custom colors (void, singularity, etc.)
+ */
 
 @layer base {
     body {
@@ -19,5 +16,177 @@
         body {
             @apply bg-gray-900 text-gray-100;
         }
+    }
+
+    /* 
+     * Code Block & Syntax Highlighting Fixes 
+     * 1. Prevent inline-code styles from leaking into pre blocks
+     * 2. Fix line-background fragments in shiki/highlighted blocks
+     */
+    .prose pre {
+        @apply !bg-transparent !p-0 !m-0 overflow-visible;
+    }
+
+    .prose pre code {
+        @apply !bg-transparent !p-0 !text-inherit !font-normal;
+        display: block;
+        min-width: 100%;
+        line-height: 1.7;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    /* Fix shiki-generated div height issue inside code blocks */
+    /* Use display: contents to make div not affect layout */
+    .prose pre code > div,
+    .prose pre code div {
+        display: contents !important;
+    }
+
+    /* Fallback: if contents doesn't work, use block with forced height */
+    .prose pre code > div:not(:empty),
+    .prose pre code div:not(:empty) {
+        min-height: 0 !important;
+        height: fit-content !important;
+        max-height: none !important;
+        line-height: 1.5 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        vertical-align: baseline !important;
+    }
+
+    /* Also fix for shiki-container wrapper */
+    .shiki-container pre code {
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    .shiki-container pre code > div,
+    .shiki-container pre code div {
+        display: contents !important;
+    }
+
+    .prose pre code::before,
+    .prose pre code::after {
+        content: none !important;
+    }
+
+    /* Styles specifically for INLINE code (not inside pre) */
+    .prose :not(pre)>code {
+        @apply text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded font-bold border border-cyan-500/10;
+        font-size: 0.9em;
+    }
+
+    .prose :not(pre)>code::before,
+    .prose :not(pre)>code::after {
+        content: none !important;
+    }
+
+    /* Prevents font-size leaks from prose into code blocks */
+    .prose pre * {
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        font-style: inherit !important;
+        font-family: inherit !important;
+        text-transform: none !important;
+    }
+
+    /* Target specific tags that the markdown parser/highlighter might use */
+    .prose pre h1,
+    .prose pre h2,
+    .prose pre h3,
+    .prose pre strong,
+    .prose pre em,
+    .prose pre b,
+    .prose pre i {
+        @apply !text-inherit !tracking-normal;
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        font-style: inherit !important;
+    }
+}
+
+@layer utilities {
+
+    /* 高科技六角形網格背景 */
+    .bg-hex-grid {
+        background-image:
+            linear-gradient(30deg, rgba(255, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 255, 255, 0.03) 87.5%, rgba(255, 255, 255, 0.03) 100%),
+            linear-gradient(150deg, rgba(255, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 255, 255, 0.03) 87.5%, rgba(255, 255, 255, 0.03) 100%),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(255, 255, 255, 0.03) 87.5%, rgba(255, 255, 255, 0.03) 100%);
+        background-size: 60px 104px, 60px 104px, 120px 60px;
+        background-position: 0 0, 0 0, 0 0;
+        /* 漸層遮罩，讓網格在上下邊緣淡出 */
+        mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+    }
+
+    /* 簡化版：點狀網格（如果六角形太複雜） */
+    .bg-hex-grid-simple {
+        background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 30px 30px;
+        /* 漸層遮罩，讓網格在上下邊緣淡出 */
+        mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+    }
+
+    /* 
+     * Documentation Table Overhaul 
+     * Improving readability for property/type/description tables
+     */
+    .docs-table-wrapper {
+        @apply my-12 overflow-hidden rounded-[2.5rem] border border-white/5 bg-panel/30 backdrop-blur-2xl transition-all duration-700 hover:border-white/10;
+        box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.6);
+    }
+
+    .docs-table {
+        @apply w-full border-collapse text-left table-fixed;
+    }
+
+    .docs-table th {
+        @apply border-b border-white/10 bg-white/[0.05] backdrop-blur-xl px-8 py-6 text-[10px] font-black uppercase tracking-[0.4em] text-white/40;
+    }
+
+    .docs-table td {
+        @apply border-b border-white/[0.04] px-8 py-8 text-[15px] leading-relaxed text-gray-400 align-top transition-all duration-500;
+    }
+
+    .docs-table tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .docs-table tr:hover td {
+        @apply bg-white/[0.02] text-gray-100;
+    }
+
+    /* Column 1: Property Name - Architectural separation */
+    .docs-table td:first-child,
+    .docs-table th:first-child {
+        @apply w-[25%] min-w-[180px] font-mono font-bold text-[15px] text-singularity/90 tracking-tight border-r border-white/[0.03];
+    }
+
+    /* Column 2: Type Definition - Technical styling */
+    .docs-table .type-cell {
+        @apply w-[30%] min-w-[220px] font-mono text-[13px] text-purple-400/90 break-words;
+    }
+
+    /* Column 3: Description */
+    .docs-table td:last-child {
+        @apply text-gray-400/80;
+    }
+
+    /* Custom Scrollbar */
+    .h-scrollbar::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .h-scrollbar::-webkit-scrollbar-track {
+        @apply bg-void/80 rounded-full;
+    }
+
+    .h-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-white/5 rounded-full hover:bg-singularity/30 transition-all border-2 border-transparent bg-clip-padding;
     }
 }

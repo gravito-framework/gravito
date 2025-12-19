@@ -11,8 +11,10 @@ import { bootstrap } from './bootstrap'
  * - views/      → HTML templates
  * - bootstrap.ts → Advanced configuration
  */
-export default await bootstrap({
+const core = await bootstrap({
   port: 3000,
   name: 'Gravito Demo',
   version: '1.0.0',
 })
+
+export default core.liftoff()

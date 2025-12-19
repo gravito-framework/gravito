@@ -1,93 +1,121 @@
-# 🌌 My Gravito App
+# 🌌 Gravito Official Website (v1.0.0-rc)
+> **Singularity** Project Code: `gravito-official-site`
 
-A web application built with [Gravito](https://github.com/CarlLee1983/gravito) - A micro-kernel framework for modular backend applications.
+Welcome to the official website repository for **Gravito** - The micro-kernel framework for the next generation of backend applications.
 
-## Quick Start
+This project serves as both the **production-ready official site** and the **flagship reference implementation** of the Gravito "Singularity" architecture.
+
+---
+
+## 🚀 Features & Architecture
+
+This website demonstrates the full power of the Gravito ecosystem, specifically the **Micro-Monolith** pattern:
+
+### 1. **Core Architecture** (`@gravito/core`)
+- **Micro-Kernel**: Built on `gravito-core`, leveraging the lifecycle hook system for modularity.
+- **Hono Adapter**: Utilizing `hono` as the high-performance HTTP layer running on **Bun**.
+- **Orbit System**:
+    - **@gravito/orbit-inertia**: Seamless server-side routing with modern SPA user experience.
+    - **@gravito/orbit-view**: Server-side template rendering for critical SEO paths.
+    - **@gravito/orbit-cache**: Optimized caching strategies.
+
+### 2. **Modern Frontend**
+- **React + Inertia.js**: A hybrid approach delivering the speed of an SPA with the simplicity of a backend-driven app.
+- **Vite**: Ultra-fast build tool handling HMR and static asset bundling.
+- **TailwindCSS**: Utilitarian design system providing the "Cosmic" dark mode aesthetic.
+- **Framer Motion**: High-performance animations (Hero effects, Feature cards).
+
+### 3. **Documentation System**
+- **Markdown-driven**: Documentation is sourced directly from the monorepo's `docs/` directory.
+- **Smart Link Resolution**: Automated transformation of relative `.md` links into clean, routable web URLs.
+- **Syntax Highlighting**: Powered by **Shiki** for beautiful code snippets.
+
+### 4. **SEO & Performance**
+- **Gravito SEO Engine**:
+    - Dynamic **Robots.txt** & **Sitemap.xml** generation via `@gravito/seo-adapter-hono`.
+    - No static files to maintain; routing rules are defined in code (`src/config/seo.ts`).
+- **Image Optimization**:
+    - Responsive WebP handling (`GravitoImage` component).
+    - Pure SVG Tech Stack icons for zero-latency loading.
+- **I18n**: Native support for English (`/en`) and Chinese (`/zh`) locales.
+
+---
+
+## 🛠️ Project Structure
 
 ```bash
-# Install dependencies
+examples/official-site/
+├── src/
+│   ├── bootstrap.ts       # App wiring (Core + Orbits + Middleware)
+│   ├── index.ts           # Entry point
+│   ├── config/            # SEO, App configurations
+│   ├── controllers/       # Backend logic (Home, Docs, API)
+│   ├── services/          # Business logic (Markdown processing)
+│   ├── routes/            # Route definitions
+│   └── client/            # Frontend (React)
+│       ├── pages/         # Inertia Page Components
+│       ├── components/    # Shared UI Components
+│       └── app.tsx        # Client entry point
+├── static/                # Public assets (Images, Manifest)
+├── vite.config.ts         # Build configuration
+└── build-static.ts        # SSG Build Script
+```
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+- **Bun** (v1.0+)
+- **Node.js** (v18+ for some build tools, though Bun handles most)
+
+### Development
+
+```bash
+# 1. Install dependencies (from root monorepo or project dir)
 bun install
 
-# Start development server (with hot reload)
+# 2. Start the development environment
+# This launches both the Backend Server (Port 3000) and Vite HMR Server
 bun run dev
+```
 
-# Start production server
+Visit `http://localhost:3000` to see the site.
+
+### Building for Production
+
+```bash
+# Build client-side assets
+bun run build:client
+
+# Start the production server
 bun run start
 ```
 
-## Project Structure
+### Static Site Generation (SSG)
 
-```
-src/
-├── index.ts           # App entry point (configure here)
-├── bootstrap.ts       # Framework initialization
-├── routes/
-│   ├── home.ts        # Page routes (GET /)
-│   └── api.ts         # API routes (GET /api/*)
-├── hooks/
-│   └── index.ts       # Application hooks
-├── utils/
-│   └── template.ts    # Template engine
-└── views/
-    ├── layout.html    # Base HTML layout
-    └── home.html      # Home page template
+This project also supports exporting to a static site (e.g. for GitHub Pages):
+
+```bash
+bun run build:static
 ```
 
-## Customization
+---
 
-### Add a New Route
+## 🎨 Asset Optimization
 
-Create a new file in `src/routes/`:
+### Tech Stack Icons
+Gravito uses **Pure SVG Paths** for technology logos (Bun, Hono, TS) to ensure pixel-perfect rendering at any scale without external network requests.
+See `TechIcon` component in `src/client/pages/Home.tsx`.
 
-```typescript
-// src/routes/users.ts
-import type { PlanetCore } from 'gravito-core'
+### Hero Images
+Images are automatically served in responsive WebP formats:
+- `hero-768w.webp`
+- `hero-1280w.webp`
+- `hero-2560w.webp`
 
-export function registerUserRoutes(core: PlanetCore): void {
-  core.app.get('/api/users', (c) => {
-    return c.json({ users: [] })
-  })
-}
-```
+---
 
-Then register it in `src/bootstrap.ts`:
+## 📄 License
 
-```typescript
-import { registerUserRoutes } from './routes/users'
-
-// In bootstrap function:
-registerUserRoutes(core)
-```
-
-### Add a Hook
-
-Edit `src/hooks/index.ts`:
-
-```typescript
-// Log all requests
-core.hooks.addAction('request:start', (args) => {
-  console.log(`Request: ${args.method} ${args.path}`)
-})
-```
-
-### Add a New Page
-
-1. Create `src/views/about.html`
-2. In your route, use `render('about', { data }, { title: 'About' })`
-
-## Available Orbits
-
-- `@gravito/orbit-cache` - In-memory caching
-- `@gravito/orbit-db` - Database integration
-- `@gravito/orbit-auth` - Authentication
-- `@gravito/orbit-storage` - File storage
-
-## Learn More
-
-- [Gravito Documentation](https://github.com/CarlLee1983/gravito#readme)
-- [Hono Documentation](https://hono.dev)
-- [Bun Documentation](https://bun.sh)
-
-## License
-
-MIT
+MIT © [Carl Lee](https://github.com/CarlLee1983)

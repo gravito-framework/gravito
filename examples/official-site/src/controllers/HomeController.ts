@@ -14,8 +14,20 @@ export class HomeController {
     const inertia = c.get('inertia') as InertiaService
     const locale = (c.get('locale') as string) || 'en'
     const t = getTranslation(locale)
+    const { generateSeoHtml } = await import('../utils/seo')
+    const seoHtml = generateSeoHtml(locale)
 
-    return inertia.render('Home', { t, locale })
+    return (inertia as any).render('Home', { t, locale }, { seoHtml })
+  }
+
+  about = async (c: Context) => {
+    const inertia = c.get('inertia') as InertiaService
+    const locale = (c.get('locale') as string) || 'en'
+    const t = getTranslation(locale)
+    const { generateSeoHtml } = await import('../utils/seo')
+    const seoHtml = generateSeoHtml(locale, `${t.nav.about} | ${t.site.title}`)
+
+    return (inertia as any).render('About', { t, locale }, { seoHtml })
   }
 
   subscribe = async (c: Context) => {
