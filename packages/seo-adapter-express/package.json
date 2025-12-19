@@ -1,14 +1,35 @@
 {
-    "name": "@gravito/seo-adapter-express",
-    "version": "1.0.0",
-    "description": "Express/Koa adapter for Gravito SmartMap Engine",
-    "main": "src/index.ts",
-    "types": "src/index.ts",
-    "dependencies": {
-        "@gravito/seo-core": "1.0.0"
-    },
-    "devDependencies": {
-        "@types/express": "^4.17.21",
-        "bun-types": "latest"
+  "name": "@gravito/seo-adapter-express",
+  "version": "1.0.0-alpha.1",
+  "description": "Express/Koa adapter for Gravito SmartMap Engine",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gravito/seo-core": "1.0.0-beta.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "bun-types": "latest",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

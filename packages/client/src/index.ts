@@ -70,7 +70,7 @@ import type { GravitoClientOptions } from './types'
 export function createGravitoClient<T extends Hono<any, any, any>>(
   baseUrl: string,
   options?: GravitoClientOptions
-) {
+): ReturnType<typeof hc<T>> {
   // We explicitly cast the return type to match what hc<T> provides.
   // The 'hc' function from Hono returns a proxy that provides typed access based on T.
   return hc<T>(baseUrl, options)

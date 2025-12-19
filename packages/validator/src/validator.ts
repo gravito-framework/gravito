@@ -1,6 +1,6 @@
 import { tbValidator } from '@hono/typebox-validator'
 import type { TSchema } from '@sinclair/typebox'
-import type { Context, MiddlewareHandler } from 'hono'
+import type { MiddlewareHandler } from 'hono'
 
 /**
  * Validation source type.
