@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import pc from 'picocolors'
@@ -7,9 +8,11 @@ export class MakeCommand {
 
   constructor() {
     // Resolve stubs relative to the compiled CLI executable or source
-    // When running from source (ts), it's ../../stubs
-    // When distributed, we might need adjustments, but for now assuming flattened structure or standard path
-    this.stubsPath = path.resolve(__dirname, '../../stubs')
+    // In dev: src/commands/MakeCommand.ts -> ../../stubs
+    // In prod: dist/index.js -> ../stubs
+    const devPath = path.resolve(__dirname, '../../stubs')
+    const prodPath = path.resolve(__dirname, '../stubs')
+    this.stubsPath = existsSync(prodPath) ? prodPath : devPath
   }
 
   /**

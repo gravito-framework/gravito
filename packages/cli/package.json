@@ -10,6 +10,12 @@
     "build": "bun build ./src/index.ts --outdir ./dist --target bun --external giget --external cac --external @clack/prompts --external picocolors",
     "dev": "bun run ./src/index.ts"
   },
+  "files": [
+    "dist",
+    "bin",
+    "stubs",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
