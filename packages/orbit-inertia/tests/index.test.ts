@@ -75,7 +75,7 @@ describe('InertiaService', () => {
     const m = html.match(/data-page='([^']*)'/)
     expect(m).not.toBeNull()
 
-    const attr = m![1]
+    const attr = m?.[1]
     const decoded = attr.replace(/&(amp|lt|gt|quot|#039);/g, (_full, ent) => {
       switch (ent) {
         case 'amp':

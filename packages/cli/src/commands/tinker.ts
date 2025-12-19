@@ -2,22 +2,22 @@ import path from 'node:path'
 import { spawn } from 'bun'
 
 export async function tinker() {
-    const bootstrapPath = path.resolve(__dirname, '../../stubs/tinker-bootstrap.ts')
+  const bootstrapPath = path.resolve(__dirname, '../../stubs/tinker-bootstrap.ts')
 
-    // Need to make sure we're running in a way that can import the project's code.
-    // Bun repl with --preload is the key.
+  // Need to make sure we're running in a way that can import the project's code.
+  // Bun repl with --preload is the key.
 
-    console.log('Loading Tinker environment...')
+  console.log('Loading Tinker environment...')
 
-    const proc = spawn(['bun', 'repl', '--preload', bootstrapPath], {
-        stdin: 'inherit',
-        stdout: 'inherit',
-        stderr: 'inherit',
-        env: {
-            ...process.env,
-            // Force color if needed, though inherit usually works
-        }
-    })
+  const proc = spawn(['bun', 'repl', '--preload', bootstrapPath], {
+    stdin: 'inherit',
+    stdout: 'inherit',
+    stderr: 'inherit',
+    env: {
+      ...process.env,
+      // Force color if needed, though inherit usually works
+    },
+  })
 
-    await proc.exited
+  await proc.exited
 }

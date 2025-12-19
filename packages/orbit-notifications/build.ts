@@ -8,6 +8,10 @@ await build({
   splitting: false,
   sourcemap: 'external',
   minify: false,
-  external: ['gravito-core', '@gravito/orbit-queue', '@gravito/orbit-mail', '@gravito/orbit-broadcasting'],
+  external: [
+    'gravito-core',
+    '@gravito/orbit-queue',
+    '@gravito/orbit-mail',
+    '@gravito/orbit-broadcasting',
+  ],
 })
-

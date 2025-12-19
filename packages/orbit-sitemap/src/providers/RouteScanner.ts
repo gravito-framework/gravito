@@ -40,10 +40,14 @@ export class RouteScanner implements SitemapProvider {
 
     for (const route of routes) {
       // Skip non-GET routes
-      if (route.method !== 'GET') continue
+      if (route.method !== 'GET') {
+        continue
+      }
 
       // Skip routes with parameters for now (unless explicitly handled later)
-      if (route.path.includes(':') || route.path.includes('*')) continue
+      if (route.path.includes(':') || route.path.includes('*')) {
+        continue
+      }
 
       if (this.shouldInclude(route.path)) {
         entries.push({
@@ -78,7 +82,9 @@ export class RouteScanner implements SitemapProvider {
     // Exclude check first
     if (this.options.exclude) {
       for (const pattern of this.options.exclude) {
-        if (matchGlob(path, pattern)) return false
+        if (matchGlob(path, pattern)) {
+          return false
+        }
       }
     }
 

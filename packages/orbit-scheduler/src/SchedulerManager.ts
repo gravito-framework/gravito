@@ -1,8 +1,8 @@
 import type { HookManager, Logger } from 'gravito-core'
 import { CronParser } from './CronParser'
 import type { LockManager } from './locks'
-import { type ScheduledTask, TaskSchedule } from './TaskSchedule'
 import { Process } from './process'
+import { type ScheduledTask, TaskSchedule } from './TaskSchedule'
 
 /**
  * Core Scheduler Manager responsible for managing and executing tasks.
@@ -15,7 +15,7 @@ export class SchedulerManager {
     private logger?: Logger,
     private hooks?: HookManager,
     private currentNodeRole?: string
-  ) { }
+  ) {}
 
   /**
    * Define a new scheduled task.
@@ -167,7 +167,7 @@ export class SchedulerManager {
       for (const cb of task.onSuccessCallbacks) {
         try {
           await cb({ name: task.name })
-        } catch { }
+        } catch {}
       }
     } catch (err: any) {
       const duration = Date.now() - startTime
@@ -182,7 +182,7 @@ export class SchedulerManager {
       for (const cb of task.onFailureCallbacks) {
         try {
           await cb(err)
-        } catch { }
+        } catch {}
       }
       // We don't rethrow here to ensure cleanup happens in runTask
     }

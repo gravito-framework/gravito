@@ -47,13 +47,19 @@ export class EmailVerificationService {
 
   verifyToken(token: string): EmailVerificationPayload | null {
     const [encoded, sig] = token.split('.', 2)
-    if (!encoded || !sig) return null
+    if (!encoded || !sig) {
+      return null
+    }
 
     const expected = this.sign(encoded)
-    if (!this.timingSafeEqual(expected, sig)) return null
+    if (!this.timingSafeEqual(expected, sig)) {
+      return null
+    }
 
     const payload = JSON.parse(base64UrlDecode(encoded)) as EmailVerificationPayload
-    if (!payload.expiresAt || Date.now() > payload.expiresAt) return null
+    if (!payload.expiresAt || Date.now() > payload.expiresAt) {
+      return null
+    }
 
     return payload
   }
@@ -65,7 +71,9 @@ export class EmailVerificationService {
   private timingSafeEqual(a: string, b: string): boolean {
     const bufA = Buffer.from(a)
     const bufB = Buffer.from(b)
-    if (bufA.length !== bufB.length) return false
+    if (bufA.length !== bufB.length) {
+      return false
+    }
     return crypto.timingSafeEqual(bufA, bufB)
   }
 }

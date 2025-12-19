@@ -67,7 +67,9 @@ export class SitemapStream {
     let loc = entry.url
     if (!loc.startsWith('http')) {
       // Ensure url starts with / if not absolute
-      if (!loc.startsWith('/')) loc = '/' + loc
+      if (!loc.startsWith('/')) {
+        loc = `/${loc}`
+      }
       loc = baseUrl + loc
     }
 
@@ -92,7 +94,9 @@ export class SitemapStream {
       for (const alt of entry.alternates) {
         let altLoc = alt.url
         if (!altLoc.startsWith('http')) {
-          if (!altLoc.startsWith('/')) altLoc = '/' + altLoc
+          if (!altLoc.startsWith('/')) {
+            altLoc = `/${altLoc}`
+          }
           altLoc = baseUrl + altLoc
         }
         item += `${subIndent}<xhtml:link rel="alternate" hreflang="${alt.lang}" href="${this.escape(altLoc)}"/>${nl}`
@@ -104,19 +108,25 @@ export class SitemapStream {
       for (const img of entry.images) {
         let loc = img.loc
         if (!loc.startsWith('http')) {
-          if (!loc.startsWith('/')) loc = '/' + loc
+          if (!loc.startsWith('/')) {
+            loc = `/${loc}`
+          }
           loc = baseUrl + loc
         }
         item += `${subIndent}<image:image>${nl}`
         item += `${subIndent}  <image:loc>${this.escape(loc)}</image:loc>${nl}`
-        if (img.title)
+        if (img.title) {
           item += `${subIndent}  <image:title>${this.escape(img.title)}</image:title>${nl}`
-        if (img.caption)
+        }
+        if (img.caption) {
           item += `${subIndent}  <image:caption>${this.escape(img.caption)}</image:caption>${nl}`
-        if (img.geo_location)
+        }
+        if (img.geo_location) {
           item += `${subIndent}  <image:geo_location>${this.escape(img.geo_location)}</image:geo_location>${nl}`
-        if (img.license)
+        }
+        if (img.license) {
           item += `${subIndent}  <image:license>${this.escape(img.license)}</image:license>${nl}`
+        }
         item += `${subIndent}</image:image>${nl}`
       }
     }
@@ -128,14 +138,18 @@ export class SitemapStream {
         item += `${subIndent}  <video:thumbnail_loc>${this.escape(video.thumbnail_loc)}</video:thumbnail_loc>${nl}`
         item += `${subIndent}  <video:title>${this.escape(video.title)}</video:title>${nl}`
         item += `${subIndent}  <video:description>${this.escape(video.description)}</video:description>${nl}`
-        if (video.content_loc)
+        if (video.content_loc) {
           item += `${subIndent}  <video:content_loc>${this.escape(video.content_loc)}</video:content_loc>${nl}`
-        if (video.player_loc)
+        }
+        if (video.player_loc) {
           item += `${subIndent}  <video:player_loc>${this.escape(video.player_loc)}</video:player_loc>${nl}`
-        if (video.duration)
+        }
+        if (video.duration) {
           item += `${subIndent}  <video:duration>${video.duration}</video:duration>${nl}`
-        if (video.view_count)
+        }
+        if (video.view_count) {
           item += `${subIndent}  <video:view_count>${video.view_count}</video:view_count>${nl}`
+        }
         if (video.publication_date) {
           const pubDate =
             video.publication_date instanceof Date
@@ -143,8 +157,9 @@ export class SitemapStream {
               : new Date(video.publication_date)
           item += `${subIndent}  <video:publication_date>${pubDate.toISOString()}</video:publication_date>${nl}`
         }
-        if (video.family_friendly)
+        if (video.family_friendly) {
           item += `${subIndent}  <video:family_friendly>${video.family_friendly}</video:family_friendly>${nl}`
+        }
         if (video.tag) {
           for (const tag of video.tag) {
             item += `${subIndent}  <video:tag>${this.escape(tag)}</video:tag>${nl}`
@@ -169,10 +184,12 @@ export class SitemapStream {
       item += `${subIndent}  <news:publication_date>${pubDate.toISOString()}</news:publication_date>${nl}`
       item += `${subIndent}  <news:title>${this.escape(entry.news.title)}</news:title>${nl}`
 
-      if (entry.news.genres)
+      if (entry.news.genres) {
         item += `${subIndent}  <news:genres>${this.escape(entry.news.genres)}</news:genres>${nl}`
-      if (entry.news.keywords)
+      }
+      if (entry.news.keywords) {
         item += `${subIndent}  <news:keywords>${entry.news.keywords.map((k) => this.escape(k)).join(', ')}</news:keywords>${nl}`
+      }
       item += `${subIndent}</news:news>${nl}`
     }
 

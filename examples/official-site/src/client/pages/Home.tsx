@@ -14,7 +14,6 @@ import {
   Box,
   Check,
   Code,
-  Copy,
   Github,
   Image as ImageIcon,
   Languages,
@@ -25,7 +24,7 @@ import {
   Terminal,
   Zap,
 } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { GravitoImage as Image } from '../components/GravitoImage'
 import Layout from '../components/Layout'
 
@@ -34,7 +33,7 @@ const AdvancedHero = ({ t }: { t: any }) => {
   const { scrollY } = useScroll()
   const y1 = useTransform(scrollY, [0, 500], [0, 200])
   const opacity = useTransform(scrollY, [0, 300], [1, 0])
-  const blur = useTransform(scrollY, [0, 300], [0, 10])
+  const _blur = useTransform(scrollY, [0, 300], [0, 10])
 
   // 生成靜態的星星數據，避免 re-render
   const stars = React.useMemo(() => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { ConsoleLogger, PlanetCore } from 'gravito-core'
-import { BroadcastManager } from '../src'
 import type { BroadcastDriver } from '../src'
+import { BroadcastManager } from '../src'
 
 describe('BroadcastManager', () => {
   it('should broadcast events through driver', async () => {
@@ -42,8 +42,8 @@ describe('BroadcastManager', () => {
     const manager = new BroadcastManager(core)
 
     manager.setDriver({
-      broadcast: async () => { },
-      authorizeChannel: async () => ({ auth: 'mock-auth' })
+      broadcast: async () => {},
+      authorizeChannel: async () => ({ auth: 'mock-auth' }),
     })
 
     manager.setAuthCallback(async (channel, _socketId, userId) => {
@@ -57,4 +57,3 @@ describe('BroadcastManager', () => {
     expect(unauthorized).toBeNull()
   })
 })
-

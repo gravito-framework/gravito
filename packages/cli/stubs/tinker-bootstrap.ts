@@ -1,10 +1,10 @@
-// @ts-ignore
-const entry = await import(process.cwd() + '/src/index.ts')
+// @ts-expect-error
+const entry = await import(`${process.cwd()}/src/index.ts`)
 const core = entry.default?.core || entry.core
 
 if (!core) {
-    console.error('Could not find core instance in src/index.ts')
-    process.exit(1)
+  console.error('Could not find core instance in src/index.ts')
+  process.exit(1)
 }
 
 // Ensure bootstrapped
@@ -15,11 +15,11 @@ if (!core) {
 
 // Expose to global
 Object.assign(globalThis, {
-    core,
-    container: core.container,
-    // Helper to resolve things quickly
-    resolve: (key: string) => core.container.make(key),
-    make: (key: string) => core.container.make(key),
+  core,
+  container: core.container,
+  // Helper to resolve things quickly
+  resolve: (key: string) => core.container.make(key),
+  make: (key: string) => core.container.make(key),
 })
 
 console.log('🌌 Gravito Tinker ready.')

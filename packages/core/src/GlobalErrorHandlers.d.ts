@@ -1,26 +1,26 @@
-import type { Logger } from './Logger';
-import type { PlanetCore } from './PlanetCore';
-export type GlobalProcessErrorKind = 'unhandledRejection' | 'uncaughtException';
+import type { Logger } from './Logger'
+import type { PlanetCore } from './PlanetCore'
+export type GlobalProcessErrorKind = 'unhandledRejection' | 'uncaughtException'
 export type GlobalProcessErrorHandlerContext = {
-    core?: PlanetCore;
-    kind: GlobalProcessErrorKind;
-    error: unknown;
-    isProduction: boolean;
-    timestamp: number;
-    logLevel?: 'error' | 'warn' | 'info' | 'none';
-    logMessage?: string;
-    exit?: boolean;
-    exitCode?: number;
-    gracePeriodMs?: number;
-};
-export type GlobalErrorHandlersMode = 'log' | 'exit' | 'exitInProduction';
+  core?: PlanetCore
+  kind: GlobalProcessErrorKind
+  error: unknown
+  isProduction: boolean
+  timestamp: number
+  logLevel?: 'error' | 'warn' | 'info' | 'none'
+  logMessage?: string
+  exit?: boolean
+  exitCode?: number
+  gracePeriodMs?: number
+}
+export type GlobalErrorHandlersMode = 'log' | 'exit' | 'exitInProduction'
 export type RegisterGlobalErrorHandlersOptions = {
-    core?: PlanetCore;
-    logger?: Logger;
-    mode?: GlobalErrorHandlersMode;
-    exitCode?: number;
-    gracePeriodMs?: number;
-};
+  core?: PlanetCore
+  logger?: Logger
+  mode?: GlobalErrorHandlersMode
+  exitCode?: number
+  gracePeriodMs?: number
+}
 /**
  * Register process-level error handlers (`unhandledRejection` / `uncaughtException`).
  *
@@ -28,5 +28,7 @@ export type RegisterGlobalErrorHandlersOptions = {
  * - `mode: "exit"`: report then `process.exit(exitCode)`
  * - `mode: "exitInProduction"`: exit only when `NODE_ENV=production` (default)
  */
-export declare function registerGlobalErrorHandlers(options?: RegisterGlobalErrorHandlersOptions): () => void;
+export declare function registerGlobalErrorHandlers(
+  options?: RegisterGlobalErrorHandlersOptions
+): () => void
 //# sourceMappingURL=GlobalErrorHandlers.d.ts.map

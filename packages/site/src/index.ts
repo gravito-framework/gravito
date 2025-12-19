@@ -1,5 +1,3 @@
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 import { ContentOrbit } from '@gravito/orbit-content'
 import { I18nOrbit, localeMiddleware } from '@gravito/orbit-i18n'
 import { type GravitoConfig, PlanetCore } from 'gravito-core'

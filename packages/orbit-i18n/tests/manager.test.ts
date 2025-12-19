@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
-import { I18nManager, localeMiddleware } from '../src/index'
+import { I18nManager } from '../src/index'
 
 describe('Orbit I18n Manager', () => {
-  const config = {
+  const _config = {
     defaultLocale: 'en',
     supportedLocales: ['en', 'zh', 'jp'],
     translations: {

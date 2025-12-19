@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import { AuthorizationException, GravitoException, ValidationException } from 'gravito-core'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import {
@@ -7,30 +8,35 @@ import {
   type MessageProvider,
   validateRequest,
 } from '../src/FormRequest'
-import { GravitoException, ValidationException, AuthorizationException } from 'gravito-core'
 
 const createApp = () => {
   const app = new Hono()
   app.onError((err, c) => {
     if (err instanceof AuthorizationException) {
-      return c.json({
-        success: false,
-        error: {
-          code: err.code,
-          message: err.message,
-        }
-      }, 403)
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: err.code,
+            message: err.message,
+          },
+        },
+        403
+      )
     }
 
     if (err instanceof ValidationException) {
-      return c.json({
-        success: false,
-        error: {
-          code: err.code,
-          message: err.message,
-          details: err.errors,
-        }
-      }, 422)
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: err.code,
+            message: err.message,
+            details: err.errors,
+          },
+        },
+        422
+      )
     }
 
     if (err instanceof GravitoException) {

@@ -1,11 +1,13 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { PlanetCore } from 'gravito-core'
-import orbitAuth, { CallbackUserProvider } from '../src/index'
 import type { Authenticatable } from '../src/contracts/Authenticatable'
+import orbitAuth, { CallbackUserProvider } from '../src/index'
 
 class TestUser implements Authenticatable {
-  constructor(public id: string) { }
-  getAuthIdentifier() { return this.id }
+  constructor(public id: string) {}
+  getAuthIdentifier() {
+    return this.id
+  }
 }
 
 describe('OrbitAuth', () => {
@@ -16,19 +18,20 @@ describe('OrbitAuth', () => {
     orbitAuth(core, {
       defaults: { guard: 'api' }, // Use JWT guard for test as it's simpler? OR session
       guards: {
-        api: { driver: 'jwt', provider: 'users', secret: 'secret' }
+        api: { driver: 'jwt', provider: 'users', secret: 'secret' },
       },
       providers: {
-        users: { driver: 'callback' }
+        users: { driver: 'callback' },
       },
       bindings: {
         providers: {
-          users: (config) => new CallbackUserProvider(
-            async (id) => new TestUser(String(id)),
-            async () => true
-          )
-        }
-      }
+          users: (_config) =>
+            new CallbackUserProvider(
+              async (id) => new TestUser(String(id)),
+              async () => true
+            ),
+        },
+      },
     })
 
     // Register a route to test injection
@@ -36,7 +39,7 @@ describe('OrbitAuth', () => {
       const auth = c.get('auth')
       return c.json({
         hasAuth: !!auth,
-        isAuthManager: auth.constructor.name === 'AuthManager'
+        isAuthManager: auth.constructor.name === 'AuthManager',
       })
     })
 

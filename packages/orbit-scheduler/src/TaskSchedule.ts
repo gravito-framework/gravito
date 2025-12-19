@@ -258,7 +258,7 @@ export class TaskSchedule {
   /**
    * Set a description for the task (useful for listing).
    */
-  description(text: string): this {
+  description(_text: string): this {
     // Description logic if we want to store it (currently not in ScheduledTask interface but useful for CLI)
     // For now we just return this
     return this

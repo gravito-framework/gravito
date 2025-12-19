@@ -40,7 +40,9 @@ export class SitemapIndex {
     for (const entry of this.entries) {
       let loc = entry.url
       if (!loc.startsWith('http')) {
-        if (!loc.startsWith('/')) loc = '/' + loc
+        if (!loc.startsWith('/')) {
+          loc = `/${loc}`
+        }
         loc = baseUrl + loc
       }
 

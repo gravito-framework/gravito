@@ -204,9 +204,7 @@ cli
     // Logic to handle directory vs package name
     const isCurrentDir = project.name === '.' || project.name === './'
     const targetDir = isCurrentDir ? '.' : project.name
-    const packageName = isCurrentDir
-      ? path.basename(process.cwd())
-      : project.name
+    const packageName = isCurrentDir ? path.basename(process.cwd()) : project.name
 
     try {
       // Use giget to download from GitHub

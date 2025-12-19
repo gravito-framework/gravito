@@ -63,7 +63,9 @@ export class DocsService {
     // The docs layout renders the page title already. Strip a leading H1 from the rendered Markdown
     // to avoid duplicated titles, while still allowing authors to keep an H1 in the source Markdown.
     const match = html.match(/^\s*<h1\b[^>]*>([\s\S]*?)<\/h1>\s*/i)
-    if (!match) return { html, h1Text: null }
+    if (!match) {
+      return { html, h1Text: null }
+    }
 
     const innerHtml = match[1] ?? ''
     const h1Text = DocsService.stripLeadingEmoji(
@@ -94,8 +96,12 @@ export class DocsService {
       /<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/g,
       (full, levelRaw, attrsRaw, innerHtml) => {
         const level = Number(levelRaw)
-        if (!Number.isFinite(level) || level < 1 || level > 6) return full
-        if (level === 1) return full
+        if (!Number.isFinite(level) || level < 1 || level > 6) {
+          return full
+        }
+        if (level === 1) {
+          return full
+        }
 
         const existingIdMatch = String(attrsRaw).match(/\sid="([^"]+)"/)
         const existingClassMatch = String(attrsRaw).match(/\sclass="([^"]+)"/)

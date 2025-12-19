@@ -1,6 +1,6 @@
 {
   "name": "@gravito/orbit-request",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-beta.1",
   "description": "Form Request validation for Gravito - Laravel-style request validation with Zod",
   "type": "module",
   "main": "./dist/index.js",
@@ -33,11 +33,11 @@
     "@types/bun": "^1.1.0",
     "typescript": "^5.0.0"
   },
-  "author": "Carl Lee",
+  "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gravito-framework/gravito.git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
     "directory": "packages/orbit-request"
   },
   "keywords": [
@@ -47,5 +47,6 @@
     "zod",
     "hono",
     "middleware"
-  ]
+  ],
+  "homepage": "https://github.com/gravito-framework/gravito#readme"
 }

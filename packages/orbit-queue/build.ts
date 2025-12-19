@@ -1,6 +1,4 @@
 import { build } from 'bun'
-import { rename } from 'node:fs/promises'
-import { join } from 'node:path'
 
 // Build ESM
 await build({
@@ -29,10 +27,13 @@ await build({
 })
 
 console.log('📝 Generating type declarations...')
-const tsc = Bun.spawn(['bunx', 'tsc', '--emitDeclarationOnly', '--skipLibCheck', '--skipDefaultLibCheck'], {
-  stdout: 'inherit',
-  stderr: 'inherit',
-})
+const tsc = Bun.spawn(
+  ['bunx', 'tsc', '--emitDeclarationOnly', '--skipLibCheck', '--skipDefaultLibCheck'],
+  {
+    stdout: 'inherit',
+    stderr: 'inherit',
+  }
+)
 const exitCode = await tsc.exited
 if (exitCode !== 0) {
   console.warn('⚠️  Type declaration generation had warnings, but continuing...')

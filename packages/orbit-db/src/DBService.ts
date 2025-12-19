@@ -127,7 +127,6 @@ export interface DBService {
  * Database service implementation.
  */
 export class DBServiceImpl implements DBService {
-  private queryLogs: QueryLogInfo[] = []
   private currentTransaction: { id: string; startTime: number; queries: QueryLogInfo[] } | null =
     null
 
@@ -136,7 +135,7 @@ export class DBServiceImpl implements DBService {
   constructor(
     private db: DrizzleDB,
     private core: PlanetCore,
-    private databaseType: DatabaseType,
+    _databaseType: DatabaseType,
     private enableQueryLogging: boolean,
     private queryLogLevel: 'debug' | 'info' | 'warn' | 'error',
     private enableHealthCheck: boolean,
@@ -1624,7 +1623,9 @@ export class DBServiceImpl implements DBService {
       } else {
         // Fallback: fetch all records and compute in application.
         const all = await this.findAll(table, where)
-        if (all.length === 0) return 0
+        if (all.length === 0) {
+          return 0
+        }
 
         const sum = all.reduce((acc: number, row: any) => {
           return acc + (Number(row[column]) || 0)
@@ -1671,10 +1672,14 @@ export class DBServiceImpl implements DBService {
       } else {
         // Fallback: fetch all records and compute in application.
         const all = await this.findAll(table, where)
-        if (all.length === 0) return null
+        if (all.length === 0) {
+          return null
+        }
 
         const values = all.map((row: any) => row[column]).filter((v: any) => v != null)
-        if (values.length === 0) return null
+        if (values.length === 0) {
+          return null
+        }
 
         const minValue = values.reduce((acc: any, val: any) => {
           return acc < val ? acc : val
@@ -1721,10 +1726,14 @@ export class DBServiceImpl implements DBService {
       } else {
         // Fallback: fetch all records and compute in application.
         const all = await this.findAll(table, where)
-        if (all.length === 0) return null
+        if (all.length === 0) {
+          return null
+        }
 
         const values = all.map((row: any) => row[column]).filter((v: any) => v != null)
-        if (values.length === 0) return null
+        if (values.length === 0) {
+          return null
+        }
 
         const maxValue = values.reduce((acc: any, val: any) => {
           return acc > val ? acc : val
@@ -1831,7 +1840,7 @@ export class DBServiceImpl implements DBService {
         if (dbAny.sql && typeof dbAny.sql === 'function' && params) {
           // Parameterized query.
           const sqlBuilder = dbAny.sql
-          const paramPlaceholders = params.map((_, i) => sqlBuilder.placeholder(`param${i}`))
+          const _paramPlaceholders = params.map((_, i) => sqlBuilder.placeholder(`param${i}`))
           // Note: simplified implementation; complex SQL building may be required in real usage.
           result = await dbAny.execute(dbAny.sql.raw(sql, params))
         } else {

@@ -72,7 +72,9 @@ async function build() {
       const pathname = urlObj.pathname.replace(/\/$/, '') || '/'
 
       // Skip root since we handled it above (if it was somehow in entries)
-      if (pathname === '/') continue
+      if (pathname === '/') {
+        continue
+      }
 
       console.log(`Render: ${pathname}`)
 
@@ -122,7 +124,7 @@ async function build() {
   const staticDir = join(process.cwd(), 'static')
   try {
     await cp(staticDir, join(outputDir, 'static'), { recursive: true })
-  } catch (e) {
+  } catch (_e) {
     console.warn('⚠️  No static directory found or failed to copy.')
   }
 
@@ -156,7 +158,7 @@ async function build() {
   for (const asset of rootAssets) {
     try {
       await cp(join(staticDir, asset), join(outputDir, asset))
-    } catch (e) {
+    } catch (_e) {
       // Ignore if missing, strictly speaking
     }
   }

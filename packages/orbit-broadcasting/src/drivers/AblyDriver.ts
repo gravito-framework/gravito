@@ -45,7 +45,7 @@ export class AblyDriver implements BroadcastDriver {
 
   async authorizeChannel(
     channel: string,
-    socketId: string,
+    _socketId: string,
     userId?: string | number
   ): Promise<{ auth: string; channel_data?: string }> {
     // Ably uses a different authorization mechanism.

@@ -471,7 +471,7 @@ describe('OrbitDB', () => {
 
     it('should support migrateTo', async () => {
       const mockMigrations = ['001_initial']
-      mockDb.migrate = mock((options: any) => Promise.resolve({ migrations: mockMigrations }))
+      mockDb.migrate = mock((_options: any) => Promise.resolve({ migrations: mockMigrations }))
 
       const result = await dbService.migrateTo('001_initial')
 
@@ -1036,7 +1036,7 @@ describe('OrbitDB', () => {
         }
 
         // Accessor
-        getFullNameAttribute(value: unknown): string {
+        getFullNameAttribute(_value: unknown): string {
           const attrs = this.attributes as any
           return `${attrs.firstName || ''} ${attrs.lastName || ''}`.trim()
         }

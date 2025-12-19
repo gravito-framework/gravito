@@ -116,8 +116,12 @@ export class OrbitAuth implements GravitoOrbit {
         this.gate.forUser(async () => await manager.user())
       )
       c.set(exposeHashAs, hash)
-      if (passwordBroker) c.set(exposePasswordBrokerAs, passwordBroker)
-      if (emailVerification) c.set(exposeEmailVerificationAs, emailVerification)
+      if (passwordBroker) {
+        c.set(exposePasswordBrokerAs, passwordBroker)
+      }
+      if (emailVerification) {
+        c.set(exposeEmailVerificationAs, emailVerification)
+      }
 
       await next()
     })

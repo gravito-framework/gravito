@@ -43,5 +43,11 @@
     "hono": "^4.11.1",
     "@types/bun": "latest",
     "typescript": "^5.9.3"
+  },
+  "homepage": "https://github.com/gravito-framework/gravito#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/orbit-cache"
   }
 }

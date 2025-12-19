@@ -66,7 +66,9 @@ export class PasswordBroker {
    */
   async verifyToken(identifier: string, token: string): Promise<boolean> {
     const record = await this.repository.get(identifier)
-    if (!record) return false
+    if (!record) {
+      return false
+    }
 
     if (Date.now() > record.expiresAt) {
       await this.repository.forget(identifier)

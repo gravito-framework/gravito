@@ -1,6 +1,6 @@
 {
   "name": "@gravito/orbit-storage",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-beta.1",
   "publishConfig": {
     "access": "public"
   },
@@ -42,5 +42,11 @@
     "hono": "^4.11.1",
     "@types/bun": "latest",
     "typescript": "^5.9.3"
+  },
+  "homepage": "https://github.com/gravito-framework/gravito#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/orbit-storage"
   }
 }

@@ -18,4 +18,3 @@ await Bun.build({
 await $`bunx tsc -p tsconfig.build.json --emitDeclarationOnly`
 
 console.log('Build complete!')
-

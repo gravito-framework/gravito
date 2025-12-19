@@ -38,7 +38,9 @@ export class ContentManager {
    */
   async find(collectionName: string, slug: string, locale = 'en'): Promise<ContentItem | null> {
     const config = this.collections.get(collectionName)
-    if (!config) throw new Error(`Collection '${collectionName}' not defined`)
+    if (!config) {
+      throw new Error(`Collection '${collectionName}' not defined`)
+    }
 
     const cacheKey = `${collectionName}:${locale}:${slug}`
     if (this.cache.has(cacheKey)) {
@@ -53,7 +55,9 @@ export class ContentManager {
       const exists = await stat(filePath)
         .then(() => true)
         .catch(() => false)
-      if (!exists) return null
+      if (!exists) {
+        return null
+      }
 
       const fileContent = await readFile(filePath, 'utf-8')
       const { data, content, exemption } = matter(fileContent)
@@ -82,7 +86,9 @@ export class ContentManager {
    */
   async list(collectionName: string, locale = 'en'): Promise<ContentItem[]> {
     const config = this.collections.get(collectionName)
-    if (!config) throw new Error(`Collection '${collectionName}' not defined`)
+    if (!config) {
+      throw new Error(`Collection '${collectionName}' not defined`)
+    }
 
     const dirPath = join(this.rootDir, config.path, locale)
 
@@ -91,14 +97,18 @@ export class ContentManager {
       const items: ContentItem[] = []
 
       for (const file of files) {
-        if (!file.endsWith('.md')) continue
+        if (!file.endsWith('.md')) {
+          continue
+        }
         const slug = parse(file).name
         const item = await this.find(collectionName, slug, locale)
-        if (item) items.push(item)
+        if (item) {
+          items.push(item)
+        }
       }
 
       return items
-    } catch (e) {
+    } catch (_e) {
       // Directory likely doesn't exist for this locale
       return []
     }

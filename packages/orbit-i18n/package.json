@@ -1,6 +1,6 @@
 {
   "name": "@gravito/orbit-i18n",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-beta.1",
   "description": "Internationalization orbit for Gravito framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "i18n",
     "internationalization"
   ],
-  "author": "Carl",
+  "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
     "gravito-core": "1.0.0-beta.1",
@@ -25,5 +25,11 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "homepage": "https://github.com/gravito-framework/gravito#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/orbit-i18n"
   }
 }

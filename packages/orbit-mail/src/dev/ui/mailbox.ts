@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Address } from '../../types'
 import type { MailboxEntry } from '../DevMailbox'
 import { layout } from './shared'
 
@@ -8,12 +6,18 @@ function formatAddress(addr: { name?: string; address: string }): string {
 }
 
 function timeAgo(date: Date): string {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
-  if (seconds < 60) return 'Just now'
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
+  if (seconds < 60) {
+    return 'Just now'
+  }
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 60) {
+    return `${minutes}m ago`
+  }
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) {
+    return `${hours}h ago`
+  }
   return date.toLocaleDateString()
 }
 

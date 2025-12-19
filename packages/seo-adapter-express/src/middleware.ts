@@ -43,7 +43,7 @@ export function gravitoSeo(config: SeoConfig) {
       const entries = await strategy.getEntries()
 
       const renderer = new SeoRenderer(config)
-      const page = req.query.page ? Number.parseInt(String(req.query.page)) : undefined
+      const page = req.query.page ? Number.parseInt(String(req.query.page), 10) : undefined
 
       const fullUrl = `${config.baseUrl}${req.path}`
 

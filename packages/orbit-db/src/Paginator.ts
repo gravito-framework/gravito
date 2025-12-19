@@ -31,8 +31,12 @@ export class Paginator<T> {
    * Get the URL for a specific page.
    */
   url(page: number): string {
-    if (page < 1) page = 1
-    if (page > this.lastPage) page = this.lastPage
+    if (page < 1) {
+      page = 1
+    }
+    if (page > this.lastPage) {
+      page = this.lastPage
+    }
 
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(this.query)) {

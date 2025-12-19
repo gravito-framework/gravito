@@ -65,9 +65,15 @@ export class HashManager {
     const desiredTime = this.config.argon2id?.timeCost
     const desiredParallelism = this.config.argon2id?.parallelism
 
-    if (desiredMemory !== undefined && Number(map.get('m')) !== desiredMemory) return true
-    if (desiredTime !== undefined && Number(map.get('t')) !== desiredTime) return true
-    if (desiredParallelism !== undefined && Number(map.get('p')) !== desiredParallelism) return true
+    if (desiredMemory !== undefined && Number(map.get('m')) !== desiredMemory) {
+      return true
+    }
+    if (desiredTime !== undefined && Number(map.get('t')) !== desiredTime) {
+      return true
+    }
+    if (desiredParallelism !== undefined && Number(map.get('p')) !== desiredParallelism) {
+      return true
+    }
 
     return false
   }

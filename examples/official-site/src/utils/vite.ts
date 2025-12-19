@@ -30,7 +30,9 @@ export function setupViteProxy(core: PlanetCore): void {
           break // Success
         } catch (e) {
           retries++
-          if (retries > 3) throw e // Give up after 3 tries
+          if (retries > 3) {
+            throw e // Give up after 3 tries
+          }
           await new Promise((resolve) => setTimeout(resolve, 100)) // Wait 100ms
         }
       }

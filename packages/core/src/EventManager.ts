@@ -124,7 +124,7 @@ export class EventManager {
       ...options,
     }
 
-    this.listeners.get(eventKey)!.push(registration)
+    this.listeners.get(eventKey)?.push(registration)
   }
 
   /**
@@ -139,7 +139,9 @@ export class EventManager {
   ): void {
     const eventKey = typeof event === 'string' ? event : event
     const registrations = this.listeners.get(eventKey)
-    if (!registrations) return
+    if (!registrations) {
+      return
+    }
 
     const filtered = registrations.filter((reg) => reg.listener !== listener)
     if (filtered.length === 0) {

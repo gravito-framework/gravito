@@ -38,7 +38,7 @@ class TestVueMail extends Mailable {
 describe('Renderers', () => {
   it('should render React component to HTML', async () => {
     const mail = new TestReactMail()
-    const envelope = await mail.buildEnvelope(mockConfig)
+    const _envelope = await mail.buildEnvelope(mockConfig)
     const { html } = await mail.renderContent()
 
     expect(html).toContain('<!DOCTYPE html>')
@@ -47,7 +47,7 @@ describe('Renderers', () => {
 
   it('should render Vue component to HTML', async () => {
     const mail = new TestVueMail()
-    const envelope = await mail.buildEnvelope(mockConfig)
+    const _envelope = await mail.buildEnvelope(mockConfig)
     const { html } = await mail.renderContent()
 
     expect(html).toContain('<!DOCTYPE html>')

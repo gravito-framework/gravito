@@ -44,8 +44,8 @@ describe('OrbitAuth Security Utilities', () => {
     const payload = service.verifyToken(token)
 
     expect(payload).not.toBeNull()
-    expect(payload!.id).toBe('1')
-    expect(payload!.email).toBe('user@example.com')
+    expect(payload?.id).toBe('1')
+    expect(payload?.email).toBe('user@example.com')
   })
 
   it('EmailVerificationService should reject tampered tokens', () => {

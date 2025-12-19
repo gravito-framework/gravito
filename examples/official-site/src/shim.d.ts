@@ -1,5 +1,5 @@
 declare module '@gravito/orbit-inertia' {
-  import { Context, Next } from 'hono'
+  import { Context } from 'hono'
   import { GravitoOrbit, PlanetCore } from 'gravito-core'
 
   export interface InertiaConfig {

@@ -1,5 +1,4 @@
 import type React from 'react'
-import { ImgHTMLAttributes } from 'react'
 
 // Extend generic img attributes to include fetchpriority
 declare module 'react' {
@@ -79,7 +78,9 @@ class ImageService {
   }
 
   public generateSrcset(src: string, widths: number[]): string {
-    if (widths.length <= 1) return ''
+    if (widths.length <= 1) {
+      return ''
+    }
     return widths
       .map((width) => {
         const srcWithWidth = this.addWidthToPath(src, width)
@@ -92,7 +93,9 @@ class ImageService {
     const widths = new Set<number>()
     widths.add(baseWidth)
     const width15x = Math.round(baseWidth * 1.5)
-    if (width15x <= baseWidth * 2) widths.add(width15x)
+    if (width15x <= baseWidth * 2) {
+      widths.add(width15x)
+    }
     widths.add(baseWidth * 2)
     if (baseWidth >= 800) {
       widths.add(400)
@@ -104,9 +107,13 @@ class ImageService {
   }
 
   private addWidthToPath(src: string, width: number): string {
-    if (src.startsWith('http')) return src
+    if (src.startsWith('http')) {
+      return src
+    }
     const lastDotIndex = src.lastIndexOf('.')
-    if (lastDotIndex === -1) return `${src}-${width}w`
+    if (lastDotIndex === -1) {
+      return `${src}-${width}w`
+    }
 
     const basePath = src.substring(0, lastDotIndex)
     const extension = src.substring(lastDotIndex)
@@ -120,9 +127,13 @@ class ImageService {
   }
 
   public normalizePath(src: string): string {
-    if (src.startsWith('http') || src.startsWith('//')) return src
+    if (src.startsWith('http') || src.startsWith('//')) {
+      return src
+    }
     let path = src
-    if (!path.startsWith('/')) path = `/${path}`
+    if (!path.startsWith('/')) {
+      path = `/${path}`
+    }
 
     // v1.0 Standard: If we have a .jpg/png, let's see if we can use the .webp version
     // This is a simple fallback logic for the main src

@@ -76,7 +76,7 @@ export class SmsChannel implements NotificationChannel {
   /**
    * Send SMS via AWS SNS.
    */
-  private async sendViaAwsSns(message: import('../types').SmsMessage): Promise<void> {
+  private async sendViaAwsSns(_message: import('../types').SmsMessage): Promise<void> {
     // AWS SNS implementation requires AWS SDK.
     // This is only a placeholder; install `@aws-sdk/client-sns` and implement it.
     throw new Error('AWS SNS SMS provider not yet implemented. Please install @aws-sdk/client-sns')

@@ -9,7 +9,7 @@
 
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { exec } from 'node:child_process';
+import { spawn, exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
@@ -19,11 +19,17 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const SKIP_BUILD = process.argv.includes('--skip-build');
 const SKIP_TEST = process.argv.includes('--skip-test');
 
-// 從環境變數或參數獲取 OTP
-const OTP = process.env.NPM_OTP || (() => {
-    const otpIndex = process.argv.indexOf('--otp');
-    return otpIndex !== -1 && process.argv[otpIndex + 1] ? process.argv[otpIndex + 1] : undefined;
-})();
+async function spawnAsync(command: string, args: string[], options: any = {}): Promise<{ code: number }> {
+    return new Promise((resolve, reject) => {
+        const child = spawn(command, args, { stdio: 'inherit', shell: true, ...options });
+        child.on('close', (code) => {
+            resolve({ code: code ?? 1 });
+        });
+        child.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
 
 interface PackageInfo {
     name: string;
@@ -125,18 +131,18 @@ async function checkPackageExists(pkg: PackageInfo): Promise<boolean> {
 
 async function verifyNpmAuth(): Promise<boolean> {
     console.log('\n🔐 檢查 NPM 認證狀態...');
-    
+
     try {
         // 檢查是否已登入
         const { stdout } = await execAsync('npm whoami');
         const username = stdout.trim();
         console.log(`✅ 已登入為: ${username}`);
-        
+
         console.log('\n🌐 準備進行瀏覽器驗證...');
         console.log('   注意：發布第一個套件時，NPM 會自動打開瀏覽器進行驗證');
         console.log('   請在瀏覽器中完成驗證（指紋、Face ID 等）');
         console.log('   驗證成功後，後續套件會自動發布\n');
-        
+
         return true;
     } catch (e: any) {
         console.error('❌ 未登入 NPM，請先執行: npm login');
@@ -144,11 +150,11 @@ async function verifyNpmAuth(): Promise<boolean> {
     }
 }
 
-async function publishPackage(pkg: PackageInfo, retryCount = 0): Promise<boolean> {
+async function publishPackage(pkg: PackageInfo): Promise<boolean> {
     const isBeta = pkg.version.includes('beta');
     const isAlpha = pkg.version.includes('alpha');
     const versionTag = isBeta ? 'beta' : isAlpha ? 'alpha' : 'latest';
-    
+
     console.log(`\n🚀 發布 ${pkg.name}@${pkg.version}${isBeta || isAlpha ? ` (tag: ${versionTag})` : ''}...`);
 
     // 檢查是否已存在
@@ -164,56 +170,28 @@ async function publishPackage(pkg: PackageInfo, retryCount = 0): Promise<boolean
 
     try {
         // 對於 alpha/beta 版本，使用對應的 tag
-        let publishCmd = isBeta || isAlpha 
-            ? `npm publish --access public --tag ${versionTag}`
-            : 'npm publish --access public';
-        
-        // 如果有 OTP，添加到命令中（但通常瀏覽器驗證不需要）
-        if (OTP) {
-            publishCmd += ` --otp=${OTP}`;
+        const args = ['publish', '--access', 'public'];
+        if (isBeta || isAlpha) {
+            args.push('--tag', versionTag);
         }
-        
-        // 設置較長的超時時間，因為瀏覽器驗證可能需要時間
-        await execAsync(publishCmd, { 
-            cwd: pkg.path,
-            timeout: 120000, // 2分鐘超時
-            maxBuffer: 10 * 1024 * 1024 // 10MB buffer
-        });
-        console.log(`  ✅ ${pkg.name}@${pkg.version} 發布成功${isBeta || isAlpha ? ` (tag: ${versionTag})` : ''}`);
-        return true;
-    } catch (e: any) {
-        const errorMsg = e.message || e.stderr || '';
-        
-        // 如果是版本已存在的錯誤，視為成功
-        if (errorMsg.includes('You cannot publish over the previously published versions') ||
-            errorMsg.includes('version already exists') ||
-            errorMsg.includes('EPUBLISHCONFLICT')) {
-            console.log(`  ⏭️  ${pkg.name}@${pkg.version} 已存在，跳過`);
+
+        // 增加支援瀏覽器驗證的提示
+        console.log(`  💡 提示: 如果 NPM 要求驗證，請依照終端器指示操作（若有提示則會開啟瀏覽器驗證）`);
+
+        // 使用 spawn 以支援互動模式
+        const { code } = await spawnAsync('npm', args, { cwd: pkg.path });
+
+        if (code === 0) {
+            console.log(`  ✅ ${pkg.name}@${pkg.version} 發布成功`);
             return true;
-        }
-        
-        // 如果是認證問題，且還沒重試過，提示用戶
-        if ((errorMsg.includes('E401') || errorMsg.includes('unauthorized') || errorMsg.includes('Access token expired')) && retryCount === 0) {
-            console.error(`  ❌ ${pkg.name} 發布失敗: 認證問題`);
-            console.error(`  💡 請在瀏覽器中完成驗證，然後重新執行發布`);
+        } else {
+            // 如果失敗，檢查是否是因為版本衝突（雖然 checkPackageExists 已檢查，但可能存在競爭）
+            // 由於 stdio: inherit，我們無法直接抓取 stdout，但可以依靠 exit code 或之前已檢查過
+            console.error(`  ❌ ${pkg.name}@${pkg.version} 發布失敗 (碼: ${code})`);
             return false;
         }
-        
-        // 如果是 EOTP 錯誤
-        if (errorMsg.includes('EOTP') || errorMsg.includes('one-time password')) {
-            console.error(`  ❌ ${pkg.name} 發布失敗: 需要 OTP 驗證`);
-            console.error(`  💡 提示: 請使用 --otp=<code> 或設定 NPM_OTP 環境變數`);
-            return false;
-        }
-        
-        // 如果是 tag 問題
-        if (errorMsg.includes('specify a tag') || errorMsg.includes('prerelease version')) {
-            console.error(`  ❌ ${pkg.name} 發布失敗: 預發布版本必須指定 tag`);
-            console.error(`  💡 提示: 腳本應該已自動處理，請檢查版本號格式`);
-            return false;
-        }
-        
-        console.error(`  ❌ ${pkg.name} 發布失敗:`, errorMsg.split('\n').slice(0, 3).join(' '));
+    } catch (e: any) {
+        console.error(`  ❌ ${pkg.name} 發布過程發生意外錯誤:`, e.message);
         return false;
     }
 }
@@ -240,7 +218,7 @@ async function main() {
     console.log('\n🔍 檢查已發布的版本...');
     const packagesToPublish: PackageInfo[] = [];
     const packagesSkipped: PackageInfo[] = [];
-    
+
     for (const pkg of packages) {
         const exists = await checkPackageExists(pkg);
         if (exists) {
@@ -271,7 +249,7 @@ async function main() {
             console.error('\n❌ 認證檢查失敗，請重新登入後再試');
             process.exit(1);
         }
-        
+
         console.log('⏳ 等待 3 秒後開始發布...');
         console.log('   第一個套件發布時會觸發瀏覽器驗證\n');
         await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -309,7 +287,7 @@ async function main() {
         // 發布
         success = await publishPackage(pkg);
         results.push({ pkg, success });
-        
+
         // 發布間隔，避免過於頻繁
         if (success && !DRY_RUN) {
             await new Promise((resolve) => setTimeout(resolve, 1000));

@@ -25,8 +25,12 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
 
   const getLocalizedPath = (path: string) => {
     if (currentLang === 'zh') {
-      if (path === '/') return '/zh'
-      if (path.startsWith('/')) return `/zh${path}`
+      if (path === '/') {
+        return '/zh'
+      }
+      if (path.startsWith('/')) {
+        return `/zh${path}`
+      }
       return `/zh/${path}`
     }
     return path
@@ -35,19 +39,27 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
   const isPathActive = (path: string) => {
     const currentPath = window.location.pathname
     const localizedPath = getLocalizedPath(path)
-    if (path === '/' && (currentPath === '/' || currentPath === '/zh')) return true
+    if (path === '/' && (currentPath === '/' || currentPath === '/zh')) {
+      return true
+    }
     return currentPath.startsWith(localizedPath)
   }
 
   const switchLocale = (newLang: string) => {
     const path = window.location.pathname
     if (newLang === 'zh') {
-      if (path.startsWith('/zh')) return path
-      if (path === '/') return '/zh/'
+      if (path.startsWith('/zh')) {
+        return path
+      }
+      if (path === '/') {
+        return '/zh/'
+      }
       return `/zh${path}`
     }
     if (newLang === 'en') {
-      if (!path.startsWith('/zh')) return path
+      if (!path.startsWith('/zh')) {
+        return path
+      }
       const newPath = path.replace(/^\/zh/, '')
       return newPath || '/'
     }
@@ -67,10 +79,11 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
         <div className="max-w-7xl mx-auto flex items-center justify-between relative">
           {/* Navbar Background Capsule */}
           <div
-            className={`absolute inset-y-[-8px] inset-x-[-20px] rounded-[32px] transition-all duration-700 -z-10 ${isScrolled
-              ? 'bg-void/60 backdrop-blur-2xl border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] opacity-100 scale-100'
-              : 'bg-transparent opacity-0 scale-95'
-              }`}
+            className={`absolute inset-y-[-8px] inset-x-[-20px] rounded-[32px] transition-all duration-700 -z-10 ${
+              isScrolled
+                ? 'bg-void/60 backdrop-blur-2xl border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] opacity-100 scale-100'
+                : 'bg-transparent opacity-0 scale-95'
+            }`}
           />
 
           <Logo isZh={currentLang === 'zh'} />
@@ -85,8 +98,9 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
                 <Link
                   key={item.path}
                   href={getLocalizedPath(item.path)}
-                  className={`relative px-6 py-2.5 rounded-xl text-sm font-bold tracking-tight transition-all duration-300 group ${active ? 'text-white' : 'text-gray-400 hover:text-white'
-                    }`}
+                  className={`relative px-6 py-2.5 rounded-xl text-sm font-bold tracking-tight transition-all duration-300 group ${
+                    active ? 'text-white' : 'text-gray-400 hover:text-white'
+                  }`}
                 >
                   {active && (
                     <motion.div
@@ -124,8 +138,9 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
             <div className="flex items-center p-1 bg-white/5 rounded-xl border border-white/5 backdrop-blur-md relative overflow-hidden">
               <Link
                 href={switchLocale('en')}
-                className={`relative z-10 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-colors duration-500 ${currentLang === 'en' ? 'text-black' : 'text-white/40 hover:text-white'
-                  }`}
+                className={`relative z-10 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-colors duration-500 ${
+                  currentLang === 'en' ? 'text-black' : 'text-white/40 hover:text-white'
+                }`}
               >
                 {currentLang === 'en' && (
                   <motion.div
@@ -138,8 +153,9 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
               </Link>
               <Link
                 href={switchLocale('zh')}
-                className={`relative z-10 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-colors duration-500 ${currentLang === 'zh' ? 'text-black' : 'text-white/40 hover:text-white'
-                  }`}
+                className={`relative z-10 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-colors duration-500 ${
+                  currentLang === 'zh' ? 'text-black' : 'text-white/40 hover:text-white'
+                }`}
               >
                 {currentLang === 'zh' && (
                   <motion.div
@@ -152,7 +168,10 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
               </Link>
             </div>
 
-            <button type="button" className="md:hidden p-3 bg-white/5 rounded-xl border border-white/5 text-gray-400">
+            <button
+              type="button"
+              className="md:hidden p-3 bg-white/5 rounded-xl border border-white/5 text-gray-400"
+            >
               <Menu size={20} />
             </button>
           </div>

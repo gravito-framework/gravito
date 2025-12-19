@@ -20,7 +20,7 @@ export class CronParser {
         tz: timezone,
       })
       return interval.next().toDate()
-    } catch (err) {
+    } catch (_err) {
       throw new Error(`Invalid cron expression: ${expression}`)
     }
   }
@@ -40,7 +40,7 @@ export class CronParser {
     // Try SimpleCronParser first (Synchronous and fast)
     try {
       return SimpleCronParser.isDue(expression, timezone, currentDate)
-    } catch (e) {
+    } catch (_e) {
       // Fallback to heavy cron-parser if expression is complex/unsupported
       // or if calculation fails
     }
@@ -60,7 +60,7 @@ export class CronParser {
 
       // Compare down to the minute
       return this.minuteMatches(nextRun, currentDate)
-    } catch (err) {
+    } catch (_err) {
       return false
     }
   }

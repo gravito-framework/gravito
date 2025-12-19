@@ -27,21 +27,21 @@ export abstract class ResourceTransformer<TModel = any, TResource = any> {
   /**
    * Include relation data (optional).
    */
-  with?(relation: string): this {
+  with?(_relation: string): this {
     return this
   }
 
   /**
    * Exclude fields (optional).
    */
-  except?(fields: string[]): this {
+  except?(_fields: string[]): this {
     return this
   }
 
   /**
    * Only include specific fields (optional).
    */
-  only?(fields: string[]): this {
+  only?(_fields: string[]): this {
     return this
   }
 }

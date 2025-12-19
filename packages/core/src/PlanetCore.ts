@@ -269,7 +269,7 @@ export class PlanetCore {
                 if (!errorBag[e.field]) {
                   errorBag[e.field] = []
                 }
-                errorBag[e.field]!.push(e.message)
+                errorBag[e.field]?.push(e.message)
               }
               session.flash('errors', errorBag)
 

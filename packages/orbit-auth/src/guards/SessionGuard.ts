@@ -3,93 +3,101 @@ import type { Authenticatable } from '../contracts/Authenticatable'
 import type { StatefulGuard } from '../contracts/Guard'
 import type { UserProvider } from '../contracts/UserProvider'
 
-export class SessionGuard<User extends Authenticatable = Authenticatable> implements StatefulGuard<User> {
-    protected userInstance: User | null = null
-    protected loggedOut = false
+export class SessionGuard<User extends Authenticatable = Authenticatable>
+  implements StatefulGuard<User>
+{
+  protected userInstance: User | null = null
+  protected loggedOut = false
 
-    constructor(
-        protected name: string,
-        protected provider: UserProvider<User>,
-        protected ctx: Context,
-        protected sessionKey: string = 'auth_session'
-    ) { }
+  constructor(
+    protected name: string,
+    protected provider: UserProvider<User>,
+    protected ctx: Context,
+    protected sessionKey = 'auth_session'
+  ) {}
 
-    async check(): Promise<boolean> {
-        return (await this.user()) !== null
+  async check(): Promise<boolean> {
+    return (await this.user()) !== null
+  }
+
+  async guest(): Promise<boolean> {
+    return !(await this.check())
+  }
+
+  async user(): Promise<User | null> {
+    if (this.loggedOut) {
+      return null
+    }
+    if (this.userInstance) {
+      return this.userInstance
     }
 
-    async guest(): Promise<boolean> {
-        return !(await this.check())
+    const id = this.ctx.get('session').get(this.getName())
+
+    if (id) {
+      this.userInstance = await this.provider.retrieveById(id)
     }
 
-    async user(): Promise<User | null> {
-        if (this.loggedOut) return null
-        if (this.userInstance) return this.userInstance
+    // TODO: Remember me implementation here
 
-        const id = this.ctx.get('session').get(this.getName())
+    return this.userInstance
+  }
 
-        if (id) {
-            this.userInstance = await this.provider.retrieveById(id)
-        }
+  async id(): Promise<string | number | null> {
+    if (this.loggedOut) {
+      return null
+    }
+    const id = this.ctx.get('session').get(this.getName())
+    return id ?? (this.userInstance ? this.userInstance.getAuthIdentifier() : null)
+  }
 
-        // TODO: Remember me implementation here
+  async validate(credentials: Record<string, unknown>): Promise<boolean> {
+    const user = await this.provider.retrieveByCredentials(credentials)
+    return user ? await this.provider.validateCredentials(user, credentials) : false
+  }
 
-        return this.userInstance
+  setUser(user: User): this {
+    this.userInstance = user
+    return this
+  }
+
+  async attempt(credentials: Record<string, unknown>, remember = false): Promise<boolean> {
+    const user = await this.provider.retrieveByCredentials(credentials)
+
+    if (!user || !(await this.provider.validateCredentials(user, credentials))) {
+      return false
     }
 
-    async id(): Promise<string | number | null> {
-        if (this.loggedOut) return null
-        const id = this.ctx.get('session').get(this.getName())
-        return id ?? (this.userInstance ? this.userInstance.getAuthIdentifier() : null)
+    await this.login(user, remember)
+    return true
+  }
+
+  async login(user: User, remember = false): Promise<void> {
+    this.ctx.get('session').regenerate()
+    this.ctx.get('session').put(this.getName(), user.getAuthIdentifier())
+    this.setUser(user)
+
+    if (remember) {
+      // TODO: Implement remember me
     }
+  }
 
-    async validate(credentials: Record<string, unknown>): Promise<boolean> {
-        const user = await this.provider.retrieveByCredentials(credentials)
-        return user ? await this.provider.validateCredentials(user, credentials) : false
-    }
+  async logout(): Promise<void> {
+    this.userInstance = null
+    this.loggedOut = true
+    this.ctx.get('session').forget(this.getName())
+    this.ctx.get('session').regenerate()
+  }
 
-    setUser(user: User): this {
-        this.userInstance = user
-        return this
-    }
+  getProvider(): UserProvider<User> {
+    return this.provider
+  }
 
-    async attempt(credentials: Record<string, unknown>, remember = false): Promise<boolean> {
-        const user = await this.provider.retrieveByCredentials(credentials)
+  setProvider(provider: UserProvider<User>): void {
+    this.provider = provider
+  }
 
-        if (!user || !(await this.provider.validateCredentials(user, credentials))) {
-            return false
-        }
-
-        await this.login(user, remember)
-        return true
-    }
-
-    async login(user: User, remember = false): Promise<void> {
-        this.ctx.get('session').regenerate()
-        this.ctx.get('session').put(this.getName(), user.getAuthIdentifier())
-        this.setUser(user)
-
-        if (remember) {
-            // TODO: Implement remember me
-        }
-    }
-
-    async logout(): Promise<void> {
-        this.userInstance = null
-        this.loggedOut = true
-        this.ctx.get('session').forget(this.getName())
-        this.ctx.get('session').regenerate()
-    }
-
-    getProvider(): UserProvider<User> {
-        return this.provider
-    }
-
-    setProvider(provider: UserProvider<User>): void {
-        this.provider = provider
-    }
-
-    protected getName(): string {
-        return 'login_' + this.name + '_' + this.sessionKey
-    }
+  protected getName(): string {
+    return `login_${this.name}_${this.sessionKey}`
+  }
 }

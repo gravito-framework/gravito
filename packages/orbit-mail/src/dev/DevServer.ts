@@ -1,5 +1,5 @@
 import type { PlanetCore } from 'gravito-core'
-import type { DevMailbox, MailboxEntry } from './DevMailbox'
+import type { DevMailbox } from './DevMailbox'
 import { getMailboxHtml } from './ui/mailbox'
 import { getPreviewHtml } from './ui/preview'
 
@@ -36,7 +36,9 @@ export class DevServer {
     router.get(`${prefix}/:id/html`, (ctx) => {
       const id = ctx.req.param('id')
       const entry = this.mailbox.get(id)
-      if (!entry) return ctx.text('Not found', 404)
+      if (!entry) {
+        return ctx.text('Not found', 404)
+      }
       return ctx.html(entry.html)
     })
 
@@ -44,7 +46,9 @@ export class DevServer {
     router.get(`${prefix}/:id/text`, (ctx) => {
       const id = ctx.req.param('id')
       const entry = this.mailbox.get(id)
-      if (!entry) return ctx.text('Not found', 404)
+      if (!entry) {
+        return ctx.text('Not found', 404)
+      }
       return ctx.text(entry.text || 'No text content', 200, {
         'Content-Type': 'text/plain; charset=utf-8',
       })
@@ -54,7 +58,9 @@ export class DevServer {
     router.get(`${prefix}/:id/raw`, (ctx) => {
       const id = ctx.req.param('id')
       const entry = this.mailbox.get(id)
-      if (!entry) return ctx.json({ error: 'Not found' }, 404)
+      if (!entry) {
+        return ctx.json({ error: 'Not found' }, 404)
+      }
       return ctx.json(entry)
     })
 

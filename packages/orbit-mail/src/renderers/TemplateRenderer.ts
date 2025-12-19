@@ -8,7 +8,7 @@ export class TemplateRenderer implements Renderer {
   constructor(templateName: string, viewsDir?: string) {
     this.template = templateName
     // Default to src/emails if not provided, falling back to process cwd
-    const defaultDir = viewsDir || process.cwd() + '/src/emails'
+    const defaultDir = viewsDir || `${process.cwd()}/src/emails`
     this.engine = new TemplateEngine(defaultDir)
   }
 

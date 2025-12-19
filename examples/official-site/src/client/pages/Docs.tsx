@@ -40,7 +40,7 @@ export default function Docs() {
 
   // Scroll Progress
   const { scrollYProgress } = useScroll()
-  const scaleX = useSpring(scrollYProgress, {
+  const _scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
@@ -52,14 +52,20 @@ export default function Docs() {
 
   useEffect(() => {
     const root = contentRef.current
-    if (!root) return
-    if (!content) return
+    if (!root) {
+      return
+    }
+    if (!content) {
+      return
+    }
 
     // Enhance code blocks with copy button and window controls (Mac terminal style)
     const pres = Array.from(root.querySelectorAll('pre'))
     for (const pre of pres) {
       const existingWrapper = pre.closest('[data-pre-wrapper="true"]')
-      if (existingWrapper) continue
+      if (existingWrapper) {
+        continue
+      }
 
       const wrapper = document.createElement('div')
       wrapper.dataset.preWrapper = 'true'
@@ -80,7 +86,9 @@ export default function Docs() {
       wrapper.appendChild(header)
 
       const parent = pre.parentNode
-      if (!parent) continue
+      if (!parent) {
+        continue
+      }
 
       parent.insertBefore(wrapper, pre)
       wrapper.appendChild(pre)
@@ -116,7 +124,9 @@ export default function Docs() {
     const tables = Array.from(root.querySelectorAll('table'))
     for (const table of tables) {
       const parent = table.parentElement
-      if (parent?.dataset.tableWrapper === 'true') continue
+      if (parent?.dataset.tableWrapper === 'true') {
+        continue
+      }
 
       const wrapper = document.createElement('div')
       wrapper.dataset.tableWrapper = 'true'
@@ -139,20 +149,30 @@ export default function Docs() {
 
   useEffect(() => {
     const root = contentRef.current
-    if (!root) return
-    if (!content) return
-    if (tocItems.length === 0) return
+    if (!root) {
+      return
+    }
+    if (!content) {
+      return
+    }
+    if (tocItems.length === 0) {
+      return
+    }
 
     const headingElements = tocItems
       .map((item) => root.querySelector<HTMLElement>(`#${CSS.escape(item.id)}`))
       .filter(Boolean) as HTMLElement[]
 
-    if (headingElements.length === 0) return
+    if (headingElements.length === 0) {
+      return
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting)
-        if (visible.length === 0) return
+        if (visible.length === 0) {
+          return
+        }
 
         visible.sort((a, b) => (a.boundingClientRect.top ?? 0) - (b.boundingClientRect.top ?? 0))
         const id = (visible[0].target as HTMLElement).id
@@ -161,14 +181,18 @@ export default function Docs() {
       { rootMargin: '-20% 0px -70% 0px', threshold: [0, 1] }
     )
 
-    for (const el of headingElements) observer.observe(el)
+    for (const el of headingElements) {
+      observer.observe(el)
+    }
     return () => observer.disconnect()
   }, [tocItems, content])
 
   // SPA Link Interceptor: Prevent full page reload for internal docs links
   useEffect(() => {
     const root = contentRef.current
-    if (!root) return
+    if (!root) {
+      return
+    }
 
     const handleInternalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -254,10 +278,11 @@ export default function Docs() {
                       <li key={cIdx}>
                         <Link
                           href={item.path}
-                          className={`block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent ${isActive
+                          className={`block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent ${
+                            isActive
                               ? 'text-singularity font-bold border-white/5 bg-white/[0.03] shadow-[0_0_20px_rgba(20,241,149,0.05)]'
                               : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
-                            }`}
+                          }`}
                         >
                           <div className="flex items-center gap-3">
                             {isActive && (
@@ -449,7 +474,9 @@ export default function Docs() {
               const prev = currentIndex > 0 ? flatItems[currentIndex - 1] : null
               const next = currentIndex < flatItems.length - 1 ? flatItems[currentIndex + 1] : null
 
-              if (!prev && !next) return null
+              if (!prev && !next) {
+                return null
+              }
 
               return (
                 <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
@@ -509,10 +536,11 @@ export default function Docs() {
                           <li key={item.id} className={`${indent} relative`}>
                             <a
                               href={`#${item.id}`}
-                              className={`block text-[13px] leading-relaxed transition-all duration-300 ${isActive
+                              className={`block text-[13px] leading-relaxed transition-all duration-300 ${
+                                isActive
                                   ? 'text-singularity font-black tracking-tight translate-x-1'
                                   : 'text-gray-400 hover:text-white'
-                                }`}
+                              }`}
                             >
                               {item.text}
                             </a>

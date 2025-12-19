@@ -44,7 +44,7 @@ export class BroadcastManager {
    * @param eventName - Event name
    */
   async broadcast(
-    event: unknown,
+    _event: unknown,
     channel: { name: string; type: string },
     data: Record<string, unknown>,
     eventName: string

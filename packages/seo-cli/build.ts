@@ -1,6 +1,5 @@
-import { build } from 'bun'
 import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { build } from 'bun'
 
 // Build main entry
 await build({
@@ -31,9 +30,9 @@ if (cliBuild.outputs && cliBuild.outputs.length > 0) {
   const cliFile = cliBuild.outputs[0].path
   const content = await Bun.file(cliFile).text()
   // Only add shebang if not already present
-  const withShebang = content.startsWith('#!/usr/bin/env node') 
-    ? content 
-    : '#!/usr/bin/env node\n' + content
+  const withShebang = content.startsWith('#!/usr/bin/env node')
+    ? content
+    : `#!/usr/bin/env node\n${content}`
   await writeFile(cliFile, withShebang)
   // Make executable
   await Bun.spawn(['chmod', '+x', cliFile]).exited
@@ -50,4 +49,3 @@ if (exitCode !== 0) {
 }
 
 console.log('✅ Build completed')
-

@@ -34,9 +34,11 @@ export class SitemapGenerator {
     })
 
     const flushShard = async () => {
-      if (currentCount === 0) return
+      if (currentCount === 0) {
+        return
+      }
 
-      const baseName = this.options.filename!.replace(/\.xml$/, '')
+      const baseName = this.options.filename?.replace(/\.xml$/, '')
       const filename = `${baseName}-${shardIndex}.xml`
       const xml = currentStream.toXML()
 

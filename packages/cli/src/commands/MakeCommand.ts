@@ -52,7 +52,7 @@ export class MakeCommand {
     try {
       const filePath = path.join(this.stubsPath, filename)
       return await fs.readFile(filePath, 'utf-8')
-    } catch (e) {
+    } catch (_e) {
       return null
     }
   }

@@ -22,4 +22,3 @@ if (exitCode !== 0) {
 }
 
 console.log('✅ Build completed')
-

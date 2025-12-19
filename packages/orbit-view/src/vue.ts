@@ -1,4 +1,4 @@
-import { defineComponent, h, type PropType, type StyleValue } from 'vue'
+import { defineComponent, h, type PropType } from 'vue'
 import { type ImageOptions, ImageService } from './ImageService'
 
 export const Image = defineComponent({

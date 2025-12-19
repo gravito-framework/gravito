@@ -88,7 +88,9 @@ class MemorySessionStore implements SessionStore {
 
   async get(id: SessionId): Promise<SessionRecord | null> {
     const item = this.store.get(id)
-    if (!item) return null
+    if (!item) {
+      return null
+    }
     if (this.now() > item.expiresAt) {
       this.store.delete(id)
       return null
@@ -118,11 +120,15 @@ function generateSessionId(): SessionId {
 }
 
 function parseCookieHeader(header: string | null | undefined): Record<string, string> {
-  if (!header) return {}
+  if (!header) {
+    return {}
+  }
   const out: Record<string, string> = {}
   for (const part of header.split(';')) {
     const [rawKey, ...rest] = part.trim().split('=')
-    if (!rawKey) continue
+    if (!rawKey) {
+      continue
+    }
     out[rawKey] = decodeURIComponent(rest.join('=') ?? '')
   }
   return out
@@ -141,17 +147,29 @@ function serializeCookie(
 ): string {
   const parts = [`${name}=${encodeURIComponent(value)}`]
   parts.push(`Path=${options.path ?? '/'}`)
-  if (options.maxAge != null) parts.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`)
-  if (options.httpOnly) parts.push('HttpOnly')
-  if (options.secure) parts.push('Secure')
-  if (options.sameSite) parts.push(`SameSite=${options.sameSite}`)
+  if (options.maxAge != null) {
+    parts.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`)
+  }
+  if (options.httpOnly) {
+    parts.push('HttpOnly')
+  }
+  if (options.secure) {
+    parts.push('Secure')
+  }
+  if (options.sameSite) {
+    parts.push(`SameSite=${options.sameSite}`)
+  }
   return parts.join('; ')
 }
 
 function safeEquals(a: string, b: string): boolean {
-  if (a.length !== b.length) return false
+  if (a.length !== b.length) {
+    return false
+  }
   let diff = 0
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
   return diff === 0
 }
 
@@ -221,7 +239,9 @@ export class OrbitSession implements GravitoOrbit {
                   )
                 }
                 const raw = (await cache.get(`${keyPrefix}${id}`)) as string | null | undefined
-                if (!raw) return null
+                if (!raw) {
+                  return null
+                }
                 try {
                   return JSON.parse(raw) as SessionRecord
                 } catch {
@@ -314,7 +334,9 @@ export class OrbitSession implements GravitoOrbit {
         all: () => {
           ensureStarted()
           const out: Record<string, unknown> = {}
-          for (const [k, v] of Object.entries(data)) out[k] = v
+          for (const [k, v] of Object.entries(data)) {
+            out[k] = v
+          }
           return out
         },
         pull: (key, defaultValue) => {
@@ -333,17 +355,23 @@ export class OrbitSession implements GravitoOrbit {
         },
         getFlash: (key, defaultValue) => {
           ensureStarted()
-          if (!flashNow.has(key)) return defaultValue as any
+          if (!flashNow.has(key)) {
+            return defaultValue as any
+          }
           return (key in data ? (data[key] as any) : defaultValue) as any
         },
         reflash: () => {
-          for (const key of flashNow) flashNext.add(key)
+          for (const key of flashNow) {
+            flashNext.add(key)
+          }
           markDirty()
         },
         keep: (keys) => {
           const keepKeys = keys && keys.length > 0 ? keys : Array.from(flashNow)
           for (const key of keepKeys) {
-            if (flashNow.has(key)) flashNext.add(key)
+            if (flashNow.has(key)) {
+              flashNext.add(key)
+            }
           }
           markDirty()
         },
@@ -355,7 +383,9 @@ export class OrbitSession implements GravitoOrbit {
         invalidate: () => {
           regeneratedFrom = sessionId
           sessionId = generateSessionId()
-          for (const key of Object.keys(data)) delete data[key]
+          for (const key of Object.keys(data)) {
+            delete data[key]
+          }
           flashNow.clear()
           flashNext.clear()
           markDirty()
@@ -366,7 +396,9 @@ export class OrbitSession implements GravitoOrbit {
         token: () => {
           ensureStarted()
           const existing = data._csrf
-          if (typeof existing === 'string' && existing.length > 0) return existing
+          if (typeof existing === 'string' && existing.length > 0) {
+            return existing
+          }
           const token = base64Url(randomBytes(32))
           data._csrf = token
           markDirty()
@@ -408,7 +440,9 @@ export class OrbitSession implements GravitoOrbit {
 
       if (started) {
         for (const key of flashNow) {
-          if (!flashNext.has(key)) delete data[key]
+          if (!flashNext.has(key)) {
+            delete data[key]
+          }
         }
       }
 

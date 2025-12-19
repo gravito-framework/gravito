@@ -1,4 +1,4 @@
-import { describe, expect, it, mock, spyOn } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Mailable } from '../src/Mailable'
 import { OrbitMail } from '../src/OrbitMail'
 import { LogTransport } from '../src/transports/LogTransport'

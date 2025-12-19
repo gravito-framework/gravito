@@ -44,14 +44,14 @@ export class SimpleCronParser {
         // Reconstruct date from parts (treating it as local time for field comparison)
         // Note: Months in Intl are 1-12, Date() expects 0-11
         targetDate = new Date(
-          parseInt(partMap.year!),
-          parseInt(partMap.month!) - 1,
-          parseInt(partMap.day!),
-          parseInt(partMap.hour!) === 24 ? 0 : parseInt(partMap.hour!), // Intl can return 24? usually 0-23
-          parseInt(partMap.minute!),
+          parseInt(partMap.year!, 10),
+          parseInt(partMap.month!, 10) - 1,
+          parseInt(partMap.day!, 10),
+          parseInt(partMap.hour!, 10) === 24 ? 0 : parseInt(partMap.hour!, 10), // Intl can return 24? usually 0-23
+          parseInt(partMap.minute!, 10),
           0
         )
-      } catch (e) {
+      } catch (_e) {
         // Fallback or error if timezone invalid
         // For simple usage, we might assume UTC if conversion fails or throw
         throw new Error(`Invalid timezone: ${timezone}`)
@@ -82,7 +82,9 @@ export class SimpleCronParser {
 
   private static matchField(pattern: string, value: number, min: number, max: number): boolean {
     // 1. Wildcard
-    if (pattern === '*') return true
+    if (pattern === '*') {
+      return true
+    }
 
     // 2. Step (*\/5, 1-10/2)
     if (pattern.includes('/')) {
@@ -124,7 +126,9 @@ export class SimpleCronParser {
     const expected = parseInt(pattern, 10)
 
     // Special case for DayOfWeek: 7 is also Sunday (0)
-    if (max === 7 && expected === 7 && value === 0) return true
+    if (max === 7 && expected === 7 && value === 0) {
+      return true
+    }
 
     return value === expected
   }

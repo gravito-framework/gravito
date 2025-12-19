@@ -100,6 +100,6 @@ export class Encrypter {
    */
   static generateKey(cipher = 'aes-256-cbc'): string {
     const bytes = cipher === 'aes-128-cbc' ? 16 : 32
-    return 'base64:' + crypto.randomBytes(bytes).toString('base64')
+    return `base64:${crypto.randomBytes(bytes).toString('base64')}`
   }
 }

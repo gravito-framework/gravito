@@ -201,8 +201,12 @@ export class RouteGroup {
     }
 
     const allowed = actions.filter((action) => {
-      if (options.only) return options.only.includes(action)
-      if (options.except) return !options.except.includes(action)
+      if (options.only) {
+        return options.only.includes(action)
+      }
+      if (options.except) {
+        return !options.except.includes(action)
+      }
       return true
     })
 
@@ -308,7 +312,9 @@ export class Router {
 
     const qs = new URLSearchParams()
     for (const [k, v] of Object.entries(query)) {
-      if (v === undefined || v === null) continue
+      if (v === undefined || v === null) {
+        continue
+      }
       qs.set(k, String(v))
     }
 
@@ -502,8 +508,12 @@ export class Router {
     }
 
     const allowed = actions.filter((action) => {
-      if (options.only) return options.only.includes(action)
-      if (options.except) return !options.except.includes(action)
+      if (options.only) {
+        return options.only.includes(action)
+      }
+      if (options.except) {
+        return !options.except.includes(action)
+      }
       return true
     })
 

@@ -20,7 +20,9 @@ export async function loadTranslations(
     const files = await readdir(directory)
 
     for (const file of files) {
-      if (!file.endsWith('.json')) continue
+      if (!file.endsWith('.json')) {
+        continue
+      }
 
       const locale = parse(file).name // 'en' from 'en.json'
       const content = await readFile(join(directory, file), 'utf-8')
@@ -31,7 +33,7 @@ export async function loadTranslations(
         console.error(`[Orbit-I18n] Failed to parse translation file: ${file}`, e)
       }
     }
-  } catch (e) {
+  } catch (_e) {
     console.warn(
       `[Orbit-I18n] Could not load translations from ${directory}. Directory might not exist.`
     )

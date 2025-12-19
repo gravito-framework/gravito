@@ -166,7 +166,6 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
   public attributes: Partial<TAttributes> = {}
   private relationsCache: Map<string, unknown> = new Map()
   private relationsLoaded: Set<string> = new Set()
-  private originalAttributes: Partial<TAttributes> = {}
   private exists = false
   public wasRecentlyCreated = false
 
@@ -614,7 +613,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
    * Cast an attribute value.
    */
   static castAttribute(
-    key: string,
+    _key: string,
     value: unknown,
     cast: CastType | ((value: unknown) => unknown)
   ): unknown {
@@ -1006,7 +1005,7 @@ export abstract class Model<TAttributes = Record<string, unknown>> {
       }
 
       const relatedTable = (relatedModel as unknown as typeof Model).getTable()
-      const relatedTableName = (relatedModel as unknown as typeof Model).tableName
+      const _relatedTableName = (relatedModel as unknown as typeof Model).tableName
       const currentModelName = modelClass.name
 
       const where: any = {
@@ -1335,8 +1334,6 @@ export class QueryBuilder<T extends Model> {
   private orderByColumn?: unknown
   private orderDirection: 'asc' | 'desc' = 'asc'
   private limitValue?: number
-  private offsetValue?: number
-  private groupByColumns: unknown[] = []
   private softDeleteMode: 'default' | 'withTrashed' | 'onlyTrashed' = 'default'
 
   constructor(private modelClass: ModelStatic<T>) {}
@@ -1668,7 +1665,7 @@ export class QueryBuilder<T extends Model> {
     const dbService = (modelClass as any).getDBService()
     const table = (modelClass as any).getTable()
 
-    const finalWhere = this.buildWhere()
+    const _finalWhere = this.buildWhere()
 
     const options: { orderBy?: unknown; orderDirection?: 'asc' | 'desc' } = {}
     if (this.orderByColumn) {
@@ -1745,7 +1742,9 @@ export class ModelRegistry {
    * Set core instance for all Models (for emitting events).
    */
   static setCore(core: PlanetCore): void {
-    if (!core) return
+    if (!core) {
+      return
+    }
     for (const { model } of ModelRegistry.models) {
       // Check whether the model has a setCore method.
       if (typeof (model as any).setCore === 'function') {

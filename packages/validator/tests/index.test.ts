@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Schema, validate } from '../src/index'
 
 describe('@gravito/validator', () => {
@@ -24,4 +24,3 @@ describe('@gravito/validator', () => {
     expect(typeof middleware).toBe('function')
   })
 })
-

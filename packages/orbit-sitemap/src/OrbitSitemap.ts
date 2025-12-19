@@ -55,8 +55,8 @@ export class OrbitSitemap {
   private installDynamic(core: PlanetCore) {
     const opts = this.options as DynamicSitemapOptions
     const storage = opts.storage ?? new MemorySitemapStorage(opts.baseUrl)
-    const indexFilename = opts.path!.split('/').pop()!
-    const baseDir = opts.path!.substring(0, opts.path!.lastIndexOf('/'))
+    const indexFilename = opts.path?.split('/').pop()!
+    const baseDir = opts.path?.substring(0, opts.path?.lastIndexOf('/'))
 
     const handler = async (ctx: Context) => {
       // Determine filename from request
@@ -85,7 +85,9 @@ export class OrbitSitemap {
           })
           await generator.run()
         } finally {
-          if (opts.lock) await opts.lock.release(filename)
+          if (opts.lock) {
+            await opts.lock.release(filename)
+          }
         }
 
         content = await storage.read(filename)

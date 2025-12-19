@@ -1,6 +1,5 @@
 import type { GravitoOrbit, PlanetCore } from 'gravito-core'
 import type { Context, Next } from 'hono'
-import type { DBService } from './DBService'
 import { DBServiceImpl, detectDatabaseType } from './DBService'
 import { ModelRegistry } from './Model'
 import type { DatabaseType } from './types'

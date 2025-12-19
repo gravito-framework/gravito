@@ -69,7 +69,7 @@ export class EventBus {
     if (!this.handlers.has(event)) {
       this.handlers.set(event, [])
     }
-    this.handlers.get(event)!.push({ handler })
+    this.handlers.get(event)?.push({ handler })
   }
 
   /**
@@ -79,7 +79,7 @@ export class EventBus {
     if (!this.handlers.has(event)) {
       this.handlers.set(event, [])
     }
-    this.handlers.get(event)!.push({ handler, once: true })
+    this.handlers.get(event)?.push({ handler, once: true })
   }
 
   /**
@@ -87,7 +87,9 @@ export class EventBus {
    */
   off<T = any>(event: string, handler: EventHandler<T>): void {
     const subscriptions = this.handlers.get(event)
-    if (!subscriptions) return
+    if (!subscriptions) {
+      return
+    }
 
     const filtered = subscriptions.filter((sub) => sub.handler !== handler)
     if (filtered.length === 0) {

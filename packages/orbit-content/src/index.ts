@@ -1,4 +1,3 @@
-import { join } from 'node:path'
 import type { GravitoOrbit, PlanetCore } from 'gravito-core'
 import { type CollectionConfig, ContentManager } from './ContentManager'
 

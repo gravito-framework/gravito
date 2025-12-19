@@ -32,5 +32,12 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "author": "Carl Lee <carllee0520@gmail.com>",
+  "homepage": "https://github.com/gravito-framework/gravito#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/seo-core"
   }
 }
