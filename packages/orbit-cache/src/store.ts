@@ -11,7 +11,7 @@ export interface CacheStore {
   increment(key: CacheKey, value?: number): Promise<number>
   decrement(key: CacheKey, value?: number): Promise<number>
 
-  lock?(name: string, seconds?: number): CacheLock
+  lock?(name: string, seconds?: number): CacheLock | undefined
 }
 
 export interface TaggableStore {

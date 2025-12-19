@@ -274,7 +274,7 @@ export class CacheRepository {
     }
 
     const lock = this.store.lock(`flexible:${metaKey}`, Math.max(1, ttlSeconds))
-    if (!(await lock.acquire())) {
+    if (!lock || !(await lock.acquire())) {
       return
     }
 

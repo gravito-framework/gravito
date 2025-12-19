@@ -29,7 +29,11 @@ export class InertiaService {
   /**
    * Render an Inertia component
    */
-  public render(component: string, props: Record<string, unknown> = {}) {
+  public render(
+    component: string,
+    props: Record<string, unknown> = {},
+    rootVars: Record<string, unknown> = {}
+  ) {
     const page = {
       component,
       props: { ...this.sharedProps, ...props },
@@ -54,11 +58,16 @@ export class InertiaService {
       throw new Error('OrbitView is required for the initial page load in OrbitInertia')
     }
 
+    // 檢測是否為開發模式
+    const isDev = process.env.NODE_ENV !== 'production'
+
     return this.context.html(
       view.render(
         rootView,
         {
+          ...rootVars,
           page: this.escapeForSingleQuotedHtmlAttribute(JSON.stringify(page)),
+          isDev,
         },
         { layout: '' }
       )

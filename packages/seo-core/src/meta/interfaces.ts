@@ -31,9 +31,16 @@ export interface JsonLdConfig {
   data: Record<string, unknown>
 }
 
+export interface AnalyticsConfig {
+  gtag?: string // G-XXXXXXX
+  pixel?: string // FB Pixel
+  baidu?: string // Baidu HM
+}
+
 export interface PageSeoConfig {
   meta: MetaConfig
   og?: OpenGraphConfig
   twitter?: TwitterCardConfig
   jsonLd?: JsonLdConfig | JsonLdConfig[]
+  analytics?: AnalyticsConfig
 }

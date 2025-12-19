@@ -1,5 +1,5 @@
-import type { SitemapEntry } from '../../interfaces'
-import type { SeoConfig, SeoResolver } from '../../types'
+import type { SeoResolver, SitemapEntry } from '../../interfaces'
+import type { SeoConfig } from '../../types'
 import type { SeoStrategy } from '../interfaces'
 
 export class DynamicStrategy implements SeoStrategy {
@@ -20,7 +20,7 @@ export class DynamicStrategy implements SeoStrategy {
         let entries = await resolver.fetch()
 
         // Apply resolver-level defaults if entry doesn't have them
-        entries = entries.map((entry) => ({
+        entries = entries.map((entry: SitemapEntry) => ({
           ...entry,
           priority: entry.priority ?? resolver.priority,
           changefreq: entry.changefreq ?? resolver.changefreq,

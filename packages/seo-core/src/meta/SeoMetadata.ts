@@ -1,3 +1,4 @@
+import { AnalyticsBuilder } from './AnalyticsBuilder'
 import type { PageSeoConfig } from './interfaces'
 import { JsonLdBuilder } from './JsonLdBuilder'
 import { MetaTagBuilder } from './MetaTagBuilder'
@@ -9,6 +10,7 @@ export class SeoMetadata {
   private ogBuilder?: OpenGraphBuilder
   private twitterBuilder?: TwitterCardBuilder
   private jsonLdBuilder?: JsonLdBuilder
+  private analyticsBuilder?: AnalyticsBuilder
 
   constructor(config: PageSeoConfig) {
     this.metaBuilder = new MetaTagBuilder(config.meta)
@@ -37,6 +39,10 @@ export class SeoMetadata {
     if (config.jsonLd) {
       this.jsonLdBuilder = new JsonLdBuilder(config.jsonLd)
     }
+
+    if (config.analytics) {
+      this.analyticsBuilder = new AnalyticsBuilder(config.analytics)
+    }
   }
 
   toString(): string {
@@ -54,6 +60,10 @@ export class SeoMetadata {
 
     if (this.jsonLdBuilder) {
       parts.push(this.jsonLdBuilder.build())
+    }
+
+    if (this.analyticsBuilder) {
+      parts.push(this.analyticsBuilder.build())
     }
 
     return parts.join('\n')

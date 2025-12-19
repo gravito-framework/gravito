@@ -1,4 +1,4 @@
-import type { SitemapEntry } from '../../interfaces'
+import type { SitemapEntry } from '../interfaces'
 
 export interface SeoStrategy {
   /**

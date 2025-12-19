@@ -272,7 +272,9 @@ export abstract class FormRequest<T = unknown> {
         return ctx.req.json().catch(() => ({}))
       case 'form': {
         const fd = await ctx.req.formData().catch(() => null)
-        if (!fd) return {}
+        if (!fd) {
+          return {}
+        }
         const obj: Record<string, unknown> = {}
         fd.forEach((value, key) => {
           obj[key] = value
@@ -436,14 +438,16 @@ export function validateRequest<T>(RequestClass: new () => FormRequest<T>): Midd
           errorData.details.map((d) => ({
             field: d.field,
             message: d.message,
-            code: d.code,
+            ...(d.code !== undefined ? { code: d.code } : {}),
           })),
           errorData.message
         )
 
         if (request.redirect) {
           const url = request.redirect()
-          if (url) exception.withRedirect(url)
+          if (url) {
+            exception.withRedirect(url)
+          }
         }
 
         // Attach input data for flashing

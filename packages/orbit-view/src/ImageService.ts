@@ -23,9 +23,10 @@ export interface ImageOptions {
 
 export class ImageService {
   /**
-   * Generate a full `<img>` tag HTML string.
+   * Generate optimized image attributes.
+   * Useful for framework integrations (React, Vue) where you need props, not an HTML string.
    */
-  public generateImageTag(options: ImageOptions): string {
+  public generateImageAttributes(options: ImageOptions): Record<string, string> {
     const {
       src,
       width,
@@ -45,33 +46,30 @@ export class ImageService {
       throw new Error('Image alt attribute is required for accessibility')
     }
 
+    const attributes: Record<string, string> = {}
+
     // Normalize image path
     const normalizedSrc = this.normalizePath(src)
-
-    // Build attribute list
-    const attributes: string[] = []
-
-    // Required attributes
-    attributes.push(`src="${this.escapeHtml(normalizedSrc)}"`)
-    attributes.push(`alt="${this.escapeHtml(alt)}"`)
+    attributes.src = normalizedSrc
+    attributes.alt = alt
 
     // Width/height (prevents CLS)
     if (width !== undefined) {
-      attributes.push(`width="${width}"`)
+      attributes.width = String(width)
     }
     if (height !== undefined) {
-      attributes.push(`height="${height}"`)
+      attributes.height = String(height)
     }
 
     // Lazy loading
-    attributes.push(`loading="${loading}"`)
+    attributes.loading = loading
 
     // Decoding hint
-    attributes.push(`decoding="${decoding}"`)
+    attributes.decoding = decoding
 
     // Priority hint (LCP optimization)
     if (fetchpriority) {
-      attributes.push(`fetchpriority="${fetchpriority}"`)
+      attributes.fetchpriority = fetchpriority
     }
 
     // Generate srcset (if enabled)
@@ -81,27 +79,41 @@ export class ImageService {
         : this.generateDefaultSrcsetWidths(width)
       const srcsetValue = this.generateSrcset(normalizedSrc, widths)
       if (srcsetValue) {
-        attributes.push(`srcset="${srcsetValue}"`)
+        attributes.srcset = srcsetValue
       }
     }
 
     // `sizes` attribute (responsive images)
     if (sizes) {
-      attributes.push(`sizes="${this.escapeHtml(sizes)}"`)
+      attributes.sizes = sizes
     } else if (srcsetOption !== false && width !== undefined) {
       // Default `sizes` when width is provided and srcset is enabled
-      attributes.push(`sizes="(max-width: ${width}px) 100vw, ${width}px"`)
+      attributes.sizes = `(max-width: ${width}px) 100vw, ${width}px`
     }
 
     // Optional attributes
     if (className) {
-      attributes.push(`class="${this.escapeHtml(className)}"`)
+      attributes.class = className
     }
     if (style) {
-      attributes.push(`style="${this.escapeHtml(style)}"`)
+      attributes.style = style
     }
 
-    return `<img ${attributes.join(' ')} />`
+    return attributes
+  }
+
+  /**
+   * Generate a full `<img>` tag HTML string.
+   */
+  public generateImageTag(options: ImageOptions): string {
+    const attrs = this.generateImageAttributes(options)
+
+    // Convert attributes object to string
+    const attrString = Object.entries(attrs)
+      .map(([key, value]) => `${key}="${this.escapeHtml(value)}"`)
+      .join(' ')
+
+    return `<img ${attrString} />`
   }
 
   /**

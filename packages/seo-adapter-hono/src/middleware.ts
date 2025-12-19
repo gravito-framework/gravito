@@ -18,15 +18,20 @@ export function gravitoSeo(config: SeoConfig): MiddlewareHandler {
 
     const path = c.req.path
 
+    const isRobots = path.endsWith('/robots.txt')
+    const isSitemap = path.endsWith('/sitemap.xml') || path.includes('sitemap_page_')
+
+    if (!isRobots && !isSitemap) {
+      return await _next()
+    }
+
     // Robots.txt Handler
-    if (path.endsWith('/robots.txt')) {
+    if (isRobots) {
       if (config.robots) {
         const robotsBuilder = new RobotsBuilder(config.robots, config.baseUrl)
         const content = robotsBuilder.build()
         return c.text(content)
       }
-      // If config.robots is missing, maybe we shouldn't handle it?
-      // Or return a default one allowing everything + sitemap?
       const defaultBuilder = new RobotsBuilder(
         {
           rules: [{ userAgent: '*', allow: ['/'] }],
@@ -37,9 +42,6 @@ export function gravitoSeo(config: SeoConfig): MiddlewareHandler {
     }
 
     // Sitemap Handler
-    // For safety, only run sitemap logic if path ends in .xml OR user deliberately mounted this here.
-    // We'll trust the mount point mostly, but let's be safe.
-
     if (!initialized) {
       try {
         await engine.init()
@@ -55,16 +57,8 @@ export function gravitoSeo(config: SeoConfig): MiddlewareHandler {
       const entries = await strategy.getEntries()
 
       const renderer = new SeoRenderer(config)
-      const page = c.req.query('page') ? Number.parseInt(c.req.query('page')!) : undefined
-
-      // We need the full URL for the index to point back to itself?
-      // Actually we need the absolute URL of the *sitemap endpoint*.
-      // c.req.url gives full URL.
-      // But we probably want to use the public Base URL from config if possible,
-      // combined with the path.
-      // However, usually sitemap entries in the index MUST match the site's domain.
-
-      // Let's use config.baseUrl + path for the index links for consistency.
+      const pageQuery = c.req.query('page')
+      const page = pageQuery ? Number.parseInt(pageQuery, 10) : undefined
       const fullUrl = `${config.baseUrl}${path}`
 
       const xml = renderer.render(entries, fullUrl, page)

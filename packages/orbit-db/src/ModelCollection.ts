@@ -17,10 +17,15 @@ export class ModelCollection<T> extends Array<T> {
   /**
    * Convert to JSON.
    */
-  toJSON(): any[] {
-    return this.map((item: any) => {
-      if (item && typeof item.toJSON === 'function') {
-        return item.toJSON()
+  toJSON(): unknown[] {
+    return this.map((item: T) => {
+      if (
+        item &&
+        typeof item === 'object' &&
+        'toJSON' in item &&
+        typeof (item as { toJSON?: () => unknown }).toJSON === 'function'
+      ) {
+        return (item as { toJSON: () => unknown }).toJSON()
       }
       return item
     })
@@ -29,8 +34,8 @@ export class ModelCollection<T> extends Array<T> {
   /**
    * Find the first item that matches a predicate.
    */
-  // @ts-expect-error
-  find(callback: (item: T, index: number, array: T[]) => boolean): T | undefined {
+
+  override find(callback: (item: T, index: number, array: T[]) => boolean): T | undefined {
     return super.find(callback)
   }
 
@@ -51,16 +56,16 @@ export class ModelCollection<T> extends Array<T> {
   /**
    * Map.
    */
-  // @ts-expect-error
-  map<U>(callback: (item: T, index: number, array: T[]) => U): ModelCollection<U> {
+
+  override map<U>(callback: (item: T, index: number, array: T[]) => U): ModelCollection<U> {
     return new ModelCollection(super.map(callback))
   }
 
   /**
    * Filter.
    */
-  // @ts-expect-error
-  filter(callback: (item: T, index: number, array: T[]) => boolean): ModelCollection<T> {
+
+  override filter(callback: (item: T, index: number, array: T[]) => boolean): ModelCollection<T> {
     return new ModelCollection(super.filter(callback))
   }
 }
