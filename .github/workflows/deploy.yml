@@ -38,16 +38,14 @@ jobs:
         env:
           SKIP_INSTALL_SIMPLE_GIT_HOOKS: 1
 
-      - name: Build Packages
-        run: |
-          cd packages/orbit-sitemap && bun run build
-          # Add other packages if needed, but sitemap is critical for build script
+      - name: Build All Packages
+        run: bun run build
 
       - name: Build Official Site
         working-directory: examples/official-site
         run: |
           bun run build:client
-          bun run generate
+          bun run build:static
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
