@@ -37,12 +37,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CarlLee1983/gravito.git"
+    "url": "git+https://github.com/gravito-framework/gravito.git"
   },
   "bugs": {
-    "url": "https://github.com/CarlLee1983/gravito/issues"
+    "url": "https://github.com/gravito-framework/gravito/issues"
   },
-  "homepage": "https://github.com/CarlLee1983/gravito#readme",
+  "homepage": "https://github.com/gravito-framework/gravito#readme",
   "engines": {
     "node": ">=18.0.0"
   },

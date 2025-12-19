@@ -37,7 +37,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CarlLee1983/gravito.git",
+    "url": "https://github.com/gravito-framework/gravito.git",
     "directory": "packages/validator"
   },
   "keywords": [
