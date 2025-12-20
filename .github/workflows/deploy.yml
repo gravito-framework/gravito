@@ -47,6 +47,7 @@ jobs:
           bun run build:client
           bun run build:static
         env:
+          NODE_ENV: production
           VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
 
       - name: Upload artifact

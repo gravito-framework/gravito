@@ -7,7 +7,7 @@
         "dev:server": "NODE_ENV=development bun run --watch src/index.ts",
         "dev:vite": "vite",
         "build:client": "vite build",
-        "build:static": "bun build-static.ts",
+        "build:static": "NODE_ENV=production bun build-static.ts",
         "typecheck": "tsc --noEmit",
         "start": "bun run src/index.ts"
     },
