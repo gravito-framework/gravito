@@ -1,7 +1,6 @@
-import { join } from 'node:path'
 import { mkdirSync } from 'node:fs'
 import { unlink } from 'node:fs/promises'
-import { BunFile } from 'bun'
+import { join } from 'node:path'
 import type { SessionId, SessionRecord, SessionStore } from '../types'
 
 export class FileSessionStore implements SessionStore {
@@ -28,7 +27,7 @@ export class FileSessionStore implements SessionStore {
     }
   }
 
-  async set(id: SessionId, record: SessionRecord, ttlSeconds: number): Promise<void> {
+  async set(id: SessionId, record: SessionRecord, _ttlSeconds: number): Promise<void> {
     const file = Bun.file(this.getFilePath(id))
     await Bun.write(file, JSON.stringify(record))
   }

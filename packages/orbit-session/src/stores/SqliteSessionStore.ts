@@ -5,7 +5,7 @@ export class SqliteSessionStore implements SessionStore {
   private db: Database
   private tableName: string
 
-  constructor(path: string, tableName: string = 'sessions') {
+  constructor(path: string, tableName = 'sessions') {
     this.db = new Database(path, { create: true })
     this.tableName = tableName
     this.init()
@@ -20,11 +20,15 @@ export class SqliteSessionStore implements SessionStore {
         expires_at INTEGER NOT NULL
       )
     `)
-    this.db.run(`CREATE INDEX IF NOT EXISTS idx_${this.tableName}_expires ON "${this.tableName}" (expires_at)`)
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_${this.tableName}_expires ON "${this.tableName}" (expires_at)`
+    )
   }
 
   async get(id: SessionId): Promise<SessionRecord | null> {
-    const query = this.db.query(`SELECT payload, expires_at FROM "${this.tableName}" WHERE id = $id`)
+    const query = this.db.query(
+      `SELECT payload, expires_at FROM "${this.tableName}" WHERE id = $id`
+    )
     const row = query.get({ $id: id }) as { payload: string; expires_at: number } | null
 
     if (!row) {
@@ -53,7 +57,7 @@ export class SqliteSessionStore implements SessionStore {
       $id: id,
       $payload: JSON.stringify(record),
       $lastActivity: Math.floor(record.lastActivityAt / 1000),
-      $expiresAt: expiresAt
+      $expiresAt: expiresAt,
     })
   }
 

@@ -3,7 +3,7 @@ import type { SessionId, SessionRecord, SessionStore } from '../types'
 
 export class RedisSessionStore implements SessionStore {
   constructor(
-    private prefix: string = 'session:',
+    private prefix = 'session:',
     private connection?: string
   ) {}
 
