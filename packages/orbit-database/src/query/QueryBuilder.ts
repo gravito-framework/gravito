@@ -823,8 +823,12 @@ export class QueryBuilder<T = Record<string, unknown>> implements QueryBuilderCo
 
     /**
      * Paginate results
+     * Automatically ensures deterministic ordering by appending primary key
      */
-    async paginate(perPage = 15, page = 1): Promise<PaginateResult<T>> {
+    async paginate(perPage = 15, page = 1, primaryKey = 'id'): Promise<PaginateResult<T>> {
+        // Ensure deterministic ordering for stable pagination
+        this.ensureDeterministicOrder(primaryKey)
+
         // Get total count
         const total = await this.clone().count()
 
@@ -844,6 +848,26 @@ export class QueryBuilder<T = Record<string, unknown>> implements QueryBuilderCo
                 hasPrev: page > 1,
             },
         }
+    }
+
+    /**
+     * Ensure deterministic ordering for stable pagination
+     * Appends primary key to ORDER BY if not already present
+     * 
+     * This prevents row duplication/skipping when paginating on non-unique columns
+     * @example Without deterministic order: ORDER BY created_at (rows may shift)
+     * @example With deterministic order: ORDER BY created_at, id (stable pagination)
+     */
+    ensureDeterministicOrder(primaryKey = 'id'): this {
+        // Check if primary key is already in the ORDER BY
+        const hasIdOrder = this.orders.some(order => order.column === primaryKey)
+
+        if (!hasIdOrder) {
+            // Append primary key as tie-breaker
+            this.orders.push({ column: primaryKey, direction: 'asc' })
+        }
+
+        return this
     }
 
     // ============================================================================

@@ -70,6 +70,20 @@ export type { Migration, MigratorOptions, MigrationResult, MigrationRecord, Migr
 export { SeederRunner, Factory, factory } from './seed'
 export type { Seeder, SeederRunnerOptions, FactoryDefinition, SeederFile } from './seed'
 
+// ORM
+export { SchemaRegistry, SchemaSniffer, Model, DirtyTracker } from './orm'
+export { ColumnNotFoundError, TypeMismatchError, NullableConstraintError, ModelNotFoundError } from './orm'
+export type {
+    SchemaMode,
+    SchemaRegistryOptions,
+    TableSchema,
+    ColumnSchema as OrmColumnSchema,
+    SchemaLock,
+    ModelAttributes,
+    ModelConstructor,
+    ModelStatic
+} from './orm'
+
 // Drivers
 export { PostgresDriver } from './drivers/PostgresDriver'
 
