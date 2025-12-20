@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto'
-import type { GravitoOrbit, PlanetCore } from 'gravito-core'
+import type { CacheService, GravitoOrbit, PlanetCore } from 'gravito-core'
 import type { Context, Next } from 'hono'
 import { FileSessionStore } from './stores/FileSessionStore'
 import { MemorySessionStore } from './stores/MemorySessionStore'
@@ -164,7 +164,7 @@ export class OrbitSession implements GravitoOrbit {
       } else if (driver === 'cache') {
         store = {
           get: async (id) => {
-            const cache = c.get(cacheKey as any) as any
+            const cache = c.get(cacheKey as never) as CacheService | undefined
             if (!cache?.get) {
               throw new Error(
                 `[OrbitSession] Session driver is "cache" but cache service "${cacheKey}" was not found in context.`
@@ -181,12 +181,12 @@ export class OrbitSession implements GravitoOrbit {
             }
           },
           set: async (id, record, ttlSeconds) => {
-            const cache = c.get(cacheKey as any) as any
-            await cache.set(`${keyPrefix}${id}`, JSON.stringify(record), ttlSeconds)
+            const cache = c.get(cacheKey as never) as CacheService | undefined
+            await cache?.set(`${keyPrefix}${id}`, JSON.stringify(record), ttlSeconds)
           },
           delete: async (id) => {
-            const cache = c.get(cacheKey as any) as any
-            await cache.delete(`${keyPrefix}${id}`)
+            const cache = c.get(cacheKey as never) as CacheService | undefined
+            await cache?.delete(`${keyPrefix}${id}`)
           },
         }
       } else {
@@ -247,7 +247,7 @@ export class OrbitSession implements GravitoOrbit {
         isStarted: () => started,
         get: (key, defaultValue) => {
           ensureStarted()
-          return (key in data ? (data[key] as any) : defaultValue) as any
+          return (key in data ? (data[key] as never) : defaultValue) as never
         },
         has: (key) => {
           ensureStarted()
@@ -275,7 +275,7 @@ export class OrbitSession implements GravitoOrbit {
         },
         pull: (key, defaultValue) => {
           ensureStarted()
-          const val = (key in data ? (data[key] as any) : defaultValue) as any
+          const val = (key in data ? (data[key] as never) : defaultValue) as never
           if (key in data) {
             delete data[key]
             markDirty()
@@ -290,9 +290,9 @@ export class OrbitSession implements GravitoOrbit {
         getFlash: (key, defaultValue) => {
           ensureStarted()
           if (!flashNow.has(key)) {
-            return defaultValue as any
+            return defaultValue as never
           }
-          return (key in data ? (data[key] as any) : defaultValue) as any
+          return (key in data ? (data[key] as never) : defaultValue) as never
         },
         reflash: () => {
           for (const key of flashNow) {

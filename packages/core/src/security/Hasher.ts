@@ -27,13 +27,21 @@ export class BunHasher implements Hasher {
     value: string,
     options?: { algorithm?: 'bcrypt' | 'argon2id'; cost?: number }
   ): Promise<string> {
-    // Bun.password.hash(text, options)
-    // algorithm defaults to bcrypt
-    return await (Bun as any).password.hash(value, options)
+    const bun = Bun as unknown as {
+      password: {
+        hash(v: string, o?: unknown): Promise<string>
+      }
+    }
+    return await bun.password.hash(value, options)
   }
 
   async check(value: string, hashedValue: string): Promise<boolean> {
-    return await (Bun as any).password.verify(value, hashedValue)
+    const bun = Bun as unknown as {
+      password: {
+        verify(v: string, h: string): Promise<boolean>
+      }
+    }
+    return await bun.password.verify(value, hashedValue)
   }
 
   needsRehash(_hashedValue: string, _options?: Record<string, unknown>): boolean {

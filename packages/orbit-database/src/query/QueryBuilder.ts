@@ -58,10 +58,12 @@ export class QueryBuilder<T = Record<string, unknown>> implements QueryBuilderCo
   protected limitValue: number | undefined = undefined
   protected offsetValue: number | undefined = undefined
   protected bindingsList: unknown[] = []
+  // biome-ignore lint/suspicious/noExplicitAny: Eager loads need any for flexibility
   protected eagerLoads = new Map<string, (query: QueryBuilderContract<any>) => void>()
   protected _cache?: { ttl: number; key?: string }
 
   // Global Scopes
+  // biome-ignore lint/suspicious/noExplicitAny: Global scopes need any for flexibility
   protected globalScopes = new Map<string, (query: QueryBuilderContract<any>) => void>()
   protected removedScopes = new Set<string>()
   protected _isApplyingScopes = false
@@ -843,13 +845,18 @@ export class QueryBuilder<T = Record<string, unknown>> implements QueryBuilderCo
    * Add a relationship to be eager loaded
    */
   with(
+    // biome-ignore lint/suspicious/noExplicitAny: Eager loads need any for flexibility
     relation: string | string[] | Record<string, (query: QueryBuilderContract<any>) => void>
   ): this {
     if (typeof relation === 'string') {
-      this.eagerLoads.set(relation, () => {})
+      this.eagerLoads.set(relation, () => {
+        /* noop */
+      })
     } else if (Array.isArray(relation)) {
       for (const rel of relation) {
-        this.eagerLoads.set(rel, () => {})
+        this.eagerLoads.set(rel, () => {
+          /* noop */
+        })
       }
     } else {
       for (const [rel, callback] of Object.entries(relation)) {
@@ -862,6 +869,7 @@ export class QueryBuilder<T = Record<string, unknown>> implements QueryBuilderCo
   /**
    * Get eager loads
    */
+  // biome-ignore lint/suspicious/noExplicitAny: Eager loads need any for flexibility
   getEagerLoads(): Map<string, (query: QueryBuilderContract<any>) => void> {
     return this.eagerLoads
   }
@@ -890,7 +898,7 @@ export class QueryBuilder<T = Record<string, unknown>> implements QueryBuilderCo
    * Restore soft deleted records
    */
   async restore(): Promise<number> {
-    return this.withTrashed().update({ deleted_at: null } as any)
+    return this.withTrashed().update({ deleted_at: null } as never)
   }
 
   /**

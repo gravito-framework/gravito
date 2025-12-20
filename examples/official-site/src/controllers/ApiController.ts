@@ -8,7 +8,7 @@ const startTime = Date.now()
  * Handles all API endpoints
  */
 export class ApiController {
-  [key: string]: any
+  [key: string]: unknown
   constructor(private core: PlanetCore) {}
 
   /**

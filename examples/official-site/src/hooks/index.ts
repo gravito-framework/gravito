@@ -14,7 +14,7 @@ export function registerHooks(core: PlanetCore): void {
   })
 
   // Add metadata to all API responses
-  core.hooks.addFilter('api:response', async (data: any) => ({
+  core.hooks.addFilter<Record<string, unknown>>('api:response', async (data) => ({
     ...data,
     _meta: {
       timestamp: new Date().toISOString(),
