@@ -36,7 +36,9 @@ export class RedisClient implements RedisClientContract {
    * Connect to Redis
    */
   async connect(): Promise<void> {
-    if (this.connected) return
+    if (this.connected) {
+      return
+    }
 
     this.ioredis = await this.loadIORedis()
 
@@ -140,11 +142,21 @@ export class RedisClient implements RedisClientContract {
     const client = this.getClient()
     const args: unknown[] = [key, value]
 
-    if (options?.ex) args.push('EX', options.ex)
-    if (options?.px) args.push('PX', options.px)
-    if (options?.nx) args.push('NX')
-    if (options?.xx) args.push('XX')
-    if (options?.keepttl) args.push('KEEPTTL')
+    if (options?.ex) {
+      args.push('EX', options.ex)
+    }
+    if (options?.px) {
+      args.push('PX', options.px)
+    }
+    if (options?.nx) {
+      args.push('NX')
+    }
+    if (options?.xx) {
+      args.push('XX')
+    }
+    if (options?.keepttl) {
+      args.push('KEEPTTL')
+    }
 
     return (await (client as IORedisClientWithCall).call('SET', ...args)) as 'OK' | null
   }
@@ -449,8 +461,12 @@ export class RedisClient implements RedisClientContract {
 
   async scan(cursor: string, options?: ScanOptions): Promise<ScanResult> {
     const args: unknown[] = [cursor]
-    if (options?.match) args.push('MATCH', options.match)
-    if (options?.count) args.push('COUNT', options.count)
+    if (options?.match) {
+      args.push('MATCH', options.match)
+    }
+    if (options?.count) {
+      args.push('COUNT', options.count)
+    }
 
     const [newCursor, keys] = await this.getClient().scan(...args)
     return { cursor: newCursor, keys }
@@ -513,7 +529,9 @@ export class RedisClient implements RedisClientContract {
         const ch = args[0] as string
         const msg = args[1] as string
         const handler = this.subscriptions.get(ch)
-        if (handler) handler(msg, ch)
+        if (handler) {
+          handler(msg, ch)
+        }
       })
     }
 

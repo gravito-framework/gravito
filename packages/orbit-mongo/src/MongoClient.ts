@@ -32,7 +32,9 @@ export class MongoClient implements MongoClientContract {
    * Connect to MongoDB
    */
   async connect(): Promise<void> {
-    if (this.connected) return
+    if (this.connected) {
+      return
+    }
 
     this.mongodb = await this.loadMongoDBModule()
 
