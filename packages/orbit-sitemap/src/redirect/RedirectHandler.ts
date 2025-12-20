@@ -29,7 +29,7 @@ export class RedirectHandler {
    */
   async processEntries(entries: SitemapEntry[]): Promise<SitemapEntry[]> {
     const { manager, strategy, followChains, maxChainLength } = this.options
-    const processedEntries: SitemapEntry[] = []
+    const _processedEntries: SitemapEntry[] = []
     const redirectMap = new Map<string, RedirectRule>()
 
     // 1. 解析所有轉址

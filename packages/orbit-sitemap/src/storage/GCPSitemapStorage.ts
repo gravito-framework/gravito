@@ -156,7 +156,7 @@ export class GCPSitemapStorage implements SitemapStorage {
     for (const shadowFile of shadowFiles) {
       // 提取原始檔名（移除 .shadow.{id} 部分）
       const originalKey = shadowFile.name.replace(/\.shadow\.[^/]+$/, '')
-      const originalFilename = originalKey.replace(prefix, '')
+      const _originalFilename = originalKey.replace(prefix, '')
 
       if (this.shadowMode === 'atomic') {
         // 原子切換：複製影子檔案到目標位置

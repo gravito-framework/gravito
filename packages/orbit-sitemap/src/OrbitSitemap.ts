@@ -349,7 +349,7 @@ export class OrbitSitemap {
         return ctx.json({ error: 'Progress tracking is not enabled' }, 400)
       }
 
-      const limit = parseInt(ctx.req.query('limit') || '10')
+      const limit = parseInt(ctx.req.query('limit') || '10', 10)
       const history = await opts.progressStorage.list(limit)
 
       return ctx.json(history)

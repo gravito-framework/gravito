@@ -112,7 +112,7 @@ export class IncrementalGenerator {
   /**
    * 生成差異部分
    */
-  private async generateDiff(diff: {
+  private async generateDiff(_diff: {
     added: SitemapEntry[]
     updated: SitemapEntry[]
     removed: string[]

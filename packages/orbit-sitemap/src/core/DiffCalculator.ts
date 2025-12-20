@@ -1,4 +1,4 @@
-import type { ChangeType, SitemapChange, SitemapEntry } from '../types'
+import type { SitemapChange, SitemapEntry } from '../types'
 
 export interface DiffResult {
   added: SitemapEntry[]

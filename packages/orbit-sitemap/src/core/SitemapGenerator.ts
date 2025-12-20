@@ -1,5 +1,5 @@
 import type { SitemapProvider, SitemapStorage, SitemapStreamOptions } from '../types'
-import type { ShadowProcessor, ShadowProcessorOptions } from './ShadowProcessor'
+import type { ShadowProcessor } from './ShadowProcessor'
 import { ShadowProcessor as ShadowProcessorImpl } from './ShadowProcessor'
 import { SitemapIndex } from './SitemapIndex'
 import { SitemapStream } from './SitemapStream'

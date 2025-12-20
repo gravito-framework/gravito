@@ -1,4 +1,4 @@
-import type { ChangeTracker, SitemapChange, SitemapEntry } from '../types'
+import type { ChangeTracker, SitemapChange } from '../types'
 
 export interface MemoryChangeTrackerOptions {
   maxChanges?: number // 最大變更記錄數，預設 100000

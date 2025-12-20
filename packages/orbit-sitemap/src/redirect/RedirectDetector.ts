@@ -134,7 +134,7 @@ export class RedirectDetector {
       return {
         from: row[columns.from],
         to: row[columns.to],
-        type: parseInt(row[columns.type]) as 301 | 302,
+        type: parseInt(row[columns.type], 10) as 301 | 302,
       }
     } catch {
       return null

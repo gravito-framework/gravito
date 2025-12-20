@@ -205,11 +205,13 @@ export class S3SitemapStorage implements SitemapStorage {
     )
 
     for (const shadowFile of shadowFiles) {
-      if (!shadowFile.Key) continue
+      if (!shadowFile.Key) {
+        continue
+      }
 
       // 提取原始檔名（移除 .shadow.{id} 部分）
       const originalKey = shadowFile.Key.replace(/\.shadow\.[^/]+$/, '')
-      const originalFilename = originalKey.replace(prefix, '')
+      const _originalFilename = originalKey.replace(prefix, '')
 
       if (this.shadowMode === 'atomic') {
         // 原子切換：複製影子檔案到目標位置
@@ -289,7 +291,9 @@ export class S3SitemapStorage implements SitemapStorage {
       // 提取版本號
       const versions: string[] = []
       for (const obj of listResponse.Contents) {
-        if (!obj.Key) continue
+        if (!obj.Key) {
+          continue
+        }
         const match = obj.Key.match(/\.v([^/]+)$/)
         if (match) {
           versions.push(match[1])
