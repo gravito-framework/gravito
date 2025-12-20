@@ -8,13 +8,13 @@
  * Thrown when accessing/setting a column that doesn't exist in schema
  */
 export class ColumnNotFoundError extends Error {
-    constructor(
-        public readonly table: string,
-        public readonly column: string
-    ) {
-        super(`Column "${column}" does not exist on table "${table}".`)
-        this.name = 'ColumnNotFoundError'
-    }
+  constructor(
+    public readonly table: string,
+    public readonly column: string
+  ) {
+    super(`Column "${column}" does not exist on table "${table}".`)
+    this.name = 'ColumnNotFoundError'
+  }
 }
 
 /**
@@ -22,18 +22,18 @@ export class ColumnNotFoundError extends Error {
  * Thrown when setting a value with incompatible type
  */
 export class TypeMismatchError extends Error {
-    constructor(
-        public readonly table: string,
-        public readonly column: string,
-        public readonly expectedType: string,
-        public readonly actualType: string
-    ) {
-        super(
-            `Type mismatch for column "${column}" on table "${table}". ` +
-            `Expected ${expectedType}, got ${actualType}.`
-        )
-        this.name = 'TypeMismatchError'
-    }
+  constructor(
+    public readonly table: string,
+    public readonly column: string,
+    public readonly expectedType: string,
+    public readonly actualType: string
+  ) {
+    super(
+      `Type mismatch for column "${column}" on table "${table}". ` +
+        `Expected ${expectedType}, got ${actualType}.`
+    )
+    this.name = 'TypeMismatchError'
+  }
 }
 
 /**
@@ -41,13 +41,13 @@ export class TypeMismatchError extends Error {
  * Thrown when setting null on a non-nullable column
  */
 export class NullableConstraintError extends Error {
-    constructor(
-        public readonly table: string,
-        public readonly column: string
-    ) {
-        super(`Column "${column}" on table "${table}" cannot be null.`)
-        this.name = 'NullableConstraintError'
-    }
+  constructor(
+    public readonly table: string,
+    public readonly column: string
+  ) {
+    super(`Column "${column}" on table "${table}" cannot be null.`)
+    this.name = 'NullableConstraintError'
+  }
 }
 
 /**
@@ -55,11 +55,11 @@ export class NullableConstraintError extends Error {
  * Thrown when a model is not found in the database
  */
 export class ModelNotFoundError extends Error {
-    constructor(
-        public readonly model: string,
-        public readonly key: unknown
-    ) {
-        super(`${model} with key "${key}" not found.`)
-        this.name = 'ModelNotFoundError'
-    }
+  constructor(
+    public readonly model: string,
+    public readonly key: unknown
+  ) {
+    super(`${model} with key "${key}" not found.`)
+    this.name = 'ModelNotFoundError'
+  }
 }

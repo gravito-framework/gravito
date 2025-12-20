@@ -2,14 +2,14 @@
  * Schema Module Index
  */
 
-export type {
-    ColumnType,
-    ColumnSchema,
-    TableSchema,
-    SchemaLock,
-    SerializedTableSchema,
-    SerializedColumnSchema,
-} from './types'
+export { type SchemaMode, SchemaRegistry, type SchemaRegistryOptions } from './SchemaRegistry'
 
 export { SchemaSniffer } from './SchemaSniffer'
-export { SchemaRegistry, type SchemaMode, type SchemaRegistryOptions } from './SchemaRegistry'
+export type {
+  ColumnSchema,
+  ColumnType,
+  SchemaLock,
+  SerializedColumnSchema,
+  SerializedTableSchema,
+  TableSchema,
+} from './types'

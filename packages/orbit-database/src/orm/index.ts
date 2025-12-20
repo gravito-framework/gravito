@@ -2,5 +2,5 @@
  * ORM Module Index
  */
 
-export * from './schema'
 export * from './model'
+export * from './schema'

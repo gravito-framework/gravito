@@ -2,23 +2,23 @@
  * Model Module Index
  */
 
-export { Model, type ModelAttributes, type ModelConstructor, type ModelStatic } from './Model'
 export { DirtyTracker } from './DirtyTracker'
 export {
-    ColumnNotFoundError,
-    TypeMismatchError,
-    NullableConstraintError,
-    ModelNotFoundError
+  ColumnNotFoundError,
+  ModelNotFoundError,
+  NullableConstraintError,
+  TypeMismatchError,
 } from './errors'
+export { Model, type ModelAttributes, type ModelConstructor, type ModelStatic } from './Model'
 export {
-    HasOne,
-    HasMany,
-    BelongsTo,
-    BelongsToMany,
-    eagerLoad,
-    eagerLoadMany,
-    getRelationships,
-    type RelationType,
-    type RelationshipOptions,
-    type RelationshipMeta,
+  BelongsTo,
+  BelongsToMany,
+  eagerLoad,
+  eagerLoadMany,
+  getRelationships,
+  HasMany,
+  HasOne,
+  type RelationshipMeta,
+  type RelationshipOptions,
+  type RelationType,
 } from './relationships'
