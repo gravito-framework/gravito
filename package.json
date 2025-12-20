@@ -9,6 +9,7 @@
     "scripts": {
         "build": "bun run --filter './packages/*' build",
         "test": "bun run --filter '*' test",
+        "test:ci": "bun run --filter './packages/*' test",
         "lint": "biome lint .",
         "format": "biome format --write .",
         "check": "biome check .",
