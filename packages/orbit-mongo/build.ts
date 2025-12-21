@@ -1,6 +1,6 @@
 import { spawn } from 'bun'
 
-console.log('Building @gravito/orbit-auth...')
+console.log('Building @gravito/dark-matter...')
 
 // Clean dist
 await Bun.$`rm -rf dist`
@@ -11,10 +11,9 @@ await Bun.build({
   outdir: './dist',
   format: 'esm',
   target: 'node',
-  sourcemap: 'external',
   minify: false,
   naming: '[dir]/[name].mjs',
-  external: ['gravito-core', 'hono', '@gravito/stasis'],
+  external: ['gravito-core', 'mongodb'],
 })
 
 // Build CJS
@@ -23,10 +22,9 @@ await Bun.build({
   outdir: './dist',
   format: 'cjs',
   target: 'node',
-  sourcemap: 'external',
   minify: false,
   naming: '[dir]/[name].cjs',
-  external: ['gravito-core', 'hono', '@gravito/stasis'],
+  external: ['gravito-core', 'mongodb'],
 })
 
 console.log('📝 Generating type declarations...')

@@ -1,6 +1,6 @@
 import { serveStatic } from 'hono/bun'
 import { defineConfig, PlanetCore } from '../packages/core/src/index.ts'
-import { OrbitCache } from '../packages/orbit-cache/src/index.ts'
+import { OrbitCache } from '../packages/stasis/src/index.ts'
 
 // 1. Define Configuration (IoC Style)
 const config = defineConfig({

@@ -3780,7 +3780,7 @@ auth.install(core)
 使用 Orbit Cache 快取使用者資料：
 
 ```typescript
-import { OrbitCache } from '@gravito/orbit-cache'
+import { OrbitCache } from '@gravito/stasis'
 import { OrbitAuth, CallbackUserProvider } from '@gravito/orbit-auth'
 
 const core = new PlanetCore()

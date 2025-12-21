@@ -17,7 +17,7 @@ Official "First-Party" Orbits to jumpstart development.
 - [x] **Standard Database Orbit (Orbit-DB)**: Drizzle ORM integration.
 - [x] **Auth Orbit**: JWT/Session authentication provider.
 - [x] **Storage Orbit**: S3/Local file storage wrapper.
-- [x] **@gravito/orbit-cache (Performance)**: Redis/InMemory caching layer.
+- [x] **@gravito/stasis (Performance)**: Redis/InMemory caching layer.
 
 ## 🛸 Phase 4: Interstellar Travel (Ecosystem)
 - [x] **CLI Tool**: `gravito create` to scaffold new projects and plugins.

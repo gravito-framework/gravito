@@ -1,4 +1,4 @@
-import { OrbitCache } from '@gravito/orbit-cache'
+import { OrbitCache } from '@gravito/stasis'
 import { OrbitInertia } from '@gravito/orbit-inertia'
 import { OrbitView } from '@gravito/orbit-view'
 import { defineConfig, PlanetCore } from 'gravito-core'

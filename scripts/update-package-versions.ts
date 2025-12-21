@@ -15,7 +15,7 @@ const PACKAGES_DIR = join(process.cwd(), 'packages');
 // 官網使用的套件（可以發布 beta 或穩定版）
 const OFFICIAL_SITE_PACKAGES = [
   'gravito-core',
-  '@gravito/orbit-cache',
+  '@gravito/stasis',
   '@gravito/orbit-inertia',
   '@gravito/orbit-view',
   '@gravito/luminosity-adapter-hono',

@@ -95,7 +95,7 @@ bun run --filter '*' publish
 以下套件已在官網實際使用，發布為 **beta 版本** (`1.0.0-beta.1`)：
 
 - `gravito-core` - 核心框架
-- `@gravito/orbit-cache` - 快取模組
+- `@gravito/stasis` - 快取模組
 - `@gravito/orbit-inertia` - Inertia.js 整合
 - `@gravito/orbit-view` - 視圖模組
 - `@gravito/seo-adapter-hono` - SEO Hono 適配器

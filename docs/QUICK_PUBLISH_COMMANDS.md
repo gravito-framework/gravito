@@ -8,8 +8,8 @@
 # gravito-core
 cd packages/core && npm publish --access public --tag beta && cd ../..
 
-# @gravito/orbit-cache
-cd packages/orbit-cache && npm publish --access public --tag beta && cd ../..
+# @gravito/stasis
+cd packages/stasis && npm publish --access public --tag beta && cd ../..
 
 # @gravito/orbit-inertia
 cd packages/orbit-inertia && npm publish --access public --tag beta && cd ../..

@@ -108,7 +108,7 @@ npm publish --access public --otp=<你的OTP代碼>
 
 以下套件發布為 `1.0.0-beta.1`：
 - `gravito-core`
-- `@gravito/orbit-cache`
+- `@gravito/stasis`
 - `@gravito/orbit-inertia`
 - `@gravito/orbit-view`
 - `@gravito/seo-adapter-hono`

@@ -180,7 +180,7 @@ const res = await fetch('/login', {
 | 情境 | 建議設定 |
 | --- | --- |
 | 本機開發 | `driver: 'memory'` |
-| 多機部署 | `driver: 'cache'` + `@gravito/orbit-cache` |
+| 多機部署 | `driver: 'cache'` + `@gravito/stasis` |
 | 需要直接連 Redis | `driver: 'redis'` |
 | 需要落地檔案 | `driver: 'file'` |
 

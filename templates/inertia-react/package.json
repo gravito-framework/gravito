@@ -10,7 +10,7 @@
     "dependencies": {
         "gravito-core": "workspace:*",
         "@gravito/client": "workspace:*",
-        "@gravito/orbit-cache": "workspace:*",
+        "@gravito/stasis": "workspace:*",
         "@gravito/orbit-view": "workspace:*",
         "@gravito/orbit-inertia": "workspace:*",
         "@inertiajs/react": "^1.0.0",

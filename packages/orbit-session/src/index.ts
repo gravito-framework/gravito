@@ -168,10 +168,7 @@ export class OrbitSession implements GravitoOrbit {
       csrf: csrfEnabled,
     })
 
-    console.log('[OrbitSession] Adapter constructor:', core.adapter.constructor.name)
-
     core.adapter.use('*', async (c: Context, next: Next) => {
-      console.log('[OrbitSession] Context constructor:', c.constructor.name)
       let store: SessionStore
 
       if (resolved.store) {

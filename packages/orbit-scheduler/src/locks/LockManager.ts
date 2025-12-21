@@ -1,4 +1,4 @@
-import type { CacheManager } from '@gravito/orbit-cache'
+import type { CacheManager } from '@gravito/stasis'
 import { CacheLockStore } from './CacheLockStore'
 import type { LockStore } from './LockStore'
 import { MemoryLockStore } from './MemoryLockStore'

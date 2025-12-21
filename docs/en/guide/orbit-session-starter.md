@@ -161,7 +161,7 @@ const res = await fetch('/login', {
 | Scenario | Recommendation |
 | --- | --- |
 | Local development | `driver: 'memory'` |
-| Multi-machine | `driver: 'cache'` + `@gravito/orbit-cache` |
+| Multi-machine | `driver: 'cache'` + `@gravito/stasis` |
 | Direct Redis | `driver: 'redis'` |
 | File-based | `driver: 'file'` |
 

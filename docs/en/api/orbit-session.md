@@ -29,11 +29,11 @@ bun add @gravito/orbit-session
 
 ## Setup (multi-machine recommended)
 
-For multi-machine deployments, store sessions in a shared cache (e.g. Redis) via `@gravito/orbit-cache`:
+For multi-machine deployments, store sessions in a shared cache (e.g. Redis) via `@gravito/stasis`:
 
 ```ts
 import { PlanetCore, defineConfig } from 'gravito-core'
-import { OrbitCache } from '@gravito/orbit-cache'
+import { OrbitCache } from '@gravito/stasis'
 import { OrbitSession } from '@gravito/orbit-session'
 
 const config = defineConfig({

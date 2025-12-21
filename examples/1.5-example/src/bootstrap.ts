@@ -1,4 +1,4 @@
-import { OrbitCache } from '@gravito/orbit-cache'
+import { OrbitCache } from '@gravito/stasis'
 import { OrbitDB } from '@gravito/orbit-db'
 import { OrbitInertia } from '@gravito/orbit-inertia'
 import { OrbitMail } from '@gravito/orbit-mail'

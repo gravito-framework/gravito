@@ -17,7 +17,7 @@ This website demonstrates the full power of the Gravito ecosystem, specifically 
 - **Orbit System**:
     - **@gravito/orbit-inertia**: Seamless server-side routing with modern SPA user experience.
     - **@gravito/orbit-view**: Server-side template rendering for critical SEO paths.
-    - **@gravito/orbit-cache**: Optimized caching strategies.
+    - **@gravito/stasis**: Optimized caching strategies.
 
 ### 2. **Modern Frontend**
 - **React + Inertia.js**: A hybrid approach delivering the speed of an SPA with the simplicity of a backend-driven app.

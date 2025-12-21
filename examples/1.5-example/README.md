@@ -77,7 +77,7 @@ core.hooks.addAction('request:start', (args) => {
 
 ## Available Orbits
 
-- `@gravito/orbit-cache` - In-memory caching
+- `@gravito/stasis` - In-memory caching
 - `@gravito/orbit-db` - Database integration
 - `@gravito/orbit-auth` - Authentication
 - `@gravito/orbit-storage` - File storage

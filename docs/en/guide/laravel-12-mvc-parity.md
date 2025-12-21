@@ -26,7 +26,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 | Views / Blade | `@gravito/orbit-view` (TSX template engine) / `@gravito/orbit-inertia` (Inertia bridge) |
 | Database / Eloquent | `@gravito/orbit-db` (Drizzle-based DB layer) |
 | Auth / Gate / Policies | `@gravito/orbit-auth` (guards + `Gate`) |
-| Cache | `@gravito/orbit-cache` |
+| Cache | `@gravito/stasis` |
 | Queue / Jobs | `@gravito/orbit-queue` |
 | Scheduler | `@gravito/orbit-scheduler` |
 | Mail | `@gravito/orbit-mail` |
@@ -134,7 +134,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Cache | Implemented | `@gravito/orbit-cache` |
+| Cache | Implemented | `@gravito/stasis` |
 | Storage | Implemented | `@gravito/orbit-storage` |
 | Localization (i18n) | Implemented | `@gravito/cosmos` |
 

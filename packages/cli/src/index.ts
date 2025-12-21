@@ -345,7 +345,7 @@ cli
         'gravito-core': '^1.0.0-beta.1',
         '@gravito/client': '^1.0.0-alpha.1',
         '@gravito/orbit-view': '^1.0.0-beta.1',
-        '@gravito/orbit-cache': '^1.0.0-beta.1',
+        '@gravito/stasis': '^1.0.0-beta.1',
         default: '^1.0.0-alpha.1', // Fallback for other orbits still in alpha
       }
 

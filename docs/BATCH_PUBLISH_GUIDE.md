@@ -67,12 +67,12 @@ bun run publish:dry-run
 
 📋 找到 24 個套件:
   - gravito-core@1.0.0-beta.1
-  - @gravito/orbit-cache@1.0.0-beta.1
+  - @gravito/stasis@1.0.0-beta.1
   ...
 
 🔍 檢查已發布的版本...
   ⏭️  gravito-core@1.0.0-beta.1 已存在於 NPM，跳過發布
-  ⏭️  @gravito/orbit-cache@1.0.0-beta.1 已存在於 NPM，跳過發布
+  ⏭️  @gravito/stasis@1.0.0-beta.1 已存在於 NPM，跳過發布
   ...
 
 📊 發布計劃:

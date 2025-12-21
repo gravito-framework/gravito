@@ -1,4 +1,4 @@
-# @gravito/orbit-cache
+# @gravito/stasis
 
 > The Standard Cache Orbit for Galaxy Architecture.
 
@@ -12,14 +12,14 @@ Provides a Laravel-like cache layer with:
 ## 📦 Installation
 
 ```bash
-bun add @gravito/orbit-cache
+bun add @gravito/stasis
 ```
 
 ## 🚀 Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitCache from '@gravito/orbit-cache';
+import orbitCache from '@gravito/stasis';
 
 const core = new PlanetCore();
 

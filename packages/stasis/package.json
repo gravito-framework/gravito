@@ -1,5 +1,5 @@
 {
-  "name": "@gravito/orbit-cache",
+  "name": "@gravito/stasis",
   "version": "1.0.0-beta.1",
   "publishConfig": {
     "access": "public"
@@ -50,6 +50,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gravito-framework/gravito.git",
-    "directory": "packages/orbit-cache"
+    "directory": "packages/stasis"
   }
 }

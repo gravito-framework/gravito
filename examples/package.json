@@ -4,7 +4,7 @@
     "type": "module",
     "dependencies": {
         "gravito-core": "workspace:*",
-        "@gravito/orbit-cache": "workspace:*",
+        "@gravito/stasis": "workspace:*",
         "hono": "^4.0.0"
     }
 }

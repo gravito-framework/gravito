@@ -12,7 +12,7 @@
         "start": "bun run src/index.ts"
     },
     "dependencies": {
-        "@gravito/orbit-cache": "workspace:*",
+        "@gravito/stasis": "workspace:*",
         "@gravito/orbit-inertia": "workspace:*",
         "@gravito/constellation": "workspace:*",
         "@gravito/orbit-view": "workspace:*",

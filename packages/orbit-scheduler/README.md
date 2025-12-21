@@ -21,7 +21,7 @@ bun add @gravito/orbit-scheduler
 
 ```typescript
 import { OrbitScheduler } from '@gravito/orbit-scheduler'
-import { OrbitCache } from '@gravito/orbit-cache' // Optional, for cache lock
+import { OrbitCache } from '@gravito/stasis' // Optional, for cache lock
 
 await PlanetCore.boot({
   config: {

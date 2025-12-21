@@ -74,8 +74,8 @@ npm publish --access public
 cd packages/core
 npm publish --access public --tag beta
 
-# @gravito/orbit-cache
-cd packages/orbit-cache
+# @gravito/stasis
+cd packages/stasis
 npm publish --access public --tag beta
 
 # @gravito/orbit-inertia

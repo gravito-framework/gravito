@@ -6,21 +6,21 @@ title: Orbit Cache
 
 > Caching utilities as a Gravito Orbit.
 
-Package: `@gravito/orbit-cache`
+Package: `@gravito/stasis`
 
 Provides a unified caching interface with a built-in Memory (LRU-like) provider, extensible for Redis.
 
 ## Installation
 
 ```bash
-bun add @gravito/orbit-cache
+bun add @gravito/stasis
 ```
 
 ## Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitCache from '@gravito/orbit-cache';
+import orbitCache from '@gravito/stasis';
 
 const core = new PlanetCore();
 
@@ -52,7 +52,7 @@ core.app.get('/heavy-data', async (c) => {
 Orbit Cache provides a Rate Limiter driver that utilizes your cache store to count and limit actions.
 
 ```typescript
-import { CacheManager } from '@gravito/orbit-cache';
+import { CacheManager } from '@gravito/stasis';
 
 core.app.post('/send-email', async (c) => {
   const cache = c.get('cache') as CacheManager

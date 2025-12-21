@@ -23,7 +23,7 @@ bun add @gravito/orbit-session
 
 ```ts
 import { PlanetCore, defineConfig } from 'gravito-core'
-import { OrbitCache } from '@gravito/orbit-cache'
+import { OrbitCache } from '@gravito/stasis'
 import { OrbitSession } from '@gravito/orbit-session'
 
 const config = defineConfig({

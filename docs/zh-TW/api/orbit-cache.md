@@ -6,21 +6,21 @@ title: Orbit Cache
 
 > 以 Gravito Orbit 形式提供快取功能。
 
-套件：`@gravito/orbit-cache`
+套件：`@gravito/stasis`
 
 提供簡單的快取抽象層，內建記憶體 (LRU-like) 提供者。
 
 ## 安裝
 
 ```bash
-bun add @gravito/orbit-cache
+bun add @gravito/stasis
 ```
 
 ## 用法
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitCache from '@gravito/orbit-cache';
+import orbitCache from '@gravito/stasis';
 
 const core = new PlanetCore();
 
@@ -52,7 +52,7 @@ core.app.get('/heavy-data', async (c) => {
 Orbit Cache 提供了一個 Rate Limiter 驅動器，利用您的快取儲存空間來計數並限制操作。
 
 ```typescript
-import { CacheManager } from '@gravito/orbit-cache';
+import { CacheManager } from '@gravito/stasis';
 
 core.app.post('/send-email', async (c) => {
   const cache = c.get('cache') as CacheManager

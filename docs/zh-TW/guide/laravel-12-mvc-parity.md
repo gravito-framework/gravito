@@ -26,7 +26,7 @@ title: Laravel 12 MVC 對齊程度
 | Views / Blade | `@gravito/orbit-view`（TSX 樣板引擎）/ `@gravito/orbit-inertia`（Inertia 橋接） |
 | Database / Eloquent | `@gravito/orbit-db`（基於 Drizzle 的 DB layer） |
 | Auth / Gate / Policies | `@gravito/orbit-auth`（guards + `Gate`） |
-| Cache | `@gravito/orbit-cache` |
+| Cache | `@gravito/stasis` |
 | Queue / Jobs | `@gravito/orbit-queue` |
 | Scheduler | `@gravito/orbit-scheduler` |
 | Mail | `@gravito/orbit-mail` |
@@ -135,7 +135,7 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Cache | 已實作 | `@gravito/orbit-cache` |
+| Cache | 已實作 | `@gravito/stasis` |
 | Storage | 已實作 | `@gravito/orbit-storage` |
 | 多語系（i18n） | 已實作 | `@gravito/cosmos` |
 

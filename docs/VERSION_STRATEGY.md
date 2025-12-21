@@ -7,7 +7,7 @@
 **官網實際使用的套件**，已經過實際驗證，可以發布為 beta 版本：
 
 - `gravito-core` - 核心框架
-- `@gravito/orbit-cache` - 快取模組
+- `@gravito/stasis` - 快取模組
 - `@gravito/orbit-inertia` - Inertia.js 整合
 - `@gravito/orbit-view` - 視圖模組
 - `@gravito/seo-adapter-hono` - SEO Hono 適配器

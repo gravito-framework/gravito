@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "gravito-core": "workspace:*",
-        "@gravito/orbit-cache": "workspace:*",
+        "@gravito/stasis": "workspace:*",
         "@gravito/orbit-view": "workspace:*",
         "@gravito/orbit-inertia": "workspace:*",
         "@gravito/constellation": "workspace:*",

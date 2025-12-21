@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@gravito/client": "^1.0.0-beta.1",
-    "@gravito/orbit-cache": "^1.0.0-beta.1",
+    "@gravito/stasis": "^1.0.0-beta.1",
     "@gravito/orbit-db": "^1.0.0-beta.1",
     "@gravito/orbit-inertia": "^1.0.0-beta.1",
     "@gravito/orbit-mail": "^1.0.0-beta.1",
