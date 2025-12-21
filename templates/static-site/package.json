@@ -1,0 +1,38 @@
+{
+    "name": "my-gravito-static-site",
+    "version": "0.1.0",
+    "type": "module",
+    "scripts": {
+        "dev": "bun run dev:vite & bun run dev:server",
+        "dev:server": "NODE_ENV=development bun run --watch src/index.ts",
+        "dev:vite": "vite",
+        "build:client": "vite build",
+        "build:static": "NODE_ENV=production bun build-static.ts",
+        "preview:static": "cd dist-static && npx serve .",
+        "typecheck": "tsc --noEmit",
+        "start": "bun run src/index.ts"
+    },
+    "dependencies": {
+        "gravito-core": "workspace:*",
+        "@gravito/orbit-cache": "workspace:*",
+        "@gravito/orbit-view": "workspace:*",
+        "@gravito/orbit-inertia": "workspace:*",
+        "@gravito/orbit-sitemap": "workspace:*",
+        "@inertiajs/react": "^1.0.0",
+        "@inertiajs/vue3": "^1.0.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "vue": "^3.4.0",
+        "hono": "^4.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.2.7",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^4.2.0",
+        "@vitejs/plugin-vue": "^5.0.0",
+        "bun-types": "latest",
+        "typescript": "^5.0.0",
+        "vite": "^5.0.0"
+    }
+}
+

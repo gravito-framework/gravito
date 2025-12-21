@@ -50,13 +50,40 @@ docker run -p 3000:3000 --env-file .env.production my-gravito-app
 
 If you are building a documentation site or a blog, SSG is the fastest and cheapest option. It generates pure HTML files that you can host on **GitHub Pages**, **Vercel**, or **Netlify**.
 
+### ⚠️ Important: Static Site Navigation
+
+**Critical**: When building static sites with Inertia.js, you **must** use `StaticLink` component instead of Inertia's `Link` component for navigation. This ensures proper navigation in static environments where no backend server exists.
+
+See [Static Site Development Guide](./static-site-development.md) for complete details.
+
 ### 1. Run the Build
 ```bash
 bun run build:static
 ```
 
 ### 2. The Output
-Your static files will be generated in the `dist/` directory. Simply upload this folder to any static hosting provider.
+Your static files will be generated in the `dist-static/` directory (or `dist/` depending on your configuration). Simply upload this folder to any static hosting provider.
+
+### 3. Pre-deployment Checklist
+
+Before deploying, ensure:
+
+- ✅ All navigation links use `StaticLink` (not Inertia's `Link`)
+- ✅ `404.html` is generated with SPA routing support
+- ✅ All routes generate valid HTML files
+- ✅ Static assets are copied correctly
+- ✅ Test navigation locally before deploying
+
+### 4. Platform-Specific Notes
+
+#### GitHub Pages
+- Requires `404.html` for SPA routing
+- Requires `.nojekyll` file
+- Requires `CNAME` file for custom domains
+
+#### Vercel/Netlify
+- Automatically handles SPA routing
+- Still use `StaticLink` for consistency
 
 ---
 

@@ -4,6 +4,7 @@ import { ArrowUpRight, Book, Cpu, Github, Home as HomeIcon, Info, Menu, Zap } fr
 import { useEffect, useState } from 'react'
 import { useTrans } from '../hooks/useTrans'
 import Logo from './Logo'
+import { StaticLink } from './StaticLink'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -111,7 +112,7 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
             ].map((item) => {
               const active = isPathActive(item.path)
               return (
-                <Link
+                <StaticLink
                   key={item.path}
                   href={getLocalizedPath(item.path)}
                   className={`relative px-6 py-2.5 rounded-xl text-sm font-bold tracking-tight transition-all duration-300 group ${
@@ -129,7 +130,7 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
                   {!active && (
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-singularity/50 transition-all duration-300 group-hover:w-1/3" />
                   )}
-                </Link>
+                </StaticLink>
               )
             })}
 
@@ -152,7 +153,7 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
 
           <div className="flex items-center gap-4 relative z-10">
             <div className="flex items-center p-1 bg-white/5 rounded-xl border border-white/5 backdrop-blur-md relative overflow-hidden">
-              <Link
+              <StaticLink
                 href={switchLocale('en')}
                 className={`relative z-10 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-colors duration-500 ${
                   currentLang === 'en' ? 'text-black' : 'text-white/40 hover:text-white'
@@ -166,8 +167,8 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
                   />
                 )}
                 <span className="relative z-10">EN</span>
-              </Link>
-              <Link
+              </StaticLink>
+              <StaticLink
                 href={switchLocale('zh')}
                 className={`relative z-10 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-colors duration-500 ${
                   currentLang === 'zh' ? 'text-black' : 'text-white/40 hover:text-white'
@@ -181,7 +182,7 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
                   />
                 )}
                 <span className="relative z-10">繁中</span>
-              </Link>
+              </StaticLink>
             </div>
 
             <button
@@ -271,7 +272,7 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
                           visible: { opacity: 1, y: 0 },
                         }}
                       >
-                        <Link
+                        <StaticLink
                           href={getLocalizedPath(item.path)}
                           onClick={() => setIsMobileMenuOpen(false)}
                           className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 group ${
@@ -299,7 +300,7 @@ export default function Layout({ children, noPadding = false }: LayoutProps) {
                             className={`ml-auto text-gray-600 group-hover:text-white transition-colors ${isPathActive(item.path) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                             size={16}
                           />
-                        </Link>
+                        </StaticLink>
                       </motion.div>
                     ))}
                   </div>

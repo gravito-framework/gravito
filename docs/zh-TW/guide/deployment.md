@@ -50,13 +50,40 @@ docker run -p 3000:3000 --env-file .env.production my-gravito-app
 
 如果您正在建構文件網站或部落格，SSG 是最快且最經濟的選擇。它會生成純 HTML 檔案，您可以將其託管在 **GitHub Pages**、**Vercel** 或 **Netlify**。
 
+### ⚠️ 重要：靜態網站導航
+
+**關鍵**：使用 Inertia.js 建構靜態網站時，您**必須**使用 `StaticLink` 組件而不是 Inertia 的 `Link` 組件進行導航。這確保在沒有後端伺服器的靜態環境中正常導航。
+
+詳見[靜態網站開發指南](./static-site-development.md)以獲取完整細節。
+
 ### 1. 執行建構
 ```bash
 bun run build:static
 ```
 
 ### 2. 產出結果
-您的靜態檔案會生成在 `dist/` 目錄中。只需將此資料夾上傳到任何靜態託管服務商即可。
+您的靜態檔案會生成在 `dist-static/` 目錄中（或根據配置為 `dist/`）。只需將此資料夾上傳到任何靜態託管服務商即可。
+
+### 3. 部署前檢查清單
+
+部署前，請確保：
+
+- ✅ 所有導航連結使用 `StaticLink`（不是 Inertia 的 `Link`）
+- ✅ `404.html` 生成時包含 SPA 路由支援
+- ✅ 所有路由生成有效的 HTML 檔案
+- ✅ 靜態資源正確複製
+- ✅ 部署前在本地測試導航
+
+### 4. 平台特定注意事項
+
+#### GitHub Pages
+- 需要 `404.html` 用於 SPA 路由
+- 需要 `.nojekyll` 檔案
+- 需要 `CNAME` 檔案用於自訂域名
+
+#### Vercel/Netlify
+- 自動處理 SPA 路由
+- 仍使用 `StaticLink` 以保持一致性
 
 ---
 

@@ -188,6 +188,11 @@ cli
               label: '⚛️ Orbit App (Full-stack)',
               hint: 'Inertia + React for complex apps',
             },
+            {
+              value: 'static-site',
+              label: '🌐 Static Site',
+              hint: 'Pre-configured static site for GitHub Pages, Vercel, Netlify',
+            },
           ],
         })
       },
@@ -196,6 +201,32 @@ cli
     if (isCancel(project.name) || isCancel(project.template)) {
       cancel('Operation cancelled.')
       process.exit(0)
+    }
+
+    // Ask for framework if static-site template is selected
+    let framework: string | null = null
+    if (project.template === 'static-site') {
+      const frameworkResult = await select({
+        message: 'Choose your frontend framework:',
+        options: [
+          {
+            value: 'react',
+            label: '⚛️ React',
+            hint: 'Recommended for most projects',
+          },
+          {
+            value: 'vue',
+            label: '🟢 Vue 3',
+            hint: 'Composition API with TypeScript',
+          },
+        ],
+      })
+
+      if (isCancel(frameworkResult)) {
+        cancel('Operation cancelled.')
+        process.exit(0)
+      }
+      framework = frameworkResult as string
     }
 
     const s = spinner()
@@ -214,6 +245,91 @@ cli
         dir: targetDir,
         force: true, // Allow overwriting empty dir
       })
+
+      // Handle framework-specific files for static-site template
+      if (project.template === 'static-site' && framework) {
+        const clientDir = path.join(process.cwd(), targetDir, 'src', 'client')
+        
+        if (framework === 'react') {
+          // Remove Vue files and keep React files
+          try {
+            await fs.unlink(path.join(clientDir, 'app.vue.ts'))
+            await fs.unlink(path.join(clientDir, 'components', 'StaticLink.vue'))
+            await fs.unlink(path.join(clientDir, 'components', 'Layout.vue'))
+            await fs.unlink(path.join(clientDir, 'pages', 'Home.vue'))
+            await fs.unlink(path.join(clientDir, 'pages', 'About.vue'))
+          } catch {
+            // Files might not exist, ignore
+          }
+          
+          // Update package.json to remove Vue dependencies
+          const pkgPath = path.join(process.cwd(), targetDir, 'package.json')
+          const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'))
+          if (pkg.dependencies) {
+            delete pkg.dependencies['@inertiajs/vue3']
+            delete pkg.dependencies['vue']
+          }
+          if (pkg.devDependencies) {
+            delete pkg.devDependencies['@vitejs/plugin-vue']
+          }
+          await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2))
+        } else if (framework === 'vue') {
+          // Remove React files and keep Vue files
+          try {
+            await fs.unlink(path.join(clientDir, 'app.tsx'))
+            await fs.unlink(path.join(clientDir, 'components', 'StaticLink.tsx'))
+            await fs.unlink(path.join(clientDir, 'components', 'Layout.tsx'))
+            await fs.unlink(path.join(clientDir, 'pages', 'Home.tsx'))
+            await fs.unlink(path.join(clientDir, 'pages', 'About.tsx'))
+          } catch {
+            // Files might not exist, ignore
+          }
+          
+          // Copy app.vue.ts to app.ts (Vue entry point)
+          const appVuePath = path.join(clientDir, 'app.vue.ts')
+          const appTsPath = path.join(clientDir, 'app.ts')
+          try {
+            const content = await fs.readFile(appVuePath, 'utf-8')
+            await fs.writeFile(appTsPath, content)
+            await fs.unlink(appVuePath)
+          } catch {
+            // File might not exist, ignore
+          }
+          
+          // Update package.json to remove React dependencies and add Vue
+          const pkgPath = path.join(process.cwd(), targetDir, 'package.json')
+          const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'))
+          if (pkg.dependencies) {
+            delete pkg.dependencies['@inertiajs/react']
+            delete pkg.dependencies['react']
+            delete pkg.dependencies['react-dom']
+            if (!pkg.dependencies['@inertiajs/vue3']) {
+              pkg.dependencies['@inertiajs/vue3'] = '^1.0.0'
+            }
+            if (!pkg.dependencies['vue']) {
+              pkg.dependencies['vue'] = '^3.4.0'
+            }
+          }
+          if (pkg.devDependencies) {
+            delete pkg.devDependencies['@vitejs/plugin-react']
+            delete pkg.devDependencies['@types/react']
+            delete pkg.devDependencies['@types/react-dom']
+            if (!pkg.devDependencies['@vitejs/plugin-vue']) {
+              pkg.devDependencies['@vitejs/plugin-vue'] = '^5.0.0'
+            }
+          }
+          await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2))
+          
+          // Update vite.config.ts for Vue
+          const viteConfigPath = path.join(process.cwd(), targetDir, 'vite.config.ts')
+          const viteConfig = await fs.readFile(viteConfigPath, 'utf-8')
+          const vueViteConfig = viteConfig
+            .replace("import react from '@vitejs/plugin-react'", "import vue from '@vitejs/plugin-vue'")
+            .replace("plugins: [react()]", "plugins: [vue()]")
+            .replace("input: './src/client/app.tsx'", "input: './src/client/app.ts'")
+          await fs.writeFile(viteConfigPath, vueViteConfig)
+        }
+      }
 
       s.stop('Universe created!')
 
@@ -243,9 +359,30 @@ cli
 
       await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2))
 
-      note(`Project: ${project.name}\nTemplate: ${project.template}`, 'Mission Successful')
+      // Create .env file from env.example for static-site template
+      if (project.template === 'static-site') {
+        const envExamplePath = path.join(process.cwd(), targetDir, 'env.example')
+        const envPath = path.join(process.cwd(), targetDir, '.env')
+        try {
+          const envExample = await fs.readFile(envExamplePath, 'utf-8')
+          await fs.writeFile(envPath, envExample)
+          console.log(pc.green('✅ Created .env file from env.example'))
+        } catch {
+          // env.example might not exist, that's okay
+        }
+      }
 
-      outro(`You're all set! \n\n  cd ${pc.cyan(project.name)}\n  bun install\n  bun run dev`)
+      const frameworkNote = project.template === 'static-site' && framework
+        ? `\nFramework: ${framework === 'react' ? '⚛️ React' : '🟢 Vue 3'}`
+        : ''
+
+      note(`Project: ${project.name}\nTemplate: ${project.template}${frameworkNote}`, 'Mission Successful')
+
+      const nextSteps = project.template === 'static-site'
+        ? `\n  cd ${pc.cyan(project.name)}\n  bun install\n  ${pc.yellow('# Edit .env and configure STATIC_SITE_DOMAINS')}\n  bun run dev`
+        : `\n  cd ${pc.cyan(project.name)}\n  bun install\n  bun run dev`
+
+      outro(`You're all set! ${nextSteps}`)
     } catch (err: unknown) {
       s.stop('Mission Failed')
       const message = err instanceof Error ? err.message : String(err)

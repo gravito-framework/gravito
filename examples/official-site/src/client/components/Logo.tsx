@@ -1,9 +1,9 @@
-import { Link } from '@inertiajs/react'
 import { motion } from 'framer-motion'
+import { StaticLink } from './StaticLink'
 
 export default function Logo({ isZh = false }) {
   return (
-    <Link href={isZh ? '/zh' : '/'} className="flex items-center gap-3 group relative z-10">
+    <StaticLink href={isZh ? '/zh' : '/'} className="flex items-center gap-3 group relative z-10">
       <div className="relative">
         <motion.div
           animate={{ rotate: 360 }}
@@ -31,6 +31,6 @@ export default function Logo({ isZh = false }) {
           Singularity Engine
         </span>
       </div>
-    </Link>
+    </StaticLink>
   )
 }
