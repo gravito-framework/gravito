@@ -163,8 +163,10 @@ class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
   header(name: string, value?: string, options?: { append?: boolean }): string | undefined | void {
     if (value !== undefined) {
       if (options?.append) {
+        console.log('[HonoAdapter] Appending header:', name, value)
         this.honoCtx.header(name, value, { append: true })
       } else {
+        console.log('[HonoAdapter] Setting header:', name, value)
         this.honoCtx.header(name, value)
       }
       return undefined // Return undefined for setter to match type
@@ -219,6 +221,7 @@ function toHonoMiddleware<V extends GravitoVariables>(
   middleware: GravitoMiddleware<V>
 ): MiddlewareHandler {
   return async (c: Context, next: Next): Promise<Response | void> => {
+    console.log('[HonoAdapter] Wrapping context')
     const ctx = new HonoContextWrapper<V>(c) as GravitoContext<V>
     const gravitoNext: GravitoNext = async () => {
       await next()
@@ -337,6 +340,7 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
   }
 
   use(path: string, ...middleware: GravitoMiddleware<V>[]): void {
+    console.log('[HonoAdapter] Use called for path:', path)
     const fullPath = (this.config.basePath || '') + path
     const honoMiddleware = middleware.map((m) => toHonoMiddleware<V>(m))
 

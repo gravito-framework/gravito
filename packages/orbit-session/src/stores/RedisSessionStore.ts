@@ -1,4 +1,4 @@
-import { Redis } from '@gravito/orbit-redis'
+import { Redis } from '@gravito/plasma'
 import type { SessionId, SessionRecord, SessionStore } from '../types'
 
 export class RedisSessionStore implements SessionStore {

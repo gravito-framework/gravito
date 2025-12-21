@@ -168,7 +168,10 @@ export class OrbitSession implements GravitoOrbit {
       csrf: csrfEnabled,
     })
 
+    console.log('[OrbitSession] Adapter constructor:', core.adapter.constructor.name)
+
     core.adapter.use('*', async (c: Context, next: Next) => {
+      console.log('[OrbitSession] Context constructor:', c.constructor.name)
       let store: SessionStore
 
       if (resolved.store) {
@@ -432,18 +435,15 @@ export class OrbitSession implements GravitoOrbit {
           core.hooks.doAction('session:regenerated', { from: regeneratedFrom, to: sessionId })
         }
 
-        console.log('[OrbitSession] Setting Set-Cookie header for session:', sessionId)
-        c.header(
-          'Set-Cookie',
-          serializeCookie(cookieName, sessionId, {
-            path: cookiePath,
-            httpOnly: cookieHttpOnly,
-            sameSite: cookieSameSite,
-            secure: cookieSecure,
-            maxAge: Math.min(absoluteTimeoutSeconds, 60 * 60 * 24 * 365),
-          }),
-          { append: true }
-        )
+        const cookieVal = serializeCookie(cookieName, sessionId, {
+          path: cookiePath,
+          httpOnly: cookieHttpOnly,
+          sameSite: cookieSameSite,
+          secure: cookieSecure,
+          maxAge: Math.min(absoluteTimeoutSeconds, 60 * 60 * 24 * 365),
+        })
+        console.log('[OrbitSession] Serialized Cookie:', cookieVal)
+        c.header('Set-Cookie', cookieVal, { append: true })
       }
 
       if (csrfEnabled && started) {
@@ -460,7 +460,6 @@ export class OrbitSession implements GravitoOrbit {
           { append: true }
         )
       }
-      return
     })
   }
 }

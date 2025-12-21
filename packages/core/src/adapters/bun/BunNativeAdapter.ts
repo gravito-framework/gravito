@@ -153,7 +153,13 @@ export class BunNativeAdapter implements HttpAdapter {
             if (!fn) return undefined
 
             const result = await fn(ctx, async () => {
-                return await dispatch(i + 1)
+                const res = await dispatch(i + 1)
+                // If next() returned a response, attach it to context so subsequent c.header() calls work
+                if (res && (ctx as BunContext).res !== res) {
+                    console.log('[BunNativeAdapter] Linking response to context')
+                        (ctx as BunContext).res = res
+                }
+                return res
             })
 
             return result

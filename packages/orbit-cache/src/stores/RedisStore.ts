@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { Redis, type RedisClientContract } from '@gravito/orbit-redis'
+import { Redis, type RedisClientContract } from '@gravito/plasma'
 import { type CacheLock, LockTimeoutError, sleep } from '../locks'
 import type { CacheStore, TaggableStore } from '../store'
 import {

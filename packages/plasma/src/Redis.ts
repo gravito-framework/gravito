@@ -25,7 +25,7 @@ const manager = new RedisManager()
  *
  * @example
  * ```typescript
- * import { Redis } from '@gravito/orbit-redis'
+ * import { Redis } from '@gravito/plasma'
  *
  * // Configure
  * Redis.configure({

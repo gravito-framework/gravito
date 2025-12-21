@@ -1,5 +1,5 @@
 {
-  "name": "@gravito/orbit-redis",
+  "name": "@gravito/plasma",
   "version": "1.0.0-alpha.1",
   "description": "Redis client for Gravito - Bun native, Laravel-style API",
   "type": "module",

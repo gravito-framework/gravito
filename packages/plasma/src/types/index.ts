@@ -1,5 +1,5 @@
 /**
- * @gravito/orbit-redis - Type Definitions
+ * @gravito/plasma - Type Definitions
  */
 
 // ============================================================================

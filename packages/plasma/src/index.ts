@@ -1,5 +1,5 @@
 /**
- * @gravito/orbit-redis
+ * @gravito/plasma
  * Redis client for Gravito - Bun native, Laravel-style API
  */
 

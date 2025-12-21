@@ -1,17 +1,17 @@
-# @gravito/orbit-redis
+# @gravito/plasma
 
 > Redis client for Gravito - Bun native, Laravel-style API
 
 ## Installation
 
 ```bash
-bun add @gravito/orbit-redis ioredis
+bun add @gravito/plasma ioredis
 ```
 
 ## Quick Start
 
 ```typescript
-import { Redis } from '@gravito/orbit-redis'
+import { Redis } from '@gravito/plasma'
 
 // Configure
 Redis.configure({
