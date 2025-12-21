@@ -57,8 +57,8 @@ cd packages/orbit-request && npm publish --access public --tag alpha && cd ../..
 # @gravito/orbit-scheduler
 cd packages/orbit-scheduler && npm publish --access public --tag alpha && cd ../..
 
-# @gravito/orbit-session
-cd packages/orbit-session && npm publish --access public --tag alpha && cd ../..
+# @gravito/orbit
+cd packages/orbit && npm publish --access public --tag alpha && cd ../..
 
 # @gravito/constellation
 cd packages/constellation && npm publish --access public --tag alpha && cd ../..

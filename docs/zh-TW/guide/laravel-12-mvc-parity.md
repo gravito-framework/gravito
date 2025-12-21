@@ -64,8 +64,8 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Session | 已實作 | `@gravito/orbit-session` |
-| CSRF 防護 | 已實作 | `@gravito/orbit-session` |
+| Session | 已實作 | `@gravito/orbit` |
+| CSRF 防護 | 已實作 | `@gravito/orbit` |
 | Flash 資料模式 | 已實作 | `session.flash(key, value)` |
 | Cookie 加密 | 已實作 | `CookieJar` + AES-256-CBC Encrypter |
 | Cookie 簽章 | 缺少 | 需要第一級的簽章 primitive（含金鑰輪替策略） |

@@ -8,7 +8,7 @@ This is a step-by-step beginner tutorial that takes you from installation to log
 
 ## What You Will Build
 
-- Install and enable `@gravito/orbit-session`
+- Install and enable `@gravito/orbit`
 - Read/write session data in controllers
 - Create one-time flash messages
 - Send CSRF-protected requests from the frontend
@@ -18,7 +18,7 @@ This is a step-by-step beginner tutorial that takes you from installation to log
 1. Install the package:
 
 ```bash
-bun add @gravito/orbit-session
+bun add @gravito/orbit
 ```
 
 2. If you plan to use cache or Redis for storage, install the matching package (you can skip this for now).
@@ -29,7 +29,7 @@ bun add @gravito/orbit-session
 
 ```ts
 import { defineConfig, PlanetCore } from 'gravito-core'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 
 const config = defineConfig({
   config: {

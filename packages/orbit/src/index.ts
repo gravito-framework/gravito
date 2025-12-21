@@ -4,7 +4,7 @@
  * Provides secure session handling with multiple storage backends
  * and CSRF protection.
  *
- * @module @gravito/orbit-session
+ * @module @gravito/orbit
  * @since 1.0.0
  */
 

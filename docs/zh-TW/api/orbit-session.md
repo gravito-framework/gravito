@@ -6,7 +6,7 @@ title: Orbit Session
 
 提供 Session 管理與 CSRF 防護（Laravel 風格）。
 
-套件：`@gravito/orbit-session`
+套件：`@gravito/orbit`
 
 ## 新手教學
 
@@ -24,7 +24,7 @@ Orbit Session 提供：
 ## 安裝
 
 ```bash
-bun add @gravito/orbit-session
+bun add @gravito/orbit
 ```
 
 ## 設定（多機部署建議）
@@ -34,7 +34,7 @@ bun add @gravito/orbit-session
 ```ts
 import { PlanetCore, defineConfig } from 'gravito-core'
 import { OrbitCache } from '@gravito/stasis'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 
 const config = defineConfig({
   config: {

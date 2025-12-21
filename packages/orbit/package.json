@@ -1,5 +1,5 @@
 {
-  "name": "@gravito/orbit-session",
+  "name": "@gravito/orbit",
   "version": "1.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
@@ -52,6 +52,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gravito-framework/gravito.git",
-    "directory": "packages/orbit-session"
+    "directory": "packages/orbit"
   }
 }

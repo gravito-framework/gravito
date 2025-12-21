@@ -64,8 +64,8 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Sessions | Implemented | `@gravito/orbit-session` |
-| CSRF protection | Implemented | `@gravito/orbit-session` |
+| Sessions | Implemented | `@gravito/orbit` |
+| CSRF protection | Implemented | `@gravito/orbit` |
 | Cookie encryption | Implemented | `CookieJar` + AES-256-CBC Encrypter |
 | Cookie signing | Missing | Needs a first-class signing primitive (key rotation story) |
 | “Flash” data patterns | Implemented | `session.flash(key, value)` |

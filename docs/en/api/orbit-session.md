@@ -6,7 +6,7 @@ title: Orbit Session
 
 Session management + CSRF protection for Gravito (Laravel-style).
 
-Package: `@gravito/orbit-session`
+Package: `@gravito/orbit`
 
 ## Starter Guide
 
@@ -24,7 +24,7 @@ Orbit Session provides:
 ## Installation
 
 ```bash
-bun add @gravito/orbit-session
+bun add @gravito/orbit
 ```
 
 ## Setup (multi-machine recommended)
@@ -34,7 +34,7 @@ For multi-machine deployments, store sessions in a shared cache (e.g. Redis) via
 ```ts
 import { PlanetCore, defineConfig } from 'gravito-core'
 import { OrbitCache } from '@gravito/stasis'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 
 const config = defineConfig({
   config: {

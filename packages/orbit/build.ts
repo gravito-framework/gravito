@@ -1,6 +1,6 @@
 import { spawn } from 'bun'
 
-console.log('Building @gravito/orbit-session...')
+console.log('Building @gravito/orbit...')
 
 // Clean dist
 await Bun.$`rm -rf dist`

@@ -8,7 +8,7 @@ title: Orbit Session 新手教學
 
 ## 你會完成什麼
 
-- 安裝並啟用 `@gravito/orbit-session`
+- 安裝並啟用 `@gravito/orbit`
 - 在控制器中存取 Session
 - 建立一次性 Flash 訊息
 - 在前端送出帶有 CSRF Token 的請求
@@ -18,7 +18,7 @@ title: Orbit Session 新手教學
 1. 安裝套件：
 
 ```bash
-bun add @gravito/orbit-session
+bun add @gravito/orbit
 ```
 
 2. 如果你要使用快取或 Redis 作為 Session 儲存來源，請一併安裝對應套件（新手可先跳過）。
@@ -29,7 +29,7 @@ bun add @gravito/orbit-session
 
 ```ts
 import { defineConfig, PlanetCore } from 'gravito-core'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 
 const config = defineConfig({
   config: {

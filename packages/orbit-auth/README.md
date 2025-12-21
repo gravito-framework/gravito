@@ -62,10 +62,10 @@ bun add @gravito/orbit-auth
 - `gravito-core`：Gravito 核心模組（peer dependency）
 - `hono`：Hono 框架（peer dependency，版本 ^4.0.0）
 
-如果您使用 Session Guard，還需要安裝 `@gravito/orbit-session`：
+如果您使用 Session Guard，還需要安裝 `@gravito/orbit`：
 
 ```bash
-bun add @gravito/orbit-session
+bun add @gravito/orbit
 ```
 
 ### 最小配置範例
@@ -75,7 +75,7 @@ bun add @gravito/orbit-session
 ```typescript
 import { PlanetCore } from 'gravito-core'
 import { OrbitAuth, type AuthConfig, CallbackUserProvider } from '@gravito/orbit-auth'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 
 // 建立 PlanetCore 實例
 const core = new PlanetCore()
@@ -182,7 +182,7 @@ core.app.route('/', app)
 ```typescript
 import { PlanetCore } from 'gravito-core'
 import { OrbitAuth, type AuthConfig, CallbackUserProvider, HashManager } from '@gravito/orbit-auth'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 import { Hono } from 'hono'
 
 // 初始化 PlanetCore

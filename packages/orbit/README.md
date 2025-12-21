@@ -16,7 +16,7 @@ Laravel-style session management + CSRF protection for Gravito.
 ## Installation
 
 ```bash
-bun add @gravito/orbit-session
+bun add @gravito/orbit
 ```
 
 ## Usage
@@ -24,7 +24,7 @@ bun add @gravito/orbit-session
 ```ts
 import { PlanetCore, defineConfig } from 'gravito-core'
 import { OrbitCache } from '@gravito/stasis'
-import { OrbitSession } from '@gravito/orbit-session'
+import { OrbitSession } from '@gravito/orbit'
 
 const config = defineConfig({
   config: {
