@@ -10,6 +10,7 @@
 
 // import { Hono } from 'hono' - Decoupled
 // import { HTTPException } from 'hono/http-exception' - Decoupled
+import { HttpException } from './exceptions/HttpException'
 import { HonoAdapter } from './adapters/HonoAdapter'
 import type { HttpAdapter } from './adapters/types'
 import { ConfigManager } from './ConfigManager'

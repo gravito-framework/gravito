@@ -32,7 +32,7 @@ Gravito 可以自動掃描您的路由定義，找出所有靜態的 `GET` 路�
 
 ```typescript
 // src/config/seo.ts
-import { routeScanner } from '@gravito/orbit-sitemap'
+import { routeScanner } from '@gravito/constellation'
 import { router } from '../routes'
 
 export const seoConfig: SeoConfig = {

@@ -1,6 +1,6 @@
 import { AuthorizationException, ValidationException } from 'gravito-core'
-import type { Context, MiddlewareHandler } from 'hono'
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { Context, MiddlewareHandler } from 'gravito-core/compat'
+import type { ContentfulStatusCode } from 'gravito-core'
 import type { z } from 'zod'
 
 /**
@@ -281,10 +281,20 @@ export abstract class FormRequest<T = unknown> {
         })
         return obj
       }
-      case 'query':
-        return ctx.req.query()
+      case 'query': {
+        const queries = ctx.req.queries()
+        const flattened: Record<string, unknown> = {}
+        for (const [key, value] of Object.entries(queries)) {
+          if (Array.isArray(value) && value.length === 1) {
+            flattened[key] = value[0]
+          } else {
+            flattened[key] = value
+          }
+        }
+        return flattened
+      }
       case 'param':
-        return ctx.req.param()
+        return ctx.req.params()
       default:
         return {}
     }

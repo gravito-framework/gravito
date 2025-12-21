@@ -21,13 +21,13 @@
 ### 安裝
 
 ```bash
-bun add @gravito/orbit-sitemap
+bun add @gravito/constellation
 ```
 
 ### 最簡單範例
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -51,7 +51,7 @@ await sitemap.generate()
 從應用程式直接提供 sitemap：
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 OrbitSitemap.dynamic({
   baseUrl: 'https://example.com',
@@ -86,7 +86,7 @@ OrbitSitemap.dynamic({
 在建置過程中生成 sitemap 檔案：
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -229,7 +229,7 @@ bun add @aws-sdk/client-s3
 ```
 
 ```typescript
-import { OrbitSitemap, S3SitemapStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, S3SitemapStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -264,7 +264,7 @@ bun add @google-cloud/storage
 ```
 
 ```typescript
-import { OrbitSitemap, GCPSitemapStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, GCPSitemapStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -338,7 +338,7 @@ await storage.switchVersion('sitemap.xml', 'version-id')
 非同步生成 sitemap，不阻塞主流程：
 
 ```typescript
-import { OrbitSitemap, MemoryProgressStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryProgressStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -526,7 +526,7 @@ curl http://localhost:3000/admin/sitemap/history?limit=10 \
 #### 使用 Redis 進行進度儲存
 
 ```typescript
-import { RedisProgressStorage } from '@gravito/orbit-sitemap'
+import { RedisProgressStorage } from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
@@ -567,7 +567,7 @@ const sitemap = OrbitSitemap.static({
 ### 設定
 
 ```typescript
-import { OrbitSitemap, MemoryChangeTracker } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryChangeTracker } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -636,7 +636,7 @@ await sitemap.trackChange({
 ### 使用 Redis 進行變更追蹤
 
 ```typescript
-import { RedisChangeTracker } from '@gravito/orbit-sitemap'
+import { RedisChangeTracker } from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
@@ -667,7 +667,7 @@ import {
   OrbitSitemap, 
   MemoryRedirectManager,
   RedirectDetector 
-} from '@gravito/orbit-sitemap'
+} from '@gravito/constellation'
 
 const redirectManager = new MemoryRedirectManager()
 
@@ -831,7 +831,7 @@ await redirectManager.registerBatch([
 ### 使用 Redis 進行轉址管理
 
 ```typescript
-import { RedisRedirectManager } from '@gravito/orbit-sitemap'
+import { RedisRedirectManager } from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
@@ -976,7 +976,7 @@ import {
   RedisProgressStorage,
   RedirectDetector,
   routeScanner
-} from '@gravito/orbit-sitemap'
+} from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)

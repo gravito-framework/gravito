@@ -14,7 +14,7 @@
     "dependencies": {
         "@gravito/orbit-cache": "workspace:*",
         "@gravito/orbit-inertia": "workspace:*",
-        "@gravito/orbit-sitemap": "workspace:*",
+        "@gravito/constellation": "workspace:*",
         "@gravito/orbit-view": "workspace:*",
         "@gravito/luminosity-adapter-hono": "workspace:*",
         "@gravito/luminosity": "workspace:*",

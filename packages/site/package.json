@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build ./src/index.ts --outdir ./dist --target node --external gravito-core --external @gravito/orbit-content --external @gravito/cosmos --external @gravito/orbit-sitemap --external hono",
+    "build": "bun build ./src/index.ts --outdir ./dist --target node --external gravito-core --external @gravito/orbit-content --external @gravito/cosmos --external @gravito/constellation --external hono",
     "generate": "bun run ./build-static.ts",
     "deploy": "bun run generate && gh-pages -d dist-static --dotfiles",
     "start": "bun run ./dist/index.js"
@@ -13,7 +13,7 @@
     "gravito-core": "workspace:*",
     "@gravito/orbit-content": "workspace:*",
     "@gravito/cosmos": "workspace:*",
-    "@gravito/orbit-sitemap": "workspace:*",
+    "@gravito/constellation": "workspace:*",
     "hono": "^4.0.0"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 {
-  "name": "@gravito/orbit-sitemap",
+  "name": "@gravito/constellation",
   "version": "1.0.0-alpha.1",
   "description": "Powerful sitemap generation for Gravito applications with dynamic/static support, sharding, and caching.",
   "type": "module",

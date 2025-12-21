@@ -10,7 +10,7 @@
 
 import { randomBytes } from 'node:crypto'
 import type { CacheService, GravitoOrbit, PlanetCore } from 'gravito-core'
-import type { Context, Next } from 'hono'
+import type { Context, Next } from 'gravito-core/compat'
 import { FileSessionStore } from './stores/FileSessionStore'
 import { MemorySessionStore } from './stores/MemorySessionStore'
 import { RedisSessionStore } from './stores/RedisSessionStore'
@@ -115,7 +115,7 @@ function safeEquals(a: string, b: string): boolean {
 }
 
 export class OrbitSession implements GravitoOrbit {
-  constructor(private options: OrbitSessionOptions = {}) {}
+  constructor(private options: OrbitSessionOptions = {}) { }
 
   install(core: PlanetCore): void {
     const configFromCore = core.config.has('session')
@@ -168,7 +168,7 @@ export class OrbitSession implements GravitoOrbit {
       csrf: csrfEnabled,
     })
 
-    core.app.use('*', async (c: Context, next: Next) => {
+    core.adapter.use('*', async (c: Context, next: Next) => {
       let store: SessionStore
 
       if (resolved.store) {
@@ -432,7 +432,8 @@ export class OrbitSession implements GravitoOrbit {
           core.hooks.doAction('session:regenerated', { from: regeneratedFrom, to: sessionId })
         }
 
-        c.res.headers.append(
+        console.log('[OrbitSession] Setting Set-Cookie header for session:', sessionId)
+        c.header(
           'Set-Cookie',
           serializeCookie(cookieName, sessionId, {
             path: cookiePath,
@@ -440,13 +441,14 @@ export class OrbitSession implements GravitoOrbit {
             sameSite: cookieSameSite,
             secure: cookieSecure,
             maxAge: Math.min(absoluteTimeoutSeconds, 60 * 60 * 24 * 365),
-          })
+          }),
+          { append: true }
         )
       }
 
       if (csrfEnabled && started) {
         const token = typeof data._csrf === 'string' ? data._csrf : csrfService.token()
-        c.res.headers.append(
+        c.header(
           'Set-Cookie',
           serializeCookie(csrfCookieName, token, {
             path: csrfCookiePath,
@@ -454,7 +456,8 @@ export class OrbitSession implements GravitoOrbit {
             sameSite: csrfCookieSameSite,
             secure: csrfCookieSecure,
             maxAge: Math.min(absoluteTimeoutSeconds, 60 * 60 * 24 * 365),
-          })
+          }),
+          { append: true }
         )
       }
       return

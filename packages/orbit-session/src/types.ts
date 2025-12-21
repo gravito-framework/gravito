@@ -1,4 +1,4 @@
-import type { Context } from 'hono'
+import type { Context } from 'gravito-core/compat'
 
 export type SessionId = string
 

@@ -2,7 +2,7 @@ import { exec } from 'node:child_process'
 import { cp, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { promisify } from 'node:util'
-import { generateI18nEntries, SitemapStream } from '@gravito/orbit-sitemap'
+import { generateI18nEntries, SitemapStream } from '@gravito/constellation'
 import { Glob } from 'bun'
 import { bootstrap } from './src/bootstrap.ts'
 

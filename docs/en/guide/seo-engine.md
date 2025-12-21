@@ -32,7 +32,7 @@ Gravito can automatically scan your router for all static `GET` routes. This is 
 
 ```typescript
 // src/config/seo.ts
-import { routeScanner } from '@gravito/orbit-sitemap' 
+import { routeScanner } from '@gravito/constellation' 
 import { router } from '../routes'
 
 export const seoConfig: SeoConfig = {

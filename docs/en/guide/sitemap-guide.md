@@ -21,13 +21,13 @@ A comprehensive guide to using Orbit Sitemap for generating XML sitemaps, from b
 ### Installation
 
 ```bash
-bun add @gravito/orbit-sitemap
+bun add @gravito/constellation
 ```
 
 ### Minimal Example
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -51,7 +51,7 @@ That's it! Your sitemap is generated at `./dist/sitemap.xml`.
 Serve sitemap directly from your application:
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 OrbitSitemap.dynamic({
   baseUrl: 'https://example.com',
@@ -86,7 +86,7 @@ OrbitSitemap.dynamic({
 Generate sitemap files during build process:
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -229,7 +229,7 @@ bun add @aws-sdk/client-s3
 ```
 
 ```typescript
-import { OrbitSitemap, S3SitemapStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, S3SitemapStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -264,7 +264,7 @@ bun add @google-cloud/storage
 ```
 
 ```typescript
-import { OrbitSitemap, GCPSitemapStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, GCPSitemapStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -338,7 +338,7 @@ await storage.switchVersion('sitemap.xml', 'version-id')
 Generate sitemaps asynchronously without blocking:
 
 ```typescript
-import { OrbitSitemap, MemoryProgressStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryProgressStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -526,7 +526,7 @@ curl http://localhost:3000/admin/sitemap/history?limit=10 \
 #### Using Redis for Progress Storage
 
 ```typescript
-import { RedisProgressStorage } from '@gravito/orbit-sitemap'
+import { RedisProgressStorage } from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
@@ -567,7 +567,7 @@ Only update changed URLs instead of regenerating the entire sitemap:
 ### Setup
 
 ```typescript
-import { OrbitSitemap, MemoryChangeTracker } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryChangeTracker } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -636,7 +636,7 @@ await sitemap.trackChange({
 ### Using Redis for Change Tracking
 
 ```typescript
-import { RedisChangeTracker } from '@gravito/orbit-sitemap'
+import { RedisChangeTracker } from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
@@ -667,7 +667,7 @@ import {
   OrbitSitemap, 
   MemoryRedirectManager,
   RedirectDetector 
-} from '@gravito/orbit-sitemap'
+} from '@gravito/constellation'
 
 const redirectManager = new MemoryRedirectManager()
 
@@ -831,7 +831,7 @@ await redirectManager.registerBatch([
 ### Using Redis for Redirect Management
 
 ```typescript
-import { RedisRedirectManager } from '@gravito/orbit-sitemap'
+import { RedisRedirectManager } from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
@@ -976,7 +976,7 @@ import {
   RedisProgressStorage,
   RedirectDetector,
   routeScanner
-} from '@gravito/orbit-sitemap'
+} from '@gravito/constellation'
 import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)

@@ -2,7 +2,7 @@ import { exec } from 'node:child_process'
 import { cp, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
-import { SitemapStream } from '@gravito/orbit-sitemap'
+import { SitemapStream } from '@gravito/constellation'
 import { bootstrap } from './src/bootstrap.ts'
 
 console.log('🏗️  Starting Static Site Generation...')

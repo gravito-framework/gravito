@@ -1,12 +1,12 @@
 ---
-title: Orbit Sitemap
+title: Constellation
 ---
 
-# Orbit Sitemap
+# Constellation
 
 Dynamic and static sitemap generation for Gravito applications.
 
-**Orbit Sitemap** provides a flexible way to generate XML sitemaps for your Gravito application, supporting both dynamic generation (via routes) and static generation (for build time). It includes support for Google Sitemap extensions like Images, Videos, News, and i18n alternates.
+**Constellation** provides a flexible way to generate XML sitemaps for your Gravito application, supporting both dynamic generation (via routes) and static generation (for build time). It includes support for Google Sitemap extensions like Images, Videos, News, and i18n alternates.
 
 ## Features
 
@@ -26,7 +26,7 @@ Dynamic and static sitemap generation for Gravito applications.
 ## Installation
 
 ```bash
-bun add @gravito/orbit-sitemap
+bun add @gravito/constellation
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ Integrate directly into your Gravito app:
 
 ```typescript
 // gravito.config.ts or index.ts
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 OrbitSitemap.dynamic({
   baseUrl: 'https://example.com',
@@ -68,7 +68,7 @@ OrbitSitemap.dynamic({
 Generate files during build:
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, routeScanner } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -87,7 +87,7 @@ await sitemap.generate()
 Use the low-level API for custom needs:
 
 ```typescript
-import { SitemapStream } from '@gravito/orbit-sitemap'
+import { SitemapStream } from '@gravito/constellation'
 
 const sitemap = new SitemapStream({ baseUrl: 'https://example.com' })
 
@@ -180,7 +180,7 @@ OrbitSitemap.dynamic({
 Store sitemaps directly in cloud storage with shadow processing:
 
 ```typescript
-import { OrbitSitemap, S3SitemapStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, S3SitemapStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   baseUrl: 'https://example.com',
@@ -216,7 +216,7 @@ const sitemap = OrbitSitemap.static({
 Generate sitemaps asynchronously without blocking:
 
 ```typescript
-import { OrbitSitemap, MemoryProgressStorage } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryProgressStorage } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   // ...
@@ -242,7 +242,7 @@ const jobId = await sitemap.generateAsync({
 Only update changed URLs, perfect for large sites:
 
 ```typescript
-import { OrbitSitemap, MemoryChangeTracker } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryChangeTracker } from '@gravito/constellation'
 
 const sitemap = OrbitSitemap.static({
   // ...
@@ -265,7 +265,7 @@ await sitemap.generateIncremental(new Date('2024-01-01'))
 Automatically handle URL redirects in your sitemap:
 
 ```typescript
-import { OrbitSitemap, MemoryRedirectManager, RedirectDetector } from '@gravito/orbit-sitemap'
+import { OrbitSitemap, MemoryRedirectManager, RedirectDetector } from '@gravito/constellation'
 
 const redirectManager = new MemoryRedirectManager()
 const detector = new RedirectDetector({
@@ -319,7 +319,7 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 Implement `SitemapStorage` and `SitemapLock` interfaces:
 
 ```typescript
-import { SitemapStorage, SitemapLock } from '@gravito/orbit-sitemap'
+import { SitemapStorage, SitemapLock } from '@gravito/constellation'
 
 class MyStorage implements SitemapStorage { ... }
 class MyLock implements SitemapLock { ... }

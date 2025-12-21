@@ -17,7 +17,7 @@
         "@gravito/orbit-cache": "workspace:*",
         "@gravito/orbit-view": "workspace:*",
         "@gravito/orbit-inertia": "workspace:*",
-        "@gravito/orbit-sitemap": "workspace:*",
+        "@gravito/constellation": "workspace:*",
         "@inertiajs/react": "^1.0.0",
         "@inertiajs/vue3": "^1.0.0",
         "react": "^18.2.0",
