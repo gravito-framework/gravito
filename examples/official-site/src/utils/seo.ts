@@ -1,4 +1,4 @@
-import { SeoMetadata } from '@gravito/seo-core'
+import { SeoMetadata } from '@gravito/luminosity'
 import { getTranslation } from '../services/I18nService'
 
 export function generateSeoHtml(locale: string, title?: string, description?: string) {

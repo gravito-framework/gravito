@@ -1,4 +1,4 @@
-# @gravito/seo-adapter-hono
+# @gravito/luminosity-adapter-hono
 
 > Hono adapter for Gravito SmartMap Engine.
 
@@ -7,15 +7,15 @@ Seamlessly integrate automatic Sitemap and Robots.txt generation into your Hono 
 ## 📦 Installation
 
 ```bash
-bun add @gravito/seo-adapter-hono @gravito/seo-core
+bun add @gravito/luminosity-adapter-hono @gravito/luminosity
 ```
 
 ## 🚀 Usage
 
 ```typescript
 import { Hono } from 'hono';
-import { SeoEngine } from '@gravito/seo-core';
-import { honoSeo } from '@gravito/seo-adapter-hono';
+import { SeoEngine } from '@gravito/luminosity';
+import { honoSeo } from '@gravito/luminosity-adapter-hono';
 
 const app = new Hono();
 const engine = new SeoEngine();
@@ -26,7 +26,7 @@ app.use('*', honoSeo(engine));
 export default app;
 ```
 
-Check `@gravito/seo-core` documentation for engine configuration details.
+Check `@gravito/luminosity` documentation for engine configuration details.
 
 ## License
 

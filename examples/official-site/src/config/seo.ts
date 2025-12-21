@@ -1,4 +1,4 @@
-import type { SeoConfig } from '@gravito/seo-core'
+import type { SeoConfig } from '@gravito/luminosity'
 import { DocsService } from '../services/DocsService'
 
 export const seoConfig: SeoConfig = {

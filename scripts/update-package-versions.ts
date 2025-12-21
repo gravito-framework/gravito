@@ -18,8 +18,8 @@ const OFFICIAL_SITE_PACKAGES = [
   '@gravito/orbit-cache',
   '@gravito/orbit-inertia',
   '@gravito/orbit-view',
-  '@gravito/seo-adapter-hono',
-  '@gravito/seo-core',
+  '@gravito/luminosity-adapter-hono',
+  '@gravito/luminosity',
 ];
 
 // 版本配置

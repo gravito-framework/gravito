@@ -13,9 +13,9 @@ const execAsync = promisify(exec);
 
 const FAILED_PACKAGES = [
   'gravito-core',
-  '@gravito/seo-adapter-hono',
-  '@gravito/seo-adapter-express',
-  '@gravito/seo-cli',
+  '@gravito/luminosity-adapter-hono',
+  '@gravito/luminosity-adapter-express',
+  '@gravito/luminosity-cli',
 ];
 
 const PACKAGES_DIR = join(process.cwd(), 'packages');
@@ -30,12 +30,12 @@ async function checkFileExists(path: string): Promise<boolean> {
 }
 
 async function getPackageDir(pkgName: string): Promise<string | null> {
-  const dirs = ['core', 'seo-adapter-hono', 'seo-adapter-express', 'seo-cli'];
+  const dirs = ['core', 'luminosity-adapter-hono', 'luminosity-adapter-express', 'luminosity-cli'];
   const nameMap: Record<string, string> = {
     'gravito-core': 'core',
-    '@gravito/seo-adapter-hono': 'seo-adapter-hono',
-    '@gravito/seo-adapter-express': 'seo-adapter-express',
-    '@gravito/seo-cli': 'seo-cli',
+    '@gravito/luminosity-adapter-hono': 'luminosity-adapter-hono',
+    '@gravito/luminosity-adapter-express': 'luminosity-adapter-express',
+    '@gravito/luminosity-cli': 'luminosity-cli',
   };
 
   const dir = nameMap[pkgName] || pkgName.replace('@gravito/', '');

@@ -1,4 +1,4 @@
-# @gravito/seo-core
+# @gravito/luminosity
 
 The intelligent core of the Gravito SmartMap Engine™. Provides incremental sitemap generation, robots.txt management, and dynamic meta tag building.
 
@@ -13,7 +13,7 @@ The intelligent core of the Gravito SmartMap Engine™. Provides incremental sit
 ## Installation
 
 ```bash
-bun add @gravito/seo-core
+bun add @gravito/luminosity
 ```
 
 ## Configuration
@@ -22,7 +22,7 @@ The engine is controlled via a `SeoConfig` object, typically defined in `gravito
 
 ### Basic Config
 ```typescript
-import type { SeoConfig } from '@gravito/seo-core';
+import type { SeoConfig } from '@gravito/luminosity';
 
 const config: SeoConfig = {
   mode: 'incremental', // 'dynamic' | 'cached' | 'incremental'
@@ -82,13 +82,13 @@ When using `gravito-seo` middleware (in Hono/Express), requests to `/robots.txt`
 ## usage
 
 ### 1. Sitemap Engine
-Typically used via `@gravito/seo-adapter-hono` or `@gravito/seo-adapter-express`.
+Typically used via `@gravito/luminosity-adapter-hono` or `@gravito/luminosity-adapter-express`.
 
 ### 2. Meta Tags (SeoMetadata)
 Use `SeoMetadata` in your controllers or views to generate HTML head tags dynamically.
 
 ```typescript
-import { SeoMetadata } from '@gravito/seo-core';
+import { SeoMetadata } from '@gravito/luminosity';
 
 // In your controller/route
 const post = { title: "Hello World", summary: "..." };
@@ -139,7 +139,7 @@ const headHtml = seo.toString();
 If you need to generate robots.txt manually:
 
 ```typescript
-import { RobotsBuilder } from '@gravito/seo-core';
+import { RobotsBuilder } from '@gravito/luminosity';
 
 const builder = new RobotsBuilder({
   rules: [{ userAgent: '*', disallow: ['/'] }]

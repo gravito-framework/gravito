@@ -37,7 +37,7 @@ export async function bootstrap(options: AppConfig = {}): Promise<PlanetCore> {
   core.app.get('/favicon.ico', serveStatic({ path: './static/favicon.ico' }))
 
   // 3.1 SEO Middleware (Eat our own dog food)
-  const { gravitoSeo } = await import('@gravito/seo-adapter-hono')
+  const { gravitoSeo } = await import('@gravito/luminosity-adapter-hono')
   const { seoConfig } = await import('./config/seo')
 
   // Mounted at root to catch /sitemap.xml and /robots.txt

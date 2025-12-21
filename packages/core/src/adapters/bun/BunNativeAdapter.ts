@@ -55,19 +55,21 @@ export class BunNativeAdapter implements HttpAdapter {
             // Strip the mounting path prefix (e.g., '/orbit') from the pathname
             const prefix = path.endsWith('/') ? path.slice(0, -1) : path
 
+            console.log('[DEBUG] Mount Prefix:', prefix)
+            console.log('[DEBUG] Original Path:', url.pathname)
+
             if (url.pathname.startsWith(prefix)) {
                 // Ensure we handle root correctly (e.g. /orbit needs to become / or similar based on router logic)
                 const newPath = url.pathname.slice(prefix.length)
                 url.pathname = newPath === '' ? '/' : newPath
             }
 
-            // Create a clean request with minimal properties to avoid carrying over internal state
             // that might confuse the sub-adapter (e.g. body already used flags, though we are in GET)
+            // console.log('[DEBUG] Rewritten URL:', url.toString())
+            // Hardcode to test
             const newReq = new Request(url.toString(), {
                 method: ctx.req.method,
                 headers: ctx.req.raw.headers,
-                // body: ctx.req.method !== 'GET' && ctx.req.method !== 'HEAD' ? await ctx.req.arrayBuffer() : undefined
-                // For now assuming GET/HEAD or body not needed for this test case
             })
 
             return await subAdapter.fetch(newReq)
@@ -156,8 +158,8 @@ export class BunNativeAdapter implements HttpAdapter {
 
         const finalResponse = await dispatch(0)
 
-        if (finalResponse instanceof Response) {
-            return finalResponse
+        if (finalResponse && (finalResponse instanceof Response || typeof (finalResponse as Response).status === 'number')) {
+            return finalResponse as Response
         }
 
         // Check if context has stored response (from middleware/handler calls to ctx.json() etc)

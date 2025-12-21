@@ -41,6 +41,7 @@ describe('gravito-core', () => {
       const orbit = new Hono()
       orbit.use('*', async (c, next) => {
         console.log('[DEBUG] Orbit Request:', c.req.method, c.req.url, c.req.path)
+        console.log('[DEBUG] Headers:', c.req.header())
         await next()
       })
 
@@ -49,15 +50,69 @@ describe('gravito-core', () => {
         console.log('[DEBUG] Catch-all:', c.req.path, c.req.method)
         return c.text('Catch-all', 404)
       })
-      core.mountOrbit('/orbit', orbit)
 
-      // Use the liftoff fetch method to test
-      const { fetch } = core.liftoff(0) // port 0 for random free port
+      // Verify orbit works standalone
+      const standaloneRes = await orbit.fetch(new Request('http://localhost/ping'))
+      const standaloneText = await standaloneRes.text()
+      console.log('Standalone Orbit Response:', standaloneText)
+      expect(standaloneText).toBe('pong')
 
-      const res = await fetch(new Request('http://localhost/orbit/ping'))
+      // Test HonoAdapter directly
+      const { HonoAdapter } = await import('../src/adapters/HonoAdapter')
+      const adapter = new HonoAdapter({}, orbit)
+      const adapterRes = await adapter.fetch(new Request('http://localhost/ping'))
+      const adapterText = await adapterRes.text()
+      console.log('HonoAdapter Response:', adapterText)
+      expect(adapterText).toBe('pong')
+
+      // Simulate BunNativeAdapter request rewriting logic
+      const originalReq = new Request('http://localhost/orbit/ping')
+      const simUrl = new URL(originalReq.url)
+      simUrl.pathname = '/ping'
+      const simulatedReq = new Request(simUrl.toString(), {
+        method: originalReq.method,
+        headers: originalReq.headers
+      })
+      const simRes = await adapter.fetch(simulatedReq)
+      const simText = await simRes.text()
+      console.log('Simulated Adapter Response:', simText)
+      expect(simText).toBe('pong')
+
+      // Use a fresh instance to rule out state issues
+      const freshOrbit = new Hono()
+      freshOrbit.use('*', async (c, next) => {
+        console.log('[DEBUG-ORBIT] Middleware HIT')
+        console.log('[DEBUG-ORBIT] URL:', c.req.url)
+        console.log('[DEBUG-ORBIT] Path:', c.req.path)
+        console.log('[DEBUG-ORBIT] Path Length:', c.req.path.length)
+        console.log('[DEBUG-ORBIT] Method:', c.req.method)
+        await next()
+      })
+      freshOrbit.notFound((c) => {
+        console.log('[DEBUG-ORBIT] 404 Handler Triggered')
+        return c.text('CUSTOM 404', 404)
+      })
+      freshOrbit.all('*', (c) => {
+        console.log('[DEBUG-ORBIT] Catch-all HIT for:', c.req.path)
+        return c.text('pong-wildcard')
+      })
+
+      // VERIFY LOCALLY
+      const localRes = await freshOrbit.fetch(new Request('http://localhost/ping'))
+      console.log('Local Check (Clean):', await localRes.text())
+
+      const localResHeaders = await freshOrbit.fetch(new Request('http://localhost/ping', {
+        headers: { 'Host': 'localhost:3000' }
+      }))
+      console.log('Local Check (Headers):', await localResHeaders.text())
+
+      core.mountOrbit('/fresh', freshOrbit)
+      const { fetch } = core.liftoff(0)
+
+      const res = await fetch(new Request('http://localhost/fresh/ping'))
       const text = await res.text()
-      console.log('Response text:', text)
-      console.log('Response status:', res.status)
+      console.log('Fresh Orbit Response text:', text)
+      console.log('Fresh Orbit Response status:', res.status)
       expect(text).toBe('pong')
     })
   })

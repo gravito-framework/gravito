@@ -1,5 +1,4 @@
-import { HTTPException } from 'hono/http-exception'
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from '../http/types'
 
 export interface ExceptionOptions {
   message?: string
@@ -8,16 +7,17 @@ export interface ExceptionOptions {
   i18nParams?: Record<string, string | number>
 }
 
-export abstract class GravitoException extends HTTPException {
+export abstract class GravitoException extends Error {
+  public readonly status: ContentfulStatusCode
   public readonly code: string
   public readonly i18nKey?: string
   public readonly i18nParams?: Record<string, string | number>
 
   constructor(status: number, code: string, options: ExceptionOptions = {}) {
-    super(status as ContentfulStatusCode, {
-      ...(options.message ? { message: options.message } : {}),
-      cause: options.cause,
-    })
+    super(options.message)
+    this.name = 'GravitoException'
+    this.status = status as ContentfulStatusCode
+    this.cause = options.cause
     this.code = code
     if (options.i18nKey) {
       this.i18nKey = options.i18nKey
@@ -37,3 +37,6 @@ export abstract class GravitoException extends HTTPException {
     return this.message
   }
 }
+
+
+
