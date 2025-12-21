@@ -28,8 +28,15 @@ describe('OrbitSession', () => {
 
     const res1 = await core.adapter.fetch(new Request('http://localhost/set'))
     expect(res1.status).toBe(200)
-    const setCookie = res1.headers.get('set-cookie')
-    expect(setCookie).toContain('gravito_session=')
+
+    // Bun's Response may use getSetCookie() for multiple Set-Cookie headers
+    const cookies = res1.headers.getSetCookie
+      ? res1.headers.getSetCookie()
+      : [res1.headers.get('set-cookie') || '']
+
+    expect(cookies.join('; ')).toContain('gravito_session=')
+
+    const setCookie = cookies.find(c => c.includes('gravito_session='))!
 
     const res2 = await core.adapter.fetch(new Request('http://localhost/get', {
       headers: { Cookie: setCookie! },
@@ -84,7 +91,8 @@ describe('OrbitSession', () => {
     core.router.post('/submit', (c) => c.json({ ok: true }))
 
     const res1 = await core.adapter.fetch(new Request('http://localhost/csrf'))
-    const cookie = res1.headers.get('set-cookie')!
+    const cookies = res1.headers.getSetCookie ? res1.headers.getSetCookie() : [res1.headers.get('set-cookie')!]
+    const cookie = cookies.find(c => c.includes('gravito_session='))!
     const token = ((await res1.json()) as any).token
 
     const res2 = await core.adapter.fetch(new Request('http://localhost/submit', {

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { ContentManager } from '@gravito/orbit-content'
-import { generateI18nEntries, SitemapStream, streamToPromise } from '@gravito/orbit-sitemap'
+import { generateI18nEntries, SitemapStream, streamToPromise } from '@gravito/constellation'
 import { app } from './src/index.ts'
 
 async function build() {
