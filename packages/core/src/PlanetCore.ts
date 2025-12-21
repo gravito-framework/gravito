@@ -1,7 +1,19 @@
+/**
+ * @fileoverview PlanetCore - The Heart of Gravito Framework
+ *
+ * The micro-kernel that orchestrates the entire Galaxy Architecture.
+ * Manages HTTP routing, middleware, error handling, and orbit integration.
+ *
+ * @module gravito-core
+ * @since 1.0.0
+ */
+
 import type { Context } from 'hono'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import { HonoAdapter } from './adapters/HonoAdapter'
+import type { HttpAdapter } from './adapters/types'
 import { ConfigManager } from './ConfigManager'
 import { Container } from './Container'
 import { EventManager } from './EventManager'
@@ -75,6 +87,11 @@ export type GravitoConfig = {
   logger?: Logger
   config?: Record<string, unknown>
   orbits?: (new () => GravitoOrbit)[] | GravitoOrbit[]
+  /**
+   * HTTP Adapter to use. Defaults to HonoAdapter.
+   * @since 2.0.0
+   */
+  adapter?: HttpAdapter
 }
 
 import { CookieJar } from './http/CookieJar'
@@ -83,7 +100,28 @@ import { Encrypter } from './security/Encrypter'
 import { BunHasher } from './security/Hasher'
 
 export class PlanetCore {
-  public app: Hono<{ Variables: Variables }>
+  /**
+   * The HTTP adapter used by this core instance.
+   * @since 2.0.0
+   */
+  private _adapter!: HttpAdapter
+
+  /**
+   * Access the underlying Hono app instance.
+   * @deprecated Use adapter methods for new code. This property is kept for backward compatibility.
+   */
+  public get app(): Hono<{ Variables: Variables }> {
+    return this._adapter.native as Hono<{ Variables: Variables }>
+  }
+
+  /**
+   * Get the HTTP adapter instance.
+   * @since 2.0.0
+   */
+  public get adapter(): HttpAdapter {
+    return this._adapter
+  }
+
   public logger: Logger
   public config: ConfigManager
   public hooks: HookManager
@@ -150,7 +188,10 @@ export class PlanetCore {
       }
     }
 
-    this.app = new Hono<{ Variables: Variables }>()
+    // Initialize HTTP adapter (HonoAdapter is the default)
+    // The adapter can be replaced via boot() or constructor options in future versions
+    const honoApp = new Hono<{ Variables: Variables }>()
+    this._adapter = new HonoAdapter({}, honoApp)
 
     // Core Middleware for Context Injection
     this.app.use('*', async (c, next) => {

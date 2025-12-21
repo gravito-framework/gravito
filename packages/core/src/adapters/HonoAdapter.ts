@@ -273,11 +273,12 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
 
   constructor(
     private config: AdapterConfig = {},
-    honoInstance?: Hono
+    honoInstance?: unknown
   ) {
     // Allow injecting an existing Hono instance for backwards compatibility
     if (honoInstance) {
-      this.app = honoInstance
+      // Cast to Hono - the caller is responsible for providing a valid instance
+      this.app = honoInstance as Hono
     } else {
       // Lazy import to avoid circular dependency issues
       // In practice, PlanetCore will provide the Hono instance
