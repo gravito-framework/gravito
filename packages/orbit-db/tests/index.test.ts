@@ -12,9 +12,9 @@ describe('OrbitDB', () => {
   beforeEach(() => {
     core = new PlanetCore()
     mockDoAction = mock((_hook, _args) => Promise.resolve())
-    mockUse = mock(() => core.app)
+    mockUse = mock(() => core.adapter)
     core.hooks.doAction = mockDoAction
-    core.app.use = mockUse
+    core.adapter.use = mockUse
   })
 
   it('should register db and hooks', () => {
@@ -35,7 +35,7 @@ describe('OrbitDB', () => {
       name: 'mock-db',
       select: () => ({ from: () => ({ limit: () => Promise.resolve([]) }) }),
     }
-    const mockContext = { set: mock(() => {}) }
+    const mockContext = { set: mock(() => { }) }
 
     orbitDB(core, { db: mockDb })
 
@@ -45,20 +45,20 @@ describe('OrbitDB', () => {
     // Simulate middleware execution
     const middleware = (mockUse as any).mock.calls[0][1]
     if (middleware) {
-      await middleware(mockContext, async () => {})
+      await middleware(mockContext, async () => { })
       expect(mockContext.set).toHaveBeenCalledWith('db', expect.objectContaining({ raw: mockDb }))
     }
   })
 
   it('should support custom exposeAs', () => {
     const mockDb = { name: 'mock-db' }
-    const mockContext = { set: mock(() => {}) }
+    const mockContext = { set: mock(() => { }) }
 
     orbitDB(core, { db: mockDb, exposeAs: 'database' })
 
     const middleware = (mockUse as any).mock.calls[0][1]
     if (middleware) {
-      middleware(mockContext, async () => {})
+      middleware(mockContext, async () => { })
       expect(mockContext.set).toHaveBeenCalledWith('database', expect.anything())
     }
   })
@@ -110,7 +110,7 @@ describe('OrbitDB', () => {
           mockContext[key] = value
         }),
       }
-      middleware(mockContext, async () => {})
+      middleware(mockContext, async () => { })
       dbService = mockContext.db
     })
 
@@ -514,8 +514,8 @@ describe('OrbitDB', () => {
     })
 
     it('should support seedMany', async () => {
-      const seed1 = mock(async () => {})
-      const seed2 = mock(async () => {})
+      const seed1 = mock(async () => { })
+      const seed2 = mock(async () => { })
 
       const result = await dbService.seedMany([
         { name: 'seed1', seed: seed1 },
@@ -593,7 +593,7 @@ describe('OrbitDB', () => {
           mockContext[key] = value
         }),
       }
-      await middleware(mockContext, async () => {})
+      await middleware(mockContext, async () => { })
 
       const dbService = mockContext.db as DBService
       const mockTable = { _: { name: 'users' } }
@@ -641,8 +641,20 @@ describe('OrbitDB', () => {
         transaction: (callback: any) => callback(mockDb),
       }
 
+      mockUse = mock(() => core.adapter)
+      core.adapter.use = mockUse
+
       orbitDB(core, { db: mockDb })
-      dbService = core.app.get('db') as DBService
+
+      // Extract dbService from middleware
+      const middleware = (mockUse as any).mock.calls[0][1]
+      const mockContext: any = {
+        set: mock((key: string, value: any) => {
+          mockContext[key] = value
+        }),
+      }
+      middleware(mockContext, async () => { })
+      dbService = mockContext.db as DBService
       ModelRegistry.clear()
     })
 
@@ -686,7 +698,7 @@ describe('OrbitDB', () => {
       const mockFindById = mock(() =>
         Promise.resolve({ id: 1, name: 'John', email: 'john@example.com' })
       )
-      ;(dbService as any).findById = mockFindById
+        ; (dbService as any).findById = mockFindById
 
       const user = await User.find(1)
 
@@ -711,7 +723,7 @@ describe('OrbitDB', () => {
       User.setTable({ _: { name: 'users' } }, 'users')
 
       const mockFindById = mock(() => Promise.resolve(null))
-      ;(dbService as any).findById = mockFindById
+        ; (dbService as any).findById = mockFindById
 
       const user = await User.find(999)
 
@@ -735,7 +747,7 @@ describe('OrbitDB', () => {
       const mockFindOne = mock(() =>
         Promise.resolve({ id: 1, name: 'John', email: 'john@example.com' })
       )
-      ;(dbService as any).findOne = mockFindOne
+        ; (dbService as any).findOne = mockFindOne
 
       const user = await User.where('email', 'john@example.com')
 
@@ -767,7 +779,7 @@ describe('OrbitDB', () => {
           { id: 2, name: 'Jane', email: 'jane@example.com' },
         ])
       )
-      ;(dbService as any).findAll = mockFindAll
+        ; (dbService as any).findAll = mockFindAll
 
       const users = await User.all()
 
@@ -797,7 +809,7 @@ describe('OrbitDB', () => {
       const mockCreate = mock(() =>
         Promise.resolve({ id: 1, name: 'John', email: 'john@example.com' })
       )
-      ;(dbService as any).create = mockCreate
+        ; (dbService as any).create = mockCreate
 
       const user = await User.create({ name: 'John', email: 'john@example.com' })
 
@@ -827,10 +839,10 @@ describe('OrbitDB', () => {
       const mockCreate = mock(() =>
         Promise.resolve({ id: 1, name: 'John', email: 'john@example.com' })
       )
-      ;(dbService as any).create = mockCreate
-      ;(dbService as any).findById = mock(() =>
-        Promise.resolve({ id: 1, name: 'John', email: 'john@example.com' })
-      )
+        ; (dbService as any).create = mockCreate
+        ; (dbService as any).findById = mock(() =>
+          Promise.resolve({ id: 1, name: 'John', email: 'john@example.com' })
+        )
 
       const user = new User()
       user.set('name', 'John')
@@ -862,8 +874,8 @@ describe('OrbitDB', () => {
       const mockFindById = mock(() =>
         Promise.resolve({ id: 1, name: 'Updated', email: 'john@example.com' })
       )
-      ;(dbService as any).update = mockUpdate
-      ;(dbService as any).findById = mockFindById
+        ; (dbService as any).update = mockUpdate
+        ; (dbService as any).findById = mockFindById
 
       const user = new User()
       user.attributes = { id: 1, name: 'John', email: 'john@example.com' }
@@ -890,7 +902,7 @@ describe('OrbitDB', () => {
       User.setTable({ _: { name: 'users' } }, 'users')
 
       const mockDelete = mock(() => Promise.resolve())
-      ;(dbService as any).delete = mockDelete
+        ; (dbService as any).delete = mockDelete
 
       const user = new User()
       user.attributes = { id: 1, name: 'John', email: 'john@example.com' }
@@ -916,7 +928,7 @@ describe('OrbitDB', () => {
       User.setTable({ _: { name: 'users' } }, 'users')
 
       const mockCount = mock(() => Promise.resolve(10))
-      ;(dbService as any).count = mockCount
+        ; (dbService as any).count = mockCount
 
       const count = await User.count()
 
@@ -939,7 +951,7 @@ describe('OrbitDB', () => {
       User.setTable({ _: { name: 'users' } }, 'users')
 
       const mockExists = mock(() => Promise.resolve(true))
-      ;(dbService as any).exists = mockExists
+        ; (dbService as any).exists = mockExists
 
       const exists = await User.exists({ email: 'john@example.com' })
 
@@ -1097,7 +1109,7 @@ describe('OrbitDB', () => {
           ],
         })
       )
-      ;(dbService as any).findByIdWith = mockFindByIdWith
+        ; (dbService as any).findByIdWith = mockFindByIdWith
 
       const user = new User()
       user.attributes = { id: 1, name: 'John' }
@@ -1142,7 +1154,7 @@ describe('OrbitDB', () => {
           posts: [{ id: 1, userId: 1, title: 'Post 1' }],
         })
       )
-      ;(dbService as any).findByIdWith = mockFindByIdWith
+        ; (dbService as any).findByIdWith = mockFindByIdWith
 
       const user = new User()
       user.attributes = { id: 1, name: 'John' }

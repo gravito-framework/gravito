@@ -8,7 +8,6 @@
  * @since 1.0.0
  */
 
-import type { Context } from 'hono'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
@@ -27,6 +26,7 @@ import { HookManager } from './HookManager'
 import { fail } from './helpers/response'
 import { ConsoleLogger, type Logger } from './Logger'
 import type { ServiceProvider } from './ServiceProvider'
+import type { GravitoContext } from './http/types'
 
 /**
  * CacheService interface for orbit-injected cache
@@ -46,7 +46,7 @@ export interface ViewService {
 
 export type ErrorHandlerContext = {
   core: PlanetCore
-  c: Context
+  c: GravitoContext
   error: unknown
   isProduction: boolean
   accept: string
@@ -98,6 +98,7 @@ import { CookieJar } from './http/CookieJar'
 import { Router } from './Router'
 import { Encrypter } from './security/Encrypter'
 import { BunHasher } from './security/Hasher'
+import { BunNativeAdapter } from './adapters/bun/BunNativeAdapter'
 
 export class PlanetCore {
   /**
@@ -165,6 +166,7 @@ export class PlanetCore {
     options: {
       logger?: Logger
       config?: Record<string, unknown>
+      adapter?: HttpAdapter
     } = {}
   ) {
     this.logger = options.logger ?? new ConsoleLogger()
@@ -173,8 +175,6 @@ export class PlanetCore {
     this.events = new EventManager(this)
 
     this.hasher = new BunHasher()
-
-    // Initialize Encrypter if APP_KEY is present
 
     // Initialize Encrypter if APP_KEY is present
     const appKey =
@@ -188,13 +188,22 @@ export class PlanetCore {
       }
     }
 
-    // Initialize HTTP adapter (HonoAdapter is the default)
-    // The adapter can be replaced via boot() or constructor options in future versions
-    const honoApp = new Hono<{ Variables: Variables }>()
-    this._adapter = new HonoAdapter({}, honoApp)
+    // Initialize HTTP adapter
+    // Priority:
+    // 1. Config 'adapter' option (explicit)
+    // 2. BunNativeAdapter (if Bun is detected)
+    // 3. HonoAdapter (fallback for Node/others)
+    if (options.adapter) {
+      this._adapter = options.adapter
+    } else if (typeof Bun !== 'undefined') {
+      this._adapter = new BunNativeAdapter()
+    } else {
+      const honoApp = new Hono<{ Variables: Variables }>()
+      this._adapter = new HonoAdapter({}, honoApp)
+    }
 
     // Core Middleware for Context Injection
-    this.app.use('*', async (c, next) => {
+    this.adapter.use('*', async (c, next) => {
       c.set('core', this)
       c.set('logger', this.logger)
       c.set('config', this.config)
@@ -210,13 +219,16 @@ export class PlanetCore {
       await next()
 
       // Attach queued cookies to response
-      cookieJar.attach(c)
+      cookieJar.attach(c as unknown as import('hono').Context)
+      // cookieJar.attach expects Hono Context, need to check if we can fix that or cast.
+      // CookieJar probably needs decoupling too, but for now casting is unsafe but might work if it just checks keys.
+      // Actually CookieJar uses c.header which GravitoContext has.
     })
     // Router depends on `core.app` for route registration and optional global middleware.
     this.router = new Router(this)
 
     // Standard Error Handling
-    this.app.onError(async (err, c) => {
+    this.adapter.onError(async (err, c) => {
       const isProduction = process.env.NODE_ENV === 'production'
       const codeFromStatus = (status: number): string => {
         switch (status) {
@@ -274,6 +286,7 @@ export class PlanetCore {
       // Try rendering HTML if available and requested
       const view = c.get('view') as ViewService | undefined
       const i18n = c.get('i18n') as { t?: (key: string, params?: unknown) => string } | undefined
+      // GravitoContext uses c.req.header()
       const accept = c.req.header('Accept') || ''
       const wantsHtml = Boolean(
         view && accept.includes('text/html') && !accept.includes('application/json')
@@ -357,18 +370,18 @@ export class PlanetCore {
         payload: fail(message, code, details),
         ...(wantsHtml
           ? {
-              html: {
-                templates: status === 500 ? ['errors/500'] : [`errors/${status}`, 'errors/500'],
-                data: {
-                  status,
-                  message,
-                  code,
-                  error: !isProduction && err instanceof Error ? err.stack : undefined,
-                  debug: !isProduction,
-                  details,
-                },
+            html: {
+              templates: status === 500 ? ['errors/500'] : [`errors/${status}`, 'errors/500'],
+              data: {
+                status,
+                message,
+                code,
+                error: !isProduction && err instanceof Error ? err.stack : undefined,
+                debug: !isProduction,
+                details,
               },
-            }
+            },
+          }
           : {}),
       }
 
@@ -427,9 +440,10 @@ export class PlanetCore {
       return c.json(handlerContext.payload, handlerContext.status)
     })
 
-    this.app.notFound(async (c) => {
+    this.adapter.onNotFound(async (c) => {
       // Try rendering HTML if available and requested
       const view = c.get('view') as ViewService | undefined
+      // GravitoContext uses c.req.header
       const accept = c.req.header('Accept') || ''
       const wantsHtml = view && accept.includes('text/html') && !accept.includes('application/json')
       const isProduction = process.env.NODE_ENV === 'production'
@@ -445,16 +459,16 @@ export class PlanetCore {
         payload: fail('Route not found', 'NOT_FOUND'),
         ...(wantsHtml
           ? {
-              html: {
-                templates: ['errors/404', 'errors/500'],
-                data: {
-                  status: 404,
-                  message: 'Route not found',
-                  code: 'NOT_FOUND',
-                  debug: !isProduction,
-                },
+            html: {
+              templates: ['errors/404', 'errors/500'],
+              data: {
+                status: 404,
+                message: 'Route not found',
+                code: 'NOT_FOUND',
+                debug: !isProduction,
               },
-            }
+            },
+          }
           : {}),
       }
 
@@ -539,7 +553,26 @@ export class PlanetCore {
    */
   mountOrbit(path: string, orbitApp: Hono): void {
     this.logger.info(`Mounting orbit at path: ${path}`)
-    this.app.route(path, orbitApp)
+    // Should reuse this.adapter.mount logic if possible, or fallback.
+    // HonoAdapter has special mount. BunNativeAdapter might not fully support mounting Hono apps yet.
+    // For now, assume orbitApp is Hono and we are likely in an environment where Hono might be used.
+    // BUT if we are in BunNativeAdapter, this.app is BunNativeAdapter.
+    // BunNativeAdapter.mount() implementation warned it's not fully implemented.
+    // If we want to support Orbits, we need to fix mount in BunNativeAdapter.
+    // For now, let's just call adapter.mount.
+    // But adapter.mount signature expects HttpAdapter, not Hono.
+    // The current code expects a Hono instance.
+    // This is a break.
+    // Temporary fix: Check adapter type or wrap orbitApp.
+    if (this.adapter.name === 'hono') {
+      (this.adapter.native as Hono).route(path, orbitApp)
+    } else {
+      // Warn or try to mount if adapter supports it?
+      // BunNativeAdapter "mount" takes HttpAdapter.
+      // orbitApp is Hono. We can wrap orbitApp in HonoAdapter!
+      const subAdapter = new HonoAdapter({}, orbitApp);
+      this.adapter.mount(path, subAdapter);
+    }
   }
 
   /**
@@ -562,7 +595,7 @@ export class PlanetCore {
 
     return {
       port: finalPort,
-      fetch: this.app.fetch.bind(this.app),
+      fetch: this.adapter.fetch.bind(this.adapter), // Ensure we bind to adapter not app
       core: this,
     }
   }

@@ -4,7 +4,7 @@ import type { Authenticatable } from '../src/contracts/Authenticatable'
 import orbitAuth, { CallbackUserProvider } from '../src/index'
 
 class TestUser implements Authenticatable {
-  constructor(public id: string) {}
+  constructor(public id: string) { }
   getAuthIdentifier() {
     return this.id
   }
@@ -35,7 +35,8 @@ describe('OrbitAuth', () => {
     })
 
     // Register a route to test injection
-    core.app.get('/test', (c) => {
+    // Register a route to test injection
+    core.router.get('/test', (c) => {
       const auth = c.get('auth')
       return c.json({
         hasAuth: !!auth,
@@ -43,7 +44,7 @@ describe('OrbitAuth', () => {
       })
     })
 
-    const res = await core.app.request('/test')
+    const res = await core.adapter.fetch(new Request('http://localhost/test'))
     const json = await res.json()
 
     expect(json.hasAuth).toBe(true)

@@ -1,0 +1,24 @@
+import type { HttpMethod } from '../../http/types'
+
+/**
+ * Route Handler type (simplified for internal use)
+ * In the full framework this will align with GravitoHandler
+ */
+export type RouteHandler = Function
+
+/**
+ * Route Match Result
+ */
+export interface RouteMatch {
+    handlers: RouteHandler[]
+    params: Record<string, string>
+}
+
+/**
+ * Radix Node Type
+ */
+export enum NodeType {
+    STATIC = 0,
+    PARAM = 1,
+    WILDCARD = 2,
+}

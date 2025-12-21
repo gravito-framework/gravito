@@ -12,13 +12,13 @@ class TestException extends GravitoException {
 describe('Exception Handling', () => {
   test('handles GravitoException as JSON', async () => {
     const core = new PlanetCore()
-    core.app.get('/error', () => {
+    core.router.get('/error', () => {
       throw new TestException()
     })
 
-    const res = await core.app.request('/error', {
+    const res = await core.adapter.fetch(new Request('http://localhost/error', {
       headers: { Accept: 'application/json' },
-    })
+    }))
     expect(res.status).toBe(400)
     const json = await res.json()
     const data = json as { success: boolean; error: { code: string; message: string } }
@@ -35,21 +35,21 @@ describe('Exception Handling', () => {
       flash: flashMock,
     }
 
-    core.app.use('*', async (c, next) => {
+    core.adapter.use('*', async (c, next) => {
       c.set('session', sessionMock)
       c.set('view', { render: () => '' }) // Enable HTML mode
       await next()
     })
 
-    core.app.get('/form', () => {
+    core.router.get('/form', () => {
       const ex = new ValidationException([{ field: 'email', message: 'Invalid' }])
       ex.withInput({ email: 'bad' })
       throw ex
     })
 
-    const res = await core.app.request('/form', {
+    const res = await core.adapter.fetch(new Request('http://localhost/form', {
       headers: { Accept: 'text/html' },
-    })
+    }))
 
     expect(res.status).toBe(302)
     expect(flashMock).toHaveBeenCalledTimes(2) // errors + _old_input

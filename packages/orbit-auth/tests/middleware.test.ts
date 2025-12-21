@@ -4,7 +4,7 @@ import type { Authenticatable } from '../src/contracts/Authenticatable'
 import orbitAuth, { auth, CallbackUserProvider, can, type Gate, guest } from '../src/index'
 
 class TestUser implements Authenticatable {
-  constructor(public id: string) {}
+  constructor(public id: string) { }
   getAuthIdentifier() {
     return this.id
   }
@@ -36,9 +36,9 @@ describe('Auth Middleware', () => {
 
   it('auth middleware blocks unauthenticated requests', async () => {
     const core = setupCore()
-    core.app.get('/protected', auth(), (c) => c.text('ok'))
+    core.router.middleware(auth()).get('/protected', (c) => c.text('ok'))
 
-    const res = await core.app.request('/protected')
+    const res = await core.adapter.fetch(new Request('http://localhost/protected'))
     expect(res.status).toBe(401)
   })
 
@@ -46,7 +46,7 @@ describe('Auth Middleware', () => {
     const core = setupCore()
 
     // Mock authenticated user
-    core.app.use('*', async (c, next) => {
+    core.adapter.use('*', async (c, next) => {
       const manager = c.get('auth')
       manager.guard = () =>
         ({
@@ -54,16 +54,16 @@ describe('Auth Middleware', () => {
           user: async () => new TestUser('1'),
           id: async () => '1',
           validate: async () => true,
-          setUser: () => {},
-          getProvider: () => {},
-          setProvider: () => {},
+          setUser: () => { },
+          getProvider: () => { },
+          setProvider: () => { },
         }) as any
       await next()
     })
 
-    core.app.get('/login', guest(), (c) => c.text('login page'))
+    core.router.middleware(guest()).get('/login', (c) => c.text('login page'))
 
-    const res = await core.app.request('/login')
+    const res = await core.adapter.fetch(new Request('http://localhost/login'))
     expect(res.status).toBe(302)
     expect(res.headers.get('Location')).toBe('/')
   })
@@ -72,16 +72,16 @@ describe('Auth Middleware', () => {
     const core = setupCore()
 
     // Define a gate ability
-    core.app.use('*', async (c, next) => {
+    core.adapter.use('*', async (c, next) => {
       const gate = c.get('gate') as Gate
       gate.define('edit-post', (user) => user?.getAuthIdentifier() === '1')
       await next()
     })
 
-    core.app.get('/admin', can('edit-post'), (c) => c.text('admin'))
+    core.router.middleware(can('edit-post')).get('/admin', (c) => c.text('admin'))
 
     // Unauthenticated -> Deny
-    const res1 = await core.app.request('/admin')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/admin'))
     expect(res1.status).toBe(403)
   })
 })

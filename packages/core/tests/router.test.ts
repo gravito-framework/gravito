@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import type { Context, MiddlewareHandler } from 'hono'
+import type { GravitoContext as Context, GravitoMiddleware } from '../src/index'
 import { PlanetCore } from '../src/PlanetCore'
 import { Router } from '../src/Router'
 
@@ -22,7 +22,7 @@ describe('Router', () => {
 
     router.get('/', [TestController, 'index'])
 
-    const res = await core.app.request('/')
+    const res = await core.adapter.fetch(new Request('http://localhost/'))
     expect(await res.text()).toBe('index')
   })
 
@@ -34,7 +34,7 @@ describe('Router', () => {
       r.get('/test', [TestController, 'api'])
     })
 
-    const res = await core.app.request('/api/test')
+    const res = await core.adapter.fetch(new Request('http://localhost/api/test'))
     expect(await res.text()).toBe('api')
   })
 
@@ -48,7 +48,7 @@ describe('Router', () => {
       })
     })
 
-    const res = await core.app.request('/api/v1/users')
+    const res = await core.adapter.fetch(new Request('http://localhost/api/v1/users'))
     expect(await res.text()).toBe('api')
   })
 
@@ -57,7 +57,7 @@ describe('Router', () => {
     const router = new Router(core)
     let middlewareCalled = false
 
-    const testMiddleware: MiddlewareHandler = async (_c, next) => {
+    const testMiddleware: GravitoMiddleware = async (_c, next) => {
       middlewareCalled = true
       await next()
     }
@@ -69,7 +69,7 @@ describe('Router', () => {
         r.get('/test', [TestController, 'api'])
       })
 
-    const res = await core.app.request('/mw/test')
+    const res = await core.adapter.fetch(new Request('http://localhost/mw/test'))
     expect(await res.text()).toBe('api')
     expect(middlewareCalled).toBe(true)
   })
@@ -84,11 +84,11 @@ describe('Router', () => {
     })
 
     // Match
-    const res1 = await core.app.request('/', { headers: { host: 'api.example.com' } })
+    const res1 = await core.adapter.fetch(new Request('http://localhost/', { headers: { host: 'api.example.com' } }))
     expect(await res1.text()).toBe('api')
 
     // No Match (fallback or 404)
-    const res2 = await core.app.request('/', { headers: { host: 'www.example.com' } })
+    const res2 = await core.adapter.fetch(new Request('http://localhost/', { headers: { host: 'www.example.com' } }))
     expect(res2.status).toBe(404)
   })
 
@@ -97,15 +97,15 @@ describe('Router', () => {
     const router = new Router(core)
     const callOrder: string[] = []
 
-    const mw1: MiddlewareHandler = async (_c, next) => {
+    const mw1: GravitoMiddleware = async (_c, next) => {
       callOrder.push('mw1')
       await next()
     }
-    const mw2: MiddlewareHandler = async (_c, next) => {
+    const mw2: GravitoMiddleware = async (_c, next) => {
       callOrder.push('mw2')
       await next()
     }
-    const mw3: MiddlewareHandler = async (_c, next) => {
+    const mw3: GravitoMiddleware = async (_c, next) => {
       callOrder.push('mw3')
       await next()
     }
@@ -118,7 +118,7 @@ describe('Router', () => {
         r.get('/test', (c) => c.text('ok'))
       })
 
-    const res = await core.app.request('/arr/test')
+    const res = await core.adapter.fetch(new Request('http://localhost/arr/test'))
     expect(await res.text()).toBe('ok')
     expect(callOrder).toEqual(['mw1', 'mw2', 'mw3'])
   })
@@ -158,21 +158,21 @@ describe('Router', () => {
     })
 
     // Valid request
-    const res1 = await core.app.request('/users', {
+    const res1 = await core.adapter.fetch(new Request('http://localhost/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Carl' }),
-    })
+    }))
     expect(res1.status).toBe(200)
     const json1 = (await res1.json()) as { user: { name: string } }
     expect(json1.user.name).toBe('Carl')
 
     // Invalid request
-    const res2 = await core.app.request('/users', {
+    const res2 = await core.adapter.fetch(new Request('http://localhost/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'A' }),
-    })
+    }))
     expect(res2.status).toBe(422)
     const json2 = (await res2.json()) as { error: { code: string } }
     expect(json2.error.code).toBe('VALIDATION_ERROR')
@@ -188,7 +188,7 @@ describe('Router', () => {
 
       async validate(ctx: unknown) {
         const c = ctx as Context
-        const query = c.req.query()
+        const query = c.req.queries()
         if (!query.q) {
           return {
             success: false,
@@ -214,13 +214,13 @@ describe('Router', () => {
     })
 
     // Valid
-    const res1 = await core.app.request('/api/search?q=hello')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/api/search?q=hello'))
     expect(res1.status).toBe(200)
     const json1 = (await res1.json()) as { query: string }
     expect(json1.query).toBe('hello')
 
     // Invalid
-    const res2 = await core.app.request('/api/search')
+    const res2 = await core.adapter.fetch(new Request('http://localhost/api/search'))
     expect(res2.status).toBe(422)
   })
 })

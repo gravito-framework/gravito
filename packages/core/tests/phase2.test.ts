@@ -58,7 +58,7 @@ describe('Gravito Core Phase 2 Features', () => {
       const core = new PlanetCore()
 
       // Simulate an error route
-      core.app.get('/error', () => {
+      core.router.get('/error', () => {
         throw new Error('Something went wrong')
       })
 
@@ -75,7 +75,7 @@ describe('Gravito Core Phase 2 Features', () => {
     it('should respect HTTPException status codes', async () => {
       const core = new PlanetCore()
 
-      core.app.get('/forbidden', () => {
+      core.router.get('/forbidden', () => {
         abort(403, 'Forbidden')
       })
 
@@ -98,7 +98,7 @@ describe('Gravito Core Phase 2 Features', () => {
         return errorCtx.c.json({ custom: true, code: errorCtx.payload.error.code }, 418)
       })
 
-      core.app.get('/boom', () => {
+      core.router.get('/boom', () => {
         throw new Error('Boom')
       })
 
@@ -121,7 +121,7 @@ describe('Gravito Core Phase 2 Features', () => {
         return ctx
       })
 
-      core.app.get('/bad', () => {
+      core.router.get('/bad', () => {
         throw new Error('Nope')
       })
 
@@ -150,7 +150,7 @@ describe('Gravito Core Phase 2 Features', () => {
     it('should use status-based message for HTTPException without message', async () => {
       const core = new PlanetCore()
 
-      core.app.get('/missing', () => {
+      core.router.get('/missing', () => {
         abort(404)
       })
 
@@ -171,7 +171,7 @@ describe('Gravito Core Phase 2 Features', () => {
       try {
         const core = new PlanetCore()
 
-        core.app.get('/error', () => {
+        core.router.get('/error', () => {
           throw new Error('Sensitive internal details')
         })
 

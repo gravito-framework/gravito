@@ -14,6 +14,8 @@ export {
   HonoContextWrapper,
   HonoRequestWrapper,
 } from './HonoAdapter'
+
+export * from './bun'
 // Types
 export type {
   AdapterConfig,

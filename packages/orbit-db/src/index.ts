@@ -1,5 +1,4 @@
-import type { GravitoOrbit, PlanetCore } from 'gravito-core'
-import type { Context, Next } from 'hono'
+import type { GravitoContext, GravitoNext, GravitoOrbit, PlanetCore } from 'gravito-core'
 import { DBServiceImpl, detectDatabaseType } from './DBService'
 import { ModelRegistry } from './Model'
 import type { DatabaseType } from './types'
@@ -20,7 +19,7 @@ export interface OrbitDBOptions<TSchema extends Record<string, unknown> = Record
  * Standard Database Orbit (Class Implementation)
  */
 export class OrbitDB implements GravitoOrbit {
-  constructor(private options?: OrbitDBOptions) {}
+  constructor(private options?: OrbitDBOptions) { }
 
   install(core: PlanetCore): void {
     // Try to resolve config from core if not provided in constructor
@@ -79,7 +78,7 @@ export class OrbitDB implements GravitoOrbit {
     core.hooks.doAction('db:connected', { db, dbService, databaseType })
 
     // 3. Middleware injection - inject DBService (keep backward compatibility via `raw` access).
-    core.app.use('*', async (c: Context, next: Next) => {
+    core.adapter.use('*', async (c: GravitoContext, next: GravitoNext) => {
       c.set(exposeAs, dbService)
       await next()
     })

@@ -31,7 +31,7 @@ import type { AdapterConfig, HttpAdapter, RouteDefinition } from './types'
  * Wraps Hono's request object to implement GravitoRequest
  */
 class HonoRequestWrapper implements GravitoRequest {
-  constructor(private honoCtx: Context) {}
+  constructor(private honoCtx: Context) { }
 
   get url(): string {
     return this.honoCtx.req.url
@@ -100,8 +100,7 @@ class HonoRequestWrapper implements GravitoRequest {
  * Wraps Hono's context to implement GravitoContext
  */
 class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
-  implements GravitoContext<V>
-{
+  implements GravitoContext<V> {
   private _req: HonoRequestWrapper
   private _statusCode: StatusCode = 200
 
@@ -303,9 +302,10 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
     this.app = app
   }
 
-  route(method: HttpMethod, path: string, ...handlers: GravitoHandler<V>[]): void {
+  route(method: HttpMethod, path: string, ...handlers: (GravitoHandler<V> | GravitoMiddleware<V>)[]): void {
     const fullPath = (this.config.basePath || '') + path
-    const honoHandlers = handlers.map((h) => toHonoHandler<V>(h))
+    // We treat all handlers as potential middleware (accepting next)
+    const honoHandlers = handlers.map((h) => toHonoMiddleware<V>(h as GravitoMiddleware<V>))
 
     // Use bracket notation to dynamically call the method
     const methodFn = (this.app as unknown as Record<string, (...args: unknown[]) => unknown>)[
@@ -378,7 +378,7 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
     // In practice, this is called through the Hono routing pipeline
     throw new Error(
       'HonoAdapter.createContext() should not be called directly. ' +
-        'Use the router pipeline instead.'
+      'Use the router pipeline instead.'
     )
   }
 

@@ -39,15 +39,26 @@ describe('gravito-core', () => {
     it('should mount orbits and serve requests', async () => {
       const core = new PlanetCore()
       const orbit = new Hono()
+      orbit.use('*', async (c, next) => {
+        console.log('[DEBUG] Orbit Request:', c.req.method, c.req.url, c.req.path)
+        await next()
+      })
 
       orbit.get('/ping', (c) => c.text('pong'))
+      orbit.all('*', (c) => {
+        console.log('[DEBUG] Catch-all:', c.req.path, c.req.method)
+        return c.text('Catch-all', 404)
+      })
       core.mountOrbit('/orbit', orbit)
 
       // Use the liftoff fetch method to test
       const { fetch } = core.liftoff(0) // port 0 for random free port
 
       const res = await fetch(new Request('http://localhost/orbit/ping'))
-      expect(await res.text()).toBe('pong')
+      const text = await res.text()
+      console.log('Response text:', text)
+      console.log('Response status:', res.status)
+      expect(text).toBe('pong')
     })
   })
 })

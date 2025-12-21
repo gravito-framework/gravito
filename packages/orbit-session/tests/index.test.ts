@@ -15,25 +15,25 @@ describe('OrbitSession', () => {
       ],
     })
 
-    core.app.get('/set', (c) => {
-      const session = c.get('session')
+    core.router.get('/set', (c) => {
+      const session = c.get('session')!
       session.put('foo', 'bar')
       return c.json({ ok: true })
     })
 
-    core.app.get('/get', (c) => {
-      const session = c.get('session')
+    core.router.get('/get', (c) => {
+      const session = c.get('session')!
       return c.json({ foo: session.get('foo', null) })
     })
 
-    const res1 = await core.app.request('http://localhost/set')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/set'))
     expect(res1.status).toBe(200)
     const setCookie = res1.headers.get('set-cookie')
     expect(setCookie).toContain('gravito_session=')
 
-    const res2 = await core.app.request('http://localhost/get', {
+    const res2 = await core.adapter.fetch(new Request('http://localhost/get', {
       headers: { Cookie: setCookie! },
-    })
+    }))
     const body2 = (await res2.json()) as any
     expect(body2.foo).toBe('bar')
   })
@@ -52,20 +52,20 @@ describe('OrbitSession', () => {
       ],
     })
 
-    core.app.get('/set', (c) => {
-      c.get('session').put('foo', 'bar')
+    core.router.get('/set', (c) => {
+      c.get('session')!.put('foo', 'bar')
       return c.json({ ok: true })
     })
 
-    core.app.get('/get', (c) => {
-      return c.json({ foo: c.get('session').get('foo', null) })
+    core.router.get('/get', (c) => {
+      return c.json({ foo: c.get('session')!.get('foo', null) })
     })
 
-    const res1 = await core.app.request('http://localhost/set')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/set'))
     const cookie = res1.headers.get('set-cookie')!
 
     now += 11_000
-    const res2 = await core.app.request('http://localhost/get', { headers: { Cookie: cookie } })
+    const res2 = await core.adapter.fetch(new Request('http://localhost/get', { headers: { Cookie: cookie } }))
     const body2 = (await res2.json()) as any
     expect(body2.foo).toBe(null)
   })
@@ -80,23 +80,23 @@ describe('OrbitSession', () => {
       ],
     })
 
-    core.app.get('/csrf', (c) => c.json({ token: c.get('csrf').token() }))
-    core.app.post('/submit', (c) => c.json({ ok: true }))
+    core.router.get('/csrf', (c) => c.json({ token: c.get('csrf')!.token() }))
+    core.router.post('/submit', (c) => c.json({ ok: true }))
 
-    const res1 = await core.app.request('http://localhost/csrf')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/csrf'))
     const cookie = res1.headers.get('set-cookie')!
     const token = ((await res1.json()) as any).token
 
-    const res2 = await core.app.request('http://localhost/submit', {
+    const res2 = await core.adapter.fetch(new Request('http://localhost/submit', {
       method: 'POST',
       headers: { Cookie: cookie },
-    })
+    }))
     expect(res2.status).toBe(403)
 
-    const res3 = await core.app.request('http://localhost/submit', {
+    const res3 = await core.adapter.fetch(new Request('http://localhost/submit', {
       method: 'POST',
       headers: { Cookie: cookie, 'X-CSRF-Token': token },
-    })
+    }))
     expect(res3.status).toBe(200)
   })
 
@@ -114,20 +114,20 @@ describe('OrbitSession', () => {
       ],
     })
 
-    core.app.get('/set', (c) => {
-      c.get('session').put('foo', 'file-bar')
+    core.router.get('/set', (c) => {
+      c.get('session')!.put('foo', 'file-bar')
       return c.json({ ok: true })
     })
 
-    core.app.get('/get', (c) => {
-      return c.json({ foo: c.get('session').get('foo', null) })
+    core.router.get('/get', (c) => {
+      return c.json({ foo: c.get('session')!.get('foo', null) })
     })
 
-    const res1 = await core.app.request('http://localhost/set')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/set'))
     const cookie = res1.headers.get('set-cookie')!
     expect(cookie).toContain('gravito_session=')
 
-    const res2 = await core.app.request('http://localhost/get', { headers: { Cookie: cookie } })
+    const res2 = await core.adapter.fetch(new Request('http://localhost/get', { headers: { Cookie: cookie } }))
     const body2 = (await res2.json()) as any
     expect(body2.foo).toBe('file-bar')
 
@@ -148,20 +148,20 @@ describe('OrbitSession', () => {
       ],
     })
 
-    core.app.get('/set', (c) => {
-      c.get('session').put('foo', 'sqlite-bar')
+    core.router.get('/set', (c) => {
+      c.get('session')!.put('foo', 'sqlite-bar')
       return c.json({ ok: true })
     })
 
-    core.app.get('/get', (c) => {
-      return c.json({ foo: c.get('session').get('foo', null) })
+    core.router.get('/get', (c) => {
+      return c.json({ foo: c.get('session')!.get('foo', null) })
     })
 
-    const res1 = await core.app.request('http://localhost/set')
+    const res1 = await core.adapter.fetch(new Request('http://localhost/set'))
     const cookie = res1.headers.get('set-cookie')!
     expect(cookie).toContain('gravito_session=')
 
-    const res2 = await core.app.request('http://localhost/get', { headers: { Cookie: cookie } })
+    const res2 = await core.adapter.fetch(new Request('http://localhost/get', { headers: { Cookie: cookie } }))
     const body2 = (await res2.json()) as any
     expect(body2.foo).toBe('sqlite-bar')
 

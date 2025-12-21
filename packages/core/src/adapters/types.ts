@@ -56,7 +56,7 @@ export interface AdapterConfig {
 export interface RouteDefinition {
   method: HttpMethod
   path: string
-  handlers: GravitoHandler[]
+  handlers: (GravitoHandler | GravitoMiddleware)[]
   name?: string
   middleware?: GravitoMiddleware[]
 }
@@ -135,9 +135,9 @@ export interface HttpAdapter<V extends GravitoVariables = GravitoVariables> {
    *
    * @param method - HTTP method
    * @param path - Route path (may include parameters like ':id')
-   * @param handlers - One or more handlers for this route
+   * @param handlers - One or more handlers for this route (handlers or middleware)
    */
-  route(method: HttpMethod, path: string, ...handlers: GravitoHandler<V>[]): void
+  route(method: HttpMethod, path: string, ...handlers: (GravitoHandler<V> | GravitoMiddleware<V>)[]): void
 
   /**
    * Register multiple routes at once
