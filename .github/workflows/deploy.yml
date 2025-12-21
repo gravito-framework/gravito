@@ -45,8 +45,28 @@ jobs:
       - name: Build Official Site
         working-directory: examples/official-site
         run: |
+          set -e  # Exit on any error
+          echo "📦 Current directory: $(pwd)"
+          echo "📦 Building client assets..."
           bun run build:client
+          echo "✅ Client build completed"
+          echo "📦 Building static site..."
           bun run build:static
+          echo "✅ Build completed"
+          echo "📦 Checking dist-static directory..."
+          if [ -d "dist-static" ]; then
+            echo "✅ dist-static directory exists"
+            echo "📦 Contents:"
+            ls -la dist-static/ | head -30
+            if [ -f "dist-static/index.html" ]; then
+              echo "✅ index.html exists"
+              ls -lh dist-static/index.html
+            else
+              echo "❌ index.html NOT found!"
+            fi
+          else
+            echo "❌ dist-static directory NOT found!"
+          fi
         env:
           NODE_ENV: production
           VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
@@ -54,20 +74,38 @@ jobs:
       - name: Verify Build Output
         working-directory: examples/official-site
         run: |
+          echo "🔍 Verifying build output..."
+          echo "Current directory: $(pwd)"
+          echo "Contents of examples/official-site:"
+          ls -la | head -20
+          
           if [ ! -d "dist-static" ]; then
             echo "❌ dist-static directory not found!"
+            echo "Available directories:"
+            ls -la
             exit 1
           fi
+          
+          echo "Contents of dist-static:"
+          ls -la dist-static/ | head -30
+          
           if [ ! -f "dist-static/index.html" ]; then
             echo "❌ dist-static/index.html not found!"
+            echo "Files in dist-static:"
+            find dist-static -type f -name "*.html" | head -20
             exit 1
           fi
+          
           if [ ! -f "dist-static/404.html" ]; then
             echo "❌ dist-static/404.html not found!"
+            echo "Files in dist-static:"
+            find dist-static -type f -name "*.html" | head -20
             exit 1
           fi
-          echo "✅ Build output verified"
-          ls -la dist-static/ | head -20
+          
+          echo "✅ Build output verified successfully"
+          echo "Key files:"
+          ls -lh dist-static/index.html dist-static/404.html dist-static/CNAME dist-static/.nojekyll 2>/dev/null || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

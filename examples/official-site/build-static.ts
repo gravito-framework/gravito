@@ -28,6 +28,14 @@ async function build() {
   const domain = 'https://gravito.dev'
   const locales = ['en', 'zh']
 
+  // Debug: Log working directory and output directory
+  console.log('📂 Current working directory:', process.cwd())
+  console.log('📂 Output directory:', outputDir)
+
+  // Ensure output directory exists
+  await mkdir(outputDir, { recursive: true })
+  console.log('✅ Output directory created/verified')
+
   const routes = new Set<string>()
 
   // 1. Static Routes
@@ -50,8 +58,10 @@ async function build() {
   // We add the bare root '/' manually to the sitemap and render it
   // since generateI18nEntries only generates prefixed paths
   console.log(`Render: / (Root Default)`)
+  console.log('🌐 Making request to root path...')
   try {
     const res = await core.app.request('/')
+    console.log(`📡 Response status: ${res.status}`)
     if (res.status === 200) {
       const gaId = process.env.VITE_GA_ID
       const html = await res.text()
@@ -68,11 +78,23 @@ async function build() {
           )
         : html
 
-      await writeFile(join(outputDir, 'index.html'), finalHtml)
+      const indexPath = join(outputDir, 'index.html')
+      console.log('📝 Writing index.html to:', indexPath)
+      await writeFile(indexPath, finalHtml)
       smStream.add({ url: `${domain}/`, priority: 1.0 })
+      console.log('✅ Root index.html generated at:', indexPath)
+
+      // Verify file was written
+      const { stat } = await import('node:fs/promises')
+      const stats = await stat(indexPath)
+      console.log('✅ Verified: index.html exists, size:', stats.size, 'bytes')
+    } else {
+      console.error(`❌ Failed to render root: HTTP ${res.status}`)
+      throw new Error(`Failed to render root: HTTP ${res.status}`)
     }
   } catch (e) {
     console.error('❌ Error rendering root:', e)
+    throw e // Re-throw to ensure build fails if root page can't be generated
   }
 
   for (const abstractPath of routes) {
@@ -335,4 +357,7 @@ async function build() {
   process.exit(0)
 }
 
-build().catch(console.error)
+build().catch((error) => {
+  console.error('❌ Build failed:', error)
+  process.exit(1)
+})
