@@ -10,7 +10,6 @@
 
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { HonoAdapter } from './adapters/HonoAdapter'
 import type { HttpAdapter } from './adapters/types'
 import { ConfigManager } from './ConfigManager'
@@ -26,7 +25,7 @@ import { HookManager } from './HookManager'
 import { fail } from './helpers/response'
 import { ConsoleLogger, type Logger } from './Logger'
 import type { ServiceProvider } from './ServiceProvider'
-import type { GravitoContext } from './http/types'
+import type { GravitoContext, ContentfulStatusCode } from './http/types'
 
 /**
  * CacheService interface for orbit-injected cache
@@ -219,10 +218,7 @@ export class PlanetCore {
       await next()
 
       // Attach queued cookies to response
-      cookieJar.attach(c as unknown as import('hono').Context)
-      // cookieJar.attach expects Hono Context, need to check if we can fix that or cast.
-      // CookieJar probably needs decoupling too, but for now casting is unsafe but might work if it just checks keys.
-      // Actually CookieJar uses c.header which GravitoContext has.
+      cookieJar.attach(c)
     })
     // Router depends on `core.app` for route registration and optional global middleware.
     this.router = new Router(this)
