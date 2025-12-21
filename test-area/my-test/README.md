@@ -80,7 +80,7 @@ core.hooks.addAction('request:start', (args) => {
 - `@gravito/stasis` - In-memory caching
 - `@gravito/orbit-db` - Database integration
 - `@gravito/orbit-auth` - Authentication
-- `@gravito/orbit-storage` - File storage
+- `@gravito/nebula` - File storage
 
 ## Learn More
 

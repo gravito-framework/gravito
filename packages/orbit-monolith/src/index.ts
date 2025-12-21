@@ -12,8 +12,8 @@ export interface ContentConfig {
   collections?: Record<string, CollectionConfig>
 }
 
-export class ContentOrbit implements GravitoOrbit {
-  constructor(private config: ContentConfig = {}) {}
+export class OrbitMonolith implements GravitoOrbit {
+  constructor(private config: ContentConfig = {}) { }
 
   install(core: PlanetCore): void {
     const root = this.config.root || process.cwd()
@@ -30,12 +30,12 @@ export class ContentOrbit implements GravitoOrbit {
     // Let's stick to explicit configuration for now to avoid magic.
 
     // Inject into request context
-    core.app.use('*', async (c, next) => {
+    core.adapter.use('*', async (c, next) => {
       c.set('content', manager)
       await next()
     })
 
-    core.logger.info('Content Orbit installed 📝')
+    core.logger.info('Orbit Monolith installed ⬛️')
   }
 }
 

@@ -117,7 +117,7 @@ bun run --filter '*' publish
 - `@gravito/orbit-scheduler` - 排程模組
 - `@gravito/orbit` - Session 模組
 - `@gravito/orbit-sitemap` - Sitemap 模組
-- `@gravito/orbit-storage` - 儲存模組
+- `@gravito/nebula` - 儲存模組
 - `@gravito/seo-adapter-express` - SEO Express 適配器
 - `@gravito/seo-cli` - SEO CLI 工具
 - `@gravito/mass` - 驗證器模組

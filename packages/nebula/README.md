@@ -1,4 +1,4 @@
-# @gravito/orbit-storage
+# @gravito/nebula
 
 > The Standard Storage Orbit for Galaxy Architecture.
 
@@ -7,14 +7,14 @@ Provides an abstraction layer for file storage, with a built-in Local Disk provi
 ## 📦 Installation
 
 ```bash
-bun add @gravito/orbit-storage
+bun add @gravito/nebula
 ```
 
 ## 🚀 Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitStorage from '@gravito/orbit-storage';
+import orbitStorage from '@gravito/nebula';
 
 const core = new PlanetCore();
 

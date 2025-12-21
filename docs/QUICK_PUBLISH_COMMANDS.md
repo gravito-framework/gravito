@@ -63,8 +63,8 @@ cd packages/orbit && npm publish --access public --tag alpha && cd ../..
 # @gravito/constellation
 cd packages/constellation && npm publish --access public --tag alpha && cd ../..
 
-# @gravito/orbit-storage
-cd packages/orbit-storage && npm publish --access public --tag alpha && cd ../..
+# @gravito/nebula
+cd packages/nebula && npm publish --access public --tag alpha && cd ../..
 
 # @gravito/seo-adapter-express
 cd packages/seo-adapter-express && npm publish --access public --tag alpha && cd ../..

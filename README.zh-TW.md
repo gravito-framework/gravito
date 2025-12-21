@@ -51,7 +51,7 @@ core.liftoff();
 | `gravito-core` | 微核心框架。 | ✅ Stable (Alpha) |
 | `@gravito/orbit-db` | 標準資料庫軌道 (Drizzle)。 | ✅ Alpha |
 | `@gravito/orbit-auth` | 標準身份驗證軌道 (JWT)。 | ✅ Alpha |
-| `@gravito/orbit-storage` | 標準儲存軌道 (Local/S3)。 | ✅ Alpha |
+| `@gravito/nebula` | 標準儲存軌道 (Local/S3)。 | ✅ Alpha |
 | `@gravito/stasis` | 標準快取軌道 (Memory/Redis)。 | ✅ Alpha |
 
 ## 🤝 貢獻

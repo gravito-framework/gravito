@@ -6,21 +6,21 @@ title: Orbit Storage
 
 > File storage abstraction as a Gravito Orbit.
 
-Package: `@gravito/orbit-storage`
+Package: `@gravito/nebula`
 
 Provides an abstraction layer for file storage, with a built-in Local Disk provider.
 
 ## Installation
 
 ```bash
-bun add @gravito/orbit-storage
+bun add @gravito/nebula
 ```
 
 ## Usage
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import { OrbitStorage } from '@gravito/orbit-storage';
+import { OrbitStorage } from '@gravito/nebula';
 
 const core = await PlanetCore.boot({
   config: {

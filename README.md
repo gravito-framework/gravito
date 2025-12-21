@@ -51,7 +51,7 @@ Detailed documentation is available in the [docs](./docs) directory.
 | `gravito-core` | The micro-kernel Framework. | ✅ Stable (Alpha) |
 | `@gravito/orbit-db` | Standard Database Orbit (Drizzle). | ✅ Alpha |
 | `@gravito/orbit-auth` | Standard Authentication Orbit (JWT). | ✅ Alpha |
-| `@gravito/orbit-storage` | Standard Storage Orbit (Local/S3). | ✅ Alpha |
+| `@gravito/nebula` | Standard Storage Orbit (Local/S3). | ✅ Alpha |
 | `@gravito/stasis` | Standard Cache Orbit (Memory/Redis). | ✅ Alpha |
 
 ## 🤝 Contributing

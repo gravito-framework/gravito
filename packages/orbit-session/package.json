@@ -1,10 +1,10 @@
 {
-  "name": "@gravito/orbit-storage",
+  "name": "@gravito/orbit",
   "version": "1.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
-  "description": "Standard Storage Orbit for Galaxy Architecture",
+  "description": "Session + CSRF orbit for Gravito (Laravel-style)",
   "module": "./dist/index.mjs",
   "main": "./dist/index.cjs",
   "type": "module",
@@ -29,16 +29,21 @@
   "keywords": [
     "gravito",
     "orbit",
-    "storage",
-    "upload"
+    "session",
+    "csrf",
+    "cookie",
+    "sqlite",
+    "file-store"
   ],
   "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "gravito-core": "1.0.0-beta.1"
+    "gravito-core": "1.0.0-beta.1",
+    "@gravito/plasma": "1.0.0-alpha.1"
   },
   "devDependencies": {
     "gravito-core": "1.0.0-beta.1",
+    "@gravito/plasma": "1.0.0-alpha.1",
     "hono": "^4.11.1",
     "bun-types": "latest",
     "typescript": "^5.9.3"
@@ -47,6 +52,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gravito-framework/gravito.git",
-    "directory": "packages/orbit-storage"
+    "directory": "packages/orbit"
   }
 }

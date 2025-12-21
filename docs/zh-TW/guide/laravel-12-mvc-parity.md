@@ -136,7 +136,7 @@ title: Laravel 12 MVC 對齊程度
 | 功能 | 狀態 | 說明 |
 |------|------|------|
 | Cache | 已實作 | `@gravito/stasis` |
-| Storage | 已實作 | `@gravito/orbit-storage` |
+| Storage | 已實作 | `@gravito/nebula` |
 | 多語系（i18n） | 已實作 | `@gravito/cosmos` |
 
 ### 可觀測性（Observability）

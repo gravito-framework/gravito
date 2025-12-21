@@ -6,21 +6,21 @@ title: Orbit Storage
 
 > 以 Gravito Orbit 形式提供檔案儲存抽象層。
 
-套件：`@gravito/orbit-storage`
+套件：`@gravito/nebula`
 
 提供檔案儲存的抽象層，內建本地磁碟提供者 (Local Disk Provider)。
 
 ## 安裝
 
 ```bash
-bun add @gravito/orbit-storage
+bun add @gravito/nebula
 ```
 
 ## 用法
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import { OrbitStorage } from '@gravito/orbit-storage';
+import { OrbitStorage } from '@gravito/nebula';
 
 const core = await PlanetCore.boot({
   config: {

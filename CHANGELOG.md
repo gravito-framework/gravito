@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Orbit System (Plugin Architecture)**
   - `@gravito/orbit-db` - Database injection
   - `@gravito/stasis` - Memory cache with TTL
-  - `@gravito/orbit-storage` - Local file storage
+  - `@gravito/nebula` - Local file storage
   - `@gravito/orbit-auth` - JWT authentication
 
 - **Hook System**

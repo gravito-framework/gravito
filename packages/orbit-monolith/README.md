@@ -1,6 +1,6 @@
-# @gravito/orbit-content
+# @gravito/orbit-monolith
 
-> File-based Content Management System (CMS) for Gravito.
+> The Eternal Knowledge Block. File-based CMS for Gravito.
 
 Turn your markdown files into a powerful API. Perfect for blogs, documentation, and static sites.
 
