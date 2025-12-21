@@ -1,99 +1,108 @@
-
-import { RadixRouter } from '../src/adapters/bun/RadixRouter'
 import { RegExpRouter } from 'hono/router/reg-exp-router'
 import { TrieRouter } from 'hono/router/trie-router'
+import { RadixRouter } from '../src/adapters/bun/RadixRouter'
 
 // Simple placeholder handler since functions aren't serialized
 const noop = () => new Response('ok')
 
 // Helper to generate routes
 function generateRoutes(count: number, type: 'static' | 'dynamic' | 'wildcard'): string[] {
-    const routes: string[] = []
-    for (let i = 0; i < count; i++) {
-        if (type === 'static') {
-            routes.push(`/api/v1/users/${i}`)
-        } else if (type === 'dynamic') {
-            routes.push(`/api/v1/users/${i}/:action`)
-        } else if (type === 'wildcard') {
-            routes.push(`/files/${i}/*`)
-        }
+  const routes: string[] = []
+  for (let i = 0; i < count; i++) {
+    if (type === 'static') {
+      routes.push(`/api/v1/users/${i}`)
+    } else if (type === 'dynamic') {
+      routes.push(`/api/v1/users/${i}/:action`)
+    } else if (type === 'wildcard') {
+      routes.push(`/files/${i}/*`)
     }
-    return routes
+  }
+  return routes
 }
 
-async function benchmarkRouter(name: string, routerImpl: any, routes: string[], method: string = 'get') {
-    // 1. Boot Time
-    const startBoot = performance.now()
-    const router = new routerImpl()
-    for (const path of routes) {
-        router.add(method, path, [noop])
-    }
-    const endBoot = performance.now()
+async function benchmarkRouter(name: string, routerImpl: any, routes: string[], method = 'get') {
+  // 1. Boot Time
+  const startBoot = performance.now()
+  const router = new routerImpl()
+  for (const path of routes) {
+    router.add(method, path, [noop])
+  }
+  const endBoot = performance.now()
 
-    // 2. Lookup Time
-    const iterations = 100000
-    const startLookup = performance.now()
-    for (let i = 0; i < iterations; i++) {
-        const target = routes[i % routes.length]
-        router.match(method, target)
-    }
-    const endLookup = performance.now()
+  // 2. Lookup Time
+  const iterations = 100000
+  const startLookup = performance.now()
+  for (let i = 0; i < iterations; i++) {
+    const target = routes[i % routes.length]
+    router.match(method, target)
+  }
+  const endLookup = performance.now()
 
-    const bootTime = (endBoot - startBoot).toFixed(2)
-    const duration = endLookup - startLookup
-    const ops = (iterations / duration) * 1000
+  const bootTime = (endBoot - startBoot).toFixed(2)
+  const duration = endLookup - startLookup
+  const ops = (iterations / duration) * 1000
 
-    console.log(`  ${name.padEnd(15)} | Boot: ${bootTime}ms | Lookup: ${ops.toFixed(0)} ops/sec`)
+  console.log(`  ${name.padEnd(15)} | Boot: ${bootTime}ms | Lookup: ${ops.toFixed(0)} ops/sec`)
 
-    return { bootTime, ops }
+  return { bootTime, ops }
 }
 
 async function runBenchmarks() {
-    console.log('--- Gravito RadixRouter vs Hono Benchmarks ---\n')
+  console.log('--- Gravito RadixRouter vs Hono Benchmarks ---\n')
 
-    const counts = [50, 500, 5000]
+  const counts = [50, 500, 5000]
 
-    for (const count of counts) {
-        console.log(`\n[Scenario: ${count} routes (Mixed Static)]`)
-        const routes = generateRoutes(count, 'static')
+  for (const count of counts) {
+    console.log(`\n[Scenario: ${count} routes (Mixed Static)]`)
+    const routes = generateRoutes(count, 'static')
 
-        await benchmarkRouter('RadixRouter', RadixRouter, routes)
-        try {
-            await benchmarkRouter('Hono(RegExp)', RegExpRouter, routes)
-        } catch (e) {
-            // RegExpRouter might fail with too many routes due to regex size limits
-            console.log('  Hono(RegExp)    | Failed (Likely route limit)')
-        }
-        try {
-            await benchmarkRouter('Hono(Trie)', TrieRouter, routes)
-        } catch (e) { console.log('  Hono(Trie)      | Failed') }
+    await benchmarkRouter('RadixRouter', RadixRouter, routes)
+    try {
+      await benchmarkRouter('Hono(RegExp)', RegExpRouter, routes)
+    } catch (_e) {
+      // RegExpRouter might fail with too many routes due to regex size limits
+      console.log('  Hono(RegExp)    | Failed (Likely route limit)')
     }
-
-    console.log(`\n[Scenario: 1000 routes (Dynamic Params)]`)
-    const dynamicRoutes = generateRoutes(1000, 'dynamic')
-    await benchmarkRouter('RadixRouter', RadixRouter, dynamicRoutes)
     try {
-        await benchmarkRouter('Hono(RegExp)', RegExpRouter, dynamicRoutes)
-    } catch (e) { console.log('  Hono(RegExp)    | Failed') }
-    try {
-        await benchmarkRouter('Hono(Trie)', TrieRouter, dynamicRoutes)
-    } catch (e) { console.log('  Hono(Trie)      | Failed') }
+      await benchmarkRouter('Hono(Trie)', TrieRouter, routes)
+    } catch (_e) {
+      console.log('  Hono(Trie)      | Failed')
+    }
+  }
 
-    // Serialization Check
-    console.log('\n[Serialization Check - 5000 Routes]')
-    const r = new RadixRouter()
-    const routes5k = generateRoutes(5000, 'static')
-    for (const p of routes5k) r.add('get', p, [noop])
+  console.log(`\n[Scenario: 1000 routes (Dynamic Params)]`)
+  const dynamicRoutes = generateRoutes(1000, 'dynamic')
+  await benchmarkRouter('RadixRouter', RadixRouter, dynamicRoutes)
+  try {
+    await benchmarkRouter('Hono(RegExp)', RegExpRouter, dynamicRoutes)
+  } catch (_e) {
+    console.log('  Hono(RegExp)    | Failed')
+  }
+  try {
+    await benchmarkRouter('Hono(Trie)', TrieRouter, dynamicRoutes)
+  } catch (_e) {
+    console.log('  Hono(Trie)      | Failed')
+  }
 
-    const startSer = performance.now()
-    const json = r.serialize()
-    const endSer = performance.now()
-    console.log(`  Serialize     : ${(endSer - startSer).toFixed(2)}ms | Size: ${(json.length / 1024).toFixed(2)} KB`)
+  // Serialization Check
+  console.log('\n[Serialization Check - 5000 Routes]')
+  const r = new RadixRouter()
+  const routes5k = generateRoutes(5000, 'static')
+  for (const p of routes5k) {
+    r.add('get', p, [noop])
+  }
 
-    const startDes = performance.now()
-    RadixRouter.fromSerialized(json)
-    const endDes = performance.now()
-    console.log(`  Deserialize   : ${(endDes - startDes).toFixed(2)}ms`)
+  const startSer = performance.now()
+  const json = r.serialize()
+  const endSer = performance.now()
+  console.log(
+    `  Serialize     : ${(endSer - startSer).toFixed(2)}ms | Size: ${(json.length / 1024).toFixed(2)} KB`
+  )
+
+  const startDes = performance.now()
+  RadixRouter.fromSerialized(json)
+  const endDes = performance.now()
+  console.log(`  Deserialize   : ${(endDes - startDes).toFixed(2)}ms`)
 }
 
 runBenchmarks()

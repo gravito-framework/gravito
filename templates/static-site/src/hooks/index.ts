@@ -20,4 +20,3 @@ export function registerHooks(core: PlanetCore): void {
     },
   }))
 }
-

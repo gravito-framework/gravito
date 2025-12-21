@@ -1,6 +1,6 @@
+import { OrbitIon } from '@gravito/ion'
+import { OrbitPrism } from '@gravito/prism'
 import { OrbitCache } from '@gravito/stasis'
-import { OrbitInertia } from '@gravito/orbit-inertia'
-import { OrbitView } from '@gravito/orbit-view'
 import { defineConfig, PlanetCore } from 'gravito-core'
 import { serveStatic } from 'hono/bun'
 import { registerHooks } from './hooks'
@@ -23,8 +23,8 @@ export async function bootstrap(options: AppConfig = {}) {
       APP_VERSION: version,
       VIEW_DIR: 'src/views',
     },
-    // Add OrbitInertia
-    orbits: [OrbitCache, OrbitView, OrbitInertia],
+    // Add OrbitIon
+    orbits: [OrbitCache, OrbitPrism, OrbitIon],
   })
 
   // 2. Boot

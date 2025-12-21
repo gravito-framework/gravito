@@ -49,4 +49,3 @@ export default function Home({ msg, version }: { msg: string; version: string })
     </Layout>
   )
 }
-

@@ -1,183 +1,196 @@
 import type { HttpMethod } from '../../http/types'
 import { RadixNode } from './RadixNode'
-import { NodeType, type RouteMatch, type RouteHandler } from './types'
+import { NodeType, type RouteHandler, type RouteMatch } from './types'
 
 /**
  * High-performance Radix Tree Router for Bun
  */
 export class RadixRouter {
-    private root: RadixNode = new RadixNode()
+  private root: RadixNode = new RadixNode()
 
-    // Global parameter constraints (e.g., id => /^\d+$/)
-    private globalConstraints: Map<string, RegExp> = new Map()
+  // Global parameter constraints (e.g., id => /^\d+$/)
+  private globalConstraints: Map<string, RegExp> = new Map()
 
-    /**
-     * Add a generic parameter constraint
-     */
-    where(param: string, regex: RegExp): void {
-        this.globalConstraints.set(param, regex)
+  /**
+   * Add a generic parameter constraint
+   */
+  where(param: string, regex: RegExp): void {
+    this.globalConstraints.set(param, regex)
+  }
+
+  /**
+   * Register a route
+   */
+  add(method: HttpMethod, path: string, handlers: RouteHandler[]): void {
+    let node = this.root
+    const segments = this.splitPath(path)
+
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i]!
+
+      // Determine node type
+      if (segment === '*') {
+        // Wildcard
+        if (!node.wildcardChild) {
+          node.wildcardChild = new RadixNode('*', NodeType.WILDCARD)
+        }
+        node = node.wildcardChild
+        break
+      } else if (segment.startsWith(':')) {
+        // Parameter
+        const paramName = segment.slice(1)
+        if (!node.paramChild) {
+          const child = new RadixNode(segment, NodeType.PARAM)
+          child.paramName = paramName
+          // Apply global constraint if exists
+          const constraint = this.globalConstraints.get(paramName)
+          if (constraint) {
+            child.regex = constraint
+          }
+          node.paramChild = child
+        }
+        node = node.paramChild!
+      } else {
+        // Static
+        if (!node.children.has(segment)) {
+          node.children.set(segment, new RadixNode(segment, NodeType.STATIC))
+        }
+        node = node.children.get(segment)!
+      }
     }
 
-    /**
-     * Register a route
-     */
-    add(method: HttpMethod, path: string, handlers: RouteHandler[]): void {
-        let node = this.root
-        const segments = this.splitPath(path)
+    // Ensure we store handlers for lowercase method
+    node.handlers.set(method.toLowerCase() as HttpMethod, handlers)
+  }
 
-        for (let i = 0; i < segments.length; i++) {
-            const segment = segments[i]!
+  /**
+   * Match a request
+   */
+  match(method: string, path: string): RouteMatch | null {
+    const normalizedMethod = method.toLowerCase() as HttpMethod
 
-            // Determine node type
-            if (segment === '*') {
-                // Wildcard
-                if (!node.wildcardChild) {
-                    node.wildcardChild = new RadixNode('*', NodeType.WILDCARD)
-                }
-                node = node.wildcardChild
-                break
-            } else if (segment.startsWith(':')) {
-                // Parameter
-                const paramName = segment.slice(1)
-                if (!node.paramChild) {
-                    const child = new RadixNode(segment, NodeType.PARAM)
-                    child.paramName = paramName
-                    // Apply global constraint if exists
-                    const constraint = this.globalConstraints.get(paramName)
-                    if (constraint) {
-                        child.regex = constraint
-                    }
-                    node.paramChild = child
-                }
-                node = node.paramChild!
-            } else {
-                // Static
-                if (!node.children.has(segment)) {
-                    node.children.set(segment, new RadixNode(segment, NodeType.STATIC))
-                }
-                node = node.children.get(segment)!
-            }
-        }
-
-        // Ensure we store handlers for lowercase method
-        node.handlers.set(method.toLowerCase() as HttpMethod, handlers)
+    // Fast path for root
+    if (path === '/' || path === '') {
+      const handlers = this.root.handlers.get(normalizedMethod)
+      if (handlers) {
+        return { handlers, params: {} }
+      }
+      return null
     }
 
-    /**
-     * Match a request
-     */
-    match(method: string, path: string): RouteMatch | null {
-        const normalizedMethod = method.toLowerCase() as HttpMethod
+    // Removing leading slash for faster segmenting
+    const searchPath = path.startsWith('/') ? path.slice(1) : path
+    const segments = searchPath.split('/')
 
-        // Fast path for root
-        if (path === '/' || path === '') {
-            const handlers = this.root.handlers.get(normalizedMethod)
-            if (handlers) {
-                return { handlers, params: {} }
-            }
-            return null
-        }
+    return this.matchRecursive(this.root, segments, 0, {}, normalizedMethod)
+  }
 
-        // Removing leading slash for faster segmenting
-        const searchPath = path.startsWith('/') ? path.slice(1) : path
-        const segments = searchPath.split('/')
-
-        return this.matchRecursive(this.root, segments, 0, {}, normalizedMethod)
+  private matchRecursive(
+    node: RadixNode,
+    segments: string[],
+    depth: number,
+    params: Record<string, string>,
+    method: HttpMethod
+  ): RouteMatch | null {
+    // 1. Check if we reached end of path
+    if (depth >= segments.length) {
+      let handlers = node.handlers.get(method)
+      if (!handlers) {
+        handlers = node.handlers.get('all' as HttpMethod)
+      }
+      if (handlers) {
+        return { handlers, params }
+      }
+      return null
     }
 
-    private matchRecursive(
-        node: RadixNode,
-        segments: string[],
-        depth: number,
-        params: Record<string, string>,
-        method: HttpMethod
-    ): RouteMatch | null {
-        // 1. Check if we reached end of path
-        if (depth >= segments.length) {
-            let handlers = node.handlers.get(method)
-            if (!handlers) {
-                handlers = node.handlers.get('all' as HttpMethod)
-            }
-            if (handlers) {
-                return { handlers, params }
-            }
-            return null
-        }
+    const segment = segments[depth]!
 
-        const segment = segments[depth]!
-
-        // 2. Try Static Match
-        const staticChild = node.children.get(segment)
-        if (staticChild) {
-            const match = this.matchRecursive(staticChild, segments, depth + 1, params, method)
-            if (match) return match
-        }
-
-        // 3. Try Param Match
-        const paramChild = node.paramChild
-        if (paramChild) {
-            // Check constraints
-            if (paramChild.regex && !paramChild.regex.test(segment)) {
-                // Constraint failed, continue to wildcard
-            } else {
-                // Capture param
-                if (paramChild.paramName) {
-                    params[paramChild.paramName] = decodeURIComponent(segment)
-                    const match = this.matchRecursive(paramChild, segments, depth + 1, params, method)
-                    if (match) return match
-                    // Backtrack
-                    delete params[paramChild.paramName]
-                }
-            }
-        }
-
-        // 4. Try Wildcard Match
-        if (node.wildcardChild) {
-            let handlers = node.wildcardChild.handlers.get(method)
-            if (!handlers) {
-                handlers = node.wildcardChild.handlers.get('all' as HttpMethod)
-            }
-            if (handlers) {
-                return { handlers, params }
-            }
-        }
-
-        return null
+    // 2. Try Static Match
+    const staticChild = node.children.get(segment)
+    if (staticChild) {
+      const match = this.matchRecursive(staticChild, segments, depth + 1, params, method)
+      if (match) {
+        return match
+      }
     }
 
-    private splitPath(path: string): string[] {
-        if (path === '/' || path === '') return []
-        let p = path
-        if (p.startsWith('/')) p = p.slice(1)
-        if (p.endsWith('/')) p = p.slice(0, -1)
-        return p.split('/')
-    }
-
-    /**
-     * Serialize the router to a JSON string
-     */
-    serialize(): string {
-        return JSON.stringify({
-            root: this.root.toJSON(),
-            globalConstraints: Array.from(this.globalConstraints.entries()).map(([k, v]) => [k, v.source])
-        })
-    }
-
-    /**
-     * Restore a router from a serialized JSON string
-     */
-    static fromSerialized(json: string): RadixRouter {
-        const data = JSON.parse(json)
-        const router = new RadixRouter()
-
-        router.root = RadixNode.fromJSON(data.root)
-
-        if (data.globalConstraints) {
-            for (const [key, source] of data.globalConstraints) {
-                router.globalConstraints.set(key, new RegExp(source))
-            }
+    // 3. Try Param Match
+    const paramChild = node.paramChild
+    if (paramChild) {
+      // Check constraints
+      if (paramChild.regex && !paramChild.regex.test(segment)) {
+        // Constraint failed, continue to wildcard
+      } else {
+        // Capture param
+        if (paramChild.paramName) {
+          params[paramChild.paramName] = decodeURIComponent(segment)
+          const match = this.matchRecursive(paramChild, segments, depth + 1, params, method)
+          if (match) {
+            return match
+          }
+          // Backtrack
+          delete params[paramChild.paramName]
         }
-
-        return router
+      }
     }
+
+    // 4. Try Wildcard Match
+    if (node.wildcardChild) {
+      let handlers = node.wildcardChild.handlers.get(method)
+      if (!handlers) {
+        handlers = node.wildcardChild.handlers.get('all' as HttpMethod)
+      }
+      if (handlers) {
+        return { handlers, params }
+      }
+    }
+
+    return null
+  }
+
+  private splitPath(path: string): string[] {
+    if (path === '/' || path === '') {
+      return []
+    }
+    let p = path
+    if (p.startsWith('/')) {
+      p = p.slice(1)
+    }
+    if (p.endsWith('/')) {
+      p = p.slice(0, -1)
+    }
+    return p.split('/')
+  }
+
+  /**
+   * Serialize the router to a JSON string
+   */
+  serialize(): string {
+    return JSON.stringify({
+      root: this.root.toJSON(),
+      globalConstraints: Array.from(this.globalConstraints.entries()).map(([k, v]) => [
+        k,
+        v.source,
+      ]),
+    })
+  }
+
+  /**
+   * Restore a router from a serialized JSON string
+   */
+  static fromSerialized(json: string): RadixRouter {
+    const data = JSON.parse(json)
+    const router = new RadixRouter()
+
+    router.root = RadixNode.fromJSON(data.root)
+
+    if (data.globalConstraints) {
+      for (const [key, source] of data.globalConstraints) {
+        router.globalConstraints.set(key, new RegExp(source))
+      }
+    }
+
+    return router
+  }
 }

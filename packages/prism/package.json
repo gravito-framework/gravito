@@ -1,0 +1,79 @@
+{
+  "name": "@gravito/prism",
+  "version": "1.0.0-beta.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Standard View Orbit for Gravito - Template Engine with Image Optimization",
+  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.mjs",
+      "require": "./dist/vue.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "gravito",
+    "orbit",
+    "view",
+    "template",
+    "html",
+    "image",
+    "optimization",
+    "core-web-vitals",
+    "react"
+  ],
+  "author": "Carl Lee <carllee0520@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "gravito-core": "1.0.0-beta.1",
+    "hono": "^4.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "vue": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "@types/react": "^18.0.0",
+    "gravito-core": "1.0.0-beta.1",
+    "hono": "^4.0.0",
+    "typescript": "latest",
+    "vue": "^3.5.26"
+  },
+  "homepage": "https://github.com/gravito-framework/gravito#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/orbit-view"
+  }
+}

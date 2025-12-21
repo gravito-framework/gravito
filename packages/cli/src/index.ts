@@ -249,7 +249,7 @@ cli
       // Handle framework-specific files for static-site template
       if (project.template === 'static-site' && framework) {
         const clientDir = path.join(process.cwd(), targetDir, 'src', 'client')
-        
+
         if (framework === 'react') {
           // Remove Vue files and keep React files
           try {
@@ -261,13 +261,13 @@ cli
           } catch {
             // Files might not exist, ignore
           }
-          
+
           // Update package.json to remove Vue dependencies
           const pkgPath = path.join(process.cwd(), targetDir, 'package.json')
           const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'))
           if (pkg.dependencies) {
             delete pkg.dependencies['@inertiajs/vue3']
-            delete pkg.dependencies['vue']
+            delete pkg.dependencies.vue
           }
           if (pkg.devDependencies) {
             delete pkg.devDependencies['@vitejs/plugin-vue']
@@ -284,7 +284,7 @@ cli
           } catch {
             // Files might not exist, ignore
           }
-          
+
           // Copy app.vue.ts to app.ts (Vue entry point)
           const appVuePath = path.join(clientDir, 'app.vue.ts')
           const appTsPath = path.join(clientDir, 'app.ts')
@@ -295,19 +295,19 @@ cli
           } catch {
             // File might not exist, ignore
           }
-          
+
           // Update package.json to remove React dependencies and add Vue
           const pkgPath = path.join(process.cwd(), targetDir, 'package.json')
           const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'))
           if (pkg.dependencies) {
             delete pkg.dependencies['@inertiajs/react']
-            delete pkg.dependencies['react']
+            delete pkg.dependencies.react
             delete pkg.dependencies['react-dom']
             if (!pkg.dependencies['@inertiajs/vue3']) {
               pkg.dependencies['@inertiajs/vue3'] = '^1.0.0'
             }
-            if (!pkg.dependencies['vue']) {
-              pkg.dependencies['vue'] = '^3.4.0'
+            if (!pkg.dependencies.vue) {
+              pkg.dependencies.vue = '^3.4.0'
             }
           }
           if (pkg.devDependencies) {
@@ -319,13 +319,16 @@ cli
             }
           }
           await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2))
-          
+
           // Update vite.config.ts for Vue
           const viteConfigPath = path.join(process.cwd(), targetDir, 'vite.config.ts')
           const viteConfig = await fs.readFile(viteConfigPath, 'utf-8')
           const vueViteConfig = viteConfig
-            .replace("import react from '@vitejs/plugin-react'", "import vue from '@vitejs/plugin-vue'")
-            .replace("plugins: [react()]", "plugins: [vue()]")
+            .replace(
+              "import react from '@vitejs/plugin-react'",
+              "import vue from '@vitejs/plugin-vue'"
+            )
+            .replace('plugins: [react()]', 'plugins: [vue()]')
             .replace("input: './src/client/app.tsx'", "input: './src/client/app.ts'")
           await fs.writeFile(viteConfigPath, vueViteConfig)
         }
@@ -344,7 +347,7 @@ cli
       const versionMap: Record<string, string> = {
         'gravito-core': '^1.0.0-beta.1',
         '@gravito/client': '^1.0.0-alpha.1',
-        '@gravito/orbit-view': '^1.0.0-beta.1',
+        '@gravito/prism': '^1.0.0-beta.1',
         '@gravito/stasis': '^1.0.0-beta.1',
         default: '^1.0.0-alpha.1', // Fallback for other orbits still in alpha
       }
@@ -372,15 +375,20 @@ cli
         }
       }
 
-      const frameworkNote = project.template === 'static-site' && framework
-        ? `\nFramework: ${framework === 'react' ? '⚛️ React' : '🟢 Vue 3'}`
-        : ''
+      const frameworkNote =
+        project.template === 'static-site' && framework
+          ? `\nFramework: ${framework === 'react' ? '⚛️ React' : '🟢 Vue 3'}`
+          : ''
 
-      note(`Project: ${project.name}\nTemplate: ${project.template}${frameworkNote}`, 'Mission Successful')
+      note(
+        `Project: ${project.name}\nTemplate: ${project.template}${frameworkNote}`,
+        'Mission Successful'
+      )
 
-      const nextSteps = project.template === 'static-site'
-        ? `\n  cd ${pc.cyan(project.name)}\n  bun install\n  ${pc.yellow('# Edit .env and configure STATIC_SITE_DOMAINS')}\n  bun run dev`
-        : `\n  cd ${pc.cyan(project.name)}\n  bun install\n  bun run dev`
+      const nextSteps =
+        project.template === 'static-site'
+          ? `\n  cd ${pc.cyan(project.name)}\n  bun install\n  ${pc.yellow('# Edit .env and configure STATIC_SITE_DOMAINS')}\n  bun run dev`
+          : `\n  cd ${pc.cyan(project.name)}\n  bun install\n  bun run dev`
 
       outro(`You're all set! ${nextSteps}`)
     } catch (err: unknown) {

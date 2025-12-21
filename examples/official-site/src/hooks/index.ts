@@ -1,4 +1,4 @@
-import type { InertiaService } from '@gravito/orbit-inertia'
+import type { InertiaService } from '@gravito/ion'
 import type { PlanetCore } from 'gravito-core'
 import type { Context } from 'hono'
 
@@ -34,7 +34,7 @@ export function registerHooks(core: PlanetCore): void {
     const inertia = c.get('inertia') as InertiaService
 
     // Only intercept if this is an Inertia request or we want to render HTML
-    // But OrbitInertia typically handles all HTML requests if installed
+    // But OrbitIon typically handles all HTML requests if installed
     if (inertia) {
       return inertia.render('Error', { status: 404 })
     }

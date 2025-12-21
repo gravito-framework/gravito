@@ -13,9 +13,9 @@
     },
     "dependencies": {
         "@gravito/stasis": "workspace:*",
-        "@gravito/orbit-inertia": "workspace:*",
+        "@gravito/ion": "workspace:*",
         "@gravito/constellation": "workspace:*",
-        "@gravito/orbit-view": "workspace:*",
+        "@gravito/prism": "workspace:*",
         "@gravito/luminosity-adapter-hono": "workspace:*",
         "@gravito/luminosity": "workspace:*",
         "@inertiajs/react": "^1.0.0",

@@ -128,7 +128,7 @@ export { Event } from './types/events'
  *     APP_NAME: 'My App',
  *     PORT: 3000,
  *   },
- *   orbits: [OrbitCache, OrbitSession],
+ *   orbits: [OrbitCache, OrbitPulsar],
  * })
  *
  * const core = await PlanetCore.boot(config)

@@ -15,8 +15,8 @@ This website demonstrates the full power of the Gravito ecosystem, specifically 
 - **Micro-Kernel**: Built on `gravito-core`, leveraging the lifecycle hook system for modularity.
 - **Hono Adapter**: Utilizing `hono` as the high-performance HTTP layer running on **Bun**.
 - **Orbit System**:
-    - **@gravito/orbit-inertia**: Seamless server-side routing with modern SPA user experience.
-    - **@gravito/orbit-view**: Server-side template rendering for critical SEO paths.
+    - **@gravito/ion**: Seamless server-side routing with modern SPA user experience.
+    - **@gravito/prism**: Server-side template rendering for critical SEO paths.
     - **@gravito/stasis**: Optimized caching strategies.
 
 ### 2. **Modern Frontend**

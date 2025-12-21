@@ -31,7 +31,7 @@ import type { AdapterConfig, HttpAdapter, RouteDefinition } from './types'
  * Wraps Hono's request object to implement GravitoRequest
  */
 class HonoRequestWrapper implements GravitoRequest {
-  constructor(private honoCtx: Context) { }
+  constructor(private honoCtx: Context) {}
 
   get url(): string {
     return this.honoCtx.req.url
@@ -61,8 +61,13 @@ class HonoRequestWrapper implements GravitoRequest {
     return this.honoCtx.req.queries() as Record<string, string | string[]>
   }
 
-  header(name: string): string | undefined {
-    return this.honoCtx.req.header(name)
+  header(name: string): string | undefined
+  header(): Record<string, string>
+  header(name?: string): string | undefined | Record<string, string> {
+    if (name) {
+      return this.honoCtx.req.header(name)
+    }
+    return this.honoCtx.req.header()
   }
 
   async json<T = unknown>(): Promise<T> {
@@ -100,9 +105,9 @@ class HonoRequestWrapper implements GravitoRequest {
  * Wraps Hono's context to implement GravitoContext
  */
 class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
-  implements GravitoContext<V> {
+  implements GravitoContext<V>
+{
   private _req: HonoRequestWrapper
-  private _statusCode: StatusCode = 200
 
   constructor(private honoCtx: Context) {
     this._req = new HonoRequestWrapper(honoCtx)
@@ -160,7 +165,11 @@ class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
   // Implement header as separate methods internally
   header(name: string): string | undefined
   header(name: string, value: string, options?: { append?: boolean }): void
-  header(name: string, value?: string, options?: { append?: boolean }): string | undefined | void {
+  header(
+    name: string,
+    value?: string,
+    options?: { append?: boolean }
+  ): string | undefined | undefined {
     if (value !== undefined) {
       if (options?.append) {
         // console.log('[HonoAdapter] Appending header:', name, value)
@@ -220,7 +229,7 @@ function toHonoHandler<V extends GravitoVariables>(handler: GravitoHandler<V>): 
 function toHonoMiddleware<V extends GravitoVariables>(
   middleware: GravitoMiddleware<V>
 ): MiddlewareHandler {
-  return async (c: Context, next: Next): Promise<Response | void> => {
+  return async (c: Context, next: Next): Promise<Response | undefined> => {
     // console.log('[HonoAdapter] Wrapping context')
     const ctx = new HonoContextWrapper<V>(c) as GravitoContext<V>
     const gravitoNext: GravitoNext = async () => {
@@ -309,7 +318,11 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
     this.app = app
   }
 
-  route(method: HttpMethod, path: string, ...handlers: (GravitoHandler<V> | GravitoMiddleware<V>)[]): void {
+  route(
+    method: HttpMethod,
+    path: string,
+    ...handlers: (GravitoHandler<V> | GravitoMiddleware<V>)[]
+  ): void {
     const fullPath = (this.config.basePath || '') + path
     // We treat all handlers as potential middleware (accepting next)
     const honoHandlers = handlers.map((h) => toHonoMiddleware<V>(h as GravitoMiddleware<V>))
@@ -358,7 +371,7 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
       this.app.route(path, subAdapter.native as Hono)
     } else {
       // Generic fallback: relay all requests to sub-adapter
-      this.use(path + '/*', async (ctx) => {
+      this.use(`${path}/*`, async (ctx) => {
         const response = await subAdapter.fetch(ctx.req.raw)
         return response
       })
@@ -380,12 +393,12 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
     return this.app.fetch(request, server)
   }
 
-  createContext(request: Request): GravitoContext<V> {
+  createContext(_request: Request): GravitoContext<V> {
     // Create a minimal context for testing
     // In practice, this is called through the Hono routing pipeline
     throw new Error(
       'HonoAdapter.createContext() should not be called directly. ' +
-      'Use the router pipeline instead.'
+        'Use the router pipeline instead.'
     )
   }
 

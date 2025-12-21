@@ -14,7 +14,7 @@ type CacheLike = {
 }
 
 export class ThrottleRequests {
-  constructor(private core: PlanetCore) { }
+  constructor(private core: PlanetCore) {}
 
   /**
    * Create the middleware

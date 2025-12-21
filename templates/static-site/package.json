@@ -15,8 +15,8 @@
     "dependencies": {
         "gravito-core": "workspace:*",
         "@gravito/stasis": "workspace:*",
-        "@gravito/orbit-view": "workspace:*",
-        "@gravito/orbit-inertia": "workspace:*",
+        "@gravito/prism": "workspace:*",
+        "@gravito/ion": "workspace:*",
         "@gravito/constellation": "workspace:*",
         "@inertiajs/react": "^1.0.0",
         "@inertiajs/vue3": "^1.0.0",

@@ -1,4 +1,4 @@
-import type { GravitoContext, ContentfulStatusCode } from '../http/types'
+import type { ContentfulStatusCode, GravitoContext } from '../http/types'
 
 export type ApiSuccess<T> = {
   success: true
@@ -29,7 +29,11 @@ export function fail(message: string, code?: string, details?: unknown): ApiFail
   return { success: false, error }
 }
 
-export function jsonSuccess<T>(c: GravitoContext, data: T, status: ContentfulStatusCode = 200): Response {
+export function jsonSuccess<T>(
+  c: GravitoContext,
+  data: T,
+  status: ContentfulStatusCode = 200
+): Response {
   return c.json(ok(data), status)
 }
 

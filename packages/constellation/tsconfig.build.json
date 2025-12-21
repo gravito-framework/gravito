@@ -3,7 +3,7 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "@gravito/orbit-sitemap": [
+            "@gravito/constellation": [
                 "./src/index.ts"
             ]
         },

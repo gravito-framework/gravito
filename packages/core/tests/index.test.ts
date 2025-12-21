@@ -71,7 +71,7 @@ describe('gravito-core', () => {
       simUrl.pathname = '/ping'
       const simulatedReq = new Request(simUrl.toString(), {
         method: originalReq.method,
-        headers: originalReq.headers
+        headers: originalReq.headers,
       })
       const simRes = await adapter.fetch(simulatedReq)
       const simText = await simRes.text()

@@ -22,7 +22,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",
     "@google-cloud/storage": "^7.18.0",
-    "@gravito/orbit-queue": "1.0.0-alpha.1",
+    "@gravito/stream": "1.0.0-alpha.1",
     "hono": "^4.11.1"
   },
   "devDependencies": {

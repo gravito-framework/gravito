@@ -184,7 +184,7 @@ export async function schemaLock(options: { entry?: string; lockPath?: string })
       throw new Error('Could not find core instance to access SchemaRegistry')
     }
 
-    const { Model, SchemaRegistry } = await import('@gravito/orbit-database')
+    const { Model, SchemaRegistry } = await import('@gravito/atlas')
     const modelsDir = path.join(process.cwd(), 'src/models')
     const files = await fs.readdir(modelsDir)
     const tables: string[] = []
@@ -237,7 +237,7 @@ export async function schemaRefresh(options: { entry?: string }) {
       throw new Error('Could not find core instance')
     }
 
-    const { SchemaRegistry } = await import('@gravito/orbit-database')
+    const { SchemaRegistry } = await import('@gravito/atlas')
     const registry = SchemaRegistry.getInstance()
 
     registry.invalidateAll()

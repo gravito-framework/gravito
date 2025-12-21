@@ -16,8 +16,8 @@ export default function About({ version }: { version: string }) {
         <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>
           <h2>Built with Gravito</h2>
           <p>
-            This is a static site generated with Gravito + Inertia.js + React. It can be deployed
-            to GitHub Pages, Vercel, Netlify, or any static hosting provider.
+            This is a static site generated with Gravito + Inertia.js + React. It can be deployed to
+            GitHub Pages, Vercel, Netlify, or any static hosting provider.
           </p>
 
           <h3>Key Features</h3>
@@ -38,4 +38,3 @@ export default function About({ version }: { version: string }) {
     </Layout>
   )
 }
-

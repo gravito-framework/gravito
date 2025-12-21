@@ -1,9 +1,9 @@
+import { OrbitDB } from '@gravito/db'
+import { OrbitIon } from '@gravito/ion'
+import { OrbitPrism } from '@gravito/prism'
+import { OrbitSignal } from '@gravito/signal'
 import { OrbitCache } from '@gravito/stasis'
-import { OrbitDB } from '@gravito/orbit-db'
-import { OrbitInertia } from '@gravito/orbit-inertia'
-import { OrbitMail } from '@gravito/orbit-mail'
-import { OrbitQueue } from '@gravito/orbit-queue'
-import { OrbitView } from '@gravito/orbit-view'
+import { OrbitStream } from '@gravito/stream'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { defineConfig, PlanetCore } from 'gravito-core'
@@ -53,11 +53,11 @@ export async function bootstrap(options: AppConfig = {}) {
     // Add Orbits
     orbits: [
       new OrbitCache(),
-      new OrbitView(),
-      new OrbitInertia(),
+      new OrbitPrism(),
+      new OrbitIon(),
       new OrbitDB({ db }), // Pass the Drizzle instance
-      new OrbitQueue(),
-      new OrbitMail(),
+      new OrbitStream(),
+      new OrbitSignal(),
     ],
   })
 

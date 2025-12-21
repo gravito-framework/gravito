@@ -3,6 +3,7 @@ import { cp, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { SitemapStream } from '@gravito/constellation'
+import type { PlanetCore } from 'gravito-core'
 import { bootstrap } from './src/bootstrap.ts'
 
 console.log('🏗️  Starting Static Site Generation...')
@@ -13,12 +14,12 @@ const execAsync = promisify(exec)
  * Discover all routes from the router
  * This scans the router's internal route registry
  */
-function discoverRoutes(core: any): string[] {
+function discoverRoutes(core: PlanetCore): string[] {
   const routes = new Set<string>()
 
   // Get all registered routes from the router
   // The router stores routes in its internal structure
-  const router = core.router
+  const _router = core.router
 
   // Try to get routes from router's internal registry
   // This is a simplified approach - in production you might want to
@@ -26,7 +27,9 @@ function discoverRoutes(core: any): string[] {
   const knownRoutes = ['/', '/about']
 
   // Add known routes
-  knownRoutes.forEach((route) => routes.add(route))
+  for (const route of knownRoutes) {
+    routes.add(route)
+  }
 
   // You can extend this to scan your route files or maintain a routes manifest
   // For now, we'll use a simple approach and let users add routes manually
@@ -219,11 +222,11 @@ async function build() {
     </script>`
 
     if (html.includes('</body>')) {
-      html = html.replace('</body>', spaScript + '\n</body>')
+      html = html.replace('</body>', `${spaScript}\n</body>`)
     } else if (html.includes('</BODY>')) {
-      html = html.replace('</BODY>', spaScript + '\n</BODY>')
+      html = html.replace('</BODY>', `${spaScript}\n</BODY>`)
     } else {
-      html = html.replace('</html>', spaScript + '\n</html>')
+      html = html.replace('</html>', `${spaScript}\n</html>`)
     }
 
     await writeFile(join(outputDir, '404.html'), html)
@@ -251,4 +254,3 @@ build().catch((error) => {
   console.error('❌ Build failed:', error)
   process.exit(1)
 })
-

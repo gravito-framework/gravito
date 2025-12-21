@@ -17,7 +17,7 @@ await Bun.build({
     'hono',
     '@aws-sdk/client-s3',
     '@google-cloud/storage',
-    '@gravito/orbit-queue',
+    '@gravito/stream',
   ],
 })
 
@@ -33,7 +33,7 @@ await Bun.build({
     'hono',
     '@aws-sdk/client-s3',
     '@google-cloud/storage',
-    '@gravito/orbit-queue',
+    '@gravito/stream',
   ],
 })
 

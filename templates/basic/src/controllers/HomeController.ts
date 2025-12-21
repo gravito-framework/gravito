@@ -5,7 +5,7 @@ import type { CacheService, GravitoContext, PlanetCore, ViewService } from 'grav
  * Handles page rendering for the home page
  */
 export class HomeController {
-  constructor(private core: PlanetCore) { }
+  constructor(private core: PlanetCore) {}
 
   /**
    * GET /
@@ -43,4 +43,3 @@ export class HomeController {
     return ctx.html(view.render('about', {}, { title: 'About Us', isAbout: true }))
   }
 }
-

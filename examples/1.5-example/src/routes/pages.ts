@@ -1,7 +1,7 @@
-import type { InertiaService } from '@gravito/orbit-inertia'
-import type { OrbitMail } from '@gravito/orbit-mail'
-import { Mailable } from '@gravito/orbit-mail'
+import type { InertiaService } from '@gravito/ion'
 import { Schema, validate } from '@gravito/mass'
+import type { OrbitSignal } from '@gravito/signal'
+import { Mailable } from '@gravito/signal'
 import type { PlanetCore } from 'gravito-core'
 import type { Context } from 'hono'
 import { Hono } from 'hono'
@@ -63,7 +63,7 @@ export function createPagesRoute(core: PlanetCore) {
     ),
     async (c) => {
       const data = c.req.valid('json')
-      const mail = c.get('mail') as OrbitMail
+      const mail = c.get('mail') as OrbitSignal
       const inertia = c.get('inertia') as InertiaService
 
       // 1. Save to DB

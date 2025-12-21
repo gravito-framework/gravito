@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'bun:test'
-import { HTTPException } from 'hono/http-exception'
 import {
   Arr,
   abort,
@@ -16,6 +15,7 @@ import {
   env,
   fail,
   filled,
+  HttpException,
   hasApp,
   logger,
   ok,
@@ -186,21 +186,21 @@ describe('helpers', () => {
     expect(() => throwUnless(false, () => new Error('boom'))).toThrow('boom')
   })
 
-  it('abort helpers throw HTTPException with status', () => {
+  it('abort helpers throw HttpException with status', () => {
     try {
       abort(404, 'Not Found')
     } catch (e) {
-      expect(e).toBeInstanceOf(HTTPException)
-      const err = e as HTTPException
+      expect(e).toBeInstanceOf(HttpException)
+      const err = e as HttpException
       expect(err.status).toBe(404)
       expect(err.message).toBe('Not Found')
     }
 
     expect(() => abortIf(false, 401)).not.toThrow()
-    expect(() => abortIf(true, 401, 'Unauthorized')).toThrow(HTTPException)
+    expect(() => abortIf(true, 401, 'Unauthorized')).toThrow(HttpException)
 
     expect(() => abortUnless(true, 403)).not.toThrow()
-    expect(() => abortUnless(false, 403)).toThrow(HTTPException)
+    expect(() => abortUnless(false, 403)).toThrow(HttpException)
   })
 
   it('dump writes via console.dir and dd throws DumpDieError', () => {

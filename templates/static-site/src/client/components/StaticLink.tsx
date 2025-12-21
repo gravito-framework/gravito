@@ -1,12 +1,12 @@
-import { Link } from '@inertiajs/react'
 import type { LinkProps } from '@inertiajs/react'
+import { Link } from '@inertiajs/react'
 import type React from 'react'
 
 /**
  * 檢測是否在靜態網站環境中（GitHub Pages、Vercel、Netlify 等）
  * 在靜態環境中，沒有後端伺服器處理 Inertia 的 AJAX 請求，
  * 因此需要使用普通的 <a> 標籤進行完整頁面導航
- * 
+ *
  * 從環境變數 STATIC_SITE_DOMAINS 讀取生產環境域名列表
  */
 function isStaticSite(): boolean {
@@ -47,7 +47,7 @@ interface StaticLinkProps extends LinkProps {
 /**
  * 自定義 Link 組件，在靜態網站環境中使用普通的 <a> 標籤
  * 在開發環境或動態環境中使用 Inertia 的 Link 組件
- * 
+ *
  * 使用方式：
  * ```tsx
  * import { StaticLink } from '@/components/StaticLink'
@@ -73,7 +73,10 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
         href={href as string}
         className={className}
         onClick={handleClick}
-        {...(props as Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'className' | 'onClick'>)}
+        {...(props as Omit<
+          React.AnchorHTMLAttributes<HTMLAnchorElement>,
+          'href' | 'className' | 'onClick'
+        >)}
       >
         {children}
       </a>
@@ -87,4 +90,3 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
     </Link>
   )
 }
-

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import type { DBService } from '@gravito/orbit-db'
+import type { DBService } from '@gravito/db'
 
 export async function up(db: DBService): Promise<void> {
   // TODO: Implement migration

@@ -1,10 +1,5 @@
-import type {
-  GravitoHandler,
-  GravitoMiddleware,
-  GravitoContext,
-  HttpMethod
-} from './http/types'
 import { ModelNotFoundException } from './exceptions/ModelNotFoundException'
+import type { GravitoHandler, GravitoMiddleware, HttpMethod } from './http/types'
 import type { PlanetCore } from './PlanetCore'
 import { Route } from './Route'
 
@@ -15,7 +10,7 @@ export type ControllerClass = new (core: PlanetCore) => Record<string, unknown>
 export type RouteHandler = GravitoHandler | [ControllerClass, string]
 
 /**
- * Interface for FormRequest classes (from @gravito/orbit-request).
+ * Interface for FormRequest classes (from @gravito/impulse).
  * Used for duck-typing detection without hard dependency.
  */
 export interface FormRequestLike {
@@ -88,7 +83,7 @@ export class RouteGroup {
   constructor(
     private router: Router,
     private options: RouteOptions
-  ) { }
+  ) {}
 
   /**
    * Add a prefix to the current group
@@ -553,7 +548,7 @@ export class Router {
     // 5. Register with Adapter
     // If domain constraint exists, we wrap everything in a check
     if (options.domain) {
-      const wrappedHandler: GravitoHandler = async (c) => {
+      const _wrappedHandler: GravitoHandler = async (c) => {
         // Warning: This domain check is basic and doesn't handle multiple domains cleanly like Hono's vhost
         // But for parity with existing code:
         if (c.req.header('host') !== options.domain) {
@@ -651,7 +646,7 @@ export class Router {
     // We should cast them to `any` or update `HttpAdapter` signature to `...handlers: (GravitoHandler | GravitoMiddleware)[]`.
     // For now, I will use `any` cast when calling `this.core.adapter.route` because checking interface would derail me.
 
-    this.core.adapter.route(method, fullPath, ...handlers as any[])
+    this.core.adapter.route(method, fullPath, ...(handlers as any[]))
 
     return new Route(this, method, fullPath, options)
   }

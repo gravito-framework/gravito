@@ -292,12 +292,12 @@ async function build() {
     // Insert the script before the closing body tag
     // Use a more reliable method to find and replace </body>
     if (html.includes('</body>')) {
-      html = html.replace('</body>', spaScript + '\n</body>')
+      html = html.replace('</body>', `${spaScript}\n</body>`)
     } else if (html.includes('</BODY>')) {
-      html = html.replace('</BODY>', spaScript + '\n</BODY>')
+      html = html.replace('</BODY>', `${spaScript}\n</BODY>`)
     } else {
       // If no body tag found, append before closing html tag
-      html = html.replace('</html>', spaScript + '\n</html>')
+      html = html.replace('</html>', `${spaScript}\n</html>`)
     }
 
     await writeFile(join(outputDir, '404.html'), html)

@@ -1,5 +1,5 @@
-import { ContentOrbit } from '@gravito/orbit-content'
 import { I18nOrbit, localeMiddleware } from '@gravito/cosmos'
+import { OrbitMonolith } from '@gravito/monolith'
 import { type GravitoConfig, PlanetCore } from 'gravito-core'
 
 // Load Translations (Mock for now)
@@ -19,7 +19,7 @@ const config: GravitoConfig = {
       supportedLocales: ['en', 'zh'],
       translations,
     }),
-    new ContentOrbit({
+    new OrbitMonolith({
       root: process.cwd(),
       collections: {
         docs: { path: contentPath },

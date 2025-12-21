@@ -1,12 +1,11 @@
-import type { PlanetCore } from 'gravito-core'
-import type { Context } from 'hono'
+import type { GravitoContext, GravitoNext, PlanetCore } from 'gravito-core'
 
 /**
  * Configure Vite proxy middleware for development mode
  */
 export function setupViteProxy(core: PlanetCore): void {
   // Universal Vite Proxy
-  const proxyToVite = async (c: Context) => {
+  const proxyToVite = async (c: GravitoContext) => {
     try {
       const url = new URL(c.req.url)
 
@@ -73,7 +72,7 @@ export function setupViteProxy(core: PlanetCore): void {
   // We use a global middleware pattern but conditionally execute to avoid interfering with API/HTML routes if possible.
   // However, Hono's order matters. This is installed AFTER static files but BEFORE other routes in bootstrap.
 
-  core.app.use('*', async (c, next) => {
+  core.adapter.use('*', async (c: GravitoContext, next: GravitoNext) => {
     const url = new URL(c.req.url)
     const p = url.pathname
 

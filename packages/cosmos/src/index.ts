@@ -18,7 +18,7 @@ export class I18nOrbit implements GravitoOrbit {
     // Ideally we attach it to the core instance or inject it into every request.
 
     // Inject into every request
-    core.app.use('*', async (c, next) => {
+    core.adapter.use('*', async (c, next) => {
       c.set('i18n', i18n)
       await next()
     })

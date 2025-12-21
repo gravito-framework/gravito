@@ -1,12 +1,12 @@
-import { Link } from '@inertiajs/react'
 import type { LinkProps } from '@inertiajs/react'
+import { Link } from '@inertiajs/react'
 import type React from 'react'
 
 /**
  * 檢測是否在靜態網站環境中（GitHub Pages、Vercel、Netlify 等）
  * 在靜態環境中，沒有後端伺服器處理 Inertia 的 AJAX 請求，
  * 因此需要使用普通的 <a> 標籤進行完整頁面導航
- * 
+ *
  * 注意：請根據您的實際生產環境域名更新 staticDomains 陣列
  */
 function isStaticSite(): boolean {
@@ -15,7 +15,7 @@ function isStaticSite(): boolean {
   }
 
   const hostname = window.location.hostname
-  
+
   // 在此添加您的生產環境域名
   // 這些域名會被視為靜態網站環境
   const staticDomains = [
@@ -58,7 +58,10 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
         href={href as string}
         className={className}
         onClick={handleClick}
-        {...(props as Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'className' | 'onClick'>)}
+        {...(props as Omit<
+          React.AnchorHTMLAttributes<HTMLAnchorElement>,
+          'href' | 'className' | 'onClick'
+        >)}
       >
         {children}
       </a>
@@ -72,4 +75,3 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
     </Link>
   )
 }
-

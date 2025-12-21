@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Book, Cpu, Github, Home as HomeIcon, Info, Menu, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'

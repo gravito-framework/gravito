@@ -8,15 +8,15 @@
  * @since 1.0.0
  */
 
-// import { Hono } from 'hono' - Decoupled
-// import { HTTPException } from 'hono/http-exception' - Decoupled
-import { HttpException } from './exceptions/HttpException'
 import { HonoAdapter } from './adapters/HonoAdapter'
 import type { HttpAdapter } from './adapters/types'
 import { ConfigManager } from './ConfigManager'
 import { Container } from './Container'
 import { EventManager } from './EventManager'
 import { GravitoException } from './exceptions/GravitoException'
+// import { Hono } from 'hono' - Decoupled
+// import { HTTPException } from 'hono/http-exception' - Decoupled
+import { HttpException } from './exceptions/HttpException'
 import { ValidationException } from './exceptions/ValidationException'
 import {
   type RegisterGlobalErrorHandlersOptions,
@@ -24,9 +24,9 @@ import {
 } from './GlobalErrorHandlers'
 import { HookManager } from './HookManager'
 import { fail } from './helpers/response'
+import type { ContentfulStatusCode, GravitoContext } from './http/types'
 import { ConsoleLogger, type Logger } from './Logger'
 import type { ServiceProvider } from './ServiceProvider'
-import type { GravitoContext, ContentfulStatusCode } from './http/types'
 
 /**
  * CacheService interface for orbit-injected cache
@@ -94,11 +94,11 @@ export type GravitoConfig = {
   adapter?: HttpAdapter
 }
 
+import { BunNativeAdapter } from './adapters/bun/BunNativeAdapter'
 import { CookieJar } from './http/CookieJar'
 import { Router } from './Router'
 import { Encrypter } from './security/Encrypter'
 import { BunHasher } from './security/Hasher'
-import { BunNativeAdapter } from './adapters/bun/BunNativeAdapter'
 
 export class PlanetCore {
   /**
@@ -296,10 +296,15 @@ export class PlanetCore {
         status = err.status as ContentfulStatusCode
         code = err.code
 
+        // Fallback for generic HTTP errors to use status-based codes
+        if (code === 'HTTP_ERROR') {
+          code = codeFromStatus(status)
+        }
+
         if (i18n?.t && err.i18nKey) {
           message = i18n.t(err.i18nKey, err.i18nParams)
         } else {
-          message = err.message
+          message = err.message || messageFromStatus(status)
         }
 
         if (err instanceof ValidationException) {
@@ -335,10 +340,15 @@ export class PlanetCore {
       } else if (err instanceof HttpException) {
         status = err.status
         message = err.message
-      } else if (err instanceof Error && 'status' in err && typeof (err as any).status === 'number') {
+      } else if (
+        err instanceof Error &&
+        'status' in err &&
+        typeof (err as any).status === 'number'
+      ) {
         // Handle Hono or other framework exceptions via duck typing
         status = (err as any).status as ContentfulStatusCode
         message = err.message
+        code = codeFromStatus(status)
       } else if (err instanceof Error) {
         if (!isProduction) {
           message = err.message || message
@@ -368,18 +378,18 @@ export class PlanetCore {
         payload: fail(message, code, details),
         ...(wantsHtml
           ? {
-            html: {
-              templates: status === 500 ? ['errors/500'] : [`errors/${status}`, 'errors/500'],
-              data: {
-                status,
-                message,
-                code,
-                error: !isProduction && err instanceof Error ? err.stack : undefined,
-                debug: !isProduction,
-                details,
+              html: {
+                templates: status === 500 ? ['errors/500'] : [`errors/${status}`, 'errors/500'],
+                data: {
+                  status,
+                  message,
+                  code,
+                  error: !isProduction && err instanceof Error ? err.stack : undefined,
+                  debug: !isProduction,
+                  details,
+                },
               },
-            },
-          }
+            }
           : {}),
       }
 
@@ -457,16 +467,16 @@ export class PlanetCore {
         payload: fail('Route not found', 'NOT_FOUND'),
         ...(wantsHtml
           ? {
-            html: {
-              templates: ['errors/404', 'errors/500'],
-              data: {
-                status: 404,
-                message: 'Route not found',
-                code: 'NOT_FOUND',
-                debug: !isProduction,
+              html: {
+                templates: ['errors/404', 'errors/500'],
+                data: {
+                  status: 404,
+                  message: 'Route not found',
+                  code: 'NOT_FOUND',
+                  debug: !isProduction,
+                },
               },
-            },
-          }
+            }
           : {}),
       }
 
@@ -563,14 +573,14 @@ export class PlanetCore {
     // This is a break.
     // Temporary fix: Check adapter type or wrap orbitApp.
     if (this.adapter.name === 'hono') {
-      (this.adapter.native as any).route(path, orbitApp)
+      ;(this.adapter.native as any).route(path, orbitApp)
     } else {
       // Warn or try to mount if adapter supports it?
       // BunNativeAdapter "mount" takes HttpAdapter.
       // orbitApp is Hono. We can wrap orbitApp in HonoAdapter!
       // NOTE: We assume 'orbitApp' is a Hono instance compatible with HonoAdapter
-      const subAdapter = new HonoAdapter({}, orbitApp as any);
-      this.adapter.mount(path, subAdapter);
+      const subAdapter = new HonoAdapter({}, orbitApp as any)
+      this.adapter.mount(path, subAdapter)
     }
   }
 

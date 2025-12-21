@@ -1,4 +1,4 @@
-import { Model } from '@gravito/orbit-database'
+import { Model } from '@gravito/atlas'
 
 export class {{ Name }} extends Model {
   static table = '{{ name }}s'

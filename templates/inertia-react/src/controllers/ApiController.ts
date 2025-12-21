@@ -7,7 +7,7 @@ const startTime = Date.now()
  * Handles all API endpoints
  */
 export class ApiController {
-  constructor(private core: PlanetCore) { }
+  constructor(private core: PlanetCore) {}
 
   /**
    * GET /api/health
@@ -62,4 +62,3 @@ export class ApiController {
     return ctx.json(response)
   }
 }
-

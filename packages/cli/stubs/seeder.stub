@@ -1,4 +1,4 @@
-import type { DBService } from '@gravito/orbit-db'
+import type { DBService } from '@gravito/db'
 
 export default async function seed(db: DBService): Promise<void> {
   // TODO: Implement seeder

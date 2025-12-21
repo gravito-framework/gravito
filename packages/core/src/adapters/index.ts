@@ -7,6 +7,7 @@
  * @since 2.0.0
  */
 
+export * from './bun'
 // Implementations
 export {
   createHonoAdapter,
@@ -14,8 +15,6 @@ export {
   HonoContextWrapper,
   HonoRequestWrapper,
 } from './HonoAdapter'
-
-export * from './bun'
 // Types
 export type {
   AdapterConfig,

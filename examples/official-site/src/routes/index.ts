@@ -1,5 +1,4 @@
 import type { PlanetCore } from 'gravito-core'
-import type { Context, Next } from 'hono'
 import { ApiController } from '../controllers/ApiController'
 import { DocsController } from '../controllers/DocsController'
 import { HomeController } from '../controllers/HomeController'
@@ -8,7 +7,7 @@ export function registerRoutes(core: PlanetCore): void {
   const router = core.router
 
   // Middleware to set locale
-  const setLocale = (locale: string) => async (c: Context, next: Next) => {
+  const setLocale = (locale: string) => async (c: any, next: any) => {
     c.set('locale', locale)
     await next()
   }
@@ -59,7 +58,7 @@ export function registerRoutes(core: PlanetCore): void {
   // ─────────────────────────────────────────────
   // API Routes
   // ─────────────────────────────────────────────
-  const apiLogger = async (c: Context, next: Next) => {
+  const apiLogger = async (c: any, next: any) => {
     console.log(`[API] ${c.req.method} ${c.req.url}`)
     await next()
   }

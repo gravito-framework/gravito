@@ -10,7 +10,7 @@
         "gravito-core": "workspace:*",
         "@gravito/client": "workspace:*",
         "@gravito/stasis": "workspace:*",
-        "@gravito/orbit-view": "workspace:*",
+        "@gravito/prism": "workspace:*",
         "hono": "^4.0.0"
     },
     "devDependencies": {

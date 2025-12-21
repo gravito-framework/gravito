@@ -10,7 +10,6 @@
  */
 
 import type {
-  ContentfulStatusCode,
   GravitoContext,
   GravitoErrorHandler,
   GravitoHandler,
@@ -137,7 +136,11 @@ export interface HttpAdapter<V extends GravitoVariables = GravitoVariables> {
    * @param path - Route path (may include parameters like ':id')
    * @param handlers - One or more handlers for this route (handlers or middleware)
    */
-  route(method: HttpMethod, path: string, ...handlers: (GravitoHandler<V> | GravitoMiddleware<V>)[]): void
+  route(
+    method: HttpMethod,
+    path: string,
+    ...handlers: (GravitoHandler<V> | GravitoMiddleware<V>)[]
+  ): void
 
   /**
    * Register multiple routes at once

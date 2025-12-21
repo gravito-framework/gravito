@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import type { PlanetCore } from 'gravito-core'
-import type { Context } from 'hono'
 import { IncrementalGenerator } from './core/IncrementalGenerator'
 import { ProgressTracker } from './core/ProgressTracker'
 import { SitemapGenerator } from './core/SitemapGenerator'
@@ -92,7 +91,7 @@ export class OrbitSitemap {
     const indexFilename = opts.path?.split('/').pop() ?? 'sitemap.xml'
     const baseDir = opts.path ? opts.path.substring(0, opts.path.lastIndexOf('/')) : undefined
 
-    const handler = async (ctx: Context) => {
+    const handler = async (ctx: any) => {
       // Determine filename from request
       const reqPath = ctx.req.path
       const filename = reqPath.split('/').pop() || indexFilename
@@ -314,7 +313,7 @@ export class OrbitSitemap {
     const opts = this.options as StaticSitemapOptions
 
     // 觸發生成
-    core.router.post(`${basePath}/generate`, async (ctx: Context) => {
+    core.router.post(`${basePath}/generate`, async (ctx: any) => {
       try {
         const body = await ctx.req.json().catch(() => ({}))
         const jobId = await this.generateAsync({
@@ -329,7 +328,7 @@ export class OrbitSitemap {
     })
 
     // 查詢進度
-    core.router.get(`${basePath}/status/:jobId`, async (ctx: Context) => {
+    core.router.get(`${basePath}/status/:jobId`, async (ctx: any) => {
       const jobId = ctx.req.param('jobId')
       if (!opts.progressStorage) {
         return ctx.json({ error: 'Progress tracking is not enabled' }, 400)
@@ -344,12 +343,12 @@ export class OrbitSitemap {
     })
 
     // 查詢歷史記錄
-    core.router.get(`${basePath}/history`, async (ctx: Context) => {
+    core.router.get(`${basePath}/history`, async (ctx: any) => {
       if (!opts.progressStorage) {
         return ctx.json({ error: 'Progress tracking is not enabled' }, 400)
       }
 
-      const limit = parseInt(ctx.req.query('limit') || '10', 10)
+      const limit = Number.parseInt(ctx.req.query('limit') || '10', 10)
       const history = await opts.progressStorage.list(limit)
 
       return ctx.json(history)

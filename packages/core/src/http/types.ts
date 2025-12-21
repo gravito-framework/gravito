@@ -169,6 +169,11 @@ export interface GravitoRequest {
    */
   header(name: string): string | undefined
 
+  /**
+   * Get all request headers
+   */
+  header(): Record<string, string>
+
   // ─────────────────────────────────────────────
   // Body Parsing
   // ─────────────────────────────────────────────
@@ -401,7 +406,7 @@ export type GravitoHandler<V extends GravitoVariables = GravitoVariables> = (
 export type GravitoMiddleware<V extends GravitoVariables = GravitoVariables> = (
   ctx: GravitoContext<V>,
   next: GravitoNext
-) => Response | Promise<Response | void>
+) => Response | Promise<Response | undefined>
 
 /**
  * Error handler type

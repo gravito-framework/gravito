@@ -37,6 +37,3 @@ export abstract class GravitoException extends Error {
     return this.message
   }
 }
-
-
-

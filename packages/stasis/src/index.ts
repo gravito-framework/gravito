@@ -228,7 +228,7 @@ export class OrbitCache implements GravitoOrbit {
 
     this.manager = manager
 
-    core.app.use('*', async (c: OrbitCacheContext, next: OrbitCacheNext) => {
+    core.adapter.use('*', async (c: OrbitCacheContext, next: OrbitCacheNext) => {
       c.set(exposeAs, manager)
       await next()
     })

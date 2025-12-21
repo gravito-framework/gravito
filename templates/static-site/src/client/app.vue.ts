@@ -7,7 +7,9 @@ createInertiaApp({
     const pages = import.meta.glob('./pages/**/*.vue', { eager: true })
     return pages[`./pages/${name}.vue`]
   },
-  setup({ el, App, props, plugin }) {
-    createApp({ render: () => App }).use(plugin).mount(el)
+  setup({ el, App, plugin }) {
+    createApp({ render: () => App })
+      .use(plugin)
+      .mount(el)
   },
 })

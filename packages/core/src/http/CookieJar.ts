@@ -1,5 +1,5 @@
-import type { GravitoContext } from './types'
 import type { Encrypter } from '../security/Encrypter'
+import type { GravitoContext } from './types'
 
 export interface CookieOptions {
   path?: string
@@ -15,7 +15,7 @@ export interface CookieOptions {
 export class CookieJar {
   private queued: Map<string, { value: string; options: CookieOptions }> = new Map()
 
-  constructor(private encrypter?: Encrypter) { }
+  constructor(private encrypter?: Encrypter) {}
 
   /**
    * Queue a cookie to be sent with the response
@@ -57,13 +57,27 @@ export class CookieJar {
    */
   private serializeCookie(name: string, value: string, opts: CookieOptions): string {
     const parts = [`${name}=${encodeURIComponent(value)}`]
-    if (opts.maxAge !== undefined) parts.push(`Max-Age=${opts.maxAge}`)
-    if (opts.expires) parts.push(`Expires=${opts.expires.toUTCString()}`)
-    if (opts.path) parts.push(`Path=${opts.path}`)
-    if (opts.domain) parts.push(`Domain=${opts.domain}`)
-    if (opts.secure) parts.push('Secure')
-    if (opts.httpOnly) parts.push('HttpOnly')
-    if (opts.sameSite) parts.push(`SameSite=${opts.sameSite}`)
+    if (opts.maxAge !== undefined) {
+      parts.push(`Max-Age=${opts.maxAge}`)
+    }
+    if (opts.expires) {
+      parts.push(`Expires=${opts.expires.toUTCString()}`)
+    }
+    if (opts.path) {
+      parts.push(`Path=${opts.path}`)
+    }
+    if (opts.domain) {
+      parts.push(`Domain=${opts.domain}`)
+    }
+    if (opts.secure) {
+      parts.push('Secure')
+    }
+    if (opts.httpOnly) {
+      parts.push('HttpOnly')
+    }
+    if (opts.sameSite) {
+      parts.push(`SameSite=${opts.sameSite}`)
+    }
     return parts.join('; ')
   }
 

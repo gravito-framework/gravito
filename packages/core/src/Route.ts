@@ -6,7 +6,7 @@ export class Route {
     private method: string,
     private path: string,
     private options: RouteOptions
-  ) { }
+  ) {}
 
   /**
    * Name the route

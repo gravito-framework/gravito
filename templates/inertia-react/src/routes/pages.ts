@@ -1,4 +1,4 @@
-import type { InertiaService } from '@gravito/orbit-inertia'
+import type { InertiaService } from '@gravito/ion'
 import type { PlanetCore } from 'gravito-core'
 import type { Context } from 'hono'
 import { Hono } from 'hono'

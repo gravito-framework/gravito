@@ -16,9 +16,11 @@ describe('Exception Handling', () => {
       throw new TestException()
     })
 
-    const res = await core.adapter.fetch(new Request('http://localhost/error', {
-      headers: { Accept: 'application/json' },
-    }))
+    const res = await core.adapter.fetch(
+      new Request('http://localhost/error', {
+        headers: { Accept: 'application/json' },
+      })
+    )
     expect(res.status).toBe(400)
     const json = await res.json()
     const data = json as { success: boolean; error: { code: string; message: string } }
@@ -47,9 +49,11 @@ describe('Exception Handling', () => {
       throw ex
     })
 
-    const res = await core.adapter.fetch(new Request('http://localhost/form', {
-      headers: { Accept: 'text/html' },
-    }))
+    const res = await core.adapter.fetch(
+      new Request('http://localhost/form', {
+        headers: { Accept: 'text/html' },
+      })
+    )
 
     expect(res.status).toBe(302)
     expect(flashMock).toHaveBeenCalledTimes(2) // errors + _old_input

@@ -1,7 +1,6 @@
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { GravitoOrbit, PlanetCore } from 'gravito-core'
-import type { Context, Next } from 'hono'
 
 export interface StorageProvider {
   put(key: string, data: Blob | Buffer | string): Promise<void>
@@ -108,7 +107,7 @@ export class OrbitStorage implements GravitoOrbit {
     }
 
     // Inject helper into context
-    core.app.use('*', async (c: Context, next: Next) => {
+    core.adapter.use('*', async (c: any, next: any) => {
       c.set(exposeAs, storageService)
       await next()
     })

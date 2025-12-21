@@ -84,11 +84,15 @@ describe('Router', () => {
     })
 
     // Match
-    const res1 = await core.adapter.fetch(new Request('http://localhost/', { headers: { host: 'api.example.com' } }))
+    const res1 = await core.adapter.fetch(
+      new Request('http://localhost/', { headers: { host: 'api.example.com' } })
+    )
     expect(await res1.text()).toBe('api')
 
     // No Match (fallback or 404)
-    const res2 = await core.adapter.fetch(new Request('http://localhost/', { headers: { host: 'www.example.com' } }))
+    const res2 = await core.adapter.fetch(
+      new Request('http://localhost/', { headers: { host: 'www.example.com' } })
+    )
     expect(res2.status).toBe(404)
   })
 
@@ -158,21 +162,25 @@ describe('Router', () => {
     })
 
     // Valid request
-    const res1 = await core.adapter.fetch(new Request('http://localhost/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Carl' }),
-    }))
+    const res1 = await core.adapter.fetch(
+      new Request('http://localhost/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Carl' }),
+      })
+    )
     expect(res1.status).toBe(200)
     const json1 = (await res1.json()) as { user: { name: string } }
     expect(json1.user.name).toBe('Carl')
 
     // Invalid request
-    const res2 = await core.adapter.fetch(new Request('http://localhost/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'A' }),
-    }))
+    const res2 = await core.adapter.fetch(
+      new Request('http://localhost/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'A' }),
+      })
+    )
     expect(res2.status).toBe(422)
     const json2 = (await res2.json()) as { error: { code: string } }
     expect(json2.error.code).toBe('VALIDATION_ERROR')

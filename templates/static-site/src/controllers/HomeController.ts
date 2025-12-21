@@ -1,8 +1,8 @@
-import type { InertiaService } from '@gravito/orbit-inertia'
+import type { InertiaService } from '@gravito/ion'
 import type { GravitoContext, PlanetCore } from 'gravito-core'
 
 export class HomeController {
-  constructor(private core: PlanetCore) { }
+  constructor(private core: PlanetCore) {}
 
   index = async (ctx: GravitoContext) => {
     const inertia = ctx.get('inertia') as InertiaService
@@ -20,4 +20,3 @@ export class HomeController {
     })
   }
 }
-

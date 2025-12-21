@@ -35,4 +35,3 @@ export function registerRoutes(core: PlanetCore): void {
       api.get('/stats', [ApiController, 'stats'])
     })
 }
-

@@ -1,4 +1,4 @@
-import { Job } from '@gravito/orbit-queue'
+import { Job } from '@gravito/stream'
 import type { ProgressTracker } from '../core/ProgressTracker'
 import type { ShadowProcessor } from '../core/ShadowProcessor'
 import type { SitemapGeneratorOptions } from '../core/SitemapGenerator'

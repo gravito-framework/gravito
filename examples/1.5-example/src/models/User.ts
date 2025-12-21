@@ -1,4 +1,4 @@
-import { Model } from '@gravito/orbit-db'
+import { Model } from '@gravito/db'
 
 export interface UserAttributes {
   id?: number
