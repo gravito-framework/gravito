@@ -8,7 +8,31 @@ Build blazing-fast static sites from your Gravito applications using `@gravito/f
 
 ## 🚀 Quick Start
 
-### 1. Install the Package
+### Option 1: Use CLI Template (Recommended)
+
+The fastest way to get started is using the CLI template generator:
+
+```bash
+# Create a new static site project
+gravito create my-static-site --template static-site
+
+# You'll be prompted to choose between React or Vue 3
+cd my-static-site
+bun install
+bun run dev
+```
+
+This will scaffold a complete static site project with:
+- Pre-configured `@gravito/freeze` setup
+- StaticLink components for React or Vue
+- Build scripts for static generation
+- Example configuration files
+
+### Option 2: Manual Setup
+
+If you prefer to set up manually:
+
+#### 1. Install the Package
 
 ```bash
 bun add @gravito/freeze
