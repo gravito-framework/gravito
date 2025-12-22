@@ -1,3 +1,8 @@
+---
+title: Luminosity SEO Engine
+description: The advanced SEO engine for Gravito, featuring sitemap generation and meta tag management.
+---
+
 # 🛰️ Luminosity SEO Engine
 
 Traditional Single-Page Applications (SPAs) are often "invisible" to search engines because they rely heavily on client-side rendering. Gravito's **Luminosity SEO Engine** solves this by managing Meta tags, Sitemaps, and Analytics centrally on the server.
@@ -377,7 +382,7 @@ Ensure your root template (e.g., `resources/views/app.edge`) has a slot in the `
   @vite(['src/main.tsx'])
 </head>
 <body>
-  <div id="app" data-page="{{ page }}"></div>
+  <div id="app" data-page='\{{ page }}'></div>
 </body>
 </html>
 ```
