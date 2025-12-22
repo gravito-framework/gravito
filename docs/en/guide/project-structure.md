@@ -41,8 +41,10 @@ The core of Gravito is intentionally tiny. It doesn't know how to render React, 
 ### 2. Kinetic Modules (Infrastructure)
 Functionalities are added as "Kinetic Modules" that revolve around the core. 
 - Want React? Add **Ion**.
+- Want Vue? Add **Ion**.
+- Want HTML? Add **Prism**.
 - Want SEO? Add **Luminosity**.
-- Need a Database? Add **Atlas**.
+- Need a Database? Add **Atlas** (not available in v1.0).
 
 This "Pay only for what you use" approach ensures your application remains lightning-fast regardless of its scale.
 

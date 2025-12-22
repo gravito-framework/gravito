@@ -316,6 +316,106 @@ const config: SeoConfig = {
 
 ---
 
+## 🎭 Unified Meta Management
+
+Beyond Sitemaps, Luminosity provides a powerful `SeoMetadata` utility specifically designed to solve the "Blank Link Preview" issue common in SPAs.
+
+### Why Server-Side Meta?
+While Inertia's `<Head>` component handles client-side navigation updates, crawlers for Facebook, Twitter (X), and Line often do not execute JavaScript. Therefore, **OpenGraph and Twitter Cards must be injected directly into the initial HTML response**.
+
+### Implementation Example
+
+#### 1. Controller Setup
+Create Metadata in your controller and pass it to the View:
+
+```typescript
+import { SeoMetadata } from '@gravito/luminosity'
+
+export class ProductController {
+  async show({ inertia, params }: HttpContext) {
+    const product = await Product.find(params.id)
+    
+    // Define Meta Tags
+    const seo = new SeoMetadata({
+      meta: {
+        title: product.name,
+        description: product.summary,
+        canonical: `https://example.com/products/${product.slug}`
+      },
+      og: {
+        type: 'product',
+        title: product.name,
+        image: product.coverImage,
+        url: `https://example.com/products/${product.slug}`
+      },
+      twitter: {
+        card: 'summary_large_image'
+      }
+    })
+
+    // Pass generated HTML string to Root Template (3rd argument)
+    return inertia.render('Product/Show', { product }, {
+      metaTags: seo.toString()
+    })
+  }
+}
+```
+
+#### 2. Root Template Slot
+Ensure your root template (e.g., `resources/views/app.edge`) has a slot in the `<head>`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Server-Side Meta Injection -->
+  {{{ metaTags || '' }}}
+  
+  @vite(['src/main.tsx'])
+</head>
+<body>
+  <div id="app" data-page="{{ page }}"></div>
+</body>
+</html>
+```
+
+---
+
+## 📟 Command Line Interface (CLI)
+
+Beyond running as an API middleware, Luminosity is also a robust CLI tool, perfect for CI/CD pipelines or manual maintenance.
+
+### Installation
+
+```bash
+npm install -g @gravito/luminosity-cli
+# Or run directly via npx
+npx luminosity --help
+```
+
+### 1. Manual Generation (Build-time)
+If you prefer not to generate Sitemaps at runtime, use this command to build static XML files before deployment:
+
+```bash
+# Reads default luminosity.config.ts and outputs to dist/sitemap.xml
+npx luminosity generate
+
+# Custom config and output path
+npx luminosity generate --config ./seo.config.ts --out ./public/sitemap.xml
+```
+
+### 2. Force Compaction
+In `incremental` mode, you can manually trigger log compaction at any time. This is useful after bulk data imports:
+
+```bash
+npx luminosity compact
+```
+
+---
+
 ## 🛠️ Ultimate Simplicity: From Deployment to Maintenance
 
 Many developers associate "millions of URLs" or "incremental architectures" with complex distributed systems. In Luminosity, this is simplified to the point of being "invisible":

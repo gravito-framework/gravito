@@ -325,7 +325,109 @@ const config: SeoConfig = {
 
 ---
 
+## 🎭 全方位 Meta 標籤管理 (Unified Meta Management)
+
+除了 Sitemap，Luminosity 還提供了強大的 `SeoMetadata` 工具，專門解決 SPA (單頁應用) 在社交分享預覽 (Link Preview) 空白的問題。
+
+### 為什麼需要 Server-Side Meta？
+雖然 Inertia 的 `<Head>` 元件能處理客戶端導航的標題變化，但 Facebook、Twitter (X)、Line 的爬蟲通常不會執行 JavaScript。因此，**OpenGraph 與 Twitter Card 必須在伺服器端直接注入 HTML**。
+
+### 實作範例
+
+#### 1. 控制器 (Controller) 設定
+在您的控制器中建立 Metadata 並傳遞給 View：
+
+```typescript
+import { SeoMetadata } from '@gravito/luminosity'
+
+export class ProductController {
+  async show({ inertia, params }: HttpContext) {
+    const product = await Product.find(params.id)
+    
+    // 定義 Meta 標籤
+    const seo = new SeoMetadata({
+      meta: {
+        title: product.name,
+        description: product.summary,
+        canonical: `https://example.com/products/${product.slug}`
+      },
+      og: {
+        type: 'product',
+        title: product.name,
+        image: product.coverImage,
+        url: `https://example.com/products/${product.slug}`
+      },
+      twitter: {
+        card: 'summary_large_image'
+      }
+    })
+
+    // 將生成的 HTML 字串傳遞給 Root Template (第三個參數)
+    return inertia.render('Product/Show', { product }, {
+      metaTags: seo.toString()
+    })
+  }
+}
+```
+
+#### 2. 模板 (Root Template) 插槽
+確保您的根模板文件 (例如 `resources/views/app.edge`) 在 `<head>` 中預留了插槽：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Server-Side Meta Injection -->
+  {{{ metaTags || '' }}}
+  
+  @vite(['src/main.tsx'])
+</head>
+<body>
+  <div id="app" data-page="{{ page }}"></div>
+</body>
+</html>
+```
+
+---
+
+## 📟 命令列工具 (CLI)
+
+除了以 API 模式運行，Luminosity 也是一個強大的 CLI 工具，適合用於 CI/CD 流程或手動維護。
+
+### 安裝
+
+```bash
+npm install -g @gravito/luminosity-cli
+# 或者直接使用 npx
+npx luminosity --help
+```
+
+### 1. 手動生成 (Manual Generation)
+如果您不希望在 Runtime 生成 Sitemap，可以在部署前執行此命令生成靜態檔案：
+
+```bash
+# 讀取預設 luminosity.config.ts 並生成到 dist/sitemap.xml
+npx luminosity generate
+
+# 指定配置與輸出路徑
+npx luminosity generate --config ./seo.config.ts --out ./public/sitemap.xml
+```
+
+### 2. 強制壓縮 (Force Compaction)
+在 `incremental` 模式下，您可以隨時手動觸發日誌壓縮，這在進行大規模數據匯入後非常有用：
+
+```bash
+npx luminosity compact
+```
+
+---
+
 ## 💎 為什麽 Luminosity 是最強大的 SEO 引擎？
+
+
 
 
 Luminosity 不僅僅是一個 Sitemap 生成器，它是 Gravito 為了極致開發體驗與商業成功而打造的全方位解決方案：

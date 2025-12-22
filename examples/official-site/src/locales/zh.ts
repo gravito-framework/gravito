@@ -105,7 +105,7 @@ export default {
       '極致精簡的核心，僅處理最關鍵的生命週期與 I/O 協調。它始終保持纖細，絕不干擾您的開發。',
     orbitTitle: '動力模組',
     orbitDesc:
-      '路由、Ion、Luminosity 和 郵件功能皆以動力模組形式存在。根據需求加載模組，杜絕任何不必要的資源浪費。',
+      '想要 React？加入 Ion。想要 Vue？加入 Ion。想要 HTML？加入 Prism。想要 SEO？加入 Luminosity。需要資料庫？加入 Atlas（1.0 版本暫不上架）。根據需求加載模組，杜絕任何不必要的資源浪費。',
     scaleTitle: '無限擴展能力',
     scaleDesc: '從單一文件的微型 API 到全球級企業系統，架構會根據項目的「引力」自動適配。',
     aiTitle: 'AI 優先的開發合約',
