@@ -30,10 +30,7 @@ export function isStaticSite(): boolean {
   }
 
   // Production domains that should use hard reloads for safety on static CDNs
-  const staticDomains = [
-    'gravito.dev',
-    'gravito-framework.github.io'
-  ]
+  const staticDomains = ['gravito.dev', 'gravito-framework.github.io']
 
   return staticDomains.includes(hostname)
 }
@@ -43,7 +40,7 @@ interface StaticLinkProps {
   children: React.ReactNode
   className?: string
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -59,7 +56,7 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       // 如果提供了 onClick 處理器，先執行它
       if (onClick) {
-        onClick(e as any)
+        onClick(e)
       }
       // 在靜態環境中，讓瀏覽器處理導航（不阻止默認行為）
     }
@@ -80,8 +77,13 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
   }
 
   // 在動態環境中，使用 Inertia 的 Link 組件
+  // biome-ignore lint/suspicious/noExplicitAny: Inertia Link types are incompatible with our flexible href type
+  const inertiaHref = href as any
+  // biome-ignore lint/suspicious/noExplicitAny: Inertia onClick signature differs from native React
+  const inertiaOnClick = onClick as any
+
   return (
-    <Link href={href as any} className={className} onClick={onClick as any} {...props}>
+    <Link href={inertiaHref} className={className} onClick={inertiaOnClick} {...props}>
       {children}
     </Link>
   )

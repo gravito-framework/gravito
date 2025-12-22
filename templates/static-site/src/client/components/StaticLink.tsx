@@ -1,6 +1,8 @@
-import type { LinkProps } from '@inertiajs/react'
 import { Link } from '@inertiajs/react'
 import type React from 'react'
+import type { ComponentProps } from 'react'
+
+type InertiaLinkProps = ComponentProps<typeof Link>
 
 /**
  * 檢測是否在靜態網站環境中（GitHub Pages、Vercel、Netlify 等）
@@ -22,8 +24,8 @@ function isStaticSite(): boolean {
   const staticDomainsEnv = import.meta.env.VITE_STATIC_SITE_DOMAINS || ''
   const staticDomains = staticDomainsEnv
     .split(',')
-    .map((d) => d.trim())
-    .filter((d) => d.length > 0)
+    .map((d: string) => d.trim())
+    .filter((d: string) => d.length > 0)
 
   // 如果沒有配置環境變數，檢查常見的靜態託管域名模式
   if (staticDomains.length === 0) {
@@ -39,7 +41,7 @@ function isStaticSite(): boolean {
   return staticDomains.includes(hostname)
 }
 
-interface StaticLinkProps extends LinkProps {
+interface StaticLinkProps extends InertiaLinkProps {
   children: React.ReactNode
   className?: string
 }
@@ -63,7 +65,7 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       // 如果提供了 onClick 處理器，先執行它
       if (onClick) {
-        onClick(e as any)
+        ; (onClick as (e: React.MouseEvent<HTMLAnchorElement>) => void)(e)
       }
       // 在靜態環境中，讓瀏覽器處理導航（不阻止默認行為）
     }
