@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { Hono } from 'hono'
-import { createGravitoClient } from '../src/index'
+import { createBeam, createGravitoClient } from '../src/index'
 
 // Simulate AppType pattern (simple scenario)
 const app = new Hono()
@@ -21,23 +21,28 @@ function _createTypeOnlyApp() {
 
 type TestAppRoutes = ReturnType<typeof _createTypeOnlyApp>
 
-describe('@gravito/client', () => {
+describe('@gravito/beam', () => {
   describe('AppType pattern (simple)', () => {
-    test('createGravitoClient should return a client instance', () => {
-      const client = createGravitoClient<TestAppType>('http://localhost:3000')
+    test('createBeam should return a client instance', () => {
+      const client = createBeam<TestAppType>('http://localhost:3000')
       expect(client).toBeDefined()
       expect(client.hello).toBeDefined()
     })
 
-    test('client should have correct methods inferred', () => {
+    test('createGravitoClient (alias) should return a client instance', () => {
       const client = createGravitoClient<TestAppType>('http://localhost:3000')
+      expect(client).toBeDefined()
+    })
+
+    test('client should have correct methods inferred', () => {
+      const client = createBeam<TestAppType>('http://localhost:3000')
       // We can't easily test TYPES at runtime, but we can check if the proxy is structurally sound
       expect(typeof client.hello.$get).toBe('function')
       expect(typeof client.data.$post).toBe('function')
     })
 
     test('client should accept options', () => {
-      const client = createGravitoClient<TestAppType>('http://localhost:3000', {
+      const client = createBeam<TestAppType>('http://localhost:3000', {
         headers: { 'X-Custom': 'Value' },
       })
       expect(client).toBeDefined()
@@ -45,22 +50,22 @@ describe('@gravito/client', () => {
   })
 
   describe('AppRoutes pattern (recommended)', () => {
-    test('createGravitoClient should return a client instance with nested routes', () => {
-      const client = createGravitoClient<TestAppRoutes>('http://localhost:3000')
+    test('createBeam should return a client instance with nested routes', () => {
+      const client = createBeam<TestAppRoutes>('http://localhost:3000')
       expect(client).toBeDefined()
       expect(client.api).toBeDefined()
       expect(client.api.users).toBeDefined()
     })
 
     test('client should have correct nested route methods', () => {
-      const client = createGravitoClient<TestAppRoutes>('http://localhost:3000')
+      const client = createBeam<TestAppRoutes>('http://localhost:3000')
       // Verify nested route structure
       expect(typeof client.api.users.profile.$get).toBe('function')
       expect(typeof client.api.health.$get).toBe('function')
     })
 
     test('client should accept options with AppRoutes', () => {
-      const client = createGravitoClient<TestAppRoutes>('http://localhost:3000', {
+      const client = createBeam<TestAppRoutes>('http://localhost:3000', {
         headers: { Authorization: 'Bearer token' },
       })
       expect(client).toBeDefined()

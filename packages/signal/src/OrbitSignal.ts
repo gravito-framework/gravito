@@ -136,14 +136,3 @@ export class OrbitSignal implements GravitoOrbit {
     }
   }
 }
-
-// Module augmentation for GravitoVariables (new abstraction)
-declare module 'gravito-core' {
-  interface GravitoVariables {
-    /** Mail service for sending emails */
-    mail?: {
-      send: (mailable: Mailable) => Promise<void>
-      queue: (mailable: Mailable) => Promise<void>
-    }
-  }
-}

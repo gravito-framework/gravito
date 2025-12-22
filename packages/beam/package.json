@@ -1,5 +1,5 @@
 {
-  "name": "@gravito/client",
+  "name": "@gravito/beam",
   "version": "1.0.0-alpha.2",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,7 +15,7 @@
     "dist",
     "README.md"
   ],
-  "description": "Type-safe HTTP client wrapper for Gravito framework applications",
+  "description": "Orbit Beam - Lightweight, type-safe RPC client for Gravito applications",
   "license": "MIT",
   "scripts": {
     "build": "bun run build.ts",

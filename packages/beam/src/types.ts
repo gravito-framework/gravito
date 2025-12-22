@@ -1,5 +1,5 @@
 // Basic options interface for Hono client
-export interface GravitoClientOptions {
+export interface BeamOptions {
   headers?:
     | Record<string, string>
     | (() => Record<string, string> | Promise<Record<string, string>>)

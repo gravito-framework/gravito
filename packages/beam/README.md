@@ -1,4 +1,4 @@
-# @gravito/client
+# @gravito/beam (Orbit Beam)
 
 A lightweight, type-safe HTTP client wrapper for Gravito framework applications. It provides an experience similar to tRPC but uses standard Hono app types with **zero runtime overhead**.
 
@@ -13,12 +13,12 @@ A lightweight, type-safe HTTP client wrapper for Gravito framework applications.
 ## Installation
 
 ```bash
-bun add @gravito/client
+bun add @gravito/beam
 ```
 
 ## Quick Start
 
-`@gravito/client` supports two type patterns: `AppType` (simple) and `AppRoutes` (recommended for templates).
+`@gravito/beam` supports two type patterns: `AppType` (simple) and `AppRoutes` (recommended for templates).
 
 ### Pattern 1: Using AppType (Simple Scenarios)
 
@@ -52,10 +52,10 @@ Import the type only (no runtime code imported from server) and create the clien
 
 ```typescript
 // client/api.ts
-import { createGravitoClient } from '@gravito/client'
+import { createBeam } from '@gravito/beam'
 import type { AppType } from '../server/app' // Import Type Only!
 
-const client = createGravitoClient<AppType>('http://localhost:3000')
+const client = createBeam<AppType>('http://localhost:3000')
 
 // Usage
 // 1. Fully typed GET request
@@ -124,10 +124,10 @@ Import the `AppRoutes` type and create the client.
 
 ```typescript
 // client/api.ts
-import { createGravitoClient } from '@gravito/client'
+import { createBeam } from '@gravito/beam'
 import type { AppRoutes } from '../server/types' // Import Type Only!
 
-const client = createGravitoClient<AppRoutes>('http://localhost:3000')
+const client = createBeam<AppRoutes>('http://localhost:3000')
 
 // Usage with nested routes
 const loginRes = await client.api.users.login.$post({
@@ -154,7 +154,7 @@ Both patterns provide identical type safety and performance. Choose based on you
 
 ## API Reference
 
-### `createGravitoClient<T>(baseUrl, options?)`
+### `createBeam<T>(baseUrl, options?)`
 
 Creates a type-safe API client that directly delegates to Hono's `hc<T>` function with zero runtime overhead.
 
@@ -163,7 +163,7 @@ Creates a type-safe API client that directly delegates to Hono's `hc<T>` functio
   - `AppType`: `typeof app` - Direct type from Hono instance
   - `AppRoutes`: `ReturnType<typeof _createTypeOnlyApp>` - Type from `app.route()` chain
 - **baseUrl**: The root URL of your API server (e.g., `'http://localhost:3000'`)
-- **options**: Optional `GravitoClientOptions` (extends `RequestInit`) for headers, credentials, etc.
+- **options**: Optional `BeamOptions` (extends `RequestInit`) for headers, credentials, etc.
 
 **Returns:** A fully typed Hono client instance with IntelliSense support for all routes.
 
@@ -171,10 +171,10 @@ Creates a type-safe API client that directly delegates to Hono's `hc<T>` functio
 
 ```typescript
 // Basic usage
-const client = createGravitoClient<AppType>('https://api.example.com')
+const client = createBeam<AppType>('https://api.example.com')
 
 // With options (headers, credentials, etc.)
-const client = createGravitoClient<AppRoutes>('https://api.example.com', {
+const client = createBeam<AppRoutes>('https://api.example.com', {
   headers: {
     'Authorization': 'Bearer ...',
     'Content-Type': 'application/json'

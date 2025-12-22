@@ -13,7 +13,7 @@
             "@gravito/*": [
                 "../../packages/*/src/index.ts"
             ],
-            "@gravito/client": [
+            "@gravito/beam": [
                 "./src/index.ts"
             ]
         }

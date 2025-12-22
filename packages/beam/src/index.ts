@@ -1,9 +1,9 @@
 import type { Env, Hono, Schema } from 'hono'
 import { hc } from 'hono/client'
-import type { GravitoClientOptions } from './types'
+import type { BeamOptions } from './types'
 
 /**
- * Creates a type-safe API client for Gravito applications.
+ * Orbit Beam - Lightweight type-safe RPC client for Gravito applications.
  *
  * This function wraps the Hono client (`hc`) to provide a seamless, type-safe development experience
  * similar to tRPC but with zero runtime overhead. It directly delegates to Hono's client, maintaining
@@ -34,10 +34,10 @@ import type { GravitoClientOptions } from './types'
  * export type AppType = typeof app
  *
  * // client.ts
- * import { createGravitoClient } from '@gravito/client'
+ * import { createBeam } from '@gravito/beam'
  * import type { AppType } from '../server/app'
  *
- * const client = createGravitoClient<AppType>('http://localhost:3000')
+ * const client = createBeam<AppType>('http://localhost:3000')
  *
  * // Fully typed request - TypeScript will autocomplete and validate
  * const res = await client.post.$post({
@@ -56,10 +56,10 @@ import type { GravitoClientOptions } from './types'
  * export type AppRoutes = typeof routes
  *
  * // client.ts
- * import { createGravitoClient } from '@gravito/client'
+ * import { createBeam } from '@gravito/beam'
  * import type { AppRoutes } from '../server/types'
  *
- * const client = createGravitoClient<AppRoutes>('http://localhost:3000')
+ * const client = createBeam<AppRoutes>('http://localhost:3000')
  *
  * // Fully typed request with nested routes
  * const res = await client.api.users.login.$post({
@@ -67,13 +67,19 @@ import type { GravitoClientOptions } from './types'
  * })
  * ```
  */
-export function createGravitoClient<T extends Hono<Env, Schema, string>>(
+export function createBeam<T extends Hono<Env, Schema, string>>(
   baseUrl: string,
-  options?: GravitoClientOptions
+  options?: BeamOptions
 ): ReturnType<typeof hc<T>> {
   // We explicitly cast the return type to match what hc<T> provides.
   // The 'hc' function from Hono returns a proxy that provides typed access based on T.
   return hc<T>(baseUrl, options)
 }
 
-export type { GravitoClientOptions } from './types'
+/**
+ * Backward compatible alias for createBeam
+ * @deprecated Use createBeam instead
+ */
+export const createGravitoClient = createBeam
+
+export type { BeamOptions, BeamOptions as GravitoClientOptions } from './types'
