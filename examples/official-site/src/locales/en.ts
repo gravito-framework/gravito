@@ -2,9 +2,9 @@ export default {
   site: {
     title: 'Gravito Framework - The High-Performance Backend Ecosystem for Artisans',
     description:
-      'An ultra-fast, micro-kernel backend framework built on Bun and Hono. Designed for enterprise scalability with native queuing, scheduling, and AI-optimized type contracts.',
+      'Superior development framework. Designed for enterprise scalability with native queuing, scheduling, and AI-optimized type contracts.',
     keywords:
-      'Bun framework, Hono backend, Inertia.js bridge, Enterprise TS framework, Micro-kernel architecture, AI-friendly development',
+      'Bun framework, Gravito Core, Inertia.js bridge, Enterprise TS framework, Micro-kernel architecture, AI-friendly development',
   },
   nav: {
     features: 'Features',
@@ -26,8 +26,8 @@ export default {
     subtitle: 'Built for the Future',
     bun_title: 'Bun Runtime',
     bun_desc: 'Lightning fast runtime with native testing and bundling.',
-    hono_title: 'Hono Routing',
-    hono_desc: 'Ultrafast, lightweight routing that runs everywhere.',
+    hono_title: 'Gravito Core',
+    hono_desc: 'Self-developed high-performance core with nano-overhead I/O and lifecycle management.',
     ts_title: 'TypeScript',
     ts_desc: 'First-class type safety across the entire framework.',
   },
@@ -63,7 +63,7 @@ export default {
     sectionBadge: 'Bio-Lab Benchmarks',
     sectionTitle: 'Efficiency Beyond',
     sectionTitleHighlight: 'Limits',
-    sectionDesc: 'Built on Bun and Hono, Gravito minimizes overhead to near zero.',
+    sectionDesc: 'Built on Gravito Core and Bun, maximizing throughput while near zero overhead.',
     rps_title: 'Requests Per Second (RPS)',
     rps_desc: 'Unmatched throughput compared to traditional Node.js frameworks.',
     latency_title: 'Average Latency',
@@ -78,7 +78,7 @@ export default {
     integrity: 'Architectural Integrity',
   },
   footer: {
-    desc: 'The High-Performance Framework for Artisans. Built on Bun & Hono for extreme speed and simplicity.',
+    desc: 'The High-Performance Framework for Artisans. Powered by Gravito Core & Bun for extreme speed and simplicity.',
     links: 'Links',
     home: 'Home',
     connect: 'Connect',
@@ -93,7 +93,7 @@ export default {
     pillarsTitle: 'The Singularity Pillars',
     pillar1_title: 'Unrivaled Speed',
     pillar1_desc:
-      'By harnessing Bun and Hono, we eliminate the bloat of traditional Node.js stacks.',
+      'By harnessing Gravito Core and Bun, we eliminate the bloat of traditional Node.js stacks.',
     pillar2_title: 'Architectural Zen',
     pillar2_desc:
       'Inspired by the elegance of classic MVC patterns and the agility of modern Node.js ecosystems. Gravito is built to scale from minimalist content sites to robust, high-density enterprise applications.',
@@ -149,7 +149,7 @@ export default {
     dnaLaravelGaps:
       'Legacy frameworks like Laravel offer completeness but suffer from massive bloat and performance bottlenecks in modern high-concurrency environments.',
     dnaGravitoAdv:
-      'Gravito is built on Bun/Hono for extreme speed, natively integrating enterprise-grade Schedulers, Queues, and I/O coordination within a single unified core.',
+      'Gravito is powered by Bun and Gravito Core for extreme speed, natively integrating enterprise-grade Schedulers, Queues, and I/O coordination within a single unified core.',
     featDecouplingTitle: 'Microservice Extraction',
     featDecouplingDesc:
       'Design for today, scale for tomorrow. Extract message consumers into independent microservices with zero architectural friction—no code rewrites required.',

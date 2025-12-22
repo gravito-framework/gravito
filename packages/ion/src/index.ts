@@ -61,6 +61,7 @@ export class OrbitIon implements GravitoOrbit {
 
       c.set('inertia', inertia)
       await next()
+      return undefined
     })
   }
 }

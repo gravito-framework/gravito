@@ -2,8 +2,8 @@ export default {
   site: {
     title: 'Gravito Framework - 為工匠打造的高效能後端生態系統',
     description:
-      '基於 Bun 與 Hono 的極致開發框架。具備原生企業級系統（消息隊列、排程、微服務架構）與 AI 優化的型別契約，專為大規模系統擴展而生。',
-    keywords: 'Bun 框架, Hono 後端, Inertia.js 橋接器, 企業級 TS 框架, 微內核架構, AI 友善開發',
+      '極致開發框架。具備原生企業級系統（消息隊列、排程、微服務架構）與 AI 優化的型別契約，專為大規模系統擴展而生。',
+    keywords: 'Bun 框架, Gravito 核心, Inertia.js 橋接器, 企業級 TS 框架, 微內核架構, AI 友善開發',
   },
   nav: {
     features: '核心功能',
@@ -25,8 +25,8 @@ export default {
     subtitle: '為未來而建',
     bun_title: 'Bun Runtime',
     bun_desc: '疾速運行時，原生支援編譯與測試。',
-    hono_title: 'Hono Routing',
-    hono_desc: '極致輕巧的 API 框架，隨處可部署。',
+    hono_title: 'Gravito Core',
+    hono_desc: '自研極致高效能核心，Nano-overhead I/O 與強大的專屬請求生命週期管理。',
     ts_title: 'TypeScript',
     ts_desc: '全架構型別安全，從第一行程式開始。',
   },
@@ -60,7 +60,7 @@ export default {
     sectionBadge: '性能實驗室',
     sectionTitle: '超越極限的',
     sectionTitleHighlight: '效率',
-    sectionDesc: '基於 Bun 與 Hono 的強大基礎，Gravito 將性能損耗降至接近零。',
+    sectionDesc: '基於自研核心與 Bun 的強大基礎，Gravito 將性能損耗降至接近零。',
     rps_title: '每秒請求數 (RPS)',
     rps_desc: '相較於傳統 Node.js 框架，我們提供數倍的吞吐量。',
     latency_title: '平均延遲 (Latency)',
@@ -75,7 +75,7 @@ export default {
     integrity: '架構完整性',
   },
   footer: {
-    desc: '為工匠打造的高效能框架。基於 Bun & Hono 建構，追求極致速度與簡潔。',
+    desc: '為工匠打造的高效能框架。基於自研高效能核心 & Bun 建構，追求極致速度與簡潔。',
     links: '連結',
     home: '首頁',
     connect: '社群',
@@ -88,7 +88,7 @@ export default {
     missionDesc: '為開發者提供一個既尊重開發時間、又尊重機器資源的框架。',
     pillarsTitle: '奇點三大支柱',
     pillar1_title: '無與倫比的速度',
-    pillar1_desc: '透過 Bun 與 Hono 的深度整合，我們徹底消除了傳統 Node.js 堆棧的臃腫。',
+    pillar1_desc: '透過自研核心與 Bun 的深度整合，我們徹底消除了傳統 Node.js 堆棧的臃腫。',
     pillar2_title: '架構師的禪意',
     pillar2_desc:
       '融合經典 MVC 的優雅與現代 Node.js 生態（如 Next.js）的靈活性。Gravito 既能微縮至純粹的內容網站，也能擴展為高密度的企業級核心應用。',
@@ -138,7 +138,7 @@ export default {
     dnaLaravelGaps:
       'Laravel 雖然完整度高，但在 Bun 時代其擁腫的內核與性能瓶頸，已無法滿足新一代高併發應用的需求。',
     dnaGravitoAdv:
-      'Gravito 在 Bun/Hono 的極速基礎上，原生整合了排程與隊列機制，以精簡的內核提供最高等級的基礎架構支援。',
+      'Gravito 在 Bun 與自研核心的極速基礎上，原生整合了排程與隊列機制，以精簡的內核提供最高等級的基礎架構支援。',
     featDecouplingTitle: '微服務無痛抽離',
     featDecouplingDesc:
       '從消息消費者 (Consumer) 到解耦服務。Gravito 的架構允許您在擴展時直接抽離功能模組成為獨立微服務，無需任何重新開發。',

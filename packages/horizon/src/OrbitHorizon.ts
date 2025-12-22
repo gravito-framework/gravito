@@ -39,6 +39,7 @@ export class OrbitHorizon implements GravitoOrbit {
     core.adapter.use('*', async (c: any, next) => {
       c.set('scheduler', scheduler)
       await next()
+      return undefined
     })
 
     core.logger.info(`[OrbitHorizon] Initialized (Driver: ${lockDriver})`)

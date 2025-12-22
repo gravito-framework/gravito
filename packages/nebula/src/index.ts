@@ -110,6 +110,7 @@ export class OrbitStorage implements GravitoOrbit {
     core.adapter.use('*', async (c: any, next: any) => {
       c.set(exposeAs, storageService)
       await next()
+      return undefined
     })
 
     // Action: Storage Initialized

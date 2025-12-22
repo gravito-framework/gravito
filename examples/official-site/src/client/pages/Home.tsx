@@ -347,24 +347,26 @@ const TechIcon = ({ type }: { type: string }) => {
       </svg>
     )
   }
-  if (type === 'hono') {
+  if (type === 'gravito') {
     return (
-      <svg
-        viewBox="0 0 500 500"
-        className="w-12 h-12 transition-transform duration-500 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]"
-        role="img"
-      >
-        <title>Hono</title>
-        <path
-          fill="#FF5B11"
-          opacity="0.9"
-          d="M 257.5,0.5 C 258.822,0.330034 259.989,0.663368 261,1.5C 298.193,46.8936 333.193,93.8936 366,142.5C 390.289,179.069 410.955,217.735 428,258.5C 455.221,331.104 441.054,394.271 385.5,448C 336.892,489.082 280.892,505.082 217.5,496C 141.727,480.551 90.2265,436.718 63,364.5C 55.9081,340.989 53.5748,316.989 56,292.5C 60.0384,250.347 70.0384,209.68 86,170.5C 92.6509,154.514 101.318,139.848 112,126.5C 120.715,136.88 129.048,147.547 137,158.5C 140.682,162.349 144.515,166.016 148.5,169.5C 178.917,109.136 215.251,52.8028 257.5,0.5 Z"
-        />
-        <path
-          fill="#FF9758"
-          d="M 250.5,81.5 C 287.193,124.06 320.36,169.393 350,217.5C 359.293,233.418 366.959,250.085 373,267.5C 385.584,317.008 372.084,357.842 332.5,390C 294.216,416.939 252.216,424.939 206.5,414C 157.201,398.702 128.701,365.535 121,314.5C 119.131,298.409 120.798,282.742 126,267.5C 133.418,248.663 142.418,230.663 153,213.5C 163,198.833 173,184.167 183,169.5C 205.716,140.29 228.216,110.957 250.5,81.5 Z"
-        />
-      </svg>
+      <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+          className="w-full h-full rounded-xl bg-gradient-to-tr from-singularity to-purple-600 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center justify-center relative z-10 overflow-hidden"
+        >
+          <div className="w-4 h-4 rounded-full bg-void shadow-inner" />
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute inset-0 bg-white/20 blur-sm"
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-singularity/20 blur-xl rounded-full scale-125 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </div>
     )
   }
   if (type === 'ts') {
@@ -391,7 +393,7 @@ const TechIcon = ({ type }: { type: string }) => {
 const StackSection = ({ t }: { t: Translation }) => {
   const stack = [
     { type: 'bun', title: t.stack.bun_title, desc: t.stack.bun_desc, color: 'text-orange-400' },
-    { type: 'hono', title: t.stack.hono_title, desc: t.stack.hono_desc, color: 'text-rose-500' },
+    { type: 'gravito', title: t.stack.hono_title, desc: t.stack.hono_desc, color: 'text-cyan-500' },
     { type: 'ts', title: t.stack.ts_title, desc: t.stack.ts_desc, color: 'text-blue-400' },
   ]
 

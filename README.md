@@ -5,7 +5,7 @@ It leverages the **Galaxy Architecture**—a unique approach inspired by celesti
 
 ## 🌟 Key Features
 
-- **Micro-Kernel (PlanetCore)**: A tiny, high-performance core (built on top of [Hono](https://hono.dev)) that only handles lifecycle and hooks.
+- **Micro-Kernel (PlanetCore)**: A tiny, high-performance core (Self-developed) that only handles lifecycle and hooks.
 - **Orbits (Modules)**: Feature-rich extensions (Database, Auth, Storage) that "orbit" the core completely decoupled.
 - **Satellites (Plugins)**: Lightweight business logic that hooks into Core or Orbits.
 - **Performance**: Optimized for Bun runtime, offering blazing fast startup and request handling.
@@ -46,13 +46,15 @@ Detailed documentation is available in the [docs](./docs) directory.
 ## 📦 Ecosystem (Orbits)
 
 | Package | Description | Status |
-|str|str|str|
 |---|---|---|
 | `gravito-core` | The micro-kernel Framework. | ✅ Stable (Alpha) |
-| `@gravito/orbit-db` | Standard Database Orbit (Drizzle). | ✅ Alpha |
-| `@gravito/orbit-auth` | Standard Authentication Orbit (JWT). | ✅ Alpha |
+| `@gravito/db` | Standard Database Orbit (Drizzle). | ✅ Alpha |
+| `@gravito/sentinel` | Standard Authentication Orbit (Auth). | ✅ Alpha |
 | `@gravito/nebula` | Standard Storage Orbit (Local/S3). | ✅ Alpha |
 | `@gravito/stasis` | Standard Cache Orbit (Memory/Redis). | ✅ Alpha |
+| `@gravito/prism` | Standard View Orbit (Template/Image). | ✅ Alpha |
+| `@gravito/luminosity` | Standard SEO Orbit (SmartMap). | ✅ Alpha |
+| `@gravito/flare` | Standard Notification Orbit. | ✅ Alpha |
 
 ## 🤝 Contributing
 

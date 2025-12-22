@@ -5,7 +5,7 @@ Gravito 是一個基於 TypeScript 的微核心框架，旨在構建可擴展、
 
 ## 🌟 核心特色
 
-- **微核心 (PlanetCore)**: 極輕量、高效能的核心 (基於 [Hono](https://hono.dev))，僅負責生命週期和 Hook 系統。
+- **微核心 (PlanetCore)**: 極輕量、高效能的核心 (自研核心)，僅負責生命週期和 Hook 系統。
 - **軌道 (Orbits)**: 功能豐富的擴充模組 (如資料庫、驗證、儲存)，完全解耦地圍繞核心運行。
 - **衛星 (Satellites)**: 輕量級的業務邏輯插件，可掛載於核心或軌道之上。
 - **高效能**: 針對 Bun 執行環境優化，提供極快的啟動速度與請求處理能力。
@@ -46,13 +46,15 @@ core.liftoff();
 ## 📦 生態系 (Orbits)
 
 | 套件 | 描述 | 狀態 |
-|str|str|str|
 |---|---|---|
 | `gravito-core` | 微核心框架。 | ✅ Stable (Alpha) |
-| `@gravito/orbit-db` | 標準資料庫軌道 (Drizzle)。 | ✅ Alpha |
-| `@gravito/orbit-auth` | 標準身份驗證軌道 (JWT)。 | ✅ Alpha |
+| `@gravito/db` | 標準資料庫軌道 (Drizzle)。 | ✅ Alpha |
+| `@gravito/sentinel` | 標準身份驗證軌道 (Auth)。 | ✅ Alpha |
 | `@gravito/nebula` | 標準儲存軌道 (Local/S3)。 | ✅ Alpha |
 | `@gravito/stasis` | 標準快取軌道 (Memory/Redis)。 | ✅ Alpha |
+| `@gravito/prism` | 標準視圖軌道 (Template/Image)。 | ✅ Alpha |
+| `@gravito/luminosity` | 標準 SEO 軌道 (SmartMap)。 | ✅ Alpha |
+| `@gravito/flare` | 標準通知軌道 (Flare)。 | ✅ Alpha |
 
 ## 🤝 貢獻
 

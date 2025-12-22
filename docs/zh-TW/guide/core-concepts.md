@@ -36,7 +36,7 @@ title: Gravito 核心概念
 
 ### 四大核心價值
 
-- **高效能 (Performance)**：基於 Bun & Hono，實現微秒級的路由轉發。
+- **高效能 (Performance)**：基於自研核心 & Bun，實現微秒級的路由轉發。
 - **零損耗 (Zero Overhead)**：啟動時解析路由與依賴，避免執行時的過度掃描。
 - **微核心 (Micro-kernel)**：核心僅有幾 KB，功能完全按需引入。
 - **AI 友善 (AI-First)**：透過嚴格的介面契約與型別推導，讓 Copilot/Cursor 更聰明。

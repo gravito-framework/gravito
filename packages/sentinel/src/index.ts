@@ -120,6 +120,8 @@ export class OrbitSentinel implements GravitoOrbit {
       const manager = new AuthManager(c, this.options, resolvers)
 
       c.set(exposeAs, manager)
+      await next()
+      return undefined
       c.set(
         exposeGateAs,
         this.gate.forUser(async () => await manager.user())
@@ -133,6 +135,7 @@ export class OrbitSentinel implements GravitoOrbit {
       }
 
       await next()
+      return undefined
     })
   }
 }

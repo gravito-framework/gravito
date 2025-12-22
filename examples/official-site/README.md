@@ -118,4 +118,4 @@ Images are automatically served in responsive WebP formats:
 
 ## 📄 License
 
-MIT © [Carl Lee](https://github.com/CarlLee1983)
+MIT © [Carl Lee](https://github.com/gravito-framework/gravito)
