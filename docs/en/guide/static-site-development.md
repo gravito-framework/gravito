@@ -166,9 +166,9 @@ Development (Dynamic)  →  Build SSG (Freeze)  →  Deploy (Static)
 |-------------|------|----------|
 | `localhost:3000` | Dynamic | Uses Inertia navigation |
 | `localhost:5173` | Dynamic | Vite dev server |
-| `localhost:4173` | Static | Preview mode, uses `<a>` tags |
-| `*.github.io` | Static | Static mode, uses `<a>` tags |
-| `*.vercel.app` | Static | Static mode, uses `<a>` tags |
+| `localhost:4173` | Static | Preview mode, uses regular anchor tags |
+| `*.github.io` | Static | Static mode, uses regular anchor tags |
+| `*.vercel.app` | Static | Static mode, uses regular anchor tags |
 | Custom domain | Static | Based on `staticDomains` config |
 
 ---
