@@ -8,6 +8,7 @@ import type {
 } from '../../http/types'
 import type { HttpAdapter, RouteDefinition } from '../types'
 import { BunContext } from './BunContext'
+import type { BunRequest } from './BunRequest'
 import { RadixRouter } from './RadixRouter'
 
 export class BunNativeAdapter implements HttpAdapter {
@@ -114,7 +115,7 @@ export class BunNativeAdapter implements HttpAdapter {
 
       if (match) {
         if (match.params) {
-          ctx.req.setParams(match.params)
+          ;(ctx.req as BunRequest).setParams(match.params)
         }
         handlers.push(...match.handlers)
       } else {

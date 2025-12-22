@@ -115,7 +115,7 @@ export class TemplateEngine {
 
   private extractSections(template: string, ctx: RenderContext) {
     const sectionRegex = /@section\s*\(\s*['"](.+?)['"]\s*\)([\s\S]*?)@endsection/g
-    let match
+    let match: RegExpExecArray | null
     while ((match = sectionRegex.exec(template)) !== null) {
       const name = match[1]
       const content = match[2]
@@ -127,7 +127,7 @@ export class TemplateEngine {
 
   private extractStacks(template: string, ctx: RenderContext) {
     const pushRegex = /@push\s*\(\s*['"](.+?)['"]\s*\)([\s\S]*?)@endpush/g
-    let match
+    let match: RegExpExecArray | null
     while ((match = pushRegex.exec(template)) !== null) {
       const name = match[1]
       const content = match[2]
@@ -146,9 +146,12 @@ export class TemplateEngine {
 
   private processYields(template: string, ctx: RenderContext): string {
     // @yield('name', 'default')
-    return template.replace(/@yield\s*\(\s*['"](.+?)['"](?:\s*,\s*['"](.+?)['"])?\s*\)/g, (_, name, defaultValue) => {
-      return ctx.sections.get(name) || defaultValue || ''
-    })
+    return template.replace(
+      /@yield\s*\(\s*['"](.+?)['"](?:\s*,\s*['"](.+?)['"])?\s*\)/g,
+      (_, name, defaultValue) => {
+        return ctx.sections.get(name) || defaultValue || ''
+      }
+    )
   }
 
   private processStacks(template: string, ctx: RenderContext): string {
@@ -161,7 +164,12 @@ export class TemplateEngine {
 
   // --- Component Processors ---
 
-  private processComponents(template: string, data: Record<string, unknown>, ctx: RenderContext, depth = 0): string {
+  private processComponents(
+    template: string,
+    data: Record<string, unknown>,
+    ctx: RenderContext,
+    depth = 0
+  ): string {
     if (depth > 10) throw new Error('Maximum component depth exceeded')
 
     let result = template
@@ -224,7 +232,7 @@ export class TemplateEngine {
 
       // Handle Slots
       const slots: Record<string, string> = {
-        slot: innerContent
+        slot: innerContent,
       }
 
       let processedDefaultSlot = innerContent
@@ -237,7 +245,7 @@ export class TemplateEngine {
 
       const componentScope = { ...componentData, ...slots }
 
-      let renderedComponent = this.compile(componentTemplate, componentScope, ctx)
+      const renderedComponent = this.compile(componentTemplate, componentScope, ctx)
 
       // Careful replacement
       const before = result.substring(0, startIndex)
@@ -252,7 +260,7 @@ export class TemplateEngine {
     const args: Record<string, unknown> = {}
     const pattern = /([a-zA-Z0-9-:]+)(?:=(?:"([^"]*)"|'([^']*)'|(\S+)))?/g
 
-    let match
+    let match: RegExpExecArray | null
     while ((match = pattern.exec(attrString)) !== null) {
       const key = match[1]
       const valDouble = match[2]
@@ -290,7 +298,9 @@ export class TemplateEngine {
 
   private readTemplate(name: string): string {
     const cached = this.cache.get(name)
-    if (cached !== undefined) return cached
+    if (cached !== undefined) {
+      return cached
+    }
 
     const path = resolve(this.viewsDir, `${name}.html`)
     if (!existsSync(path)) {
@@ -305,7 +315,9 @@ export class TemplateEngine {
   }
 
   private processIncludes(template: string, depth = 0): string {
-    if (depth > 10) throw new Error('Maximum include depth exceeded')
+    if (depth > 10) {
+      throw new Error('Maximum include depth exceeded')
+    }
 
     const regex = /(?:\{\{\s*include\s+['"](.+?)['"]\s*\}\}|@include\s*\(\s*['"](.+?)['"]\s*\))/g
 
@@ -321,17 +333,22 @@ export class TemplateEngine {
       /\{\{\s*#each\s+([\w.]+)\s*\}\}([\s\S]*?)\{\{\s*\/each\s*\}\}/g,
       (_, key, content) => {
         const items = this.getNestedValue(data, key)
-        if (!Array.isArray(items) || items.length === 0) return ''
-        return items.map((item) => {
-          const itemData = typeof item === 'object' && item !== null
-            ? { ...data, ...(item as object), this: item }
-            : { ...data, this: item }
-          let inner = content
-          inner = this.processLoops(inner, itemData)
-          inner = this.processConditionals(inner, itemData)
-          inner = this.interpolate(inner, itemData)
-          return inner
-        }).join('')
+        if (!Array.isArray(items) || items.length === 0) {
+          return ''
+        }
+        return items
+          .map((item) => {
+            const itemData =
+              typeof item === 'object' && item !== null
+                ? { ...data, ...(item as object), this: item }
+                : { ...data, this: item }
+            let inner = content
+            inner = this.processLoops(inner, itemData)
+            inner = this.processConditionals(inner, itemData)
+            inner = this.interpolate(inner, itemData)
+            return inner
+          })
+          .join('')
       }
     )
   }
@@ -359,7 +376,9 @@ export class TemplateEngine {
       /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s+([^}]+)\s*\}\}/g,
       (match, helperName, argsString) => {
         const helper = this.helpers.get(helperName)
-        if (!helper) return match
+        if (!helper) {
+          return match
+        }
         const args = this.parseHelperArgs(argsString)
         try {
           return helper(args, data)
