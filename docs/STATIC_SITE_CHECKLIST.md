@@ -1,135 +1,202 @@
 # ✅ Static Site Development Checklist
 
-Use this checklist when building static websites with Gravito + Inertia.js to ensure everything works correctly.
+Use this checklist when building static websites with Gravito + `@gravito/freeze`.
 
 ## 📋 Pre-Development
 
+- [ ] Install `@gravito/freeze` (or `freeze-react`/`freeze-vue`)
 - [ ] Read [Static Site Development Guide](./en/guide/static-site-development.md)
 - [ ] Understand the difference between dynamic and static navigation
-- [ ] Know your production domain(s) for StaticLink configuration
+- [ ] Know your production domain(s) for configuration
 
 ## 🔧 Development Phase
 
-### Component Setup
+### Configuration Setup
 
-- [ ] Create `StaticLink` component (React or Vue)
-- [ ] Configure `StaticLink` with your production domain(s)
-- [ ] Replace all Inertia `Link` imports with `StaticLink` in navigation components
-- [ ] Test `StaticLink` in development mode (should use Inertia Link)
+```typescript
+// freeze.config.ts
+import { defineConfig } from '@gravito/freeze'
+
+export const freezeConfig = defineConfig({
+  staticDomains: ['your-domain.com'],
+  locales: ['en', 'zh'],
+  defaultLocale: 'en',
+  baseUrl: 'https://your-domain.com',
+  redirects: [
+    { from: '/docs', to: '/en/docs/guide/getting-started' },
+  ],
+})
+```
+
+- [ ] Create `freeze.config.ts` in project root
+- [ ] Configure `staticDomains` with production domains
+- [ ] Configure `locales` and `defaultLocale`
+- [ ] Add all abstract routes to `redirects`
+- [ ] Set correct `baseUrl` for production
+
+### React Setup
+
+- [ ] Install `@gravito/freeze-react`
+- [ ] Wrap app with `<FreezeProvider config={freezeConfig}>`
+- [ ] Replace all `Link` imports with `StaticLink`
+- [ ] Use `useFreeze()` hook for locale switching
+
+### Vue Setup
+
+- [ ] Install `@gravito/freeze-vue`
+- [ ] Install plugin: `app.use(FreezePlugin, freezeConfig)`
+- [ ] Replace all `Link` imports with `StaticLink`
+- [ ] Use `useFreeze()` composable for locale switching
 
 ### Navigation Components
 
 - [ ] Header/Navbar uses `StaticLink`
 - [ ] Footer links use `StaticLink`
 - [ ] Mobile menu links use `StaticLink`
-- [ ] Language switcher uses `StaticLink`
+- [ ] Language switcher uses `LocaleSwitcher` or `useFreeze().switchLocale()`
 - [ ] Logo/home link uses `StaticLink`
 - [ ] All internal page links use `StaticLink`
 
 ### Build Script
 
-- [ ] `build-static.ts` builds client assets first
-- [ ] All routes are discovered and included
+- [ ] `build-static.ts` uses `@gravito/freeze` utilities
+- [ ] Uses `generateLocalizedRoutes()` for all routes
+- [ ] Uses `generateRedirects()` for abstract routes
+- [ ] Uses `generateSitemapEntries()` for sitemap
 - [ ] Static HTML generated for each route
 - [ ] `404.html` generated with SPA routing script
-- [ ] Static assets copied correctly
 - [ ] GitHub Pages files created (CNAME, .nojekyll)
 
 ## 🏗️ Build Phase
 
 ### Build Execution
 
-- [ ] `bun run build:client` succeeds
+```bash
+bun run build:static
+bun run build:preview  # or: bun run preview
+```
+
 - [ ] `bun run build:static` succeeds
 - [ ] No build errors or warnings
 - [ ] Output directory (`dist-static/`) exists
 
 ### Output Verification
 
-- [ ] `index.html` exists in output directory
+- [ ] `index.html` exists (redirect to default locale)
 - [ ] All route directories have `index.html`
-- [ ] `404.html` exists and contains SPA script
-- [ ] Static assets directory exists
+- [ ] Locale directories exist (`/en/`, `/zh/`, etc.)
+- [ ] Redirect HTML files exist for abstract routes
+- [ ] `404.html` exists
+- [ ] `sitemap.xml` exists with i18n alternates
+- [ ] `robots.txt` exists
 - [ ] `CNAME` file exists (if using custom domain)
 - [ ] `.nojekyll` file exists (for GitHub Pages)
 
 ## 🧪 Testing Phase
 
-### Local Testing
+### Local Testing (Port 4173)
 
-- [ ] Serve static files locally (`npx serve dist-static` or similar)
+```bash
+bun run build:preview
+# Visit http://localhost:4173
+```
+
+- [ ] `StaticLink` detects static mode (port 4173)
+- [ ] Links render as native `<a>` tags
+- [ ] No black overlay on navigation
 - [ ] Test all navigation links
-- [ ] Verify links navigate to correct pages
+- [ ] Verify locale switching works
 - [ ] Test 404 page for unknown routes
 - [ ] Verify assets load correctly (CSS, JS, images)
-- [ ] Test on different browsers (Chrome, Firefox, Safari)
+- [ ] No console errors
 
 ### Production Testing
 
 - [ ] Deploy to staging/production
-- [ ] Test all navigation links on production domain
-- [ ] Verify `StaticLink` detects production environment correctly
-- [ ] Test 404 page on production
-- [ ] Verify assets load correctly
-- [ ] Test language switching (if applicable)
-- [ ] Test mobile menu navigation
+- [ ] `StaticLink` detects production environment
+- [ ] All navigation links work
+- [ ] Locale switching works
+- [ ] 404 page works
+- [ ] Abstract route redirects work
+- [ ] Sitemap accessible
+- [ ] Test on mobile devices
 
 ## 📚 Documentation
 
+- [ ] `freeze.config.ts` documented
 - [ ] Build process documented
 - [ ] Deployment steps documented
-- [ ] Team members informed about `StaticLink` usage
-- [ ] Production domains documented in `StaticLink` component
+- [ ] Team members informed about `@gravito/freeze` usage
 
 ## 🚀 Deployment
 
-### Pre-Deployment
+### GitHub Pages
 
-- [ ] All checklist items above completed
-- [ ] Code reviewed
-- [ ] Tests passing
+```yaml
+# .github/workflows/deploy.yml
+- run: bun run build:static
+- uses: peaceiris/actions-gh-pages@v3
+```
 
-### Deployment
+### Vercel
 
-- [ ] Static files uploaded to hosting provider
-- [ ] GitHub Pages configured (if applicable)
+```json
+{ "buildCommand": "bun run build:static", "outputDirectory": "dist-static" }
+```
+
+### Netlify
+
+```toml
+[build]
+command = "bun run build:static"
+publish = "dist-static"
+```
+
+- [ ] Deployment workflow configured
 - [ ] Custom domain configured (if applicable)
-- [ ] SSL certificate active (if applicable)
-
-### Post-Deployment
-
-- [ ] Site accessible on production domain
-- [ ] All navigation links work
-- [ ] 404 page works
-- [ ] Assets load correctly
-- [ ] No console errors
-- [ ] SEO meta tags correct (if applicable)
+- [ ] SSL certificate active
 
 ## 🔄 Maintenance
 
+- [ ] Update `freeze.config.ts` when adding new domains
+- [ ] Update `redirects` when adding new abstract routes
+- [ ] Keep `@gravito/freeze` packages updated
 - [ ] Monitor for navigation issues
-- [ ] Update `StaticLink` domains when adding new production domains
-- [ ] Keep build script updated with new routes
-- [ ] Document any platform-specific issues
 
 ---
 
 ## 🆘 Troubleshooting
 
-If navigation doesn't work:
+### Links don't navigate properly
 
-1. ✅ Check: Are you using `StaticLink` instead of Inertia's `Link`?
-2. ✅ Check: Is your production domain in `StaticLink`'s static domains list?
-3. ✅ Check: Is `404.html` generated with SPA routing script?
-4. ✅ Check: Are all routes included in build script?
+1. ✅ Check: Using `StaticLink` from `@gravito/freeze-react` or `@gravito/freeze-vue`?
+2. ✅ Check: App wrapped with `FreezeProvider` or `FreezePlugin` installed?
+3. ✅ Check: Production domain in `staticDomains` config?
 
-If assets don't load:
+### Black overlay on navigation
 
-1. ✅ Check: Are asset paths correct?
-2. ✅ Check: Is base path configured in Vite?
-3. ✅ Check: Are static assets copied to output directory?
+1. ✅ Check: Using Inertia's `Link` instead of `StaticLink`?
+2. ✅ Check: Preview on port 4173?
+
+### Locale not detected
+
+1. ✅ Check: Path has locale prefix (`/en/`, `/zh/`)?
+2. ✅ Check: Using `getLocalizedPath()` for all links?
+
+### 404 on abstract routes
+
+1. ✅ Check: Route added to `redirects` in config?
+2. ✅ Check: Redirect HTML generated?
 
 ---
 
-> **Remember**: Always use `StaticLink` for navigation in static sites. This is the most common source of issues.
+## 🎯 Golden Rules
 
+1. **Always use `StaticLink`** - Never use Inertia's `Link` directly
+2. **Always localize paths** - Use `getLocalizedPath()` 
+3. **Always test before deploy** - Run `bun run build:preview`
+4. **Always configure redirects** - Add abstract routes to config
+
+---
+
+> **Remember**: Use `@gravito/freeze` packages for a consistent SSG experience! 🧊

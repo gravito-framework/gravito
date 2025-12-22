@@ -1,65 +1,99 @@
 # 🚀 Static Site Quick Reference
 
-Quick reference guide for building static sites with Gravito + Inertia.js.
+Quick reference for building static sites with Gravito + `@gravito/freeze`.
 
 ## ⚡ TL;DR
 
-**Always use `StaticLink` instead of Inertia's `Link` in static sites.**
+```bash
+# Install
+bun add @gravito/freeze-react  # or freeze-vue
+
+# Configure
+# freeze.config.ts
+export const freezeConfig = defineConfig({
+  staticDomains: ['your-domain.com'],
+  locales: ['en', 'zh'],
+  defaultLocale: 'en',
+  baseUrl: 'https://your-domain.com',
+})
+
+# Build & Test
+bun run build:preview
+# Visit http://localhost:4173
+```
+
+## 📦 Package Usage
+
+### React
 
 ```tsx
-// ❌ Wrong
-import { Link } from '@inertiajs/react'
-<Link href="/about">About</Link>
+// App.tsx
+import { FreezeProvider } from '@gravito/freeze-react'
+import { freezeConfig } from './freeze.config'
 
-// ✅ Correct
-import { StaticLink } from '@/components/StaticLink'
+<FreezeProvider config={freezeConfig}>
+  <Layout />
+</FreezeProvider>
+
+// Navigation.tsx
+import { StaticLink, LocaleSwitcher, useFreeze } from '@gravito/freeze-react'
+
+const { isStatic, locale, getLocalizedPath } = useFreeze()
+
 <StaticLink href="/about">About</StaticLink>
+<LocaleSwitcher locale="zh">中文</LocaleSwitcher>
 ```
 
-## 📦 Component Location
-
-- **React**: `src/client/components/StaticLink.tsx`
-- **Vue**: `src/client/components/StaticLink.vue`
-
-## 🔧 Configuration
-
-Update the `staticDomains` array in `StaticLink` component with your production domains:
+### Vue
 
 ```typescript
-const staticDomains = [
-  'yourdomain.com',
-  'www.yourdomain.com',
-  // Add all your production domains
-]
+// main.ts
+import { FreezePlugin } from '@gravito/freeze-vue'
+app.use(FreezePlugin, freezeConfig)
 ```
 
-## ✅ Checklist
+```vue
+<script setup>
+import { StaticLink, LocaleSwitcher, useFreeze } from '@gravito/freeze-vue'
+const { isStatic, locale, getLocalizedPath } = useFreeze()
+</script>
 
-Before deploying:
+<template>
+  <StaticLink href="/about">About</StaticLink>
+  <LocaleSwitcher locale="zh">中文</LocaleSwitcher>
+</template>
+```
 
-- [ ] All navigation uses `StaticLink`
-- [ ] Production domains configured in `StaticLink`
-- [ ] `404.html` generated with SPA script
-- [ ] Tested locally before deployment
+## ✅ Quick Checklist
 
-## 📚 Full Documentation
-
-- [Static Site Development Guide](./en/guide/static-site-development.md)
-- [Static Site Checklist](./STATIC_SITE_CHECKLIST.md)
-- [Deployment Guide](./en/guide/deployment.md)
+- [ ] `@gravito/freeze-*` installed
+- [ ] `freeze.config.ts` created
+- [ ] Provider/Plugin configured
+- [ ] All `Link` → `StaticLink`
+- [ ] Tested at http://localhost:4173
 
 ## 🆘 Common Issues
 
-### Links don't navigate
-→ Check: Using `StaticLink` instead of `Link`?
+| Issue | Solution |
+|-------|----------|
+| Black overlay on click | Use `StaticLink`, not Inertia `Link` |
+| 404 on routes | Add to `redirects` in config |
+| Locale not detected | Use `getLocalizedPath()` |
+| Wrong static mode | Check `staticDomains` config |
 
-### 404 page doesn't work
-→ Check: `404.html` generated with SPA script?
+## 📚 Full Documentation
 
-### Assets don't load
-→ Check: Base path configured in Vite?
+- [SSG Development Guide](./en/guide/static-site-development.md)
+- [Full Checklist](./STATIC_SITE_CHECKLIST.md)
+- [Standardization](./STATIC_SITE_STANDARDIZATION.md)
+
+## 🎯 Golden Rules
+
+1. **StaticLink** for all internal links
+2. **getLocalizedPath()** for all paths
+3. **build:preview** before deploy
+4. **Configure redirects** for abstract routes
 
 ---
 
-> **Remember**: `StaticLink` = Static sites, `Link` = Dynamic apps
-
+> 🧊 `@gravito/freeze` = Freeze your dynamic app into static files!
