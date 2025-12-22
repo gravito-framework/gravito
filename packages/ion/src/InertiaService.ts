@@ -62,18 +62,25 @@ export class InertiaService {
    * escapes special characters. Escaping backslashes would double-escape
    * JSON escape sequences like \n, causing JSON.parse to fail.
    * 
-   * Also note: We don't escape double quotes here because JSON.stringify
-   * already escapes them as \". Escaping them again would create invalid
-   * JSON sequences like \&quot;.
+   * Important: We MUST escape double quotes because the browser will decode
+   * HTML entities in attribute values. If JSON contains \" (escaped quote),
+   * and we don't escape the quote itself, the browser will decode &quot; to "
+   * which breaks the JSON structure when the content itself contains quotes.
+   * 
+   * The correct approach: JSON.stringify escapes " as \", then we escape
+   * the backslash-quote sequence to prevent browser from decoding it incorrectly.
    */
   private escapeForSingleQuotedHtmlAttribute(value: string): string {
+    // First escape ampersands to prevent breaking existing HTML entities
+    // Then escape other characters
     return value
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      // Don't escape double quotes - JSON.stringify already handles them
-      // Escaping them would create invalid sequences like \&quot;
-      // Only escape single quotes for the HTML attribute delimiter
+      // Escape double quotes - this is safe because JSON.stringify already
+      // escaped them as \", so we're escaping the backslash-quote sequence
+      // This prevents browser from decoding &quot; in JSON content
+      .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;')
   }
 
