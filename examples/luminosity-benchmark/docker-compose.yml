@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  benchmark:
+    build:
+      context: ../..
+      dockerfile: examples/luminosity-benchmark/Dockerfile
+    container_name: luminosity-benchmark
+    volumes:
+      # Mount the dist folder so we can see the output on host
+      - ./dist-sitemaps:/app/examples/luminosity-benchmark/dist-sitemaps
+    environment:
+      - NODE_ENV=production
+    # Command sequence: Seed the DB -> Run the Benchmark
+    command: >
+      sh -c "bun run seed && bun run benchmark"
