@@ -79,7 +79,7 @@ The `GravitoContext` object is your gateway to the Gravito ecosystem. Use `ctx.g
 
 ## 📦 Handling Responses
 
-A Controller method must return a standard `Response`. Gravito/Hono makes this easy:
+A Controller method must return a standard `Response`. Gravito makes this easy:
 
 | Type | Method | Description |
 |------|--------|-------------|

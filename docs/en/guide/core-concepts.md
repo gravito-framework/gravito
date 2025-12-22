@@ -68,13 +68,17 @@ export default core.liftoff() // Ignition for liftoff
 
 The initial v1.0 release focuses on these stable Orbits:
 
-- **`Orbit Kernel`**: Core coordination and IoC container.
-- **`Orbit Inertia`**: The full-stack bridge, enabling "Backend MVC, Frontend SPA" productivity.
-- **`Orbit SEO`**: SmartMap indexing engine and automated Meta tag management.
-- **`Orbit CLI`**: Automated scaffolding and productivity commands.
+- **`@gravito/ion`** (formerly Orbit Inertia): The full-stack bridge, enabling "Backend MVC, Frontend SPA" productivity.
+- **`@gravito/luminosity`** (formerly Orbit SEO): SmartMap indexing engine and automated Meta tag management.
+- **`@gravito/atlas`** (formerly Orbit DB): Standard database orbit with a fluent Query Builder and ORM.
+- **`@gravito/sentinel`** (formerly Orbit Auth): Secure and robust authentication and authorization system.
+- **`@gravito/prism`** (formerly Orbit View): Template rendering engine with extreme image optimization.
+- **`@gravito/cosmos`** (formerly Orbit I18n): Enterprise-grade internationalization solution.
+- **`@gravito/constellation`**: Automated sitemap and search engine optimization tools.
+- **`@gravito/pulse`** (formerly Orbit CLI): Automated scaffolding and productivity commands.
 
 > **Roadmap (Scheduled for v1.5 Release)**: 
-> `Orbit DB` (Drizzle), `Orbit Auth` (JWT), `Orbit Mail`, `Orbit Queue`.
+> `Orbit Mail` (@gravito/signal), `Orbit Queue` (@gravito/kinetic), `Orbit Scheduler` (@gravito/chronon).
 
 ### 3. Satellites (Business Logic)
 

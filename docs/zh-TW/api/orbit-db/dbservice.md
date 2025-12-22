@@ -4,12 +4,12 @@ title: DBService
 
 # DBService
 
-> 注入到 Hono `Context` 的請求級資料庫服務。
+> 注入到 `GravitoContext` 的請求級資料庫服務。
 
 ## 取得方式
 
 ```ts
-core.app.get('/example', async (c) => {
+router.get('/example', async (c) => {
   const db = c.get('db') // DBService
   return c.json({ ok: true, hasRaw: !!db.raw })
 })

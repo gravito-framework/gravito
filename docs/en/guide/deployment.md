@@ -89,7 +89,7 @@ Before deploying, ensure:
 
 ## ☁️ Option 3: Edge & Serverless
 
-Because Gravito is built on the **Hono** engine, it can run "on the edge" (closer to your users).
+Because Gravito is built with a powerful cross-platform engine, it can run "on the edge" (closer to your users).
 
 - **Cloudflare Workers**: Use our Cloudflare adapter.
 - **Vercel Functions**: Deploy directly using the Vercel CLI.

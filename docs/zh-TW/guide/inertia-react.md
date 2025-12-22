@@ -1,6 +1,6 @@
 # Inertia (Inertia-React)
 
-Gravito 利用 **Inertia.js** 來連接強大的 Hono 後端與現代化的 React 前端。它讓您能夠建構單頁應用程式 (SPA)，而無需處理客戶端路由或複雜的 Rest/GraphQL API 開發。
+Gravito 利用 **Inertia.js** 來連接強大的 Gravito Core 後端與現代化的 React 前端。它讓您能夠建構單頁應用程式 (SPA)，而無需處理客戶端路由或複雜的 Rest/GraphQL API 開發。
 
 ## 「無 API」的資料流
 
@@ -12,7 +12,7 @@ Gravito 利用 **Inertia.js** 來連接強大的 Hono 後端與現代化的 Reac
 ```typescript
 // src/controllers/DocsController.ts
 export class DocsController {
-  index(c: Context) {
+  index(c: GravitoContext) {
     const inertia = c.get('inertia')
 
     // 這裡傳遞的資料會自動變成 React 的 Props

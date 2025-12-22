@@ -89,7 +89,7 @@ bun run build:static
 
 ## 選項 3：邊緣運算與 Serverless
 
-由於 Gravito 基於 **Hono** 引擎建構，它天生具備「在邊緣執行」的能力。
+由於 Gravito 擁有強大的跨平台引擎，它天生具備「在邊緣執行」的能力。
 
 - **Cloudflare Workers**：使用我們的 Cloudflare 適配器。
 - **Vercel Functions**：使用 Vercel CLI 直接部署。

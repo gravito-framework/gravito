@@ -44,7 +44,7 @@ Gravito 提供安全的 `CookieJar` 來管理 Cookie，並支援自動加密。
 `cookieJar` 可在請求 context 變數中取得。
 
 ```typescript
-core.app.get('/', (c) => {
+core.router.get('/', (c) => {
     const cookies = c.get('cookieJar');
 
     // 設定 Cookie (預設 60 分鐘)
@@ -64,13 +64,12 @@ core.app.get('/', (c) => {
 
 ### 讀取 Cookie
 
-要讀取 Cookie，請使用 Hono 的標準 cookie helper。如果 Cookie 已加密，您需要使用 encrypter 手動解密。
+要讀取 Cookie，請使用引擎標準提供的 cookie 輔助方法。如果 Cookie 已加密，您需要使用 encrypter 手動解密。
 
 ```typescript
-import { getCookie } from 'hono/cookie';
-
-core.app.get('/read', (c) => {
-    const secret = getCookie(c, 'secret');
+core.router.get('/read', (c) => {
+    // 必要時可透過 c.native 存取引擎原生請求
+    const secret = c.native.req.cookie('secret');
     if (secret) {
         try {
             const value = core.encrypter.decrypt(secret);

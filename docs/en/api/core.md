@@ -26,13 +26,13 @@ const core = new PlanetCore()
 
 ## 🛠️ Adapters
 
-Gravito is designed to be engine-agnostic. Currently, it provides first-class support for **Hono**.
+Gravito's high-performance engine is powered by the **Gravito Core Engine**, providing native support for modern runtimes like Bun and Deno.
 
 ```typescript
-import { HonoAdapter } from '@gravito/adapter-hono'
+import { GravitoAdapter } from 'gravito-core'
 
 core.liftoff({
-  adapter: new HonoAdapter(),
+  adapter: new GravitoAdapter(),
   port: 3000
 })
 ```

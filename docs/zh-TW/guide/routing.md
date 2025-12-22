@@ -5,7 +5,7 @@ description: 以優雅且精確的方式處理每一位使用者的請求。
 
 # 路由與控制器 (Routing & Controllers)
 
-Gravito 結合了 **Hono** 的速度與 **MVC** (Model-View-Controller) 的架構化開發。這種設計確保了當您的應用程式規模擴大時，程式碼依然保持井然有序。
+Gravito 結合了極致的核心效能與 **MVC** (Model-View-Controller) 的架構化開發。這種設計確保了當您的應用程式規模擴大時，程式碼依然保持井然有序。
 
 ## 路由器 (The Router)
 
@@ -46,12 +46,12 @@ routes.group({ prefix: '/api' }, (group) => {
 
 ```typescript
 // src/controllers/UserController.ts
-import { Context } from 'hono'
+import { GravitoContext as Context } from 'gravito-core'
 
 export class UserController {
   /**
    * 取得使用者列表
-   * @param c Hono Context
+   * @param c Gravito Context
    */
   async list(c: Context) {
     // 1. 從容器中取得服務
@@ -67,7 +67,7 @@ export class UserController {
 ```
 
 ### 存取服務 (Accessing Services)
-Hono 的 `Context` 物件是您進入 Gravito 生態系統的入口。使用 `c.get()` 來存取各種 Orbits 與服務：
+Gravito 的 `Context` 物件是您進入 Gravito 生態系統的入口。使用 `c.get()` 來存取各種 Orbits 與服務：
 - `c.get('inertia')`：Inertia 全端橋接器。
 - `c.get('view')`：樣板引擎。
 - `c.get('seo')`：SEO 標籤管理器。
@@ -76,7 +76,7 @@ Hono 的 `Context` 物件是您進入 Gravito 生態系統的入口。使用 `c.
 
 ## 處理回應 (Handling Responses)
 
-控制器的每個方法都必須回傳一個標準的 `Response`。透過 Gravito/Hono，這變得非常簡單：
+控制器的每個方法都必須回傳一個標準的 `Response`。透過 Gravito，這變得非常簡單：
 
 | 回傳類型 | 方法 | 描述 |
 |------|--------|-------------|

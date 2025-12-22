@@ -4,12 +4,12 @@ title: DBService
 
 # DBService
 
-> A request-scoped database service injected into Hono `Context`.
+> A request-scoped database service injected into `GravitoContext`.
 
 ## Access
 
 ```ts
-core.app.get('/example', async (c) => {
+router.get('/example', async (c) => {
   const db = c.get('db') // DBService
   return c.json({ ok: true, hasRaw: !!db.raw })
 })

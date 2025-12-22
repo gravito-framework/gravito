@@ -15,7 +15,7 @@ Gravito is a micro-kernel framework, and its power comes from the ecosystem. Thi
 | Term | Concept | Purpose | Example |
 |------|---------|---------|---------|
 | **PlanetCore** | Micro-kernel | Lifecycle, Hooks, Config | `gravito-core` |
-| **Orbit** | Infrastructure Module | Database, Auth, Storage | `@gravito/orbit-db` |
+| **Orbit** | Infrastructure Module | Database, Auth, Storage | `@gravito/atlas` |
 | **Satellite** | Business Logic Plugin | Uses Orbit features | `user-plugin`, `blog-plugin` |
 
 ---
@@ -42,7 +42,7 @@ export default function mySatellite(core: PlanetCore) {
   })
 
   // 3. Register routes
-  core.app.get('/satellite/hello', (c) => {
+  router.get('/satellite/hello', (c) => {
     return c.json({ message: 'Signal from satellite' })
   })
 }
@@ -57,16 +57,16 @@ Satellites often need access to database or authentication. These are provided b
 import { PlanetCore } from 'gravito-core'
 
 export default function userSatellite(core: PlanetCore) {
-  core.app.post('/users', async (c) => {
+  router.post('/users', async (ctx) => {
     // Get Orbit services from Context
-    const db = c.get('db')     // Provided by @gravito/orbit-db
-    const auth = c.get('auth') // Provided by @gravito/orbit-auth
+    const db = ctx.get('db')     // Provided by @gravito/atlas
+    const auth = ctx.get('auth') // Provided by @gravito/sentinel
 
     // Use services
-    await auth.verify(c.req.header('Authorization'))
+    await auth.verify(ctx.req.header('Authorization'))
     const newUser = await db.insert('users', { ... })
 
-    return c.json(newUser)
+    return ctx.json(newUser)
   })
 }
 ```
@@ -80,7 +80,7 @@ Orbits are lower-level extensions that provide infrastructure services. In v0.3+
 ### Design Principles
 
 - **Encapsulation**: Hide complex implementation details (e.g., `drizzle-orm` initialization)
-- **Injection**: Inject services into Hono Context (`c.set('service', ...)`)
+- **Injection**: Inject services into Gravito Context (`c.set('service', ...)`)
 - **Extensibility**: Trigger Hooks at key operations (e.g., `verify`, `upload`)
 
 ### The GravitoOrbit Interface
@@ -98,7 +98,7 @@ export interface GravitoOrbit {
 ```typescript
 // orbit-custom.ts
 import { PlanetCore, GravitoOrbit } from 'gravito-core'
-import type { Context, Next } from 'hono'
+import type { GravitoContext as Context, Next } from 'gravito-core'
 
 export interface CustomOrbitConfig {
   apiKey: string
@@ -114,7 +114,7 @@ export class OrbitCustom implements GravitoOrbit {
 
     core.hooks.doAction('custom:init', service)
 
-    core.app.use('*', async (c: Context, next: Next) => {
+    router.use('*', async (c: Context, next: Next) => {
       c.set('custom', service)
       await next()
     })
@@ -132,7 +132,7 @@ export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
 
 ### Lifecycle Hooks
 
-`install()` is called during bootstrap. For request-level behavior, register Hono middleware inside `install()`.
+`install()` is called during bootstrap. For request-level behavior, register HTTP middleware inside `install()`.
 
 ### Using with IoC
 
@@ -177,14 +177,14 @@ If your Orbit requires database tables:
 
 ### Type Safety
 
-Always provide TypeScript definitions. Extend Hono's `Variables` interface for autocomplete:
+Always provide TypeScript definitions. Extend Gravito's `Variables` interface for autocomplete:
 
 ```typescript
 // types.ts
 import { CustomService } from './custom-service'
 
-declare module 'hono' {
-  interface ContextVariableMap {
+declare module 'gravito-core' {
+  interface GravitoVariables {
     custom: CustomService
   }
 }
@@ -229,13 +229,12 @@ describe('OrbitCustom', () => {
 2. **package.json:**
    ```json
    {
-     "name": "@gravito/orbit-custom",
+     "name": "@gravito/custom",
      "version": "0.1.0",
      "main": "dist/index.js",
      "types": "dist/index.d.ts",
      "peerDependencies": {
-       "gravito-core": "^0.3.0",
-       "hono": "^4.0.0"
+       "gravito-core": "^1.0.0"
      }
    }
    ```

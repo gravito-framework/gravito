@@ -1,10 +1,10 @@
 # 🛰️ Inertia (Inertia-React)
 
-Gravito leverages **Inertia.js** to bridge the gap between your powerful Hono backend and modern React frontend. It allows you to build single-page apps (SPAs) without the complexity of client-side routing or building a Rest/GraphQL API.
+Gravito leverages **Inertia.js** to bridge the gap between your powerful Gravito Core backend and modern React frontend. It allows you to build single-page apps (SPAs) without the complexity of client-side routing or building a Rest/GraphQL API.
 
 ## 💡 The "No-API" Data Flow
 
-In a traditional SPA, you'd build an API and fetch data with `useEffect`. With Gravito + Inertia, your Controller **is** your Data Fetcher.
+In a traditional SPA, you'd build an API and fetch data with `useEffect`. With Gravito + Inertia, after you `bun add @gravito/ion @gravito/prism`, your Controller **is** your Data Fetcher.
 
 ### 1. The Controller (The Provider)
 Your controller fetches the data and sends it directly to the view.

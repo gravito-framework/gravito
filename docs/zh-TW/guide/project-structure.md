@@ -5,7 +5,7 @@ description: 深入瞭解 Gravito 應用程式的目錄佈局與架構設計。
 
 # 專案結構
 
-Gravito 遵循一種可預測且整潔的目錄結構。對於熟悉 MVC (如 Laravel 或 Rails) 的開發者來說會感到非常親切，同時它也針對 Bun/Hono 生態進行了極致優化。
+Gravito 遵循一種可預測且整潔的目錄結構。對於熟悉 MVC (如 Laravel 或 Rails) 的開發者來說會感到非常親切，同時它也針對 Gravito 生態進行了極致優化。
 
 ## 目錄佈局
 
@@ -19,7 +19,7 @@ my-gravito-app/
 │   │   └── pages/       # Inertia 頁面元件（對應到 Controller）
 │   ├── controllers/     # MVC 控制器（商業邏輯層）
 │   ├── locales/         # 翻譯文件（國際化 I18n）
-│   ├── routes/          # 路由定義（基於 Hono）
+│   ├── routes/          # 路由定義（Gravito 路由器）
 │   ├── services/        # 服務層（處理資料庫、外部 API）
 │   ├── bootstrap.ts     # 應用程式的「點火器」（Orbit 註冊中心）
 │   └── index.ts         # Bun 的主入口點
@@ -59,7 +59,7 @@ Gravito 的核心被刻意設計得非常微小。它不知道如何渲染 React
    core.orbit(OrbitView)
    ```
 3. **啟動 (Booting)**：核心呼叫每個 Orbit 的 `boot()` 方法，準備 View 引擎或資料庫連線等服務。
-4. **升空 (Liftoff)**：HTTP 適配器 (Hono) 開始監聽請求。
+4. **升空 (Liftoff)**：HTTP 核心引擎開始監聽請求。
 
 ## 程式碼該寫在哪裡？
 

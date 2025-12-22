@@ -6,7 +6,7 @@ title: Orbit DB
 
 > 以 Gravito Orbit 形式提供資料庫整合，**完整支援 PostgreSQL 並針對效能進行優化**。
 
-套件：`@gravito/orbit-db`
+套件：`@gravito/atlas`
 
 此 Orbit 整合 **Drizzle ORM**，提供標準化的資料庫連線、Context 注入、交易支援、查詢輔助方法、健康檢查、遷移/Seed 與 Hooks。
 
@@ -24,7 +24,7 @@ title: Orbit DB
 
 ## 功能概覽
 
-- 在每個請求的 Hono `Context` 注入 `DBService`
+- 在每個請求的 Gravito `Context` 注入 `DBService`
 - 透過 `db.raw` 存取底層 Drizzle 實例
 - 交易、CRUD 輔助、分頁、批量操作、聚合函數
 - 基於 Drizzle `db.raw.query.*` 的關聯查詢
@@ -33,7 +33,7 @@ title: Orbit DB
 ## 安裝
 
 ```bash
-bun add @gravito/orbit-db drizzle-orm
+bun add @gravito/atlas drizzle-orm
 ```
 
 ## 快速開始
@@ -42,7 +42,7 @@ bun add @gravito/orbit-db drizzle-orm
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/orbit-db'
+import { OrbitAtlas } from '@gravito/atlas'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 
@@ -50,7 +50,7 @@ const core = new PlanetCore()
 const client = postgres(process.env.DATABASE_URL!)
 const db = drizzle(client)
 
-orbitDB(core, { db, databaseType: 'postgresql', exposeAs: 'db' })
+core.orbit(OrbitAtlas, { db, databaseType: 'postgresql', exposeAs: 'db' })
 ```
 
 ## ORM 使用指南

@@ -19,19 +19,19 @@ title: Laravel 12 MVC 對齊程度
 | Laravel | Gravito |
 |--------|---------|
 | Service Container、Service Providers | `gravito-core`（`Container`、`ServiceProvider`） |
-| HTTP Kernel / Middleware | `gravito-core` Router + Hono middleware；以及 Orbit 提供的 middleware（Auth/Session/…） |
+| HTTP Kernel / Middleware | `gravito-core` Router + Native middleware；以及 Orbit 提供的 middleware（Auth/Session/…） |
 | Exception Handler | `gravito-core` `PlanetCore` 的 error + notFound handler 與 hooks |
 | Events / Listeners | `gravito-core` `EventManager` / `Listener` |
-| Validation（FormRequest） | `@gravito/orbit-request`（`FormRequest`）+ `@gravito/mass` |
-| Views / Blade | `@gravito/orbit-view`（TSX 樣板引擎）/ `@gravito/orbit-inertia`（Inertia 橋接） |
-| Database / Eloquent | `@gravito/orbit-db`（基於 Drizzle 的 DB layer） |
-| Auth / Gate / Policies | `@gravito/orbit-auth`（guards + `Gate`） |
+| Validation（FormRequest） | `@gravito/mass`（`FormRequest`） |
+| Views / Blade | `@gravito/prism`（TSX 樣板引擎）/ `@gravito/ion`（Inertia 橋接） |
+| Database / Eloquent | `@gravito/atlas`（基於 Drizzle 的 DB layer） |
+| Auth / Gate / Policies | `@gravito/sentinel`（guards + `Gate`） |
 | Cache | `@gravito/stasis` |
-| Queue / Jobs | `@gravito/orbit-queue` |
-| Scheduler | `@gravito/orbit-scheduler` |
-| Mail | `@gravito/orbit-mail` |
-| Notifications | `@gravito/orbit-notifications` |
-| Broadcasting | `@gravito/orbit-broadcasting` |
+| Queue / Jobs | `@gravito/stream` |
+| Scheduler | `@gravito/horizon` |
+| Mail | `@gravito/signal` |
+| Notifications | `@gravito/flare` |
+| Broadcasting | `@gravito/radiance` |
 | Storage | `@gravito/nebula` |
 | i18n | `@gravito/cosmos` |
 
@@ -51,7 +51,7 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| 路由 + 群組 + middleware 疊加 | 已實作 | Laravel-like fluent API（基於 Hono） |
+| 路由 + 群組 + middleware 疊加 | 已實作 | Laravel-like fluent API（基於內建引擎） |
 | Controller 路由 | 已實作 | `[ControllerClass, 'method']` |
 | 路由層級的 FormRequest 驗證 | 已實作 | `Router` 以 duck-typing 整合 |
 | 命名路由 + URL 產生器 | 已實作 | 支援 `router.get(...).name('home')` 與 `router.url('home')` |
@@ -64,8 +64,8 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Session | 已實作 | `@gravito/orbit` |
-| CSRF 防護 | 已實作 | `@gravito/orbit` |
+| Session | 已實作 | `@gravito/pulsar` |
+| CSRF 防護 | 已實作 | `@gravito/pulsar` |
 | Flash 資料模式 | 已實作 | `session.flash(key, value)` |
 | Cookie 加密 | 已實作 | `CookieJar` + AES-256-CBC Encrypter |
 | Cookie 簽章 | 缺少 | 需要第一級的簽章 primitive（含金鑰輪替策略） |
@@ -84,7 +84,7 @@ title: Laravel 12 MVC 對齊程度
 | 功能 | 狀態 | 說明 |
 |------|------|------|
 | SSR HTML entry | 已實作 | 透過 Orbit View / Core 的 app shell render |
-| SPA 橋接（Inertia） | 已實作 | `@gravito/orbit-inertia` |
+| SPA 橋接（Inertia） | 已實作 | `@gravito/ion` |
 | Blade 相容樣板 | 缺少 | Gravito 使用 TSX 樣板，而非 Blade |
 | 資產管線（asset pipeline）慣例 | 部分 | 已有 `templates`；慣例仍在演進 |
 
@@ -105,7 +105,7 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Auth guards（session/jwt/token） | 已實作 | `@gravito/orbit-auth` |
+| Auth guards（session/jwt/token） | 已實作 | `@gravito/sentinel` |
 | Auth middleware（`auth`、`guest`） | 已實作 | |
 | Gates / abilities | 已實作 | `Gate.define()` + `authorize()` |
 | Policies | 部分 | 支援手動 mapping |
@@ -117,18 +117,18 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Jobs + workers | 已實作 | `@gravito/orbit-queue` 的 multi-driver 設計 |
+| Jobs + workers | 已實作 | `@gravito/stream` 的 multi-driver 設計 |
 | 重試/backoff/timeout 慣例 | 部分 | 有部分概念；需要標準化介面 + 文件 |
-| Scheduler | 已實作 | `@gravito/orbit-scheduler` |
+| Scheduler | 已實作 | `@gravito/horizon` |
 | 佇列儀表板（Horizon-like） | 缺少 | 尚無監控 UI |
 
 ### Mail / Notifications / Broadcasting
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| Mail | 已實作 | `@gravito/orbit-mail` |
-| Notifications | 已實作 | `@gravito/orbit-notifications` |
-| Broadcasting | 已實作 | `@gravito/orbit-broadcasting` |
+| Mail | 已實作 | `@gravito/signal` |
+| Notifications | 已實作 | `@gravito/flare` |
+| Broadcasting | 已實作 | `@gravito/radiance` |
 | 多 channel 生態（Slack/SMS/WebPush/…） | 部分 | 需要更多 driver + contracts |
 
 ### Cache / Storage / i18n

@@ -5,7 +5,7 @@ description: Understanding the directory layout and architecture of a Gravito ap
 
 # 🏗 Project Structure
 
-Gravito follows a predictive, clean directory structure that feels familiar to MVC developers but is optimized for the Bun/Hono ecosystem.
+Gravito follows a predictive, clean directory structure that feels familiar to MVC developers but is optimized for the Gravito Ecosystem.
 
 ## 📂 Directory Layout
 
@@ -19,7 +19,7 @@ my-gravito-app/
 │   │   └── pages/       # Inertia Page components (mapped to Controllers)
 │   ├── controllers/     # MVC Controllers (Business logic)
 │   ├── locales/         # Translation files (I18n)
-│   ├── routes/          # Route definitions (Hono-based)
+│   ├── routes/          # Route definitions (Gravito Router)
 │   ├── services/        # Service layer (Database, External APIs)
 │   ├── bootstrap.ts     # The App "Ignition" (Orbit registration)
 │   └── index.ts         # Main Bun entry point
@@ -59,7 +59,7 @@ When you run `bun dev` or `bun run src/index.ts`, the following happens:
    core.orbit(OrbitView)
    ```
 3. **Booting**: The kernel calls `boot()` on every Orbit, preparing services like the View engine or DB connections.
-4. **Liftoff**: The HTTP adapter (Hono) starts listening for requests.
+4. **Liftoff**: The HTTP engine starts listening for requests.
 
 ## 🗺 Where to find code?
 

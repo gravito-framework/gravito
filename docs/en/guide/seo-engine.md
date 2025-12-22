@@ -79,7 +79,7 @@ Register the SEO middleware at your application entry point. It will automatical
 
 ```typescript
 // src/index.ts
-import { gravitoSeo } from '@gravito/seo-adapter-hono'
+import { gravitoSeo } from '@gravito/luminosity-adapter-hono'
 import { seoConfig } from './config/seo'
 
 app.use('*', gravitoSeo(seoConfig))
@@ -90,10 +90,10 @@ Inject dynamic meta tags for social media sharing directly from your controllers
 
 ```typescript
 // src/controllers/PostController.ts
-import { SeoMetadata } from '@gravito/seo-core'
+import { SeoMetadata } from '@gravito/luminosity'
 
 export class PostController {
-  show(c: Context) {
+  show(c: GravitoContext) {
     const post = // ... fetch your data
     
     const seo = new SeoMetadata({

@@ -5,12 +5,12 @@ description: API reference for Gravito's SEO and Sitemap integration.
 
 # 🛰️ Orbit SEO
 
-The `@gravito/seo-adapter-hono` (or simply `OrbitSEO`) provides a seamless integration between Gravito's core and the SEO engine.
+The `@gravito/luminosity-adapter-hono` (or simply `OrbitLuminosity`) provides a seamless integration between Gravito's core and the SEO engine.
 
 ## Installation
 
 ```bash
-bun add @gravito/seo-core @gravito/seo-adapter-hono
+bun add @gravito/luminosity @gravito/luminosity-adapter-hono
 ```
 
 ## Basic Usage
@@ -18,7 +18,7 @@ bun add @gravito/seo-core @gravito/seo-adapter-hono
 The SEO orbit registers a middleware that handles `/sitemap.xml` and `/robots.txt` automatically.
 
 ```typescript
-import { gravitoSeo } from '@gravito/seo-adapter-hono'
+import { gravitoSeo } from '@gravito/luminosity-adapter-hono'
 import { seoConfig } from './config/seo'
 
 // In your bootstrap or index

@@ -44,7 +44,7 @@ Your app is now running at **[http://localhost:3000](http://localhost:3000)**! ð
 
 ### What just happened?
 Gravito started two synchronized engines:
-1. **Hono Backend**: Handling your routes, controllers, and logic.
+1. **Gravito Core Engine**: Handling your routes, controllers, and logic.
 2. **Vite Frontend**: Powering the React/Inertia interface with blazing-fast Hot Module Replacement (HMR).
 
 ## ðŸŽ¨ Make Your First Change

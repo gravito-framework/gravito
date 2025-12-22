@@ -400,9 +400,9 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 使用簡單的 API Token 驗證：
 
 ```typescript
-import type { Context, Next } from 'hono'
+import type { GravitoContext, Next } from 'gravito-core'
 
-const apiTokenAuth = async (c: Context, next: Next) => {
+const apiTokenAuth = async (c: GravitoContext, next: Next) => {
   const token = c.req.header('Authorization')?.replace('Bearer ', '')
   const validToken = process.env.SITEMAP_API_TOKEN
   
@@ -438,10 +438,10 @@ curl -X POST http://localhost:3000/admin/sitemap/generate \
 限制只有特定 IP 可以存取：
 
 ```typescript
-import type { Context, Next } from 'hono'
+import type { GravitoContext, Next } from 'gravito-core'
 import { ipRangeCheck } from 'ip-range-check' // 需要安裝套件
 
-const adminOnly = async (c: Context, next: Next) => {
+const adminOnly = async (c: GravitoContext, next: Next) => {
   // 取得客戶端 IP（考慮代理伺服器）
   const forwardedFor = c.req.header('x-forwarded-for')
   const realIp = c.req.header('x-real-ip')
@@ -480,13 +480,13 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 
 ```typescript
 import { auth } from '@gravito/orbit-auth'
-import type { Context, Next } from 'hono'
+import type { GravitoContext, Next } from 'gravito-core'
 
 // 1. 檢查認證
 const requireAuth = auth()
 
 // 2. 檢查 API Token（作為第二層保護）
-const requireApiToken = async (c: Context, next: Next) => {
+const requireApiToken = async (c: GravitoContext, next: Next) => {
   const token = c.req.header('X-API-Token')
   if (token !== process.env.SITEMAP_API_TOKEN) {
     return c.json({ error: 'Invalid API token' }, 401)

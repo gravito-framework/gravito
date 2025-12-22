@@ -1,14 +1,14 @@
 ---
-title: Orbit Session Starter Guide
+title: Orbit Pulsar (Session) Starter Guide
 ---
 
-# Orbit Session Starter Guide
+# Orbit Pulsar (Session) Starter Guide
 
 This is a step-by-step beginner tutorial that takes you from installation to login state, flash messages, and CSRF protection.
 
 ## What You Will Build
 
-- Install and enable `@gravito/orbit`
+- Install and enable `@gravito/pulsar`
 - Read/write session data in controllers
 - Create one-time flash messages
 - Send CSRF-protected requests from the frontend
@@ -18,7 +18,7 @@ This is a step-by-step beginner tutorial that takes you from installation to log
 1. Install the package:
 
 ```bash
-bun add @gravito/orbit
+bun add @gravito/pulsar
 ```
 
 2. If you plan to use cache or Redis for storage, install the matching package (you can skip this for now).
@@ -29,7 +29,7 @@ bun add @gravito/orbit
 
 ```ts
 import { defineConfig, PlanetCore } from 'gravito-core'
-import { OrbitSession } from '@gravito/orbit'
+import { OrbitPulsar } from '@gravito/pulsar'
 
 const config = defineConfig({
   config: {
@@ -45,7 +45,7 @@ const config = defineConfig({
       },
     },
   },
-  orbits: [new OrbitSession()],
+  orbits: [new OrbitPulsar()],
 })
 
 const core = await PlanetCore.boot(config)
@@ -59,16 +59,16 @@ export default core.liftoff()
 1. Create `src/controllers/SessionDemoController.ts`:
 
 ```ts
-import type { Context } from 'hono'
+import type { GravitoContext } from 'gravito-core'
 
 export class SessionDemoController {
-  index(c: Context) {
+  index(c: GravitoContext) {
     const session = c.get('session')
     const userId = session.get<string | null>('userId', null)
     return c.json({ userId })
   }
 
-  login(c: Context) {
+  login(c: GravitoContext) {
     const session = c.get('session')
     session.regenerate()
     session.put('userId', 'user_123')
@@ -76,7 +76,7 @@ export class SessionDemoController {
     return c.json({ ok: true })
   }
 
-  logout(c: Context) {
+  logout(c: GravitoContext) {
     const session = c.get('session')
     session.invalidate()
     return c.json({ ok: true })
@@ -102,10 +102,10 @@ export default function(routes: Router) {
 1. Read one-time flash data on the next request:
 
 ```ts
-import type { Context } from 'hono'
+import type { GravitoContext } from 'gravito-core'
 
 export class FlashController {
-  index(c: Context) {
+  index(c: GravitoContext) {
     const session = c.get('session')
     const message = session.getFlash<string | null>('success', null)
     return c.json({ message })
@@ -122,10 +122,10 @@ Orbit Session generates the CSRF token automatically and writes it to the `XSRF-
 1. **This endpoint is optional.** As soon as a response starts a session, Orbit Session writes the `XSRF-TOKEN` cookie automatically. The endpoint below is only for debugging or if you want to fetch the token on demand:
 
 ```ts
-import type { Context } from 'hono'
+import type { GravitoContext } from 'gravito-core'
 
 export class CsrfController {
-  token(c: Context) {
+  token(c: GravitoContext) {
     const csrf = c.get('csrf')
     return c.json({ token: csrf.token() })
   }

@@ -44,7 +44,7 @@ Gravito provides a secure `CookieJar` to manage cookies with automatic encryptio
 The `cookieJar` is available in the request context variables.
 
 ```typescript
-core.app.get('/', (c) => {
+core.router.get('/', (c) => {
     const cookies = c.get('cookieJar');
     
     // Set a cookie (default 60 minutes)
@@ -64,13 +64,12 @@ Cookies queued in the jar are automatically attached to the response by the core
 
 ### Reading Cookies
 
-To read cookies, use Hono's standard cookie helpers. If the cookie was encrypted, you need to decrypt it manually using the encrypter.
+To read cookies, use the standard helpers provided by the core engine. If the cookie was encrypted, you need to decrypt it manually using the encrypter.
 
 ```typescript
-import { getCookie } from 'hono/cookie';
-
-core.app.get('/read', (c) => {
-    const secret = getCookie(c, 'secret');
+core.router.get('/read', (c) => {
+    // Access native request if needed for engine-specific helpers
+    const secret = c.native.req.cookie('secret');
     if (secret) {
         try {
             const value = core.encrypter.decrypt(secret);

@@ -400,9 +400,9 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 Simple API token authentication:
 
 ```typescript
-import type { Context, Next } from 'hono'
+import type { GravitoContext, Next } from 'gravito-core'
 
-const apiTokenAuth = async (c: Context, next: Next) => {
+const apiTokenAuth = async (c: GravitoContext, next: Next) => {
   const token = c.req.header('Authorization')?.replace('Bearer ', '')
   const validToken = process.env.SITEMAP_API_TOKEN
   
@@ -438,10 +438,10 @@ curl -X POST http://localhost:3000/admin/sitemap/generate \
 Restrict access to specific IPs:
 
 ```typescript
-import type { Context, Next } from 'hono'
+import type { GravitoContext, Next } from 'gravito-core'
 import { ipRangeCheck } from 'ip-range-check' // requires package installation
 
-const adminOnly = async (c: Context, next: Next) => {
+const adminOnly = async (c: GravitoContext, next: Next) => {
   // Get client IP (considering proxy servers)
   const forwardedFor = c.req.header('x-forwarded-for')
   const realIp = c.req.header('x-real-ip')
@@ -480,13 +480,13 @@ Combine multiple protection methods for enhanced security:
 
 ```typescript
 import { auth } from '@gravito/orbit-auth'
-import type { Context, Next } from 'hono'
+import type { GravitoContext, Next } from 'gravito-core'
 
 // 1. Check authentication
 const requireAuth = auth()
 
 // 2. Check API Token (as second layer)
-const requireApiToken = async (c: Context, next: Next) => {
+const requireApiToken = async (c: GravitoContext, next: Next) => {
   const token = c.req.header('X-API-Token')
   if (token !== process.env.SITEMAP_API_TOKEN) {
     return c.json({ error: 'Invalid API token' }, 401)

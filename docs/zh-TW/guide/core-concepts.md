@@ -67,13 +67,17 @@ export default core.liftoff() // 點火升空
 
 目前 1.0 版本提供以下穩定軌道模組：
 
-- **`Orbit Kernel`**：核心協調與 IoC 容器。
-- **`Orbit Inertia`**：全棧橋接器，實現「後端 MVC，前端 SPA」的極致開發體驗。
-- **`Orbit SEO`**：智慧型 SmartMap 引擎與 Meta 標籤自動化管理。
-- **`Orbit CLI`**：自動化骨架生成與生產力工具。
+- **`@gravito/ion`** (原 Orbit Inertia)：全棧橋接器，實現「後端 MVC，前端 SPA」的極致開發體驗。
+- **`@gravito/luminosity`** (原 Orbit SEO)：智慧型 SmartMap 引擎與 Meta 標籤自動化管理。
+- **`@gravito/atlas`** (原 Orbit DB)：標準資料庫軌道，提供流暢的 Query Builder 與 ORM 體驗。
+- **`@gravito/sentinel`** (原 Orbit Auth)：提供安全穩固的身份驗證與授權系統。
+- **`@gravito/prism`** (原 Orbit View)：極致影像優化的樣板渲染引擎。
+- **`@gravito/cosmos`** (原 Orbit I18n)：企業級國際化解決方案。
+- **`@gravito/constellation`**：自動化 Sitemap 與搜尋引擎優化工具。
+- **`@gravito/pulse`** (原 Orbit CLI)：自動化骨架生成與生產力工具。
 
-> **Roadmap (v1.5 預計發佈)**:
-> `Orbit DB` (Drizzle), `Orbit Auth` (JWT), `Orbit Mail`, `Orbit Queue`.
+> **Roadmap (v1.5 預計發佈)**: 
+> `Orbit Mail` (@gravito/signal), `Orbit Queue` (@gravito/kinetic), `Orbit Scheduler` (@gravito/chronon).
 
 ### 3. Satellites (業務衛星)
 

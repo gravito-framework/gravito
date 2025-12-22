@@ -79,7 +79,7 @@ export const seoConfig: SeoConfig = {
 
 ```typescript
 // src/index.ts
-import { gravitoSeo } from '@gravito/seo-adapter-hono'
+import { gravitoSeo } from '@gravito/luminosity-adapter-hono'
 import { seoConfig } from './config/seo'
 
 app.use('*', gravitoSeo(seoConfig))
@@ -90,10 +90,10 @@ app.use('*', gravitoSeo(seoConfig))
 
 ```typescript
 // src/controllers/PostController.ts
-import { SeoMetadata } from '@gravito/seo-core'
+import { SeoMetadata } from '@gravito/luminosity'
 
 export class PostController {
-  show(c: Context) {
+  show(c: GravitoContext) {
     const post = // ... 獲取資料
 
     const seo = new SeoMetadata({

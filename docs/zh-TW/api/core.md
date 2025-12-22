@@ -26,13 +26,13 @@ const core = new PlanetCore()
 
 ## 適配器 (Adapters)
 
-Gravito 的設計目標是與引擎無關。目前，它為 **Hono** 提供了一等公民級別的支援。
+Gravito 搭載了高效能的 **Gravito Core 引擎**，原生支援 Bun 與 Deno 等現代化執行環境。
 
 ```typescript
-import { HonoAdapter } from '@gravito/adapter-hono'
+import { GravitoAdapter } from 'gravito-core'
 
 core.liftoff({
-  adapter: new HonoAdapter(),
+  adapter: new GravitoAdapter(),
   port: 3000
 })
 ```

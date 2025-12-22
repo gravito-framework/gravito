@@ -40,7 +40,7 @@ Gravito 的設計必須同時滿足以下四點：
 
 | 比較對象 | Gravito 優勢 |
 |---------|-------------|
-| **Laravel** | 基於 Bun + Hono，毫秒級啟動，兼顧開發體驗與效能 |
+| **Laravel** | 基於自研核心 + Bun，毫秒級啟動，兼顧開發體驗與效能 |
 | **Next.js** | Binary-First (單一執行檔) 策略，避免在正式環境配送 `node_modules` |
 | **Express/Koa** | 強制 MVC 分層，避免後端邏輯破碎化 |
 
@@ -57,8 +57,8 @@ Gravito 的設計必須同時滿足以下四點：
 │  (Frontend Bridge)       │       (Build Tool)               │
 │  後端 MVC，前端 SPA       │    React/Vue 熱更新              │
 ├──────────────────────────┴──────────────────────────────────┤
-│                         Hono                                 │
-│              高效能的 JS Web 框架                              │
+│                      Gravito Core                            │
+│              自研高效能跨平台引擎                             │
 │            (Router + Request Parser)                         │
 ├─────────────────────────────────────────────────────────────┤
 │                          Bun                                 │
@@ -69,7 +69,7 @@ Gravito 的設計必須同時滿足以下四點：
 | 層級 | 技術 | 角色 |
 |------|------|------|
 | **Runtime** | Bun | 極速 JS 執行環境 + 打包工具 |
-| **HTTP Core** | Hono | 高效能的 JS Web 框架，提供 Router 與 Request Parser |
+| **HTTP Core** | Gravito Core | 自研高效能核心引擎，提供 Router 與 Request Parser |
 | **Frontend Bridge** | Inertia.js | 讓後端寫法像 MVC，前端體驗像 SPA |
 | **Build Tool** | Vite | 負責前端 React/Vue 的熱更新與編譯 |
 | **Language** | TypeScript | 全嚴格模式，為 AI 提供型別提示 |
@@ -86,7 +86,7 @@ Gravito 的設計必須同時滿足以下四點：
 ```typescript
 // 核心啟動流程
 const core = new PlanetCore({
-  orbits: [OrbitDB, OrbitAuth, OrbitInertia], // 外掛選配
+  orbits: [OrbitAtlas, OrbitSentinel, OrbitIon], // 外掛選配
 })
 
 await core.boot() // Boot-time Resolution
@@ -134,7 +134,7 @@ ctx.meta({
 ### C. 外掛系統 (Plugin System)
 
 - **Opt-in (選配式)**: 預設不含 DB、Auth，按需引入
-- **Interface-based**: 透過 Hono Middleware 機制封裝
+- **Interface-based**: 透過高效能的中間件機制封裝
 
 #### 外掛生命週期
 
@@ -145,7 +145,7 @@ ctx.meta({
 
 ```typescript
 // 外掛定義範例
-export class OrbitDB implements GravitoOrbit {
+export class OrbitAtlas implements GravitoOrbit {
   async onBoot(core: PlanetCore) {
     // 建立資料庫連線
   }
@@ -240,14 +240,14 @@ CMD ["/app/server"]
 ```
 gravito-core/
 ├── packages/                 # 核心模組 (Monorepo)
-│   ├── cli/                  # 命令列工具 (create-gravito)
-│   ├── core/                 # PlanetCore (IoC 容器 + 生命週期)
-│   ├── orbit-auth/           # 身分驗證外掛
-│   ├── orbit-cache/          # 快取外掛
-│   ├── orbit-db/             # 資料庫外掛 (Drizzle ORM)
-│   ├── orbit-inertia/        # Inertia.js 整合
-│   ├── orbit-storage/        # 儲存外掛
-│   └── orbit-view/           # 模板引擎
+│   ├── pulse/                # 命令列工具 (Orbit Pulse)
+│   ├── core/                 # PlanetCore (核心 IoC 容器 + 生命週期)
+│   ├── sentinel/             # 身分驗證軌道 (Sentinel)
+│   ├── stasis/               # 快取軌道 (Stasis)
+│   ├── atlas/                # 資料庫軌道 (Atlas)
+│   ├── ion/                  # Inertia.js 整合軌道 (Ion)
+│   ├── nebula/               # 雲端儲存軌道 (Nebula)
+│   └── prism/                # 模板與圖片優化軌道 (Prism)
 │
 ├── templates/                # 專案模板
 │   ├── basic/                # 基礎 MVC 模板 (純 HTML)
@@ -288,7 +288,7 @@ export class UserController {
 |------|------|------|
 | **Controller** | PascalCase + `Controller` 後綴 | `UserController` |
 | **Service** | PascalCase + `Service` 後綴 | `AuthService` |
-| **Orbit (外掛)** | `Orbit` 前綴 + PascalCase | `OrbitDB`, `OrbitAuth` |
+| **Orbit (外掛)** | `Orbit` 前綴 + PascalCase | `OrbitAtlas`, `OrbitSentinel` |
 | **路由檔案** | kebab-case | `api-routes.ts` |
 | **View 組件** | PascalCase | `UserProfile.tsx` |
 
@@ -327,4 +327,4 @@ src/
 
 ---
 
-*Last updated: 2025-12-17*
+*Last updated: 2025-12-22*

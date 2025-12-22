@@ -1,14 +1,14 @@
 ---
-title: Orbit Session 新手教學
+title: Orbit Pulsar (Session) 新手教學
 ---
 
-# Orbit Session 新手教學
+# Orbit Pulsar (Session) 新手教學
 
 這是一份一步一步的入門教學，從安裝到實作登入狀態、Flash 訊息與 CSRF 防護，讓你可以立刻上手。
 
 ## 你會完成什麼
 
-- 安裝並啟用 `@gravito/orbit`
+- 安裝並啟用 `@gravito/pulsar`
 - 在控制器中存取 Session
 - 建立一次性 Flash 訊息
 - 在前端送出帶有 CSRF Token 的請求
@@ -18,7 +18,7 @@ title: Orbit Session 新手教學
 1. 安裝套件：
 
 ```bash
-bun add @gravito/orbit
+bun add @gravito/pulsar
 ```
 
 2. 如果你要使用快取或 Redis 作為 Session 儲存來源，請一併安裝對應套件（新手可先跳過）。
@@ -29,7 +29,7 @@ bun add @gravito/orbit
 
 ```ts
 import { defineConfig, PlanetCore } from 'gravito-core'
-import { OrbitSession } from '@gravito/orbit'
+import { OrbitPulsar } from '@gravito/pulsar'
 
 const config = defineConfig({
   config: {
@@ -45,7 +45,7 @@ const config = defineConfig({
       },
     },
   },
-  orbits: [new OrbitSession()],
+  orbits: [new OrbitPulsar()],
 })
 
 const core = await PlanetCore.boot(config)
@@ -59,16 +59,16 @@ export default core.liftoff()
 1. 新增控制器 `src/controllers/SessionDemoController.ts`：
 
 ```ts
-import type { Context } from 'hono'
+import type { GravitoContext } from 'gravito-core'
 
 export class SessionDemoController {
-  index(c: Context) {
+  index(c: GravitoContext) {
     const session = c.get('session')
     const userId = session.get<string | null>('userId', null)
     return c.json({ userId })
   }
 
-  login(c: Context) {
+  login(c: GravitoContext) {
     const session = c.get('session')
     session.regenerate()
     session.put('userId', 'user_123')
@@ -76,7 +76,7 @@ export class SessionDemoController {
     return c.json({ ok: true })
   }
 
-  logout(c: Context) {
+  logout(c: GravitoContext) {
     const session = c.get('session')
     session.invalidate()
     return c.json({ ok: true })
@@ -102,10 +102,10 @@ export default function(routes: Router) {
 1. 在下一個請求中讀取一次性訊息：
 
 ```ts
-import type { Context } from 'hono'
+import type { GravitoContext } from 'gravito-core'
 
 export class FlashController {
-  index(c: Context) {
+  index(c: GravitoContext) {
     const session = c.get('session')
     const message = session.getFlash<string | null>('success', null)
     return c.json({ message })
@@ -122,10 +122,10 @@ Orbit Session 會自動產生 CSRF token，並在回應時寫入 `XSRF-TOKEN` co
 1. **不一定需要**建立 token 端點。只要有任何回應啟動了 session，Orbit Session 就會自動寫入 `XSRF-TOKEN` cookie。以下端點僅用於除錯或想主動取得 token 的情境：
 
 ```ts
-import type { Context } from 'hono'
+import type { GravitoContext } from 'gravito-core'
 
 export class CsrfController {
-  token(c: Context) {
+  token(c: GravitoContext) {
     const csrf = c.get('csrf')
     return c.json({ token: csrf.token() })
   }

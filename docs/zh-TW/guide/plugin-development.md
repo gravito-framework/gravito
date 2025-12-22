@@ -15,7 +15,7 @@ Gravito 是一個微核心框架，其威力來自於生態系。本指南將協
 | 術語 | 概念 | 用途 | 範例 |
 |------|------|------|------|
 | **PlanetCore** | 微核心 | 生命週期、Hooks、設定 | `gravito-core` |
-| **Orbit** | 基礎設施模組 | 資料庫、驗證、儲存 | `@gravito/orbit-db` |
+| **Orbit** | 基礎設施模組 | 資料庫、驗證、儲存 | `@gravito/atlas` |
 | **Satellite** | 業務邏輯外掛 | 使用 Orbit 的功能 | `user-plugin`, `blog-plugin` |
 
 ---
@@ -42,7 +42,7 @@ export default function mySatellite(core: PlanetCore) {
   })
 
   // 3. 註冊路由
-  core.app.get('/satellite/hello', (c) => {
+  router.get('/satellite/hello', (c) => {
     return c.json({ message: '來自衛星的訊號' })
   })
 }
@@ -57,10 +57,10 @@ Satellites 通常需要存取資料庫或驗證。這些功能由 Orbits 提供�
 import { PlanetCore } from 'gravito-core'
 
 export default function userSatellite(core: PlanetCore) {
-  core.app.post('/users', async (c) => {
+  router.post('/users', async (c) => {
     // 從 Context 獲取 Orbit 服務
-    const db = c.get('db')     // 由 @gravito/orbit-db 提供
-    const auth = c.get('auth') // 由 @gravito/orbit-auth 提供
+    const db = c.get('db')     // 由 @gravito/atlas 提供
+    const auth = c.get('auth') // 由 @gravito/sentinel 提供
 
     // 使用服務
     await auth.verify(c.req.header('Authorization'))
@@ -80,7 +80,7 @@ Orbit 是更底層的擴充，負責提供基礎設施服務。在 v0.3+ 中，O
 ### 設計原則
 
 - **封裝 (Encapsulation)**: 隱藏複雜的實作細節 (如 `drizzle-orm` 初始化)
-- **注入 (Injection)**: 將服務注入到 Hono Context (`c.set('service', ...)`)
+- **注入 (Injection)**: 將服務注入到 Gravito Context (`c.set('service', ...)`)
 - **擴充性 (Hooks)**: 在關鍵操作 (如 `verify`, `upload`) 前後觸發 Hooks
 
 ### GravitoOrbit 介面
@@ -98,7 +98,7 @@ export interface GravitoOrbit {
 ```typescript
 // orbit-custom.ts
 import { PlanetCore, GravitoOrbit } from 'gravito-core'
-import type { Context, Next } from 'hono'
+import type { GravitoContext as Context, Next } from 'gravito-core'
 
 export interface CustomOrbitConfig {
   apiKey: string
@@ -114,7 +114,7 @@ export class OrbitCustom implements GravitoOrbit {
 
     core.hooks.doAction('custom:init', service)
 
-    core.app.use('*', async (c: Context, next: Next) => {
+    router.use('*', async (c: Context, next: Next) => {
       c.set('custom', service)
       await next()
     })
@@ -132,7 +132,7 @@ export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
 
 ### 生命週期 Hooks
 
-`install()` 會在啟動階段被呼叫；若需要請求層級的行為，請在 `install()` 內註冊 Hono middleware。
+`install()` 會在啟動階段被呼叫；若需要請求層級的行為，請在 `install()` 內註冊 HTTP middleware。
 
 ### 搭配 IoC 使用
 
@@ -177,14 +177,14 @@ export default core.liftoff()
 
 ### 型別安全
 
-總是提供 TypeScript 定義。擴充 Hono 的 `Variables` 介面以獲得自動補全：
+總是提供 TypeScript 定義。擴充 Gravito 的 `Variables` 介面以獲得自動補全：
 
 ```typescript
 // types.ts
 import { CustomService } from './custom-service'
 
-declare module 'hono' {
-  interface ContextVariableMap {
+declare module 'gravito-core' {
+  interface GravitoVariables {
     custom: CustomService
   }
 }
@@ -229,13 +229,12 @@ describe('OrbitCustom', () => {
 2. **package.json：**
    ```json
    {
-     "name": "@gravito/orbit-custom",
+     "name": "@gravito/custom",
      "version": "0.1.0",
      "main": "dist/index.js",
      "types": "dist/index.d.ts",
      "peerDependencies": {
-       "gravito-core": "^0.3.0",
-       "hono": "^4.0.0"
+       "gravito-core": "^1.0.0"
      }
    }
    ```

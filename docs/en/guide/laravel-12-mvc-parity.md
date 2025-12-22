@@ -19,19 +19,19 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 | Laravel | Gravito |
 |--------|---------|
 | Service Container, Service Providers | `gravito-core` (`Container`, `ServiceProvider`) |
-| HTTP Kernel / Middleware | `gravito-core` Router + Hono middleware; Orbit-provided middleware (Auth/Session/…) |
+| HTTP Kernel / Middleware | `gravito-core` Router + Native middleware; Orbit-provided middleware (Auth/Session/…) |
 | Exception Handler | `gravito-core` `PlanetCore` error + notFound handlers and hooks |
 | Events / Listeners | `gravito-core` `EventManager` / `Listener` |
-| Validation (FormRequest) | `@gravito/orbit-request` (`FormRequest`) + `@gravito/mass` |
-| Views / Blade | `@gravito/orbit-view` (TSX template engine) / `@gravito/orbit-inertia` (Inertia bridge) |
-| Database / Eloquent | `@gravito/orbit-db` (Drizzle-based DB layer) |
-| Auth / Gate / Policies | `@gravito/orbit-auth` (guards + `Gate`) |
+| Validation (FormRequest) | `@gravito/mass` (`FormRequest`) |
+| Views / Blade | `@gravito/prism` (TSX template engine) / `@gravito/ion` (Inertia bridge) |
+| Database / Eloquent | `@gravito/atlas` (Drizzle-based DB layer) |
+| Auth / Gate / Policies | `@gravito/sentinel` (guards + `Gate`) |
 | Cache | `@gravito/stasis` |
-| Queue / Jobs | `@gravito/orbit-queue` |
-| Scheduler | `@gravito/orbit-scheduler` |
-| Mail | `@gravito/orbit-mail` |
-| Notifications | `@gravito/orbit-notifications` |
-| Broadcasting | `@gravito/orbit-broadcasting` |
+| Queue / Jobs | `@gravito/stream` |
+| Scheduler | `@gravito/horizon` |
+| Mail | `@gravito/signal` |
+| Notifications | `@gravito/flare` |
+| Broadcasting | `@gravito/radiance` |
 | Storage | `@gravito/nebula` |
 | i18n | `@gravito/cosmos` |
 
@@ -51,7 +51,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Routing + route groups + middleware stacking | Implemented | Laravel-like fluent API on top of Hono |
+| Routing + route groups + middleware stacking | Implemented | Laravel-like fluent API on top of native engine |
 | Controller routing | Implemented | `[ControllerClass, 'method']` |
 | FormRequest validation at route-level | Implemented | Duck-typed integration in `Router` |
 | Named routes + URL generation | Implemented | `router.get(...).name('home')` and `router.url('home')` |
@@ -64,8 +64,8 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Sessions | Implemented | `@gravito/orbit` |
-| CSRF protection | Implemented | `@gravito/orbit` |
+| Sessions | Implemented | `@gravito/pulsar` |
+| CSRF protection | Implemented | `@gravito/pulsar` |
 | Cookie encryption | Implemented | `CookieJar` + AES-256-CBC Encrypter |
 | Cookie signing | Missing | Needs a first-class signing primitive (key rotation story) |
 | “Flash” data patterns | Implemented | `session.flash(key, value)` |
@@ -84,7 +84,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 | Feature | Status | Notes |
 |--------|--------|------|
 | Server-rendered HTML entry | Implemented | App shell rendering via Orbit View / Core |
-| SPA bridge (Inertia) | Implemented | `@gravito/orbit-inertia` |
+| SPA bridge (Inertia) | Implemented | `@gravito/ion` |
 | Blade-compatible templating | Missing | Gravito uses TSX templates instead of Blade |
 | Asset pipeline conventions | Partial | Templates exist; conventions still evolving |
 
@@ -105,7 +105,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Auth guards (session/jwt/token) | Implemented | `@gravito/orbit-auth` |
+| Auth guards (session/jwt/token) | Implemented | `@gravito/sentinel` |
 | Auth middleware (`auth`, `guest`) | Implemented | |
 | Gates / abilities | Implemented | `Gate.define()` + `authorize()` |
 | Policies | Partial | Manual mapping supported; no discovery/scaffolding |
@@ -116,18 +116,18 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Jobs + workers | Implemented | Multi-driver design in `@gravito/orbit-queue` |
+| Jobs + workers | Implemented | Multi-driver design in `@gravito/stream` |
 | Retries/backoff/timeout conventions | Partial | Some concepts exist; needs standardized surface + docs |
-| Scheduler | Implemented | `@gravito/orbit-scheduler` |
+| Scheduler | Implemented | `@gravito/horizon` |
 | Queue dashboard (Horizon-like) | Missing | No monitoring UI yet |
 
 ### Mail / Notifications / Broadcasting
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Mail sending | Implemented | `@gravito/orbit-mail` |
-| Notifications | Implemented | `@gravito/orbit-notifications` |
-| Broadcasting | Implemented | `@gravito/orbit-broadcasting` |
+| Mail sending | Implemented | `@gravito/signal` |
+| Notifications | Implemented | `@gravito/flare` |
+| Broadcasting | Implemented | `@gravito/radiance` |
 | Channel ecosystem (Slack/SMS/WebPush/…) | Partial | Needs more drivers + contracts |
 
 ### Cache / Storage / i18n
