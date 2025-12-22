@@ -42,7 +42,7 @@
   },
   "peerDependencies": {
     "@gravito/stream": "1.0.0-alpha.2",
-    "@gravito/signal": "1.0.0-alpha.2",
+    "@gravito/signal": "1.0.0-alpha.3",
     "@gravito/radiance": "1.0.0-alpha.2"
   },
   "devDependencies": {
