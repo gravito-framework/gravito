@@ -1,5 +1,5 @@
-import type { GravitoContext } from './types'
 import type { Encrypter } from '../security/Encrypter'
+import type { GravitoContext } from './types'
 export interface CookieOptions {
   path?: string
   domain?: string

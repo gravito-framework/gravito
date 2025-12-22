@@ -1,7 +1,7 @@
 import type {
+  ContentfulStatusCode,
   GravitoContext,
   GravitoVariables,
-  ContentfulStatusCode,
   StatusCode,
 } from '../../http/types'
 import { BunRequest } from './BunRequest'

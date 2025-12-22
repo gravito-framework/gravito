@@ -1,5 +1,5 @@
 import type { HttpMethod } from '../../http/types'
-import { type RouteMatch, type RouteHandler } from './types'
+import { type RouteHandler, type RouteMatch } from './types'
 /**
  * High-performance Radix Tree Router for Bun
  */

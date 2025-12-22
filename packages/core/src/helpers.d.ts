@@ -1,4 +1,4 @@
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from './http/types'
 import type { PlanetCore } from './PlanetCore'
 import type { Router } from './Router'
 export { Arr } from './helpers/Arr'

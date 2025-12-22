@@ -12,12 +12,11 @@ import { join } from 'node:path';
 
 const PACKAGES_DIR = join(process.cwd(), 'packages');
 
-// 官網使用的套件（可以發布 beta 或穩定版）
 const OFFICIAL_SITE_PACKAGES = [
   'gravito-core',
   '@gravito/stasis',
-  '@gravito/orbit-inertia',
-  '@gravito/orbit-view',
+  '@gravito/ion',
+  '@gravito/prism',
   '@gravito/luminosity-adapter-hono',
   '@gravito/luminosity',
 ];
@@ -25,9 +24,9 @@ const OFFICIAL_SITE_PACKAGES = [
 // 版本配置
 const VERSION_CONFIG = {
   // 官網使用的套件：beta 版本
-  officialSite: '1.0.0-beta.1',
+  officialSite: '1.0.0-beta.2',
   // 其他套件：alpha 版本
-  others: '1.0.0-alpha.1',
+  others: '1.0.0-alpha.2',
 };
 
 interface PackageInfo {

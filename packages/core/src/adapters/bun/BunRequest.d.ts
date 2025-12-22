@@ -15,6 +15,7 @@ export declare class BunRequest implements GravitoRequest {
   query(name: string): string | undefined
   queries(): Record<string, string | string[]>
   header(name: string): string | undefined
+  header(): Record<string, string>
   json<T = unknown>(): Promise<T>
   text(): Promise<string>
   formData(): Promise<FormData>

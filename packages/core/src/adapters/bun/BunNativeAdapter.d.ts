@@ -1,8 +1,8 @@
 import type {
   GravitoContext,
+  GravitoErrorHandler,
   GravitoHandler,
   GravitoMiddleware,
-  GravitoErrorHandler,
   GravitoNotFoundHandler,
   HttpMethod,
 } from '../../http/types'
@@ -15,7 +15,6 @@ export declare class BunNativeAdapter implements HttpAdapter {
   private middlewares
   private errorHandler
   private notFoundHandler
-  constructor()
   route(method: HttpMethod, path: string, ...handlers: (GravitoHandler | GravitoMiddleware)[]): void
   routes(routes: RouteDefinition[]): void
   use(path: string, ...middleware: GravitoMiddleware[]): void
@@ -24,7 +23,7 @@ export declare class BunNativeAdapter implements HttpAdapter {
   createContext(request: Request): GravitoContext
   onError(handler: GravitoErrorHandler): void
   onNotFound(handler: GravitoNotFoundHandler): void
-  fetch(request: Request, server?: unknown): Promise<Response>
+  fetch(request: Request, _server?: unknown): Promise<Response>
   private executeChain
 }
 //# sourceMappingURL=BunNativeAdapter.d.ts.map

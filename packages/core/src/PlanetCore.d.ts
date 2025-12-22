@@ -7,7 +7,6 @@
  * @module gravito-core
  * @since 1.0.0
  */
-import { Hono } from 'hono'
 import type { HttpAdapter } from './adapters/types'
 import { ConfigManager } from './ConfigManager'
 import { Container } from './Container'
@@ -15,9 +14,9 @@ import { EventManager } from './EventManager'
 import { type RegisterGlobalErrorHandlersOptions } from './GlobalErrorHandlers'
 import { HookManager } from './HookManager'
 import { fail } from './helpers/response'
+import type { ContentfulStatusCode, GravitoContext } from './http/types'
 import { type Logger } from './Logger'
 import type { ServiceProvider } from './ServiceProvider'
-import type { GravitoContext, ContentfulStatusCode } from './http/types'
 /**
  * CacheService interface for orbit-injected cache
  * Orbits implementing cache should conform to this interface
@@ -48,20 +47,6 @@ export type ErrorHandlerContext = {
     data: Record<string, unknown>
   }
 }
-type RouteParams = Record<string, string | number>
-type RouteQuery = Record<string, string | number | boolean | null | undefined>
-type Variables = {
-  core: PlanetCore
-  logger: Logger
-  config: ConfigManager
-  cookieJar: CookieJar
-  route: (name: string, params?: RouteParams, query?: RouteQuery) => string
-  cache?: CacheService
-  view?: ViewService
-  i18n?: unknown
-  session?: unknown
-  routeModels?: Record<string, unknown>
-}
 export interface GravitoOrbit {
   install(core: PlanetCore): void | Promise<void>
 }
@@ -75,7 +60,6 @@ export type GravitoConfig = {
    */
   adapter?: HttpAdapter
 }
-import { CookieJar } from './http/CookieJar'
 import { Router } from './Router'
 import { Encrypter } from './security/Encrypter'
 import { BunHasher } from './security/Hasher'
@@ -89,9 +73,7 @@ export declare class PlanetCore {
    * Access the underlying Hono app instance.
    * @deprecated Use adapter methods for new code. This property is kept for backward compatibility.
    */
-  get app(): Hono<{
-    Variables: Variables
-  }>
+  get app(): unknown
   /**
    * Get the HTTP adapter instance.
    * @since 2.0.0
@@ -131,7 +113,7 @@ export declare class PlanetCore {
   /**
    * Mount an Orbit (a Hono app) to a path.
    */
-  mountOrbit(path: string, orbitApp: Hono): void
+  mountOrbit(path: string, orbitApp: unknown): void
   /**
    * Start the core (Liftoff).
    *

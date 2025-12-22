@@ -1,4 +1,4 @@
-import { type HttpMethod } from '../../http/types'
+import type { HttpMethod } from '../../http/types'
 import { NodeType, type RouteHandler } from './types'
 export declare class RadixNode {
   segment: string

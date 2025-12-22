@@ -34,6 +34,7 @@ declare class HonoRequestWrapper implements GravitoRequest {
   query(name: string): string | undefined
   queries(): Record<string, string | string[]>
   header(name: string): string | undefined
+  header(): Record<string, string>
   json<T = unknown>(): Promise<T>
   text(): Promise<string>
   formData(): Promise<FormData>
@@ -137,7 +138,7 @@ export declare class HonoAdapter<V extends GravitoVariables = GravitoVariables>
   onError(handler: GravitoErrorHandler<V>): void
   onNotFound(handler: GravitoNotFoundHandler<V>): void
   fetch: (request: Request, server?: unknown) => Response | Promise<Response>
-  createContext(request: Request): GravitoContext<V>
+  createContext(_request: Request): GravitoContext<V>
   init(): Promise<void>
   shutdown(): Promise<void>
 }

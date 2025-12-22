@@ -1,4 +1,4 @@
-import type { GravitoContext, ContentfulStatusCode } from '../http/types'
+import type { ContentfulStatusCode, GravitoContext } from '../http/types'
 export type ApiSuccess<T> = {
   success: true
   data: T
