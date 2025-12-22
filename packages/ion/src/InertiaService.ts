@@ -58,30 +58,26 @@ export class InertiaService {
   /**
    * Escape a string for safe use in HTML attributes
    * 
-   * Note: We don't escape backslashes here because JSON.stringify already
-   * escapes special characters. Escaping backslashes would double-escape
-   * JSON escape sequences like \n, causing JSON.parse to fail.
+   * Strategy: JSON.stringify already escapes special characters including
+   * quotes as \". We need to escape these for HTML attributes, but we must
+   * be careful not to break JSON escape sequences.
    * 
-   * Important: We MUST escape double quotes because the browser will decode
-   * HTML entities in attribute values. If JSON contains \" (escaped quote),
-   * and we don't escape the quote itself, the browser will decode &quot; to "
-   * which breaks the JSON structure when the content itself contains quotes.
-   * 
-   * The correct approach: JSON.stringify escapes " as \", then we escape
-   * the backslash-quote sequence to prevent browser from decoding it incorrectly.
+   * The solution: Escape backslash-quote sequences (\" from JSON.stringify)
+   * as \\&quot; so they become \\&quot; in HTML, which the browser decodes
+   * to \\" (valid JSON), not \&quot; (invalid JSON).
    */
   private escapeForSingleQuotedHtmlAttribute(value: string): string {
     // First escape ampersands to prevent breaking existing HTML entities
-    // Then escape other characters
+    // Then escape backslash-quote sequences (from JSON.stringify) as \\&quot;
+    // This ensures \" becomes \\&quot; which decodes to \\" (valid JSON)
     return value
       .replace(/&/g, '&amp;')
+      .replace(/\\"/g, '\\&quot;') // Escape \" as \\&quot; (becomes \\" after decode)
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      // Escape double quotes - this is safe because JSON.stringify already
-      // escaped them as \", so we're escaping the backslash-quote sequence
-      // This prevents browser from decoding &quot; in JSON content
-      .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;')
+      // Note: We don't escape standalone " because JSON.stringify already
+      // escaped all quotes as \", so any remaining " would be invalid JSON anyway
   }
 
   /**
