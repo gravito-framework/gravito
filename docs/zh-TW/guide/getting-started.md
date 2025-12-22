@@ -51,15 +51,15 @@ Gravito 內建了「工匠級」的 CLI 工具，能為您代勞繁重的工程�
 
 ```bash
 # 快速建構 (Scaffolding)
-bun gravito make:model User
+bun gravito make:controller UserController
+bun gravito make:middleware EnsureAdmin
 
-# 資料庫治理
-bun gravito make:migration create_users_table
-bun gravito migrate
-
-# 互動與調試
+# 開發工具 (Development Utilities)
+bun gravito route:list
 bun gravito tinker # 進入互動式 REPL
 ```
+
+> **注意**：資料庫管理命令（`make:migration`、`migrate` 等）在 v1.0 版本中不可用。這些功能將在未來的版本中推出。
 
 ### 剛才發生了什麼？
 Gravito 同時啟動了兩個同步運作的引擎：
