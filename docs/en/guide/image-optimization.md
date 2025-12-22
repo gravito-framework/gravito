@@ -5,7 +5,7 @@ description: Automated image optimization for high-performance Gravito applicati
 
 # 🖼️ Image Optimization
 
-Gravito includes a powerful **Image Optimization** module (part of `Gravito-View`) that ensures your application meets the highest performance standards, inspired by the best practices of Next.js but with **Zero Client-side Runtime**.
+**Orbit Prism** includes a powerful Image Optimization feature. It ensures your application meets the highest performance standards, inspired by the best practices of Next.js but with **Zero Client-side Runtime**.
 
 ---
 
@@ -103,8 +103,14 @@ import { Image } from '@gravito/prism/vue'
 If you are using our built-in template engine, use the `image` helper.
 
 ```html
-<!-- Single line of power -->
+<!-- One line of power -->
 {{image src="/static/hero.jpg" alt="Hero" width=1920 height=1080 loading="eager"}}
+
+<!-- Or inside a component -->
+<x-card>
+  {{image src="/static/thumb.jpg" alt="Thumb" width=400 height=300}}
+  <p>Card Content</p>
+</x-card>
 ```
 
 ---

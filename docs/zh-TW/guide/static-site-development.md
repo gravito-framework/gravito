@@ -2,9 +2,9 @@
 title: 靜態網站開發指南
 ---
 
-# 📦 使用 Gravito 建立靜態網站 (SSG)
+# 📦 使用 Orbit Freeze 建立靜態網站 (SSG)
 
-使用 `@gravito/freeze` 將您的 Gravito 應用程式建置為極速靜態網站。
+使用 **Orbit Freeze (`@gravito/freeze`)** 將您的 Gravito 應用程式建置為極速靜態網站。
 
 ## 🚀 快速開始
 

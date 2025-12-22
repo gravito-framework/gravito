@@ -5,7 +5,7 @@ description: 為高效能 Gravito 應用程式提供的自動化圖片優化方�
 
 # 圖片優化 (Image Optimization)
 
-Gravito 內建了強大的**圖片優化**模組（屬於 **Orbit Prism** 的核心功能）。它借鑑了 Next.js 的最佳實踐，確保您的應用程式符合 Core Web Vitals 最高效能標準，其最大優勢在於：**零客戶端執行路徑 (Zero Client-side Runtime)**。
+**Orbit Prism** 內建了強大的圖片優化功能。它借鑑了 Next.js 的最佳實踐，確保您的應用程式符合 Core Web Vitals 最高效能標準，其最大優勢在於：**零客戶端執行路徑 (Zero Client-side Runtime)**。
 
 ---
 

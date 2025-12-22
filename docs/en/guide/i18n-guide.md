@@ -5,7 +5,7 @@ description: Scalable multilingual support for Gravito applications.
 
 # 🌐 Internationalization (I18n)
 
-Gravito makes building global applications easy. Our I18n system is designed to be type-safe, performant, and "babysitter-friendly."
+Gravito makes building global applications easy. Our I18n system is designed to be type-safe, performant, and "developer-centric."
 
 ---
 
@@ -63,7 +63,7 @@ router.prefix('/:locale(en|zh|ja)').group((r) => {
 
 ## 🚀 Usage in Controllers
 
-Gravito's Cosmos module automatically handles the locale detection. You just need to fetch the right strings.
+**Gravito Core middleware** automatically handles the locale detection. You just need to fetch the right strings.
 
 ```typescript
 import { getTranslation } from '../services/I18nService'

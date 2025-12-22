@@ -63,7 +63,7 @@ router.prefix('/:locale(en|zh|ja)').group((r) => {
 
 ## 在 Controller 中使用
 
-Gravito 的 I18n 軌道會自動處理語言偵測，您只需要獲取正確的字串即可。
+Gravito 的 **I18n 中介軟體 (Middleware)** 會自動處理語言偵測，您只需要獲取正確的字串即可。
 
 ```typescript
 import { getTranslation } from '../services/I18nService'
@@ -122,5 +122,5 @@ export function LanguageSwitcher({ currentLocale }) {
 ## 專業提示
 
 - **回退策略 (Fallback)**：如果新語言文件中缺少某個鍵值，TypeScript 會提醒您（前提是您使用了 `typeof en` 進行約束）。
-- **SEO 整合**：如果您希望 Google 索引所有版本，請記得更新 `seoConfig` 中的 Sitemap 解析器，將新語言的網址也納入其中。
+- **Orbit Luminosity 整合**：如果您希望 Google 索引所有版本，請記得更新 `seoConfig` 中的 Sitemap 解析器，將新語言的網址也納入其中。
 - **巢狀鍵值**：您可以根據需求進行任意深度的巢狀組織。`t` 物件將完全遵循您 TypeScript 文件的結構。

@@ -2,9 +2,9 @@
 title: Static Site Development Guide
 ---
 
-# 📦 Static Site Generation (SSG) with Gravito
+# 📦 Static Site Generation with Orbit Freeze
 
-Build blazing-fast static sites from your Gravito applications using `@gravito/freeze`.
+Build blazing-fast static sites from your Gravito applications using **Orbit Freeze (`@gravito/freeze`)**.
 
 ## 🚀 Quick Start
 
