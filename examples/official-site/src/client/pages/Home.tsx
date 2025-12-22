@@ -393,7 +393,7 @@ const TechIcon = ({ type }: { type: string }) => {
 const StackSection = ({ t }: { t: Translation }) => {
   const stack = [
     { type: 'bun', title: t.stack.bun_title, desc: t.stack.bun_desc, color: 'text-orange-400' },
-    { type: 'gravito', title: t.stack.hono_title, desc: t.stack.hono_desc, color: 'text-cyan-500' },
+    { type: 'gravito', title: t.stack.engine_title, desc: t.stack.engine_desc, color: 'text-cyan-500' },
     { type: 'ts', title: t.stack.ts_title, desc: t.stack.ts_desc, color: 'text-blue-400' },
   ]
 
