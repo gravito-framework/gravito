@@ -32,7 +32,7 @@ In the Gravito worldview, a system is treated as a micro-galaxy:
 
 - **The Singularity**: Every request is optimized into a single path jump, eliminating framework overhead.
 - **The Core Gravity**: The Kernel maintains system health and coordination without interfering with specific business logic.
-- **Orbits**: Infrastructure modules orbit the core, completely decoupled.
+- **Kinetic Modules**: Specialized infrastructure modules that extend the core functionalities, completely decoupled.
 
 ### Four Pillars of Excellence
 
@@ -58,31 +58,31 @@ The gravitational center. A minimal, high-efficiency foundation responsible for:
 import { PlanetCore } from 'gravito-core'
 
 const core = await PlanetCore.boot({
-  orbits: [OrbitInertia, OrbitSEO], // Load only v1.0 stable modules
+  modules: [Ion, Luminosity], // Load only v1.0 stable modules
 })
 
 export default core.liftoff() // Ignition for liftoff
 ```
 
-### 2. Orbits (v1.0 Core Modules)
+### 2. Kinetic Modules (v1.0)
 
-The initial v1.0 release focuses on these stable Orbits:
+The initial v1.0 release focuses on these stable modules:
 
-- **`@gravito/ion`** (formerly Orbit Inertia): The full-stack bridge, enabling "Backend MVC, Frontend SPA" productivity.
-- **`@gravito/luminosity`** (formerly Orbit SEO): SmartMap indexing engine and automated Meta tag management.
-- **`@gravito/atlas`** (formerly Orbit DB): Standard database orbit with a fluent Query Builder and ORM.
-- **`@gravito/sentinel`** (formerly Orbit Auth): Secure and robust authentication and authorization system.
-- **`@gravito/prism`** (formerly Orbit View): Template rendering engine with extreme image optimization.
-- **`@gravito/cosmos`** (formerly Orbit I18n): Enterprise-grade internationalization solution.
+- **`@gravito/ion`**: The full-stack bridge, enabling "Backend MVC, Frontend SPA" productivity.
+- **`@gravito/luminosity`**: SmartMap indexing engine and automated Meta tag management.
+- **`@gravito/atlas`**: Standard database module with a fluent Query Builder and ORM.
+- **`@gravito/sentinel`**: Secure and robust authentication and authorization system.
+- **`@gravito/prism`**: Template rendering engine with extreme image optimization.
+- **`@gravito/cosmos`**: Enterprise-grade internationalization solution.
 - **`@gravito/constellation`**: Automated sitemap and search engine optimization tools.
-- **`@gravito/pulse`** (formerly Orbit CLI): Automated scaffolding and productivity commands.
+- **`@gravito/pulse`**: Automated scaffolding and productivity commands.
 
 > **Roadmap (Scheduled for v1.5 Release)**: 
-> `Orbit Mail` (@gravito/signal), `Orbit Queue` (@gravito/kinetic), `Orbit Scheduler` (@gravito/chronon).
+> `Mail` (@gravito/signal), `Queue` (@gravito/kinetic), `Scheduler` (@gravito/chronon).
 
 ### 3. Satellites (Business Logic)
 
-This is your territory. All Controllers, Services, and business logic are encapsulated in Satellites, mounting seamlessly onto the Core or Orbit modules.
+This is your territory. All Controllers, Services, and business logic are encapsulated in Satellites, mounting seamlessly onto the Core or specialized modules.
 
 ---
 

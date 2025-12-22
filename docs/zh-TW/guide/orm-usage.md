@@ -4,7 +4,7 @@ title: ORM 使用指南
 
 # ORM 使用指南
 
-> 完整的 orbit-db ORM 使用說明，涵蓋所有功能和使用場景。
+> 完整的 Atlas ORM 使用說明，涵蓋所有功能和使用場景。
 
 ## 目錄
 
@@ -24,14 +24,14 @@ title: ORM 使用指南
 ### 1. 安裝依賴
 
 ```bash
-bun add @gravito/orbit-db drizzle-orm postgres
+bun add @gravito/atlas drizzle-orm postgres
 ```
 
 ### 2. 初始化資料庫連接
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitDB from '@gravito/orbit-db';
+import orbitDB from '@gravito/atlas';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
@@ -39,7 +39,7 @@ const core = new PlanetCore();
 const client = postgres(process.env.DATABASE_URL);
 const db = drizzle(client);
 
-// 註冊 DB Orbit
+// 註冊 Atlas 模組
 orbitDB(core, {
   db,
   databaseType: 'postgresql', // 明確指定 PostgreSQL 以獲得最佳效能
@@ -147,7 +147,7 @@ const db = drizzle(client, {
   },
 });
 
-// 然後註冊到 orbit-db
+// 然後註冊到 Atlas
 orbitDB(core, { db, databaseType: 'postgresql' });
 ```
 
@@ -158,7 +158,7 @@ orbitDB(core, { db, databaseType: 'postgresql' });
 ### 定義 Model
 
 ```typescript
-import { Model } from '@gravito/orbit-db';
+import { Model } from '@gravito/atlas';
 import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
 
 // 定義表（仍使用 Drizzle，保持效能）
@@ -190,16 +190,16 @@ export class User extends Model {
 
 ### 自動註冊 Model
 
-當 `orbit-db` 初始化時，會自動初始化所有已註冊的 Model：
+當 `Atlas` 初始化時，會自動初始化所有已註冊的 Model：
 
 ```typescript
-import { ModelRegistry } from '@gravito/orbit-db';
+import { ModelRegistry } from '@gravito/atlas';
 
 // 註冊 Model（在應用啟動時）
 ModelRegistry.register(User, usersTable, 'users');
 ModelRegistry.register(Post, postsTable, 'posts');
 
-// orbit-db 會在 db:connected hook 時自動初始化所有 Model
+// Atlas 會在 db:connected hook 時自動初始化所有 Model
 orbitDB(core, { db, databaseType: 'postgresql' });
 ```
 
@@ -268,7 +268,7 @@ const json = user.toJSON();
 類似 Laravel Eloquent，可以在 Model 中定義關聯：
 
 ```typescript
-import { Model } from '@gravito/orbit-db';
+import { Model } from '@gravito/atlas';
 
 export class User extends Model {
   static table = usersTable;
@@ -731,7 +731,7 @@ console.log(user.attributes.email); // 'john@example.com' (修改器自動處理
 
 ### Model vs DBService
 
-orbit-db 提供兩種使用方式，效能相同：
+Atlas 提供兩種使用方式，效能相同：
 
 **方式 1：Model 類別（優雅，類似 Laravel）**
 ```typescript
@@ -748,7 +748,7 @@ const user = await db.findById(usersTable, 1);
 
 ## CRUD 操作
 
-orbit-db 提供兩種方式進行 CRUD 操作：
+Atlas 提供兩種方式進行 CRUD 操作：
 
 ### 方式 1：使用 Model 類別（優雅）
 
@@ -1185,7 +1185,7 @@ const result = await db.raw
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitDB from '@gravito/orbit-db';
+import orbitDB from '@gravito/atlas';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { pgTable, serial, text, integer } from 'drizzle-orm/pg-core';
@@ -1265,7 +1265,7 @@ core.liftoff();
 
 ## 總結
 
-orbit-db 提供了完整的 ORM 功能：
+Atlas 提供了完整的 ORM 功能：
 
 -  **完整的 CRUD 操作** - 所有基本資料庫操作
 -  **關聯查詢** - 支援巢狀關聯查詢

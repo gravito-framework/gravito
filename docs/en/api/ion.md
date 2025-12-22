@@ -1,27 +1,27 @@
 ---
-title: Orbit Inertia
+title: Ion
 ---
 
-# Orbit Inertia
+# Ion
 
 > Seamless integration between your Backend MVC and Frontend React/Vue components.
 
 ## Installation
 
 ```bash
-bun add @gravito/orbit-inertia @inertiajs/react
+bun add @gravito/ion @inertiajs/react
 ```
 
 ## Setup
 
-Orbit Inertia is an "Infrastructure Orbit" that mounts automatically if detected in `gravito.config.ts`.
+Ion is an "Infrastructure Gravito" that mounts automatically if detected in `gravito.config.ts`.
 
 ```typescript
 // gravito.config.ts
-import { OrbitInertia } from '@gravito/orbit-inertia';
+import { OrbitIon } from '@gravito/ion';
 
 export default defineConfig({
-    orbits: [OrbitInertia],
+    orbits: [OrbitIon],
     config: {
         inertia: {
             rootView: 'app.html',
@@ -39,7 +39,7 @@ Inject `InertiaService` into your controller via `Context`.
 
 ```typescript
 // src/controllers/HomeController.ts
-import { InertiaService } from '@gravito/orbit-inertia';
+import { InertiaService } from '@gravito/ion';
 
 export class HomeController {
     index(c: Context) {
@@ -79,7 +79,7 @@ Share data across all requests (e.g., current user, flash messages).
 
 ```typescript
 // src/middleware/HandleInertiaRequests.ts
-import { InertiaService } from '@gravito/orbit-inertia';
+import { InertiaService } from '@gravito/ion';
 
 export const handleInertiaRequests = async (c: Context, next: Next) => {
     const inertia = c.get('inertia') as InertiaService;

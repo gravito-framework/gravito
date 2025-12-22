@@ -4,7 +4,7 @@ title: Laravel 12 MVC 對齊程度
 
 # Laravel 12 MVC 對齊程度
 
-本頁用 Laravel 12 的「完整 MVC 全家桶」做參考，對照 Gravito（core + Orbits）目前已具備的能力、部分具備的能力，以及仍缺少的能力，方便規劃後續補齊方向。
+本頁用 Laravel 12 的「完整 MVC 全家桶」做參考，對照 Gravito（core + Kinetic Modules）目前已具備的能力、部分具備的能力，以及仍缺少的能力，方便規劃後續補齊方向。
 
 ## 圖例
 
@@ -19,7 +19,7 @@ title: Laravel 12 MVC 對齊程度
 | Laravel | Gravito |
 |--------|---------|
 | Service Container、Service Providers | `gravito-core`（`Container`、`ServiceProvider`） |
-| HTTP Kernel / Middleware | `gravito-core` Router + Native middleware；以及 Orbit 提供的 middleware（Auth/Session/…） |
+| HTTP Kernel / Middleware | `gravito-core` Router + Native middleware；以及 Gravito 提供的 middleware（Auth/Session/…） |
 | Exception Handler | `gravito-core` `PlanetCore` 的 error + notFound handler 與 hooks |
 | Events / Listeners | `gravito-core` `EventManager` / `Listener` |
 | Validation（FormRequest） | `@gravito/mass`（`FormRequest`） |
@@ -83,7 +83,7 @@ title: Laravel 12 MVC 對齊程度
 
 | 功能 | 狀態 | 說明 |
 |------|------|------|
-| SSR HTML entry | 已實作 | 透過 Orbit View / Core 的 app shell render |
+| SSR HTML entry | 已實作 | 透過 Prism / Core 的 app shell render |
 | SPA 橋接（Inertia） | 已實作 | `@gravito/ion` |
 | Blade 相容樣板 | 缺少 | Gravito 使用 TSX 樣板，而非 Blade |
 | 資產管線（asset pipeline）慣例 | 部分 | 已有 `templates`；慣例仍在演進 |
@@ -167,5 +167,5 @@ title: Laravel 12 MVC 對齊程度
 ### P2（生態與可觀測性）
 
 - 佇列儀表板 + job 可觀測性。
-- Tracing/metrics/health-check Orbit（OpenTelemetry-ready）。
+- Tracing/metrics/health-check Gravito（OpenTelemetry-ready）。
 - 測試 fakes（mail/notifications/queue）+ HTTP 測試工具。

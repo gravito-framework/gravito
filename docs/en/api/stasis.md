@@ -1,8 +1,8 @@
 ---
-title: Orbit Cache
+title: Cache
 ---
 
-# Orbit Cache
+# Cache
 
 > Caching utilities as a Gravito Orbit.
 
@@ -24,7 +24,7 @@ import orbitCache from '@gravito/stasis';
 
 const core = new PlanetCore();
 
-// Initialize Cache Orbit (Memory)
+// Initialize Cache Gravito (Memory)
 const cache = orbitCache(core, {
   defaultTTL: 60, // seconds
   exposeAs: 'cache' 
@@ -43,13 +43,13 @@ core.app.get('/heavy-data', async (c) => {
 
 ## Hooks
 
-- `cache:init` - Fired when the cache orbit initializes.
+- `cache:init` - Fired when the Stasis module initializes.
 - `cache:miss` - Fired when data is not found in cache.
 - `cache:hit` - Fired when data is retrieved from cache.
 
 ## Rate Limiting
 
-Orbit Cache provides a Rate Limiter driver that utilizes your cache store to count and limit actions.
+Cache provides a Rate Limiter driver that utilizes your cache store to count and limit actions.
 
 ```typescript
 import { CacheManager } from '@gravito/stasis';

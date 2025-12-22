@@ -1,8 +1,8 @@
 ---
-title: Orbit DB
+title: Atlas
 ---
 
-# Orbit DB
+# Atlas
 
 > Database integration as a Gravito Orbit with **full PostgreSQL support and performance optimizations**.
 
@@ -16,11 +16,11 @@ This page is an overview. Detailed docs are grouped by topic:
 
 | Topic | Page |
 |------|------|
-| Getting started | [Getting Started](./orbit-db/getting-started.md) |
-| DBService (query helpers) | [DBService](./orbit-db/dbservice.md) |
-| Models (Eloquent-like API) | [Models](./orbit-db/models.md) |
-| Relations | [Relations](./orbit-db/relations.md) |
-| Migrations & seeding | [Migrations & Seeding](./orbit-db/migrations-seeding.md) |
+| Getting started | [Getting Started](./atlas/getting-started.md) |
+| DBService (query helpers) | [DBService](./atlas/dbservice.md) |
+| Models (Eloquent-like API) | [Models](./atlas/models.md) |
+| Relations | [Relations](./atlas/relations.md) |
+| Migrations & seeding | [Migrations & Seeding](./atlas/migrations-seeding.md) |
 
 ## What You Get
 
@@ -38,7 +38,7 @@ bun add @gravito/atlas drizzle-orm
 
 ## Quick Start
 
-See [Getting Started](./orbit-db/getting-started.md) for full examples (PostgreSQL/SQLite, injection, config).
+See [Getting Started](./atlas/getting-started.md) for full examples (PostgreSQL/SQLite, injection, config).
 
 ```ts
 import { PlanetCore } from 'gravito-core'

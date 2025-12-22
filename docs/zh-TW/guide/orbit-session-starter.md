@@ -1,8 +1,8 @@
 ---
-title: Orbit Pulsar (Session) 新手教學
+title: Gravito Pulsar (Session) 新手教學
 ---
 
-# Orbit Pulsar (Session) 新手教學
+# Gravito Pulsar (Session) 新手教學
 
 這是一份一步一步的入門教學，從安裝到實作登入狀態、Flash 訊息與 CSRF 防護，讓你可以立刻上手。
 
@@ -23,13 +23,13 @@ bun add @gravito/pulsar
 
 2. 如果你要使用快取或 Redis 作為 Session 儲存來源，請一併安裝對應套件（新手可先跳過）。
 
-## 2. 加入 Orbit Session 設定
+## 2. 加入 Session 設定
 
-1. 在 `src/bootstrap.ts` 內加入 Orbit Session 設定（新手建議先用 `memory`）：
+1. 在 `src/bootstrap.ts` 內加入 Session 設定（新手建議先用 `memory`）：
 
 ```ts
 import { defineConfig, PlanetCore } from 'gravito-core'
-import { OrbitPulsar } from '@gravito/pulsar'
+import { GravitoPulsar } from '@gravito/pulsar'
 
 const config = defineConfig({
   config: {
@@ -45,7 +45,7 @@ const config = defineConfig({
       },
     },
   },
-  orbits: [new OrbitPulsar()],
+  orbits: [new GravitoPulsar()],
 })
 
 const core = await PlanetCore.boot(config)
@@ -117,9 +117,9 @@ export class FlashController {
 
 ## 5. CSRF Token 取得與送出
 
-Orbit Session 會自動產生 CSRF token，並在回應時寫入 `XSRF-TOKEN` cookie。你不需要每次手動重新取得 token，通常只要在前端把 cookie 的值帶回 `X-CSRF-Token` header 即可。
+Session 會自動產生 CSRF token，並在回應時寫入 `XSRF-TOKEN` cookie。你不需要每次手動重新取得 token，通常只要在前端把 cookie 的值帶回 `X-CSRF-Token` header 即可。
 
-1. **不一定需要**建立 token 端點。只要有任何回應啟動了 session，Orbit Session 就會自動寫入 `XSRF-TOKEN` cookie。以下端點僅用於除錯或想主動取得 token 的情境：
+1. **不一定需要**建立 token 端點。只要有任何回應啟動了 session，Session 就會自動寫入 `XSRF-TOKEN` cookie。以下端點僅用於除錯或想主動取得 token 的情境：
 
 ```ts
 import type { GravitoContext } from 'gravito-core'
@@ -186,4 +186,4 @@ const res = await fetch('/login', {
 
 ## 下一步
 
-- 需要更完整的參數說明與進階用法？請看 [Orbit Session API 文件](../api/orbit-session.md)。
+- 需要更完整的參數說明與進階用法？請看 [Pulsar API 文件](../api/pulsar.md)。

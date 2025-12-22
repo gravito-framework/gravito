@@ -99,13 +99,13 @@ export default {
     teamDesc:
       'Gravito 由一群相信框架應是解決方案、而非負擔的匠人打造。我們專注於填補現有技術堆棧中的空白，為開發者與 AI 代理人提供最精確的開發路徑處理。',
     architectureTitle: '天體級架構設計',
-    architectureSubtitle: '微內核與軌道系統 (Micro-Kernel & Orbits)',
+    architectureSubtitle: '微內核與動力模組 (Micro-Kernel & Kinetic Modules)',
     kernelTitle: 'PlanetCore (微內核)',
     kernelDesc:
       '極致精簡的核心，僅處理最關鍵的生命週期與 I/O 協調。它始終保持纖細，絕不干擾您的開發。',
-    orbitTitle: '功能軌道 (Orbits)',
+    orbitTitle: '動力模組',
     orbitDesc:
-      '路由、Inertia、SEO 和 郵件功能皆以「軌道」形式存在。根據需求加載模組，杜絕任何不必要的資源浪費。',
+      '路由、Ion、Luminosity 和 郵件功能皆以動力模組形式存在。根據需求加載模組，杜絕任何不必要的資源浪費。',
     scaleTitle: '無限擴展能力',
     scaleDesc: '從單一文件的微型 API 到全球級企業系統，架構會根據項目的「引力」自動適配。',
     aiTitle: 'AI 優先的開發合約',
@@ -117,16 +117,17 @@ export default {
     aiFeature2Desc: '結構化的 CLI 輸出與模版腳手架，讓 AI 代理人能高品質地代勞複雜的工程任務。',
     aiFeature3Title: '零歧義型別系統',
     aiFeature3Desc:
-      '全軌道覆蓋的 TypeScript 原生支持，提供清晰的代碼合約，徹底消除 AI 的「幻覺」問題。',
+      '全模組覆蓋的 TypeScript 原生支持，提供清晰的代碼合約，徹底消除 AI 的「幻覺」問題。',
     // 痛點解決
     painSubtitle: '解決企業級開發瓶頸',
     painTitle: '痛點驅動的進化',
     pain1Title: 'SEO 與 SPA 的終極橋樑',
-    pain1Desc: '透過 Luminosity 的整合渲染，Gravito 完美解決了單頁應用在搜尋引擎可見性上的陳年難題。',
+    pain1Desc:
+      '透過 Luminosity 的整合渲染，Gravito 完美解決了單頁應用在搜尋引擎可見性上的陳年難題。',
     pain2Title: '高密度資源調度',
     pain2Desc: '基於微內核設計，Gravito 在高併發環境下比傳統框架節省高達 60% 的資源佔用。',
     pain3Title: '破解邏輯碎片化',
-    pain3Desc: '統一的 Service Layer 與 Orbit 通信機制，確保大型專案邏輯不因演進而腐化。',
+    pain3Desc: '統一的 Service Layer 與 模組通信機制，確保大型專案邏輯不因演進而腐化。',
     pain4Title: 'AI 協同對齊',
     pain4Desc: '高度可預測的架構讓 AI 代理人能自動化維護複雜代碼庫，大幅降低人力成本。',
     // 企業級 DNA 詳解

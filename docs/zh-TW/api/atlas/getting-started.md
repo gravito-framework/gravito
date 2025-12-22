@@ -4,19 +4,19 @@ title: 快速上手
 
 # 快速上手
 
-> 安裝 Orbit DB、建立 Drizzle 實例，並在請求 Context 中注入 `DBService`。
+> 安裝 Atlas、建立 Drizzle 實例，並在請求 Context 中注入 `DBService`。
 
 ## 安裝
 
 ```bash
-bun add @gravito/orbit-db drizzle-orm
+bun add @gravito/atlas drizzle-orm
 ```
 
 ## PostgreSQL 範例
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/orbit-db'
+import orbitDB from '@gravito/atlas'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 
@@ -36,7 +36,7 @@ orbitDB(core, {
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/orbit-db'
+import orbitDB from '@gravito/atlas'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import { Database } from 'bun:sqlite'
 
@@ -57,7 +57,7 @@ core.app.get('/health/db', async (c) => {
 })
 ```
 
-## 選項（`OrbitDBOptions`）
+## 選項（`GravitoDBOptions`）
 
 - `db`：Drizzle 實例（必填）
 - `exposeAs`：注入到 Context 的 key（預設：`db`）

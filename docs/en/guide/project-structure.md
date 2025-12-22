@@ -21,7 +21,7 @@ my-gravito-app/
 │   ├── locales/         # Translation files (I18n)
 │   ├── routes/          # Route definitions (Gravito Router)
 │   ├── services/        # Service layer (Database, External APIs)
-│   ├── bootstrap.ts     # The App "Ignition" (Orbit registration)
+│   ├── bootstrap.ts     # The App "Ignition" (Gravito registration)
 │   └── index.ts         # Main Bun entry point
 ├── public/              # Static assets (images, robots.txt)
 ├── docs/                # Project documentation
@@ -31,18 +31,18 @@ my-gravito-app/
 
 ---
 
-## 🚀 The Core Philosophy: Planets & Orbits
+## 🚀 The Core Philosophy: Planets & Kinetic Modules
 
 To understand how Gravito works, you need to understand two concepts:
 
 ### 1. PlanetCore (The Micro-Kernel)
 The core of Gravito is intentionally tiny. It doesn't know how to render React, it doesn't know how to talk to a database. It only knows how to manage the **Lifecycle** and the **Service Container**.
 
-### 2. Orbits (Infrastructure)
-Functionalities are added as "Orbits" that revolve around the core. 
-- Want React? Add **Orbit Inertia**.
-- Want SEO? Add **Orbit SEO**.
-- Need a Database? Add **Orbit DB**.
+### 2. Kinetic Modules (Infrastructure)
+Functionalities are added as "Kinetic Modules" that revolve around the core. 
+- Want React? Add **Ion**.
+- Want SEO? Add **Luminosity**.
+- Need a Database? Add **Atlas**.
 
 This "Pay only for what you use" approach ensures your application remains lightning-fast regardless of its scale.
 
@@ -53,12 +53,12 @@ This "Pay only for what you use" approach ensures your application remains light
 When you run `bun dev` or `bun run src/index.ts`, the following happens:
 
 1. **Ignition (`index.ts`)**: The Bun runtime starts and calls `bootstrap()`.
-2. **Registration (`bootstrap.ts`)**: All necessary Orbits are registered. 
+2. **Registration (`bootstrap.ts`)**: All necessary Kinetic Modules are registered. 
    ```typescript
-   core.orbit(OrbitInertia)
-   core.orbit(OrbitView)
+   core.orbit(GravitoInertia)
+   core.orbit(GravitoView)
    ```
-3. **Booting**: The kernel calls `boot()` on every Orbit, preparing services like the View engine or DB connections.
+3. **Booting**: The kernel calls `boot()` on every Gravito, preparing services like the View engine or DB connections.
 4. **Liftoff**: The HTTP engine starts listening for requests.
 
 ## 🗺 Where to find code?

@@ -31,7 +31,7 @@ import type { AdapterConfig, HttpAdapter, RouteDefinition } from './types'
  * Wraps Hono's request object to implement GravitoRequest
  */
 class HonoRequestWrapper implements GravitoRequest {
-  constructor(private honoCtx: Context) { }
+  constructor(private honoCtx: Context) {}
 
   get url(): string {
     return this.honoCtx.req.url
@@ -105,11 +105,41 @@ class HonoRequestWrapper implements GravitoRequest {
  * Wraps Hono's context to implement GravitoContext
  */
 class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
-  implements GravitoContext<V> {
+  implements GravitoContext<V>
+{
   private _req: HonoRequestWrapper
 
   constructor(private honoCtx: Context) {
     this._req = new HonoRequestWrapper(honoCtx)
+  }
+
+  /**
+   * Create a proxied instance to enable object destructuring of context variables
+   * This allows: async list({ userService }: Context)
+   */
+  static create<V extends GravitoVariables = GravitoVariables>(
+    honoCtx: Context
+  ): GravitoContext<V> {
+    const instance = new HonoContextWrapper<V>(honoCtx)
+    return new Proxy(instance, {
+      get(target, prop, receiver) {
+        // 1. If property exists on the instance (method, property), return it
+        if (prop in target) {
+          const value = Reflect.get(target, prop, receiver)
+          if (typeof value === 'function') {
+            return value.bind(target) // Ensure 'this' points to instance
+          }
+          return value
+        }
+
+        // 2. If not, try to fetch from Hono context variables
+        if (typeof prop === 'string') {
+          return target.get(prop as any)
+        }
+
+        return undefined
+      },
+    }) as any
   }
 
   get req(): GravitoRequest {
@@ -216,7 +246,7 @@ class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
  */
 function toHonoHandler<V extends GravitoVariables>(handler: GravitoHandler<V>): Handler {
   return async (c: Context): Promise<Response> => {
-    const ctx = new HonoContextWrapper<V>(c) as GravitoContext<V>
+    const ctx = HonoContextWrapper.create<V>(c)
     return handler(ctx)
   }
 }
@@ -229,7 +259,7 @@ function toHonoMiddleware<V extends GravitoVariables>(
 ): MiddlewareHandler {
   return async (c: Context, next: Next): Promise<Response | undefined> => {
     // console.log('[HonoAdapter] Wrapping context')
-    const ctx = new HonoContextWrapper<V>(c) as GravitoContext<V>
+    const ctx = HonoContextWrapper.create<V>(c)
     const gravitoNext: GravitoNext = async () => {
       await next()
     }
@@ -244,7 +274,7 @@ function toHonoErrorHandler<V extends GravitoVariables>(
   handler: GravitoErrorHandler<V>
 ): (err: Error, c: Context) => Response | Promise<Response> {
   return async (err: Error, c: Context): Promise<Response> => {
-    const ctx = new HonoContextWrapper<V>(c) as GravitoContext<V>
+    const ctx = HonoContextWrapper.create<V>(c)
     return handler(err, ctx)
   }
 }
@@ -375,7 +405,7 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
 
   onNotFound(handler: GravitoNotFoundHandler<V>): void {
     this.app.notFound(async (c: Context) => {
-      const ctx = new HonoContextWrapper<V>(c) as GravitoContext<V>
+      const ctx = HonoContextWrapper.create<V>(c)
       return handler(ctx)
     })
   }
@@ -389,7 +419,7 @@ export class HonoAdapter<V extends GravitoVariables = GravitoVariables> implemen
     // In practice, this is called through the Hono routing pipeline
     throw new Error(
       'HonoAdapter.createContext() should not be called directly. ' +
-      'Use the router pipeline instead.'
+        'Use the router pipeline instead.'
     )
   }
 

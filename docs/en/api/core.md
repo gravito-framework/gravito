@@ -5,7 +5,7 @@ description: The micro-kernel architecture of the Gravito framework.
 
 # ☄️ Core Kernel (PlanetCore)
 
-The `@gravito/core` package is the heart of the Gravito ecosystem. It implements a micro-kernel architecture where functionalities are added via **Orbits** (Infrastructure) and **Satellites** (Features).
+The `@gravito/core` package is the heart of the Gravito ecosystem. It implements a micro-kernel architecture where functionalities are added via **Kinetic Modules** (Infrastructure) and **Satellites** (Features).
 
 ## 🪐 PlanetCore
 
@@ -19,9 +19,9 @@ const core = new PlanetCore()
 
 ### Lifecycle Methods
 
-- **`boot()`**: Initializes all registered orbits and prepares the service container.
+- **`boot()`**: Initializes all registered modules and prepares the service container.
 - **`liftoff(options)`**: Starts the underlying HTTP engine (Adapter).
-- **`orbit(OrbitClass)`**: Programmatically registers an infrastructure module.
+- **`orbit(ModuleClass)`**: Programmatically registers an infrastructure module.
 - **`use(SatelliteClass)`**: Programmatically registers a feature module.
 
 ## 🛠️ Adapters
@@ -37,12 +37,12 @@ core.liftoff({
 })
 ```
 
-## 🏗️ Building Orbits
+## 🏗️ Building Kinetic Modules
 
-An Orbit is a class that integrates a specific infrastructure service into the core.
+A Kinetic Module is a class that integrates a specific infrastructure service into the core.
 
 ```typescript
-export class MyOrbit {
+export class MyKineticModule {
   async register(core: PlanetCore) {
     // Register services to the container
     core.container.singleton('myService', () => new MyService())
@@ -56,7 +56,7 @@ export class MyOrbit {
 
 ## 🛰️ Building Satellites
 
-Satellites are lightweight feature modules that consume services provided by Orbits.
+Satellites are lightweight feature modules that consume services provided by Kinetic Modules.
 
 ```typescript
 export default function MyExtension(core: PlanetCore) {

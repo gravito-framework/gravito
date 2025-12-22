@@ -4,16 +4,16 @@
  * React Context for SSG configuration and detector.
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { createDetector, type FreezeConfig, type FreezeDetector } from '@gravito/freeze'
+import { createContext, type ReactNode, useContext, useMemo } from 'react'
 
 /**
  * Freeze Context value
  */
 export interface FreezeContextValue {
-    config: FreezeConfig
-    detector: FreezeDetector
-    currentLocale: string
+  config: FreezeConfig
+  detector: FreezeDetector
+  currentLocale: string
 }
 
 /**
@@ -25,12 +25,12 @@ const FreezeContext = createContext<FreezeContextValue | null>(null)
  * Props for FreezeProvider
  */
 export interface FreezeProviderProps {
-    /** SSG configuration */
-    config: FreezeConfig
-    /** Current locale (from URL or state) */
-    locale?: string
-    /** Child components */
-    children: ReactNode
+  /** SSG configuration */
+  config: FreezeConfig
+  /** Current locale (from URL or state) */
+  locale?: string
+  /** Child components */
+  children: ReactNode
 }
 
 /**
@@ -50,25 +50,19 @@ export interface FreezeProviderProps {
  * }
  * ```
  */
-export function FreezeProvider({
-    config,
-    locale,
-    children,
-}: FreezeProviderProps) {
-    const value = useMemo(() => {
-        const detector = createDetector(config)
-        const currentLocale = locale ?? detector.getCurrentLocale()
+export function FreezeProvider({ config, locale, children }: FreezeProviderProps) {
+  const value = useMemo(() => {
+    const detector = createDetector(config)
+    const currentLocale = locale ?? detector.getCurrentLocale()
 
-        return {
-            config,
-            detector,
-            currentLocale,
-        }
-    }, [config, locale])
+    return {
+      config,
+      detector,
+      currentLocale,
+    }
+  }, [config, locale])
 
-    return (
-        <FreezeContext.Provider value={value}>{children}</FreezeContext.Provider>
-    )
+  return <FreezeContext.Provider value={value}>{children}</FreezeContext.Provider>
 }
 
 /**
@@ -76,9 +70,9 @@ export function FreezeProvider({
  * Throws if used outside FreezeProvider
  */
 export function useFreezeContext(): FreezeContextValue {
-    const context = useContext(FreezeContext)
-    if (!context) {
-        throw new Error('useFreeze must be used within a FreezeProvider')
-    }
-    return context
+  const context = useContext(FreezeContext)
+  if (!context) {
+    throw new Error('useFreeze must be used within a FreezeProvider')
+  }
+  return context
 }

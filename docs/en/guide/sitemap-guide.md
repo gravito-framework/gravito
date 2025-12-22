@@ -1,6 +1,6 @@
 # 🗺️ Complete Sitemap Guide
 
-A comprehensive guide to using Orbit Sitemap for generating XML sitemaps, from basic usage to enterprise-level features supporting millions of URLs.
+A comprehensive guide to using Sitemap for generating XML sitemaps, from basic usage to enterprise-level features supporting millions of URLs.
 
 ---
 
@@ -27,9 +27,9 @@ bun add @gravito/constellation
 ### Minimal Example
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/constellation'
+import { LuminositySitemap, routeScanner } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [
@@ -51,9 +51,9 @@ That's it! Your sitemap is generated at `./dist/sitemap.xml`.
 Serve sitemap directly from your application:
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/constellation'
+import { LuminositySitemap, routeScanner } from '@gravito/constellation'
 
-OrbitSitemap.dynamic({
+LuminositySitemap.dynamic({
   baseUrl: 'https://example.com',
   providers: [
     // Automatically scan routes
@@ -86,9 +86,9 @@ OrbitSitemap.dynamic({
 Generate sitemap files during build process:
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/constellation'
+import { LuminositySitemap, routeScanner } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   filename: 'sitemap.xml',
@@ -229,9 +229,9 @@ bun add @aws-sdk/client-s3
 ```
 
 ```typescript
-import { OrbitSitemap, S3SitemapStorage } from '@gravito/constellation'
+import { LuminositySitemap, S3SitemapStorage } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   storage: new S3SitemapStorage({
     bucket: 'my-sitemap-bucket',
@@ -264,9 +264,9 @@ bun add @google-cloud/storage
 ```
 
 ```typescript
-import { OrbitSitemap, GCPSitemapStorage } from '@gravito/constellation'
+import { LuminositySitemap, GCPSitemapStorage } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   storage: new GCPSitemapStorage({
     bucket: 'my-sitemap-bucket',
@@ -294,7 +294,7 @@ Shadow processing ensures safe deployments by generating sitemaps to temporary l
 Generate to temporary location, then atomically swap:
 
 ```typescript
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   shadow: {
     enabled: true,
@@ -313,7 +313,7 @@ const sitemap = OrbitSitemap.static({
 Keep old versions, switch when ready:
 
 ```typescript
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   shadow: {
     enabled: true,
@@ -338,9 +338,9 @@ await storage.switchVersion('sitemap.xml', 'version-id')
 Generate sitemaps asynchronously without blocking:
 
 ```typescript
-import { OrbitSitemap, MemoryProgressStorage } from '@gravito/constellation'
+import { LuminositySitemap, MemoryProgressStorage } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [...],
@@ -375,12 +375,12 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 
 **Protecting the Endpoints**:
 
-##### Method 1: Using Orbit Auth (Recommended)
+##### Method 1: Using Sentinel (Recommended)
 
-Use `@gravito/orbit-auth` for authentication and authorization:
+Use `@gravito/sentinel` for authentication and authorization:
 
 ```typescript
-import { auth, can } from '@gravito/orbit-auth'
+import { auth, can } from '@gravito/sentinel'
 
 // Define authorization ability (in Gate)
 core.get('gate').define('manage-sitemap', (user) => {
@@ -479,7 +479,7 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 Combine multiple protection methods for enhanced security:
 
 ```typescript
-import { auth } from '@gravito/orbit-auth'
+import { auth } from '@gravito/sentinel'
 import type { GravitoContext, Next } from 'gravito-core'
 
 // 1. Check authentication
@@ -531,7 +531,7 @@ import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   progressStorage: new RedisProgressStorage({
     client: redis,
@@ -546,7 +546,7 @@ const sitemap = OrbitSitemap.static({
 Automatically splits large sitemaps into multiple files:
 
 ```typescript
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   maxEntriesPerFile: 50000 // Default: 50000 (Google's limit)
 })
@@ -567,9 +567,9 @@ Only update changed URLs instead of regenerating the entire sitemap:
 ### Setup
 
 ```typescript
-import { OrbitSitemap, MemoryChangeTracker } from '@gravito/constellation'
+import { LuminositySitemap, MemoryChangeTracker } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [...],
@@ -641,7 +641,7 @@ import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   incremental: {
     enabled: true,
@@ -664,14 +664,14 @@ Automatically handle URL redirects in your sitemap:
 
 ```typescript
 import { 
-  OrbitSitemap, 
+  LuminositySitemap, 
   MemoryRedirectManager,
   RedirectDetector 
 } from '@gravito/constellation'
 
 const redirectManager = new MemoryRedirectManager()
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [...],
@@ -969,7 +969,7 @@ Here's a complete enterprise setup:
 
 ```typescript
 import { 
-  OrbitSitemap,
+  LuminositySitemap,
   S3SitemapStorage,
   RedisChangeTracker,
   RedisRedirectManager,
@@ -1004,7 +1004,7 @@ for (const [from, rule] of redirects) {
 }
 
 // Create sitemap with all enterprise features
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   storage: new S3SitemapStorage({
     bucket: 'my-sitemap-bucket',

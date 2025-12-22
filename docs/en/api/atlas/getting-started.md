@@ -4,19 +4,19 @@ title: Getting Started
 
 # Getting Started
 
-> Install Orbit DB, create a Drizzle instance, and inject `DBService` into the request context.
+> Install Atlas, create a Drizzle instance, and inject `DBService` into the request context.
 
 ## Installation
 
 ```bash
-bun add @gravito/orbit-db drizzle-orm
+bun add @gravito/atlas drizzle-orm
 ```
 
 ## PostgreSQL Example
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/orbit-db'
+import orbitDB from '@gravito/atlas'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 
@@ -36,7 +36,7 @@ orbitDB(core, {
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/orbit-db'
+import orbitDB from '@gravito/atlas'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import { Database } from 'bun:sqlite'
 
@@ -57,7 +57,7 @@ core.app.get('/health/db', async (c) => {
 })
 ```
 
-## Options (`OrbitDBOptions`)
+## Options (`GravitoDBOptions`)
 
 - `db`: Drizzle instance (required)
 - `exposeAs`: context key (default: `db`)

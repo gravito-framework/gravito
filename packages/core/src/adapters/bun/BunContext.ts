@@ -35,6 +35,37 @@ export class BunContext<V extends GravitoVariables = GravitoVariables>
     this.native = { request, env, executionCtx }
   }
 
+  /**
+   * Create a proxied instance to enable object destructuring of context variables
+   * This allows: async list({ userService }: Context)
+   */
+  static create<V extends GravitoVariables = GravitoVariables>(
+    request: Request,
+    env: Record<string, unknown> = {},
+    executionCtx?: ExecutionContext
+  ): GravitoContext<V> {
+    const instance = new BunContext<V>(request, env, executionCtx)
+    return new Proxy(instance, {
+      get(target, prop, receiver) {
+        // 1. If property exists on the instance (method, property), return it
+        if (prop in target) {
+          const value = Reflect.get(target, prop, receiver)
+          if (typeof value === 'function') {
+            return value.bind(target) // Ensure 'this' points to instance
+          }
+          return value
+        }
+
+        // 2. If not, try to fetch from internal variable map
+        if (typeof prop === 'string') {
+          return target.get(prop as any)
+        }
+
+        return undefined
+      },
+    }) as any
+  }
+
   // Response Builders
   json<T>(data: T, status: ContentfulStatusCode = 200): Response {
     this.status(status)

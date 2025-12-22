@@ -25,9 +25,9 @@ Gravito 的核心設計理念是「企業級 DNA」。除了簡單的腳本開�
 
 ---
 
-## 萬向 Orbit Queue (Universal Queue)
+## 萬向 Kinetic Queue (Universal Queue)
 
-Universal Orbit Queue 是 Gravito 對基礎設施無關的後台處理方案。
+Universal Kinetic Queue 是 Gravito 對基礎設施無關的後台處理方案。
 
 ### 多驅動支援 (Multi-Driver)
 Gravito 旨在開箱即用地支援所有主流訊息佇列驅動：
@@ -41,7 +41,7 @@ Gravito 旨在開箱即用地支援所有主流訊息佇列驅動：
 
 ```typescript
 // 將任務推入佇列
-import { Queue } from '@gravito/orbit-queue'
+import { Queue } from '@gravito/stream'
 
 await Queue.push(new SendWelcomeEmail(user))
 ```

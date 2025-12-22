@@ -68,7 +68,7 @@ bunx turbo build
 bunx turbo build --filter=...[origin/main]
 
 # 構建特定套件及其依賴
-bunx turbo build --filter=@gravito/orbit-inertia...
+bunx turbo build --filter=@gravito/ion...
 
 # 測試所有套件
 bunx turbo test

@@ -196,7 +196,7 @@ bun run version:update
 安裝時可以指定 tag：
 ```bash
 npm install gravito-core@beta
-npm install @gravito/orbit-auth@alpha
+npm install @gravito/sentinel@alpha
 ```
 
 ### 權限錯誤
@@ -238,7 +238,7 @@ npm install @gravito/orbit-auth@alpha
 1. **驗證發布**：
    ```bash
    npm view gravito-core
-   npm view @gravito/orbit-auth
+   npm view @gravito/sentinel
    ```
 
 2. **更新文檔**：

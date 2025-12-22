@@ -5,7 +5,7 @@ description: Automated image optimization for high-performance Gravito applicati
 
 # 🖼️ Image Optimization
 
-Gravito includes a powerful **Image Optimization** module (part of `Orbit-View`) that ensures your application meets the highest performance standards, inspired by the best practices of Next.js but with **Zero Client-side Runtime**.
+Gravito includes a powerful **Image Optimization** module (part of `Gravito-View`) that ensures your application meets the highest performance standards, inspired by the best practices of Next.js but with **Zero Client-side Runtime**.
 
 ---
 
@@ -26,7 +26,7 @@ Unlike standard `<img>` tags, the Gravito `Image` component automatically handle
 If you are using React with Inertia, simply import the `Image` component.
 
 ```tsx
-import { Image } from '@gravito/orbit-view'
+import { Image } from '@gravito/prism'
 
 export default function Hero() {
   return (
@@ -70,7 +70,7 @@ For Vue 3 applications, import the component from the specialized subpath.
 
 ```vue
 <script setup>
-import { Image } from '@gravito/orbit-view/vue'
+import { Image } from '@gravito/prism/vue'
 </script>
 
 <template>

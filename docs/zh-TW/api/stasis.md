@@ -1,8 +1,8 @@
 ---
-title: Orbit Cache
+title: Stasis
 ---
 
-# Orbit Cache
+# Stasis
 
 > 以 Gravito Orbit 形式提供快取功能。
 
@@ -24,7 +24,7 @@ import orbitCache from '@gravito/stasis';
 
 const core = new PlanetCore();
 
-// 初始化 Cache Orbit
+// 初始化 Cache 動力模組
 const cache = orbitCache(core, {
   defaultTTL: 60, // 預設 TTL (秒)
   exposeAs: 'cache' // 可透過 c.get('cache') 存取
@@ -43,13 +43,13 @@ core.app.get('/heavy-data', async (c) => {
 
 ## Hooks
 
-- `cache:init` - 當 cache orbit 初始化時觸發。
+- `cache:init` - 當 Stasis module 初始化時觸發。
 - `cache:miss` - 當資料在快取中未找到時觸發。
 - `cache:hit` - 當資料從快取中讀取時觸發。
 
 ## 流量限制 (Rate Limiting)
 
-Orbit Cache 提供了一個 Rate Limiter 驅動器，利用您的快取儲存空間來計數並限制操作。
+Cache 提供了一個 Rate Limiter 驅動器，利用您的快取儲存空間來計數並限制操作。
 
 ```typescript
 import { CacheManager } from '@gravito/stasis';

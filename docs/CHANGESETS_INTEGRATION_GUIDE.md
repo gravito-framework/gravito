@@ -61,7 +61,7 @@ bunx changeset
 **範例**：
 ```
 🦋  Which packages would you like to include?
- · gravito-core, @gravito/orbit-inertia
+ · gravito-core, @gravito/ion
 
 🦋  Which packages should have a major bump?
  · gravito-core
@@ -179,7 +179,7 @@ jobs:
 2. **創建 Changeset**：
    ```bash
    bunx changeset
-   # 選擇 @gravito/orbit-inertia
+   # 選擇 @gravito/ion
    # 選擇 minor (新功能)
    # 寫說明：Add support for Vue 3
    ```
@@ -202,8 +202,8 @@ jobs:
 
 每個套件獨立版本：
 - `gravito-core`: 1.0.0
-- `@gravito/orbit-inertia`: 1.1.0
-- `@gravito/orbit-db`: 1.0.0
+- `@gravito/ion`: 1.1.0
+- `@gravito/atlas`: 1.0.0
 
 **優點**：
 - 使用者只更新需要的套件
@@ -213,8 +213,8 @@ jobs:
 
 所有套件統一版本：
 - `gravito-core`: 1.0.0
-- `@gravito/orbit-inertia`: 1.0.0
-- `@gravito/orbit-db`: 1.0.0
+- `@gravito/ion`: 1.0.0
+- `@gravito/atlas`: 1.0.0
 
 **優點**：
 - 版本管理簡單
@@ -241,7 +241,7 @@ jobs:
 
 3. **Git Tags**：
    - Changesets 會為每個套件創建 tag
-   - 格式：`@gravito/orbit-inertia@1.1.0`
+   - 格式：`@gravito/ion@1.1.0`
 
 ## 🔍 進階配置
 

@@ -5,7 +5,7 @@ description: Gravito 框架的微核心 (Micro-kernel) 架構。
 
 # Core 核心 (PlanetCore)
 
-`@gravito/core` 是 Gravito 生態系統的心臟。它實現了一種微核心架構，透過 **Orbits**（基礎設施）與 **Satellites**（功能外掛）來擴展框架能力。
+`@gravito/core` 是 Gravito 生態系統的心臟。它實現了一種微核心架構，透過 **Kinetic Modules**（基礎設施）與 **Satellites**（功能外掛）來擴展框架能力。
 
 ## PlanetCore
 
@@ -19,9 +19,9 @@ const core = new PlanetCore()
 
 ### 生命週期方法
 
-- **`boot()`**：初始化所有已註冊的 Orbits 並準備服務容器 (Service Container)。
+- **`boot()`**：初始化所有已註冊的 Kinetic Modules 並準備服務容器 (Service Container)。
 - **`liftoff(options)`**：啟動底層 HTTP 引擎（適配器）。
-- **`orbit(OrbitClass)`**：以程式化方式註冊基礎設施模組。
+- **`orbit(ModuleClass)`**：以程式化方式註冊基礎設施模組。
 - **`use(SatelliteClass)`**：以程式化方式註冊功能外掛模組。
 
 ## 適配器 (Adapters)
@@ -37,12 +37,12 @@ core.liftoff({
 })
 ```
 
-## 建構 Orbits
+## 建構 Kinetic Modules
 
-Orbit 是一個將特定基礎設施服務整合到核心中的類別。
+Kinetic Module 是一個將特定基礎設施服務整合到核心中的類別。
 
 ```typescript
-export class MyOrbit {
+export class MyKineticModule {
   async register(core: PlanetCore) {
     // 將服務註冊到容器中
     core.container.singleton('myService', () => new MyService())
@@ -56,7 +56,7 @@ export class MyOrbit {
 
 ## 建構 Satellites
 
-Satellites 是輕量級的功能模組，用於消費 Orbits 提供的服務。
+Satellites 是輕量級的功能模組，用於消費 Kinetic Modules 提供的服務。
 
 ```typescript
 export default function MyExtension(core: PlanetCore) {

@@ -4,7 +4,7 @@ title: Relations
 
 # Relations
 
-> Orbit DB 的關聯查詢基於 Drizzle relations 與 `db.raw.query.*`。
+> Atlas 的關聯查詢基於 Drizzle relations 與 `db.raw.query.*`。
 
 ## Drizzle Relations（`find*With` 的必要條件）
 
@@ -48,5 +48,5 @@ const user = await db.findByIdWith('users', 1, { posts: true })
 
 ## 多態關聯
 
-Orbit DB 提供 `morphTo` / `morphMany` / `morphOne`。其中 `morphTo` 建議提供 `morphMap`，
+Atlas 提供 `morphTo` / `morphMany` / `morphOne`。其中 `morphTo` 建議提供 `morphMap`，
 用於將 type 值對應到相應的 `Model` 類別。

@@ -32,7 +32,7 @@ title: Gravito 核心概念
 
 - **單一奇點 (Singularity)**：所有的請求最終都優化為單一的路徑跳轉，消弭框架開銷。
 - **核心引力 (Gravity)**：Kernel 僅負責維持系統的運作與協調，而不干涉具體業務。
-- **軌道擴展 (Orbits)**：基礎設施模組以軌道方式繞核心運作，完全解耦。
+- **動力模組 (Kinetic Modules)**：基礎設施模組以插件化方式擴展核心功能，完全解耦。
 
 ### 四大核心價值
 
@@ -57,31 +57,31 @@ title: Gravito 核心概念
 import { PlanetCore } from 'gravito-core'
 
 const core = await PlanetCore.boot({
-  orbits: [OrbitInertia, OrbitSEO], // 僅加載 1.0 穩定模組
+  modules: [Ion, Luminosity], // 僅加載 1.0 穩定模組
 })
 
 export default core.liftoff() // 點火升空
 ```
 
-### 2. Orbits (1.0 核心模組)
+### 2. 動力模組 (1.0 Kinetic Modules)
 
-目前 1.0 版本提供以下穩定軌道模組：
+目前 1.0 版本提供以下穩定動力模組：
 
-- **`@gravito/ion`** (原 Orbit Inertia)：全棧橋接器，實現「後端 MVC，前端 SPA」的極致開發體驗。
-- **`@gravito/luminosity`** (原 Orbit SEO)：智慧型 SmartMap 引擎與 Meta 標籤自動化管理。
-- **`@gravito/atlas`** (原 Orbit DB)：標準資料庫軌道，提供流暢的 Query Builder 與 ORM 體驗。
-- **`@gravito/sentinel`** (原 Orbit Auth)：提供安全穩固的身份驗證與授權系統。
-- **`@gravito/prism`** (原 Orbit View)：極致影像優化的樣板渲染引擎。
-- **`@gravito/cosmos`** (原 Orbit I18n)：企業級國際化解決方案。
+- **`@gravito/ion`**：全棧橋接器，實現「後端 MVC，前端 SPA」的極致開發體驗。
+- **`@gravito/luminosity`**：智慧型 SmartMap 引擎與 Meta 標籤自動化管理。
+- **`@gravito/atlas`**：標準資料庫模組，提供流暢的 Query Builder 與 ORM 體驗。
+- **`@gravito/sentinel`**：提供安全穩固的身份驗證與授權系統。
+- **`@gravito/prism`**：極致影像優化的樣板渲染引擎。
+- **`@gravito/cosmos`**：企業級國際化解決方案。
 - **`@gravito/constellation`**：自動化 Sitemap 與搜尋引擎優化工具。
-- **`@gravito/pulse`** (原 Orbit CLI)：自動化骨架生成與生產力工具。
+- **`@gravito/pulse`**：自動化骨架生成與生產力工具。
 
 > **Roadmap (v1.5 預計發佈)**: 
-> `Orbit Mail` (@gravito/signal), `Orbit Queue` (@gravito/kinetic), `Orbit Scheduler` (@gravito/chronon).
+> `Mail` (@gravito/signal), `Queue` (@gravito/kinetic), `Scheduler` (@gravito/chronon).
 
 ### 3. Satellites (業務衛星)
 
-這是你的領地。所有 Controller、Service 與業務邏輯都封裝在 Satellites 中，掛載於核心或軌道模組之上。
+這是你的領地。所有 Controller、Service 與業務邏輯都封裝在 Satellites 中，掛載於核心或專屬動力模組之上。
 
 ---
 

@@ -1,9 +1,9 @@
 ---
-title: Orbit SEO
+title: Luminosity
 description: API reference for Gravito's SEO and Sitemap integration.
 ---
 
-# 🛰️ Orbit SEO
+# 🛰️ Luminosity
 
 The `@gravito/luminosity-adapter-hono` (or simply `OrbitLuminosity`) provides a seamless integration between Gravito's core and the SEO engine.
 
@@ -15,7 +15,7 @@ bun add @gravito/luminosity @gravito/luminosity-adapter-hono
 
 ## Basic Usage
 
-The SEO orbit registers a middleware that handles `/sitemap.xml` and `/robots.txt` automatically.
+The Luminosity module registers a middleware that handles `/sitemap.xml` and `/robots.txt` automatically.
 
 ```typescript
 import { gravitoSeo } from '@gravito/luminosity-adapter-hono'
@@ -37,7 +37,7 @@ app.use('*', gravitoSeo(seoConfig))
 
 ## Dynamic Resolvers
 
-Resolvers are the most powerful part of Orbit SEO. They allow you to fetch URLs from any source (DB, FS, etc.)
+Resolvers are the most powerful part of Luminosity. They allow you to fetch URLs from any source (DB, FS, etc.)
 
 ```typescript
 const postsResolver = {

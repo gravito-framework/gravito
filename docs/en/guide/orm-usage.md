@@ -4,7 +4,7 @@ title: ORM Usage Guide
 
 # ORM Usage Guide
 
-> Complete guide for using orbit-db ORM, covering all features and use cases.
+> Complete guide for using Atlas ORM, covering all features and use cases.
 
 ## Table of Contents
 
@@ -24,14 +24,14 @@ title: ORM Usage Guide
 ### 1. Install Dependencies
 
 ```bash
-bun add @gravito/orbit-db drizzle-orm postgres
+bun add @gravito/atlas drizzle-orm postgres
 ```
 
 ### 2. Initialize Database Connection
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitDB from '@gravito/orbit-db';
+import orbitDB from '@gravito/atlas';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
@@ -39,7 +39,7 @@ const core = new PlanetCore();
 const client = postgres(process.env.DATABASE_URL);
 const db = drizzle(client);
 
-// Register DB Orbit
+// Register Atlas 模組
 orbitDB(core, {
   db,
   databaseType: 'postgresql', // Explicitly specify PostgreSQL for optimal performance
@@ -147,7 +147,7 @@ const db = drizzle(client, {
   },
 });
 
-// Then register to orbit-db
+// Then register to Atlas
 orbitDB(core, { db, databaseType: 'postgresql' });
 ```
 
@@ -158,7 +158,7 @@ orbitDB(core, { db, databaseType: 'postgresql' });
 ### Defining Models
 
 ```typescript
-import { Model } from '@gravito/orbit-db';
+import { Model } from '@gravito/atlas';
 import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
 
 // Define table (still using Drizzle for performance)
@@ -190,16 +190,16 @@ export class User extends Model {
 
 ### Auto-Registering Models
 
-When `orbit-db` initializes, it automatically initializes all registered Models:
+When `Atlas` initializes, it automatically initializes all registered Models:
 
 ```typescript
-import { ModelRegistry } from '@gravito/orbit-db';
+import { ModelRegistry } from '@gravito/atlas';
 
 // Register Models (at application startup)
 ModelRegistry.register(User, usersTable, 'users');
 ModelRegistry.register(Post, postsTable, 'posts');
 
-// orbit-db will automatically initialize all Models on db:connected hook
+// Atlas will automatically initialize all Models on db:connected hook
 orbitDB(core, { db, databaseType: 'postgresql' });
 ```
 
@@ -268,7 +268,7 @@ const json = user.toJSON();
 Similar to Laravel Eloquent, you can define relations in Models:
 
 ```typescript
-import { Model } from '@gravito/orbit-db';
+import { Model } from '@gravito/atlas';
 
 export class User extends Model {
   static table = usersTable;
@@ -1065,7 +1065,7 @@ Mutator naming: `set{AttributeName}Attribute`
 
 ### Model vs DBService
 
-orbit-db provides two usage patterns with the same performance:
+Atlas provides two usage patterns with the same performance:
 
 **Pattern 1: Model Classes (Elegant, Laravel-like)**
 ```typescript
@@ -1082,7 +1082,7 @@ Both patterns use the same Drizzle query builder underneath. Choose the style th
 
 ## CRUD Operations
 
-orbit-db provides two ways to perform CRUD operations:
+Atlas provides two ways to perform CRUD operations:
 
 ### Pattern 1: Using Model Classes (Elegant)
 
@@ -1536,7 +1536,7 @@ const result = await db.raw
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import orbitDB from '@gravito/orbit-db';
+import orbitDB from '@gravito/atlas';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { pgTable, serial, text, integer } from 'drizzle-orm/pg-core';
@@ -1616,7 +1616,7 @@ core.liftoff();
 
 ## Summary
 
-orbit-db provides complete ORM functionality, inspired by Laravel Eloquent while maintaining Drizzle ORM performance:
+Atlas provides complete ORM functionality, inspired by Laravel Eloquent while maintaining Drizzle ORM performance:
 
 - ✅ **Complete CRUD Operations** - All basic database operations
 - ✅ **Relation Queries** - Support for nested relation queries (hasMany, belongsTo, hasOne, belongsToMany)

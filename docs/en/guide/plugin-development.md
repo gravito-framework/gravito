@@ -4,7 +4,7 @@ title: Plugin Development Guide
 
 # Plugin Development Guide
 
-> How to develop Satellites and Orbits for the Gravito Galaxy Architecture
+> How to develop Satellites and Kinetic Modules for the Gravito Galaxy Architecture
 
 Gravito is a micro-kernel framework, and its power comes from the ecosystem. This guide will help you develop your own extensions.
 
@@ -15,8 +15,8 @@ Gravito is a micro-kernel framework, and its power comes from the ecosystem. Thi
 | Term | Concept | Purpose | Example |
 |------|---------|---------|---------|
 | **PlanetCore** | Micro-kernel | Lifecycle, Hooks, Config | `gravito-core` |
-| **Orbit** | Infrastructure Module | Database, Auth, Storage | `@gravito/atlas` |
-| **Satellite** | Business Logic Plugin | Uses Orbit features | `user-plugin`, `blog-plugin` |
+| **Gravito** | Infrastructure Module | Database, Auth, Storage | `@gravito/atlas` |
+| **Satellite** | Business Logic Plugin | Uses Gravito features | `user-plugin`, `blog-plugin` |
 
 ---
 
@@ -48,9 +48,9 @@ export default function mySatellite(core: PlanetCore) {
 }
 ```
 
-### Interacting with Orbits
+### Interacting with Kinetic Modules
 
-Satellites often need access to database or authentication. These are provided by Orbits and injected into the Request Context:
+Satellites often need access to database or authentication. These are provided by Kinetic Modules and injected into the Request Context:
 
 ```typescript
 // user-satellite.ts
@@ -58,7 +58,7 @@ import { PlanetCore } from 'gravito-core'
 
 export default function userSatellite(core: PlanetCore) {
   router.post('/users', async (ctx) => {
-    // Get Orbit services from Context
+    // Get Gravito services from Context
     const db = ctx.get('db')     // Provided by @gravito/atlas
     const auth = ctx.get('auth') // Provided by @gravito/sentinel
 
@@ -73,9 +73,9 @@ export default function userSatellite(core: PlanetCore) {
 
 ---
 
-## Developing Orbits (Infrastructure Modules)
+## Developing Kinetic Modules (Infrastructure Modules)
 
-Orbits are lower-level extensions that provide infrastructure services. In v0.3+, Orbits should implement the `GravitoOrbit` interface for IoC support.
+Kinetic Modules are lower-level extensions that provide infrastructure services. In v0.3+, Kinetic Modules should implement the `GravitoOrbit` interface for IoC support.
 
 ### Design Principles
 
@@ -93,23 +93,23 @@ export interface GravitoOrbit {
 }
 ```
 
-### Class-Based Orbit Example
+### Class-Based Gravito Example
 
 ```typescript
 // orbit-custom.ts
 import { PlanetCore, GravitoOrbit } from 'gravito-core'
 import type { GravitoContext as Context, Next } from 'gravito-core'
 
-export interface CustomOrbitConfig {
+export interface CustomGravitoConfig {
   apiKey: string
   timeout?: number
 }
 
-export class OrbitCustom implements GravitoOrbit {
-  constructor(private options?: CustomOrbitConfig) {}
+export class GravitoCustom implements GravitoOrbit {
+  constructor(private options?: CustomGravitoConfig) {}
 
   install(core: PlanetCore): void {
-    const config = this.options ?? core.config.get<CustomOrbitConfig>('custom')
+    const config = this.options ?? core.config.get<CustomGravitoConfig>('custom')
     const service = new CustomService(config)
 
     core.hooks.doAction('custom:init', service)
@@ -119,13 +119,13 @@ export class OrbitCustom implements GravitoOrbit {
       await next()
     })
 
-    core.logger.info('OrbitCustom installed')
+    core.logger.info('GravitoCustom installed')
   }
 }
 
 // Export for functional API compatibility
-export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
-  const orbit = new OrbitCustom(config)
+export function orbitCustom(core: PlanetCore, config: CustomGravitoConfig) {
+  const orbit = new GravitoCustom(config)
   orbit.install(core)
 }
 ```
@@ -139,7 +139,7 @@ export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
 ```typescript
 // gravito.config.ts
 import { PlanetCore, defineConfig } from 'gravito-core'
-import { OrbitCustom } from './orbit-custom'
+import { GravitoCustom } from './orbit-custom'
 
 const config = defineConfig({
   config: {
@@ -148,7 +148,7 @@ const config = defineConfig({
       timeout: 5000
     }
   },
-  orbits: [OrbitCustom] // Will auto-resolve config
+  orbits: [GravitoCustom] // Will auto-resolve config
 })
 
 const core = await PlanetCore.boot(config)
@@ -157,7 +157,7 @@ export default core.liftoff()
 
 ### Database Integration
 
-If your Orbit requires database tables:
+If your Gravito requires database tables:
 
 1. **Do not run migrations automatically** in `install()`.
 2. Provide standard Drizzle migration files in your package.
@@ -173,7 +173,7 @@ If your Orbit requires database tables:
 |------|------------|---------|
 | **Hook names** | Use `:` separator | `auth:login`, `db:connect` |
 | **Context keys** | camelCase | `db`, `auth`, `storage` |
-| **Orbit classes** | `Orbit` prefix | `OrbitDB`, `OrbitAuth` |
+| **Gravito classes** | `Gravito` prefix | `GravitoDB`, `GravitoAuth` |
 
 ### Type Safety
 
@@ -196,13 +196,13 @@ declare module 'gravito-core' {
 // orbit-custom.test.ts
 import { describe, it, expect } from 'bun:test'
 import { PlanetCore } from 'gravito-core'
-import { OrbitCustom } from './orbit-custom'
+import { GravitoCustom } from './orbit-custom'
 
-describe('OrbitCustom', () => {
+describe('GravitoCustom', () => {
   it('should initialize with config', async () => {
     const core = await PlanetCore.boot({
       config: { custom: { apiKey: 'test-key' } },
-      orbits: [OrbitCustom],
+      orbits: [GravitoCustom],
     })
 
     // Verify service is available
@@ -213,13 +213,13 @@ describe('OrbitCustom', () => {
 
 ---
 
-## Publishing an Orbit
+## Publishing an Gravito
 
 1. **Repository structure:**
    ```
    orbit-custom/
    ├── src/
-   │   ├── index.ts      # Export OrbitCustom class
+   │   ├── index.ts      # Export GravitoCustom class
    │   └── types.ts      # TypeScript declarations
    ├── package.json
    ├── tsconfig.json
@@ -240,7 +240,7 @@ describe('OrbitCustom', () => {
    ```
 
 3. **Document your Hooks:**
-   - List all hooks your Orbit triggers
+   - List all hooks your Gravito triggers
    - Explain arguments and expected return values
 
 ---

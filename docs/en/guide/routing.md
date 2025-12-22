@@ -67,8 +67,21 @@ export class UserController {
 }
 ```
 
+### ⚡️ Modern Destructuring (Artisan Style)
+
+For maximum productivity, Gravito supports direct object destructuring from the `Context`. This is powered by our built-in Proxy-based injection system, allowing you to bypass the `get()` calls for a cleaner functional style:
+
+```typescript
+// Even cleaner!
+async list({ userService, inertia }: GravitoContext) {
+  const users = await userService.all()
+  return inertia.render('Users/Index', { users })
+}
+```
+```
+
 ### Accessing Services
-The `GravitoContext` object is your gateway to the Gravito ecosystem. Use `ctx.get()` to access Orbits and services:
+The `GravitoContext` object is your gateway to the Gravito ecosystem. Use `ctx.get()` to access Kinetic Modules and services:
 - `ctx.get('inertia')`: The Inertia bridge.
 - `ctx.get('view')`: The Template engine.
 - `ctx.get('seo')`: The SEO metadata manager.

@@ -89,7 +89,7 @@ npm publish --access public --otp=<你的OTP代碼>
 3. **發布後驗證**：
    ```bash
    npm view gravito-core@beta
-   npm view @gravito/orbit-auth@alpha
+   npm view @gravito/sentinel@alpha
    ```
 
 ## 📋 發布檢查清單
@@ -127,7 +127,7 @@ npm publish --access public --otp=<你的OTP代碼>
 npm install gravito-core@beta
 
 # 安裝 alpha 版本
-npm install @gravito/orbit-auth@alpha
+npm install @gravito/sentinel@alpha
 ```
 
 ## 🐛 遇到問題？

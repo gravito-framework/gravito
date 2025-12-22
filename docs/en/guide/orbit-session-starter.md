@@ -1,8 +1,8 @@
 ---
-title: Orbit Pulsar (Session) Starter Guide
+title: Gravito Pulsar (Session) Starter Guide
 ---
 
-# Orbit Pulsar (Session) Starter Guide
+# Gravito Pulsar (Session) Starter Guide
 
 This is a step-by-step beginner tutorial that takes you from installation to login state, flash messages, and CSRF protection.
 
@@ -23,13 +23,13 @@ bun add @gravito/pulsar
 
 2. If you plan to use cache or Redis for storage, install the matching package (you can skip this for now).
 
-## 2. Add Orbit Session Configuration
+## 2. Add Session Configuration
 
-1. In `src/bootstrap.ts`, add the Orbit Session config (beginners can start with `memory`):
+1. In `src/bootstrap.ts`, add the Session config (beginners can start with `memory`):
 
 ```ts
 import { defineConfig, PlanetCore } from 'gravito-core'
-import { OrbitPulsar } from '@gravito/pulsar'
+import { GravitoPulsar } from '@gravito/pulsar'
 
 const config = defineConfig({
   config: {
@@ -45,7 +45,7 @@ const config = defineConfig({
       },
     },
   },
-  orbits: [new OrbitPulsar()],
+  orbits: [new GravitoPulsar()],
 })
 
 const core = await PlanetCore.boot(config)
@@ -117,9 +117,9 @@ export class FlashController {
 
 ## 5. Get and Send CSRF Tokens
 
-Orbit Session generates the CSRF token automatically and writes it to the `XSRF-TOKEN` cookie on the response. You do not need to fetch a new token for every request. In most cases, just read the cookie and send it back in the `X-CSRF-Token` header.
+Session generates the CSRF token automatically and writes it to the `XSRF-TOKEN` cookie on the response. You do not need to fetch a new token for every request. In most cases, just read the cookie and send it back in the `X-CSRF-Token` header.
 
-1. **This endpoint is optional.** As soon as a response starts a session, Orbit Session writes the `XSRF-TOKEN` cookie automatically. The endpoint below is only for debugging or if you want to fetch the token on demand:
+1. **This endpoint is optional.** As soon as a response starts a session, Session writes the `XSRF-TOKEN` cookie automatically. The endpoint below is only for debugging or if you want to fetch the token on demand:
 
 ```ts
 import type { GravitoContext } from 'gravito-core'
@@ -167,4 +167,4 @@ const res = await fetch('/login', {
 
 ## Next Step
 
-- For full options and advanced usage, see the [Orbit Session API Docs](../api/orbit-session.md).
+- For full options and advanced usage, see the [Pulsar API Docs](../api/pulsar.md).

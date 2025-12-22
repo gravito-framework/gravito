@@ -19,10 +19,13 @@ bun --version
 
 ## 📦 Create Your Project
 
-The fastest way to start is using our official CLI. Run the following command in your terminal:
+The fastest way to start is using our professional CLI. You can initialize a project interactively:
 
 ```bash
-# Initialize a new Gravito project
+# Initialize a new Gravito project interactively
+bunx gravito create my-gravito-app
+
+# Or use the legacy creator
 bunx create-gravito-app@latest my-gravito-app
 ```
 
@@ -41,6 +44,22 @@ bun dev
 ```
 
 Your app is now running at **[http://localhost:3000](http://localhost:3000)**! 🚀
+
+## 🛠 Productivity CLI
+
+Gravito comes with a built-in "Artisan" style CLI that handles the heavy lifting for you. Once inside your project, use the `gravito` command:
+
+```bash
+# Scaffolding
+bun gravito make:model User
+
+# Database Governance
+bun gravito make:migration create_users_table
+bun gravito migrate
+
+# Interaction
+bun gravito tinker # Enter the interactive REPL
+```
 
 ### What just happened?
 Gravito started two synchronized engines:
@@ -64,7 +83,7 @@ export class HomeController {
 }
 ```
 
-### Option B: The Classic MPA (Orbit-View)
+### Option B: The Classic MPA (Gravito-View)
 Prefer Laravel-style server-side templates? Use Handlebars/Mustache style templates for maximum SEO and simplicity.
 
 ```typescript
@@ -90,16 +109,16 @@ export class HomeController {
 ```
 
 ### 🖖 What about Vue?
-Yes! Gravito supports **Inertia-Vue** seamlessly. Simply swap the `@gravito/orbit-inertia` adapter settings to target Vue components instead of React.
+Yes! Gravito supports **Inertia-Vue** seamlessly. Simply swap the `@gravito/ion` adapter settings to target Vue components instead of React.
 
 ## 🗺 What's Next?
 
 You've just taken your first step into a larger world. Here is where to go next:
 
-- **[Core Concepts](/docs/guide/core-concepts)**: Understand the "Planet & Orbit" philosophy.
+- **[Core Concepts](/docs/guide/core-concepts)**: Understand the "Planet & Gravito" philosophy.
 - **[Routing System](/docs/guide/routing)**: Learn how to build clean, MVC-style routes.
 - **[Fullstack with Inertia](/docs/guide/inertia-react)**: Master the art of the modern monolith.
 
 ---
 
-> **Tip**: Gravito is highly modular. You only load what you need. Check out our **Orbits** system to master features like SEO, I18n, and Fullstack integration!
+> **Tip**: Gravito is highly modular. You only load what you need. Check out our **Kinetic Modules** system to master features like SEO, I18n, and Fullstack integration!

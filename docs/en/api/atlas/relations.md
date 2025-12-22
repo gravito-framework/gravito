@@ -4,7 +4,7 @@ title: Relations
 
 # Relations
 
-> Relation queries in Orbit DB are backed by Drizzle relations and `db.raw.query.*`.
+> Relation queries in Atlas are backed by Drizzle relations and `db.raw.query.*`.
 
 ## Drizzle Relations (Required for `find*With`)
 
@@ -49,5 +49,5 @@ Ensure your Drizzle schema defines those relations for the table names you query
 
 ## Polymorphic Relations
 
-Orbit DB includes `morphTo`, `morphMany`, and `morphOne`. For `morphTo`, you should provide a
+Atlas includes `morphTo`, `morphMany`, and `morphOne`. For `morphTo`, you should provide a
 `morphMap` that maps type values to `Model` classes.

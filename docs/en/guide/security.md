@@ -83,4 +83,4 @@ core.router.get('/read', (c) => {
 
 ## CSRF Protection
 
-CSRF protection is provided by `@gravito/orbit`. See the [Session Documentation](../api/orbit-session.md) for details.
+CSRF protection is provided by `@gravito/pulsar`. See the [Pulsar Documentation](../api/pulsar.md) for details.

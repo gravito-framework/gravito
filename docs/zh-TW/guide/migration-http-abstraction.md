@@ -126,10 +126,10 @@ The `GravitoContext` API is designed to match Hono's `Context`:
 
 ## Extending Variables
 
-To add custom context variables in your Orbit:
+To add custom context variables in your Gravito:
 
 ```typescript
-// In your orbit module
+// In your Kinetic module
 declare module 'gravito-core' {
   interface GravitoVariables {
     myService: MyService

@@ -1,20 +1,20 @@
 ---
-title: Orbit Session
+title: Pulsar
 ---
 
-# Orbit Session
+# Pulsar
 
 提供 Session 管理與 CSRF 防護（Laravel 風格）。
 
-套件：`@gravito/orbit`
+套件：`@gravito/pulsar`
 
 ## 新手教學
 
-- 第一次使用建議先閱讀 [Orbit Session 新手教學](../guide/orbit-session-starter.md)。
+- 第一次使用建議先閱讀 [Pulsar 新手教學](../guide/orbit-session-starter.md)。
 
 ## 目的
 
-Orbit Session 提供：
+Pulsar 提供：
 
 - **登入狀態**：透過伺服器端 session id cookie（`gravito_session`）
 - **CSRF 防護**：保護具副作用的請求
@@ -24,7 +24,7 @@ Orbit Session 提供：
 ## 安裝
 
 ```bash
-bun add @gravito/orbit
+bun add @gravito/pulsar
 ```
 
 ## 設定（多機部署建議）
@@ -34,7 +34,7 @@ bun add @gravito/orbit
 ```ts
 import { PlanetCore, defineConfig } from 'gravito-core'
 import { OrbitCache } from '@gravito/stasis'
-import { OrbitSession } from '@gravito/orbit'
+import { OrbitPulsar } from '@gravito/pulsar'
 
 const config = defineConfig({
   config: {
@@ -51,7 +51,7 @@ const config = defineConfig({
       },
     },
   },
-  orbits: [OrbitCache, new OrbitSession()],
+  orbits: [OrbitCache, new OrbitPulsar()],
 })
 
 const core = await PlanetCore.boot(config)
@@ -73,7 +73,7 @@ export class ExampleController {
 
 ## Flash Data (快閃資料)
 
-Orbit Session 支援 "flash" 資料，這類資料僅在下一次請求中可用。這通常用於狀態訊息（例如：「文章建立成功」）。
+Session 支援 "flash" 資料，這類資料僅在下一次請求中可用。這通常用於狀態訊息（例如：「文章建立成功」）。
 
 ```typescript
 // 儲存 flash 資料
@@ -83,10 +83,10 @@ session.flash('message', '任務成功！');
 const message = session.get('message');
 ```
 
-Inertia Orbit 會自動將常見的 flash key（如 `success`、`error`）分享給前端 props。
+Inertia Gravito 會自動將常見的 flash key（如 `success`、`error`）分享給前端 props。
 
 ## CSRF
 
 - 預設驗證方式是 **header**：`X-CSRF-Token`
 - token 會儲存在 session key `_csrf`
-- Orbit Session 也會設定一個可被前端讀取的 cookie（預設 `XSRF-TOKEN`），方便前端讀取後放進 header 送回來
+- Session 也會設定一個可被前端讀取的 cookie（預設 `XSRF-TOKEN`），方便前端讀取後放進 header 送回來

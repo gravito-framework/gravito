@@ -83,7 +83,7 @@ export class BunNativeAdapter implements HttpAdapter {
   }
 
   createContext(request: Request): GravitoContext {
-    return new BunContext(request)
+    return BunContext.create(request)
   }
 
   onError(handler: GravitoErrorHandler): void {
@@ -95,7 +95,7 @@ export class BunNativeAdapter implements HttpAdapter {
   }
 
   async fetch(request: Request, _server?: unknown): Promise<Response> {
-    const ctx = new BunContext(request)
+    const ctx = BunContext.create(request)
 
     try {
       const url = new URL(request.url)

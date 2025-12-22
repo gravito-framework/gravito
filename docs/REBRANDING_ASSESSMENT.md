@@ -26,7 +26,7 @@
 
 ### 2. 拆分模組（需要謹慎處理）
 - `gravito-core` → `@gravito/graviton` + `@gravito/horizon`
-- `@gravito/orbit-auth` → `@gravito/isotope` + `@gravito/charge`
+- `@gravito/sentinel` → `@gravito/isotope` + `@gravito/charge`
 
 ### 3. 提取模組（未來規劃）
 - 從 core 中提取 middleware、logger、helpers、DI 等
@@ -50,7 +50,7 @@
    - **理由**：主要依賴 core，不影響其他模組
 
 3. **國際化模組**（獨立性高）
-   - `@gravito/orbit-i18n` → `@gravito/cosmos`
+   - `@gravito/cosmos` → `@gravito/cosmos`
    - **理由**：功能獨立，依賴關係簡單
 
 4. **網站地圖模組**（獨立性高）
@@ -66,44 +66,44 @@
 這些模組有較多依賴關係，但影響範圍可控：
 
 1. **數據存儲模組**
-   - `@gravito/orbit-db` → `@gravito/matter`
+   - `@gravito/atlas` → `@gravito/matter`
    - `@gravito/orbit-mongo` → `@gravito/dark-matter`
    - `@gravito/orbit-database` → `@gravito/matter`（需確認是否合併）
-   - **注意**：需要確認 `orbit-db` 和 `orbit-database` 是否合併
+   - **注意**：需要確認 `Atlas` 和 `orbit-database` 是否合併
 
 2. **快取系統模組**
    - `@gravito/orbit-redis` → `@gravito/plasma`
-   - `@gravito/orbit-cache` → `@gravito/stasis`
+   - `@gravito/stasis` → `@gravito/stasis`
    - **注意**：可能被其他模組依賴（如 session、queue）
 
 3. **會話模組**
-   - `@gravito/orbit-session` → `@gravito/orbit`
+   - `@gravito/ion` → `@gravito/orbit`
    - **注意**：可能被 auth 模組依賴
 
 ### 階段三：前端與渲染模組（中等風險）⚠️
 
 1. **前端模組**
-   - `@gravito/orbit-inertia` → `@gravito/momentum`
-   - `@gravito/orbit-view` → `@gravito/photon`
+   - `@gravito/ion` → `@gravito/momentum`
+   - `@gravito/prism` → `@gravito/photon`
    - **注意**：可能被 examples 和 templates 大量使用
 
 ### 階段四：背景任務與通訊模組（中等風險）⚠️
 
 1. **背景任務**
    - `@gravito/orbit-scheduler` → `@gravito/chronon`
-   - `@gravito/orbit-queue` → `@gravito/kinetic`
+   - `@gravito/stream` → `@gravito/kinetic`
    - **注意**：可能被 mail、notifications 等模組依賴
 
 2. **通訊與通知**
    - `@gravito/orbit-broadcasting` → `@gravito/gravity-wave`
    - `@gravito/orbit-notifications` → `@gravito/flare`
-   - `@gravito/orbit-mail` → `@gravito/signal`
+   - `@gravito/signal` → `@gravito/signal`
    - **注意**：依賴關係較複雜
 
 ### 階段五：身份與權限模組（高風險，需拆分）🔴
 
 1. **身份認證模組**（需要拆分）
-   - `@gravito/orbit-auth` → `@gravito/isotope`（認證）+ `@gravito/charge`（權限）
+   - `@gravito/sentinel` → `@gravito/isotope`（認證）+ `@gravito/charge`（權限）
    - **注意**：這是拆分操作，需要：
      - 先分析現有代碼結構
      - 確定拆分邊界
@@ -145,7 +145,7 @@
 **驗證**：每個模組重命名後立即測試構建和基本功能
 
 ### 第三階段：數據與快取模組（5-7 天）
-1. 確認 `orbit-db` 和 `orbit-database` 的合併策略
+1. 確認 `Atlas` 和 `orbit-database` 的合併策略
 2. 重命名數據存儲模組（matter 系列）
 3. 重命名快取模組（plasma、stasis）
 4. 重命名會話模組（orbit）
@@ -215,7 +215,7 @@
 4. ✅ 為後續複雜重命名積累經驗
 
 ### 需要先確認的事項
-1. ⚠️ `orbit-db` 和 `orbit-database` 是否合併？
+1. ⚠️ `Atlas` 和 `orbit-database` 是否合併？
 2. ⚠️ 核心模組拆分的具體邊界是什麼？
 3. ⚠️ 身份認證模組拆分的具體邊界是什麼？
 4. ⚠️ 是否需要保持向後兼容性？

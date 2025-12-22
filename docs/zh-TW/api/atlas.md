@@ -1,14 +1,14 @@
 ---
-title: Orbit DB
+title: Atlas
 ---
 
-# Orbit DB
+# Atlas
 
 > 以 Gravito Orbit 形式提供資料庫整合，**完整支援 PostgreSQL 並針對效能進行優化**。
 
 套件：`@gravito/atlas`
 
-此 Orbit 整合 **Drizzle ORM**，提供標準化的資料庫連線、Context 注入、交易支援、查詢輔助方法、健康檢查、遷移/Seed 與 Hooks。
+此動力模組整合 **Drizzle ORM**，提供標準化的資料庫連線、Context 注入、交易支援、查詢輔助方法、健康檢查、遷移/Seed 與 Hooks。
 
 ## 閱讀導覽
 
@@ -16,11 +16,11 @@ title: Orbit DB
 
 | 主題 | 頁面 |
 |------|------|
-| 快速上手 | [快速上手](./orbit-db/getting-started.md) |
-| DBService（查詢輔助） | [DBService](./orbit-db/dbservice.md) |
-| Models（類 Eloquent API） | [Models](./orbit-db/models.md) |
-| 關聯查詢 | [Relations](./orbit-db/relations.md) |
-| 遷移與 Seed | [遷移與 Seed](./orbit-db/migrations-seeding.md) |
+| 快速上手 | [快速上手](./atlas/getting-started.md) |
+| DBService（查詢輔助） | [DBService](./atlas/dbservice.md) |
+| Models（類 Eloquent API） | [Models](./atlas/models.md) |
+| 關聯查詢 | [Relations](./atlas/relations.md) |
+| 遷移與 Seed | [遷移與 Seed](./atlas/migrations-seeding.md) |
 
 ## 功能概覽
 
@@ -38,7 +38,7 @@ bun add @gravito/atlas drizzle-orm
 
 ## 快速開始
 
-完整示例請見：[快速上手](./orbit-db/getting-started.md)。
+完整示例請見：[快速上手](./atlas/getting-started.md)。
 
 ```ts
 import { PlanetCore } from 'gravito-core'

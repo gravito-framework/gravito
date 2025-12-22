@@ -4,7 +4,7 @@ title: Laravel 12 MVC Parity
 
 # Laravel 12 MVC Parity
 
-This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC” feature set, so we can see what is already covered, what is partially covered, and what is still missing.
+This page compares Gravito (core + Kinetic Modules) with Laravel 12’s “full-stack MVC” feature set, so we can see what is already covered, what is partially covered, and what is still missing.
 
 ## Legend
 
@@ -19,7 +19,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 | Laravel | Gravito |
 |--------|---------|
 | Service Container, Service Providers | `gravito-core` (`Container`, `ServiceProvider`) |
-| HTTP Kernel / Middleware | `gravito-core` Router + Native middleware; Orbit-provided middleware (Auth/Session/…) |
+| HTTP Kernel / Middleware | `gravito-core` Router + Native middleware; Gravito-provided middleware (Auth/Session/…) |
 | Exception Handler | `gravito-core` `PlanetCore` error + notFound handlers and hooks |
 | Events / Listeners | `gravito-core` `EventManager` / `Listener` |
 | Validation (FormRequest) | `@gravito/mass` (`FormRequest`) |
@@ -83,7 +83,7 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 
 | Feature | Status | Notes |
 |--------|--------|------|
-| Server-rendered HTML entry | Implemented | App shell rendering via Orbit View / Core |
+| Server-rendered HTML entry | Implemented | App shell rendering via Prism / Core |
 | SPA bridge (Inertia) | Implemented | `@gravito/ion` |
 | Blade-compatible templating | Missing | Gravito uses TSX templates instead of Blade |
 | Asset pipeline conventions | Partial | Templates exist; conventions still evolving |
@@ -166,5 +166,5 @@ This page compares Gravito (core + Orbits) with Laravel 12’s “full-stack MVC
 ### P2 (Ecosystem and observability)
 
 - Queue dashboard + job observability.
-- Tracing/metrics/health-check Orbit (OpenTelemetry-ready).
+- Tracing/metrics/health-check Gravito (OpenTelemetry-ready).
 - Testing fakes (mail/notifications/queue) + HTTP testing utilities.

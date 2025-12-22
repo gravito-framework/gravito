@@ -1,29 +1,29 @@
 ---
-title: Orbit Auth
+title: Sentinel
 ---
 
-# Orbit Auth
+# Sentinel
 
-> Gravito 的身份驗證 Orbit。
+> Authentication system as a Gravito Orbit.
 
-套件名稱：`@gravito/orbit-auth`
+Package: `@gravito/sentinel`
 
-提供彈性的身份驗證系統，支援多種 Guard（Session、JWT、Token）與 User Provider。
+Provides a flexible authentication system with support for multiple guards (Session, JWT, Token) and user providers.
 
-## 安裝
+## Installation
 
 ```bash
-bun add @gravito/orbit-auth
+bun add @gravito/sentinel
 ```
 
-## 設定
+## Configuration
 
-Orbit Auth 透過 `PlanetCore` 中的 `auth` 設定物件進行設定。
+Sentinel is configured via the `auth` configuration object in `PlanetCore`.
 
 ```typescript
 import { PlanetCore } from 'gravito-core';
-import { OrbitAuth } from '@gravito/orbit-auth';
-import { OrbitSession } from '@gravito/orbit';
+import { OrbitSentinel } from '@gravito/sentinel';
+import { OrbitPulsar } from '@gravito/pulsar';
 
 const core = await PlanetCore.boot({
   config: {
@@ -47,61 +47,61 @@ const core = await PlanetCore.boot({
       },
       providers: {
         users: {
-          driver: 'drizzle', // 或 'callback'
-          model: 'User', // 您的 User model
+          driver: 'drizzle', // or 'callback'
+          model: 'User', // Your User model
         },
       },
     },
   },
-  orbits: [OrbitSession, OrbitAuth],
+  orbits: [OrbitPulsar, OrbitSentinel],
 });
 ```
 
-## 基本用法
+## Basic Usage
 
-### 存取 Auth Manager
+### Accessing Auth Manager
 
-您可以透過 context 存取 `AuthManager`。
+You can access the `AuthManager` via the context.
 
 ```typescript
 core.app.get('/user', async (c) => {
   const auth = c.get('auth');
-
+  
   if (await auth.check()) {
     const user = await auth.user();
     return c.json({ user });
   }
-
+  
   return c.json({ message: 'Unauthenticated' }, 401);
 });
 ```
 
-### 驗證操作
+### Authentication Actions
 
 ```typescript
-// 登入 (Session Guard)
+// Login (Session Guard)
 await auth.login(user);
 
-// 登出
+// Logout
 await auth.logout();
 
-// 嘗試使用憑證登入
+// Attempt login with credentials
 if (await auth.attempt({ email, password })) {
-    // 成功
+    // Success
 }
 ```
 
-### 使用特定 Guard
+### Using Specific Guards
 
 ```typescript
-// 明確存取 'api' guard
+// Access 'api' guard explicitly
 const apiAuth = auth.guard('api');
 const user = await apiAuth.user();
 ```
 
-## 密碼雜湊 (Hashing)
+## Hashing
 
-Orbit Auth 會在 request context 中以 `hash` 暴露 `HashManager`：
+Sentinel exposes a `HashManager` in request context as `hash`:
 
 ```ts
 core.app.post('/register', async (c) => {
@@ -111,49 +111,49 @@ core.app.post('/register', async (c) => {
 })
 ```
 
-## 密碼重設 / 信箱驗證（Primitives）
+## Password Reset / Email Verification (Primitives)
 
-Orbit Auth 可選擇性提供用來組裝 Laravel 風格流程的 primitives：
+Sentinel can optionally expose primitives for building Laravel-like flows:
 
-- `PasswordBroker`（context key: `passwords`）
-- `EmailVerificationService`（context key: `emailVerification`）
+- `PasswordBroker` (context key: `passwords`)
+- `EmailVerificationService` (context key: `emailVerification`)
 
-在 options 中啟用：
+Enable them in options:
 
 ```ts
-new OrbitAuth({
+new OrbitSentinel({
   // ...auth config
   passwordReset: { enabled: true, ttlSeconds: 3600 },
   emailVerification: { enabled: true },
 })
 ```
 
-使用方式：
+Usage:
 
 ```ts
 core.app.post('/password/forgot', async (c) => {
   const broker = c.get('passwords')
-  if (!broker) return c.text('未啟用', 500)
+  if (!broker) return c.text('Not enabled', 500)
   const token = await broker.createToken('user@example.com')
   return c.json({ token })
 })
 
 core.app.get('/email/verify', (c) => {
   const verifier = c.get('emailVerification')
-  if (!verifier) return c.text('未啟用', 500)
+  if (!verifier) return c.text('Not enabled', 500)
   const token = c.req.query('token') ?? ''
   const payload = verifier.verifyToken(token)
-  return payload ? c.json(payload) : c.text('無效 token', 400)
+  return payload ? c.json(payload) : c.text('Invalid token', 400)
 })
 ```
 
-## 授權 (Gates)
+## Authorization (Gates)
 
-Orbit Auth 包含用於授權檢查的 Gate 系統。
+Sentinel includes a Gate system for authorization checks.
 
-### 定義 Gate
+### Defining Gates
 
-在您的 `AppServiceProvider` 或啟動程式碼中定義 gate。
+Define gates in your `AppServiceProvider` or bootstrap code.
 
 ```typescript
 core.app.use('*', async (c, next) => {
@@ -167,24 +167,24 @@ core.app.use('*', async (c, next) => {
 })
 ```
 
-### 檢查授權
+### Checking Authorization
 
 ```typescript
 const gate = c.get('gate')
 
 if (await gate.allows('update-post', post)) {
-  // 已授權
+  // Authorized
 }
 
-// 若未授權則拋出 403
+// Or throw 403 if unauthorized
 await gate.authorize('update-post', post);
 ```
 
-### 透過 Context
+### Via Context
 
 ```typescript
 core.app.get('/posts/:id', async (c) => {
-  // ... 取得 post
+  // ... fetch post
 
   const gate = c.get('gate')
   await gate.authorize('update-post', post)
@@ -193,7 +193,7 @@ core.app.get('/posts/:id', async (c) => {
 
 ## Hooks
 
-- `auth:init` - 當 Auth orbit 初始化時觸發。
-- `auth:login` - 登入成功後觸發。
-- `auth:logout` - 登出後觸發。
-- `auth:failed` - 驗證失敗後觸發。
+- `auth:init` - Fired when the Sentinel module initializes.
+- `auth:login` - Fired after successful login.
+- `auth:logout` - Fired after logout.
+- `auth:failed` - Fired after failed authentication attempt.

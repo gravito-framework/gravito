@@ -19,10 +19,13 @@ bun --version
 
 ## 建立您的專案
 
-開始最快的方法是使用我們的官方 CLI。在終端機中執行以下指令：
+開始最快的方法是使用我們的專業 CLI。您可以透過互動式介面快速初始化專案：
 
 ```bash
-# 初始化新的 Gravito 專案
+# 使用互動式介面建立新的 Gravito 專案
+bunx gravito create my-gravito-app
+
+# 或使用經典的開發者工具
 bunx create-gravito-app@latest my-gravito-app
 ```
 
@@ -40,7 +43,23 @@ bun install
 bun dev
 ```
 
-您的應用程式現在執行於 **[http://localhost:3000](http://localhost:3000)**！
+您的應用程式現在執行於 **[http://localhost:3000](http://localhost:3000)**！🚀
+
+## 🛠 生產力 CLI 工具
+
+Gravito 內建了「工匠級」的 CLI 工具，能為您代勞繁重的工程任務。進入專案後，即可使用 `gravito` 指令：
+
+```bash
+# 快速建構 (Scaffolding)
+bun gravito make:model User
+
+# 資料庫治理
+bun gravito make:migration create_users_table
+bun gravito migrate
+
+# 互動與調試
+bun gravito tinker # 進入互動式 REPL
+```
 
 ### 剛才發生了什麼？
 Gravito 同時啟動了兩個同步運作的引擎：
@@ -64,7 +83,7 @@ export class HomeController {
 }
 ```
 
-### 路徑 B：經典多頁應用 MPA (Orbit-View 樣板)
+### 路徑 B：經典多頁應用 MPA (Gravito-View 樣板)
 如果您偏好 Laravel 風格的後端渲染，這絕對是首選。使用 Handlebars/Mustache 風格的樣板，獲得極致的 SEO 表現與開發簡潔度。
 
 ```typescript
@@ -90,7 +109,7 @@ export class HomeController {
 ```
 
 ### 那支援 Vue 嗎？
-當然！Gravito 完美支援 **Inertia-Vue**。您只需要在設定中將 `@gravito/orbit-inertia` 的元件目標從 React 換成 Vue，其他開發邏輯完全一致。
+當然！Gravito 完美支援 **Inertia-Vue**。您只需要在設定中將 `@gravito/ion` 的元件目標從 React 換成 Vue，其他開發邏輯完全一致。
 
 ## 下一步是什麼？
 
@@ -102,4 +121,4 @@ export class HomeController {
 
 ---
 
-> **小建議**：Gravito 是高度模組化的，您只需加載需要的東西。歡迎查看 **Orbits** 系統，掌握 SEO、國際化 (I18n) 與全端整合等核心能力！
+> **小建議**：Gravito 是高度模組化的，您只需加載需要的東西。歡迎查看 **Kinetic Modules** 系統，掌握 SEO、國際化 (I18n) 與全端整合等核心能力！

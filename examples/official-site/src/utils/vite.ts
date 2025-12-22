@@ -51,7 +51,9 @@ export function setupViteProxy(core: PlanetCore): void {
         // Forward all headers from Vite
         response.headers.forEach((value, key) => {
           // Skip some headers that might cause issues
-          if (['content-encoding', 'transfer-encoding', 'content-length'].includes(key.toLowerCase())) {
+          if (
+            ['content-encoding', 'transfer-encoding', 'content-length'].includes(key.toLowerCase())
+          ) {
             return
           }
           c.header(key, value)
@@ -64,7 +66,9 @@ export function setupViteProxy(core: PlanetCore): void {
       // Map headers for the final response
       const responseHeaders = new Headers()
       response.headers.forEach((value, key) => {
-        if (!['content-encoding', 'transfer-encoding', 'content-length'].includes(key.toLowerCase())) {
+        if (
+          !['content-encoding', 'transfer-encoding', 'content-length'].includes(key.toLowerCase())
+        ) {
           responseHeaders.set(key, value)
         }
       })

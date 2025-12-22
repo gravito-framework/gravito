@@ -27,7 +27,8 @@ export default {
     bun_title: 'Bun Runtime',
     bun_desc: 'Lightning fast runtime with native testing and bundling.',
     hono_title: 'Gravito Core',
-    hono_desc: 'Self-developed high-performance core with nano-overhead I/O and lifecycle management.',
+    hono_desc:
+      'Self-developed high-performance core with nano-overhead I/O and lifecycle management.',
     ts_title: 'TypeScript',
     ts_desc: 'First-class type safety across the entire framework.',
   },
@@ -104,13 +105,13 @@ export default {
     teamDesc:
       'Gravito is built by craftsmen who believe that a framework should be more than a tool—it should be a partner that solves the gaps left by traditional stacks.',
     architectureTitle: 'The Celestial Architecture',
-    architectureSubtitle: 'Micro-Kernel & Orbit System',
+    architectureSubtitle: 'Micro-Kernel & Kinetic Modules',
     kernelTitle: 'PlanetCore (The Micro-Kernel)',
     kernelDesc:
       'An ultra-minimalist core that handles only the most critical lifecycles and I/O coordination. It stays out of your way until you need it.',
-    orbitTitle: 'Functional Orbits',
+    orbitTitle: 'Kinetic Modules',
     orbitDesc:
-      'Features like Routing, Inertia, SEO, and Mail exist as "Orbits" that revolve around the core. Load only what you need, when you need it.',
+      'Features like Routing, Ion, Luminosity, and Mail exist as specialized modules that extend the core. Load only what you need, when you need it.',
     scaleTitle: 'Infinite Scalability',
     scaleDesc:
       "From a single-file API to a global enterprise system, the architecture adapts dynamically to your project's gravity.",
@@ -124,7 +125,7 @@ export default {
       'Structured CLI outputs and scaffolding allow AI assistants to perform complex operations on your behalf.',
     aiFeature3Title: 'Zero-Ambiguity Types',
     aiFeature3Desc:
-      'First-class TypeScript support across all orbits provides a clear contract that eliminates AI "hallucinations".',
+      'First-class TypeScript support across all modules provides a clear contract that eliminates AI "hallucinations".',
     // Pain Points
     painSubtitle: 'Solving Enterprise Bottlenecks',
     painTitle: 'Pain-Point Driven Evolution',
@@ -136,7 +137,7 @@ export default {
       'Built on a micro-kernel, Gravito consumes up to 60% less memory than bloated enterprise frameworks.',
     pain3Title: 'Logic Fragmentation',
     pain3Desc:
-      'Unified Service Layers and cross-orbit communication prevent logic rot in long-term projects.',
+      'Unified Service Layers and cross-module communication prevent logic rot in long-term projects.',
     pain4Title: 'AI Alignment',
     pain4Desc:
       'Predictable file structures mean AI agents can maintain complex codebases without human intervention.',

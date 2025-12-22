@@ -4,13 +4,13 @@ title: Plugin Marketplace Standard (GPS-001)
 
 # Plugin Marketplace Standard (GPS-001)
 
-To foster a healthy ecosystem, Gravito establishes the **Gravito Plugin Standard (GPS)**. This document outlines how to package, name, and distribute your Orbits and Satellites so they can be discovered by the CLI and future marketplace.
+To foster a healthy ecosystem, Gravito establishes the **Gravito Plugin Standard (GPS)**. This document outlines how to package, name, and distribute your Kinetic Modules and Satellites so they can be discovered by the CLI and future marketplace.
 
 ## 1. Naming Conventions
 
 To ensure discoverability on npm, please follow these naming patterns:
 
-### Orbits (Infrastructure)
+### Kinetic Modules (Infrastructure)
 *   Format: `gravito-orbit-<name>`
 *   Scoped: `@<scope>/gravito-orbit-<name>`
 *   Example: `gravito-orbit-redis`, `@my-org/gravito-orbit-payment`
@@ -27,7 +27,7 @@ Your `package.json` acts as the manifest for the Gravito system.
 ### Keywords
 You **MUST** include one of the following keywords:
 *   `gravito-plugin` (for Satellites)
-*   `gravito-orbit` (for Orbits)
+*   `gravito-orbit` (for Kinetic Modules)
 *   `gravito-ecosystem` (general)
 
 This allows the CLI to find your package via `npm search keywords:gravito-plugin`.
@@ -59,7 +59,7 @@ You **SHOULD** include a `gravito` property in your `package.json` to define int
 ```
 
 *   **type**: `'satellite' | 'orbit'`
-*   **requires**: Array of orbit keys (e.g., `['db', 'auth']`) that this plugin depends on. The CLI will warn the user if these are missing.
+*   **requires**: Array of module keys (e.g., `['db', 'auth']`) that this plugin depends on. The CLI will warn the user if these are missing.
 *   **configuration**: Schema for environment variables or options the plugin needs.
 
 ## 3. Entry Point Standard

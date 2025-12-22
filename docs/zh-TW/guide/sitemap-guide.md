@@ -27,9 +27,9 @@ bun add @gravito/constellation
 ### 最簡單範例
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/constellation'
+import { LuminositySitemap, routeScanner } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [
@@ -51,9 +51,9 @@ await sitemap.generate()
 從應用程式直接提供 sitemap：
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/constellation'
+import { LuminositySitemap, routeScanner } from '@gravito/constellation'
 
-OrbitSitemap.dynamic({
+LuminositySitemap.dynamic({
   baseUrl: 'https://example.com',
   providers: [
     // 自動掃描路由
@@ -86,9 +86,9 @@ OrbitSitemap.dynamic({
 在建置過程中生成 sitemap 檔案：
 
 ```typescript
-import { OrbitSitemap, routeScanner } from '@gravito/constellation'
+import { LuminositySitemap, routeScanner } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   filename: 'sitemap.xml',
@@ -229,9 +229,9 @@ bun add @aws-sdk/client-s3
 ```
 
 ```typescript
-import { OrbitSitemap, S3SitemapStorage } from '@gravito/constellation'
+import { LuminositySitemap, S3SitemapStorage } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   storage: new S3SitemapStorage({
     bucket: 'my-sitemap-bucket',
@@ -264,9 +264,9 @@ bun add @google-cloud/storage
 ```
 
 ```typescript
-import { OrbitSitemap, GCPSitemapStorage } from '@gravito/constellation'
+import { LuminositySitemap, GCPSitemapStorage } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   storage: new GCPSitemapStorage({
     bucket: 'my-sitemap-bucket',
@@ -294,7 +294,7 @@ await sitemap.generate()
 生成到臨時位置，然後原子性切換：
 
 ```typescript
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   shadow: {
     enabled: true,
@@ -313,7 +313,7 @@ const sitemap = OrbitSitemap.static({
 保留舊版本，準備好時再切換：
 
 ```typescript
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   shadow: {
     enabled: true,
@@ -338,9 +338,9 @@ await storage.switchVersion('sitemap.xml', 'version-id')
 非同步生成 sitemap，不阻塞主流程：
 
 ```typescript
-import { OrbitSitemap, MemoryProgressStorage } from '@gravito/constellation'
+import { LuminositySitemap, MemoryProgressStorage } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [...],
@@ -375,12 +375,12 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 
 **保護端點的實作方式**：
 
-##### 方式一：使用 Orbit Auth（推薦）
+##### 方式一：使用 Sentinel（推薦）
 
-使用 `@gravito/orbit-auth` 提供的認證與授權機制：
+使用 `@gravito/sentinel` 提供的認證與授權機制：
 
 ```typescript
-import { auth, can } from '@gravito/orbit-auth'
+import { auth, can } from '@gravito/sentinel'
 
 // 定義授權能力（在 Gate 中）
 core.get('gate').define('manage-sitemap', (user) => {
@@ -479,7 +479,7 @@ sitemap.installApiEndpoints(core, '/admin/sitemap')
 結合多種保護方式以提升安全性：
 
 ```typescript
-import { auth } from '@gravito/orbit-auth'
+import { auth } from '@gravito/sentinel'
 import type { GravitoContext, Next } from 'gravito-core'
 
 // 1. 檢查認證
@@ -531,7 +531,7 @@ import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   progressStorage: new RedisProgressStorage({
     client: redis,
@@ -546,7 +546,7 @@ const sitemap = OrbitSitemap.static({
 自動將大型 sitemap 分割成多個檔案：
 
 ```typescript
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   maxEntriesPerFile: 50000 // 預設：50000（Google 的限制）
 })
@@ -567,9 +567,9 @@ const sitemap = OrbitSitemap.static({
 ### 設定
 
 ```typescript
-import { OrbitSitemap, MemoryChangeTracker } from '@gravito/constellation'
+import { LuminositySitemap, MemoryChangeTracker } from '@gravito/constellation'
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [...],
@@ -641,7 +641,7 @@ import Redis from 'ioredis'
 
 const redis = new Redis(process.env.REDIS_URL)
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   // ...
   incremental: {
     enabled: true,
@@ -664,14 +664,14 @@ const sitemap = OrbitSitemap.static({
 
 ```typescript
 import { 
-  OrbitSitemap, 
+  LuminositySitemap, 
   MemoryRedirectManager,
   RedirectDetector 
 } from '@gravito/constellation'
 
 const redirectManager = new MemoryRedirectManager()
 
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   outDir: './dist',
   providers: [...],
@@ -969,7 +969,7 @@ storage: new S3SitemapStorage({
 
 ```typescript
 import { 
-  OrbitSitemap,
+  LuminositySitemap,
   S3SitemapStorage,
   RedisChangeTracker,
   RedisRedirectManager,
@@ -1004,7 +1004,7 @@ for (const [from, rule] of redirects) {
 }
 
 // 建立包含所有企業級功能的 sitemap
-const sitemap = OrbitSitemap.static({
+const sitemap = LuminositySitemap.static({
   baseUrl: 'https://example.com',
   storage: new S3SitemapStorage({
     bucket: 'my-sitemap-bucket',

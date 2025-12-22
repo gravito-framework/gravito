@@ -4,13 +4,13 @@ title: 外掛市集標準 (GPS-001)
 
 # 外掛市集標準 (GPS-001)
 
-為了建立一個健康的生態系，Gravito 制定了 **Gravito Plugin Standard (GPS)**。本文件說明如何打包、命名與發佈您的 Orbits 和 Satellites，以便讓 CLI 與未來的市集能夠發現它們。
+為了建立一個健康的生態系，Gravito 制定了 **Gravito Plugin Standard (GPS)**。本文件說明如何打包、命名與發佈您的 Kinetic Modules 和 Satellites，以便讓 CLI 與未來的市集能夠發現它們。
 
 ## 1. 命名規範 (Naming Conventions)
 
 為了確保在 npm 上容易被搜尋到，請遵循以下命名模式：
 
-### Orbits (基礎設施模組)
+### Kinetic Modules (基礎設施模組)
 *   格式: `gravito-orbit-<name>`
 *   Scoped: `@<scope>/gravito-orbit-<name>`
 *   範例: `gravito-orbit-redis`, `@my-org/gravito-orbit-payment`
@@ -27,7 +27,7 @@ title: 外掛市集標準 (GPS-001)
 ### 關鍵字 (Keywords)
 您 **必須** 包含以下其中一個關鍵字：
 *   `gravito-plugin` (用於 Satellites)
-*   `gravito-orbit` (用於 Orbits)
+*   `gravito-orbit` (用於 Kinetic Modules)
 *   `gravito-ecosystem` (通用)
 
 這讓 CLI 能夠透過 `npm search keywords:gravito-plugin` 找到您的套件。
@@ -59,7 +59,7 @@ title: 外掛市集標準 (GPS-001)
 ```
 
 *   **type**: `'satellite' | 'orbit'`
-*   **requires**: 此外掛依賴的 Orbit key 陣列 (例如 `['db', 'auth']`)。如果缺少這些依賴，CLI 會警告使用者。
+*   **requires**: 此外掛依賴的 Gravito key 陣列 (例如 `['db', 'auth']`)。如果缺少這些依賴，CLI 會警告使用者。
 *   **configuration**: 外掛所需的環境變數或選項 Schema。
 
 ## 3. 進入點標準 (Entry Point Standard)

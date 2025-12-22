@@ -5,7 +5,7 @@ description: 為高效能 Gravito 應用程式提供的自動化圖片優化方�
 
 # 圖片優化 (Image Optimization)
 
-Gravito 內建了強大的**圖片優化**模組（屬於 `Orbit-View` 的一部分）。它參考了 Next.js 的最佳實踐，確保您的應用程式符合最高效能標準，但其核心優勢在於：**零客戶端執行路徑 (Zero Client-side Runtime)**。
+Gravito 內建了強大的**圖片優化**模組（屬於 `Gravito-View` 的一部分）。它參考了 Next.js 的最佳實踐，確保您的應用程式符合最高效能標準，但其核心優勢在於：**零客戶端執行路徑 (Zero Client-side Runtime)**。
 
 ---
 
@@ -26,7 +26,7 @@ Gravito 內建了強大的**圖片優化**模組（屬於 `Orbit-View` 的一部
 如果您使用 React 與 Inertia，只需導入 `Image` 元件即可。
 
 ```tsx
-import { Image } from '@gravito/orbit-view'
+import { Image } from '@gravito/prism'
 
 export default function Hero() {
   return (
@@ -70,7 +70,7 @@ export default function Hero() {
 
 ```vue
 <script setup>
-import { Image } from '@gravito/orbit-view/vue'
+import { Image } from '@gravito/prism/vue'
 </script>
 
 <template>

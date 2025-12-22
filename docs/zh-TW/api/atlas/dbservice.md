@@ -44,7 +44,7 @@ await db.transaction(async (tx) => {
 
 ## 關聯查詢
 
-Orbit DB 的關聯查詢輔助方法基於 Drizzle `db.raw.query.*`：
+Atlas 的關聯查詢輔助方法基於 Drizzle `db.raw.query.*`：
 
 - `findByIdWith(tableName, id, relations)`
 - `findOneWith(tableName, where, relations)`

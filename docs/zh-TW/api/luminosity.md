@@ -1,9 +1,9 @@
 ---
-title: Orbit SEO
+title: Luminosity
 description: Gravito SEO 與 Sitemap 整合的 API 參考。
 ---
 
-# Orbit SEO
+# Luminosity
 
 `@gravito/luminosity-adapter-hono` (簡稱為 `OrbitLuminosity`) 提供了 Gravito 核心與 SEO 引擎之間的無縫整合。
 
@@ -15,7 +15,7 @@ bun add @gravito/luminosity @gravito/luminosity-adapter-hono
 
 ## 基礎用法
 
-SEO Orbit 會註冊一個中間件，自動處理 `/sitemap.xml` 與 `/robots.txt`。
+SEO 動力模組會註冊一個中間件，自動處理 `/sitemap.xml` 與 `/robots.txt`。
 
 ```typescript
 import { gravitoSeo } from '@gravito/luminosity-adapter-hono'
@@ -37,7 +37,7 @@ app.use('*', gravitoSeo(seoConfig))
 
 ## 動態解析器 (Dynamic Resolvers)
 
-解析器是 Orbit SEO 最強大的部分。它們允許您從任何來源（資料庫、檔案系統等）獲取網址。
+解析器是 Luminosity 最強大的部分。它們允許您從任何來源（資料庫、檔案系統等）獲取網址。
 
 ```typescript
 const postsResolver = {

@@ -11,10 +11,10 @@ cd packages/core && npm publish --access public --tag beta && cd ../..
 # @gravito/stasis
 cd packages/stasis && npm publish --access public --tag beta && cd ../..
 
-# @gravito/orbit-inertia
+# @gravito/ion
 cd packages/orbit-inertia && npm publish --access public --tag beta && cd ../..
 
-# @gravito/orbit-view
+# @gravito/prism
 cd packages/orbit-view && npm publish --access public --tag beta && cd ../..
 
 # @gravito/seo-adapter-hono
@@ -27,7 +27,7 @@ cd packages/seo-core && npm publish --access public --tag beta && cd ../..
 ### Alpha 版本套件（其他套件）
 
 ```bash
-# @gravito/orbit-auth
+# @gravito/sentinel
 cd packages/orbit-auth && npm publish --access public --tag alpha && cd ../..
 
 # @gravito/orbit-broadcasting
@@ -36,19 +36,19 @@ cd packages/orbit-broadcasting && npm publish --access public --tag alpha && cd 
 # @gravito/orbit-content
 cd packages/orbit-content && npm publish --access public --tag alpha && cd ../..
 
-# @gravito/orbit-db
-cd packages/orbit-db && npm publish --access public --tag alpha && cd ../..
+# @gravito/atlas
+cd packages/Atlas && npm publish --access public --tag alpha && cd ../..
 
 # @gravito/cosmos
 cd packages/cosmos && npm publish --access public --tag alpha && cd ../..
 
-# @gravito/orbit-mail
+# @gravito/signal
 cd packages/orbit-mail && npm publish --access public --tag alpha && cd ../..
 
 # @gravito/orbit-notifications
 cd packages/orbit-notifications && npm publish --access public --tag alpha && cd ../..
 
-# @gravito/orbit-queue
+# @gravito/stream
 cd packages/orbit-queue && npm publish --access public --tag alpha && cd ../..
 
 # @gravito/orbit-request

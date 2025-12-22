@@ -1,25 +1,25 @@
-# 🛰️ SmartMap SEO Engine
+# 🛰️ Luminosity SEO Engine
 
-Traditional Single-Page Applications (SPAs) are often "invisible" to search engines because they rely heavily on client-side rendering. Gravito's **SmartMap SEO Engine** solves this by managing Meta tags, Sitemaps, and Analytics centrally on the server.
+Traditional Single-Page Applications (SPAs) are often "invisible" to search engines because they rely heavily on client-side rendering. Gravito's **Luminosity SEO Engine** solves this by managing Meta tags, Sitemaps, and Analytics centrally on the server.
 
 ---
 
-## 🚀 The Three "Gravity" Modes
+## 🚀 The Three Illumination Modes
 
-The SEO engine can be configured in three modes depending on your scale and traffic.
+The Luminosity SEO engine can be configured in three "illumination" modes depending on your scale and traffic, ensuring search engines can clearly "see" your content.
 
 | Mode | Use Case | How it Works |
 |------|----------|--------------|
-| **`dynamic`** | Small/Medium sites | Generates Sitemap on every request. Data is always 100% fresh. |
-| **`cached`** | High-traffic sites | Keeps Sitemap in memory and refreshes after a TTL (time-to-live). |
-| **`incremental`**| Millions of URLs | Uses **LSM-tree** principle. Updates are appended to a log and compacted in the background. Zero memory pressure. |
+| **`dynamic`** | Small/Medium sites | **Instant Mode**: Generates Sitemap on every request. Data is always 100% fresh. |
+| **`cached`** | High-traffic sites | **Steady Mode**: Keeps Sitemap in memory for blazing fast access. |
+| **`incremental`**| Millions of URLs | **Stellar Mode**: Built for massive datasets with zero memory pressure and background compaction. |
 
 ---
 
 ## 🛠️ Step-by-Step Integration
 
 ### 1. Define Your Configuration
-The core of the SEO engine is organized into `resolvers`. We support three "babysitter-level" ways to find your URLs:
+The core of the Luminosity SEO engine is organized into `resolvers`. We support three "babysitter-level" ways to find your URLs:
 
 #### A. Static URLs (Simple list)
 Best for fixed pages like Home, Contact, or Pricing.
@@ -74,7 +74,7 @@ export const seoConfig: SeoConfig = {
 }
 ```
 
-### 2. Connect the Orbit (Middleware)
+### 2. Connect the Gravito (Middleware)
 Register the SEO middleware at your application entry point. It will automatically handle `/sitemap.xml` and `/robots.txt`.
 
 ```typescript
@@ -111,70 +111,228 @@ export class PostController {
 
 ---
 
-## 📊 Analytics & Tracking
-Gravito handles the heavy lifting of script injection. Simply define your IDs in the configuration:
+## 🏛️ 10M+ URLs: Stellar Scale Architecture
 
-- `gtag`: Google Analytics 4
-- `pixel`: Meta (Facebook) Pixel
-- `baidu`: Baidu Tongji ID
+Handling tens of millions of URLs requires more than just a sitemap generator—it requires a **"Sitemap Lifecycle Management System"**. Luminosity provides an architecture that ensures stellar performance from day one to year ten.
 
-Calling `seo.toString()` will automatically include the required non-blocking scripts.
+### Phase 1: Initial Cold Start (0 to 1)
+During the first run, Luminosity uses **Streaming Processing** to prevent memory overflow. Instead of loading 10M records at once, it flows data from your database directly into disk-based logs.
+- **Batching**: Uses `batchSize` to cycle through your data in chunks.
+- **Disk Persistence**: Data is committed to disk immediately after each batch, allowing for recovery if the process is interrupted.
 
-## 🛠️ Enterprise Architecture
-For sites with over 50,000 URLs, Gravito automatically generates a **Sitemap Index** and splits the entries into multiple paginated files, strictly following Google's best practices.
+### Phase 2: Log Persistence (Day 1+)
+Once the initial footprint is established, Luminosity shifts to **Incremental Mode**.
+- **Append-only Updates (LSM-log)**: New pages or changes are treated as "append-only" entries in a transaction log.
+- **Skip Full Scans**: You no longer need to re-scan the entire 10M record database just to add a single new URL.
 
-### Example: Large Commerce Site (2M Products)
-Use `incremental` mode and split resolvers by content type or shard to keep each resolver focused and stable at scale.
+### Phase 3: Background Compaction (Day-2 Performance)
+`incremental.compactInterval` controls the frequency of the background maintenance task (e.g., every 24h). During this process, the system performs the following **Atomic Operations**:
+
+1.  **Merge & Dedupe**: Combines the tens of thousands of changes in `.jsonl` logs with the main snapshot. If a URL changes multiple times (e.g., `add` -> `update` -> `remove`), only the final state is preserved.
+2.  **Log Rotation**: Clears old log files to prevent infinite disk usage once data is safely persisted.
+3.  **Physical Emission**: Recalculates the pagination layout for all URLs and generates static `sitemap-index.xml` and `sitemap-N.xml` (Gzip) files. This allows your Web Server (Nginx/CDN) to serve static files directly with **Zero CPU Usage**.
+4.  **Shadow Write & Atomic Swap**: To prevent read-concurrency issues, files are first written to a `.shadow` directory. Once verification passes, the system performs an OS-level **Atomic Rename**, instantly replacing the old files. Users will **never** encounter partially written or corrupted sitemaps.
+
+### 🚀 Massive Scale Example
 
 ```typescript
 // src/config/seo.ts
 export const seoConfig: SeoConfig = {
-  mode: 'incremental',
-  baseUrl: 'https://shop.example.com',
+  mode: 'incremental', // Enable Stellar scale mode
+  baseUrl: 'https://global-shop.com',
   resolvers: [
     {
-      name: 'products',
+      name: 'products-massive',
       fetch: async () => {
-        const pageSize = 5000
+        const pageSize = 10000
         let page = 0
         const entries = []
-
+        
         while (true) {
-          const rows = await db.products.findMany({
-            limit: pageSize,
-            offset: page * pageSize,
+          // Stream from your database using pagination to avoid memory overflow
+          // Even with millions of records, this keeps the server stable.
+          const products = await db.products.findMany({
+            take: pageSize,
+            skip: page * pageSize,
             select: { slug: true, updatedAt: true }
           })
-
-          if (rows.length === 0) break
-          entries.push(...rows.map(p => ({
+          
+          if (products.length === 0) break
+          
+          entries.push(...products.map(p => ({
             url: `/products/${p.slug}`,
             lastmod: p.updatedAt,
             changefreq: 'weekly',
             priority: 0.7
           })))
-          page += 1
+          
+          page++
         }
-
         return entries
       }
-    },
+    }
+  ],
+  incremental: {
+    compactInterval: '24h', // Perform background compaction every 24h
+    maxEntriesPerFile: 50000 // Threshold for auto-pagination
+  }
+}
+```
+
+---
+
+## 🔍 Storage & Hydration Details
+
+Understanding the underlying behavior of the Stellar architecture provides peace of mind when handling massive datasets:
+
+### 1. Where are the files stored?
+All Sitemap "states" are stored in your configured `logDir` (we recommend `.gravito/seo`).
+- **`sitemap.snapshot.json`**: This is your "source of truth"—the main snapshot database.
+- **`sitemap.ops.jsonl`**: The "append-only log" that records all changes since the last compaction.
+- **XML Files**: Automatically generated in your public directory based on the snapshot.
+
+### 2. Do I need to wait during the first deployment?
+**A one-time "Hydration" process is required**, but it is fully automated:
+- When you boot the app for the first time and no snapshot exists, Luminosity calls your `fetch` resolvers.
+- **Streaming Write**: This is the "Cold Start" phase. It streams data from your source into disk-based logs.
+- **Instant Boot Thereafter**: Once the snapshot is created, subsequent server restarts load the state in **milliseconds**, with no need to re-scan the database.
+
+### 3. How do I trigger updates?
+You don't need to manually delete files. Simply call `seo.add()` or `seo.remove()`. Changes are immediately written to the `.jsonl` log and merged into the main snapshot during the next background **Compaction**.
+
+---
+
+## ☁️ Cloud & Container Native
+
+If you are deploying with Docker/Kubernetes and utilizing **Auto-scaling**, the ephemeral nature of container storage requires a strategic approach:
+
+### 1. Shared Persistent Volumes (Recommended)
+Point `logDir` to a shared network file system like AWS EFS, Google Cloud Filestore, or a Kubernetes Persistent Volume (PV).
+- **Pros**: All instances share the same snapshot and logs, ensuring perfect consistency.
+- **Config Example (Docker Compose)**:
+  ```yaml
+  services:
+    app:
+      image: my-app:latest
+      volumes:
+        - efs-data:/app/.gravito/seo
+  volumes:
+    efs-data:
+      driver: local # Use cloud driver in production
+  ```
+
+### 2. Build-time Generation (SSG / Freeze)
+If your data doesn't change every minute, use `@gravito/freeze` during your CI/CD pipeline.
+- **Workflow**: Run `luminosity build` during Docker construction and bake the XML files directly into the image.
+- **Pros**: Fully stateless, ultra-scalable, and no need for external storage mounting.
+
+### 3. Leader Compaction
+In massive clusters, we recommend designating **one specific instance** as the "Leader" with write access to handle log compaction, while "Follower" instances stay in read-only mode for serving snapshots.
+
+### 4. Object Storage Mounting (S3/MinIO)
+Theoretically, Luminosity supports mounting S3/GCS buckets as local directories via **FUSE** or **CSI Drivers** (e.g., s3fs).
+- **Use Case**: Extreme cost optimization or infinite storage retention.
+- **Note**: Since S3 is not designed for low-latency random writes, we recommend increasing your write buffer (Batch Size) to minimize I/O overhead.
+
+---
+
+## 🛡️ Fault Tolerance
+
+Luminosity uses a **Parallel Isolation** strategy when executing resolvers:
+
+1.  **Independent Execution**: Each resolver runs as an independent Promise.
+2.  **Failure Isolation**: If one resolver (e.g., `products`) fails due to a DB timeout, **it does not block or crash other resolvers**.
+3.  **Graceful Degradation**: The failed resolver logs an error to the console and returns an empty array temporarily. This ensures `sitemap.xml` is still generated and your SEO service remains online.
+
+```typescript
+// Even if 'news-api' fails, 'static-pages' will still be generated
+resolvers: [
+  { name: 'static-pages', fetch: () => [...] },
+  { 
+    name: 'news-api', 
+    fetch: async () => {
+      // Suppose this throws an Error...
+      throw new Error('API Timeout') 
+    }
+  }
+]
+```
+
+---
+
+## 🎨 Advanced Features: Images, i18n & Robots
+
+Luminosity supports the full SEO protocol stack, not just basic URLs:
+
+### 1. Image Sitemaps
+For e-commerce or media platforms, image ranking is crucial. You can attach image metadata directly to your `SitemapEntry`:
+
+```typescript
+{
+  url: '/products/galaxy-s24',
+  images: [
     {
-      name: 'categories',
-      fetch: async () => {
-        const categories = await db.categories.all()
-        return categories.map(c => ({
-          url: `/categories/${c.slug}`,
-          lastmod: c.updatedAt,
-          changefreq: 'weekly',
-          priority: 0.6
-        }))
-      }
+      url: 'https://cdn.example.com/s24-titanium.jpg',
+      title: 'Galaxy S24 Titanium',
+      caption: 'The new Titanium Gray',
+      license: 'https://creativecommons.org/licenses/by/4.0/'
     }
   ]
 }
 ```
 
-This setup keeps your sitemap generation deterministic, while the engine handles the heavy lifting of index splitting and background compaction.
+### 2. Internationalization (i18n / hreflang)
+For global sites, Luminosity supports Google's `hreflang` standard to prevent duplicate content issues across different languages:
+
+```typescript
+{
+  url: '/en/about',
+  alternates: [
+    { lang: 'zh-TW', url: '/zh-tw/about' },
+    { lang: 'ja-JP', url: '/ja/about' }
+  ]
+}
+```
+
+### 3. Robots.txt & Branding
+Manage your `robots.txt` rules directly in the config, and even customize the XML footer watermark (Enterprise users can disable it):
+
+```typescript
+const config: SeoConfig = {
+  // ...
+  robots: {
+    // Automatically generates and appends Sitemap Link
+    rules: [
+      { userAgent: '*', allow: ['/'], disallow: ['/admin', '/private'] },
+      { userAgent: 'GPTBot', disallow: ['/'] } // Block AI crawlers
+    ]
+  },
+  branding: {
+    enabled: true, // Set false to hide "Generated by Luminosity"
+    watermark: 'Managed by MyCorp SEO Team'
+  }
+}
+```
+
+---
+
+## 🛠️ Ultimate Simplicity: From Deployment to Maintenance
+
+Many developers associate "millions of URLs" or "incremental architectures" with complex distributed systems. In Luminosity, this is simplified to the point of being "invisible":
+
+1.  **Deploy in One Second**: You don't need to install Redis, Kafka, or any external index databases. Just switch your `mode` to `incremental`, and the engine handles log management locally.
+2.  **Maintenance is "Set and Forget"**: Compaction tasks are executed automatically by background workers. No need to write cron jobs or manually manage sitemap files.
+3.  **No-Pain Scalability**: When your site grows from 1,000 URLs to 10M, your code **stays exactly the same**. Luminosity evolves automatically as your data scales.
+
+---
+
+## 💎 Why Luminosity is the Strongest SEO Engine?
+
+Luminosity isn't just a sitemap generator; it's a comprehensive solution for business success:
+
+1.  **Cross-Platform Consistency**: Whether using React (Ion) or Vue, Meta tag management is centralized on the server, solving SPA "invisibility".
+2.  **Babysitter-Level Scanning**: The built-in `routeScanner` syncs your routes in a single line of code.
+3.  **Zero-Config Tracking**: Automated script injection for GA4, Facebook Pixel, and Baidu with full CSP support.
+4.  **SSG Ready**: Deeply integrated with `@gravito/freeze` to bring enterprise SEO to static sites.
 
 > **Final Step**: Ready to go live? Check out the [Deployment Guide](/en/docs/guide/deployment).

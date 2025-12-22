@@ -21,7 +21,7 @@ my-gravito-app/
 │   ├── locales/         # 翻譯文件（國際化 I18n）
 │   ├── routes/          # 路由定義（Gravito 路由器）
 │   ├── services/        # 服務層（處理資料庫、外部 API）
-│   ├── bootstrap.ts     # 應用程式的「點火器」（Orbit 註冊中心）
+│   ├── bootstrap.ts     # 應用程式的「點火器」（Gravito 註冊中心）
 │   └── index.ts         # Bun 的主入口點
 ├── public/              # 靜態資源（圖片、robots.txt）
 ├── docs/                # 專案文件
@@ -31,18 +31,18 @@ my-gravito-app/
 
 ---
 
-## 核心哲學：行星與軌道 (Planets & Orbits)
+## 核心哲學：行星與軌道 (Planets & Kinetic Modules)
 
 要理解 Gravito 的運作方式，您需要掌握兩個核心概念：
 
 ### 1. PlanetCore (微核心)
 Gravito 的核心被刻意設計得非常微小。它不知道如何渲染 React，也不知道如何連接資料庫。它只負責管理 **生命週期 (Lifecycle)** 與 **服務容器 (Service Container)**。
 
-### 2. Orbits (基礎設施軌道)
+### 2. Kinetic Modules (基礎設施軌道)
 功能是以「軌道」的形式圍繞著核心旋轉並增加能力的：
-- 想要 React？加入 **Orbit Inertia**。
-- 想要 SEO？加入 **Orbit SEO**。
-- 需要資料庫？加入 **Orbit DB**。
+- 想要 React？加入 **Ion**。
+- 想要 SEO？加入 **Luminosity**。
+- 需要資料庫？加入 **Atlas**。
 
 這種「只為您使用的功能付費（效能開銷）」的方法，確保了您的應用無論規模大小，都能保持閃電般的速度。
 
@@ -53,12 +53,12 @@ Gravito 的核心被刻意設計得非常微小。它不知道如何渲染 React
 當您執行 `bun dev` 或 `bun run src/index.ts` 時，會發生以下過程：
 
 1. **點火 (Ignition - `index.ts`)**：Bun 啟動並呼叫 `bootstrap()`。
-2. **註冊 (Registration - `bootstrap.ts`)**：註冊所有必要的 Orbits。
+2. **註冊 (Registration - `bootstrap.ts`)**：註冊所有必要的 Kinetic Modules。
    ```typescript
-   core.orbit(OrbitInertia)
-   core.orbit(OrbitView)
+   core.orbit(GravitoInertia)
+   core.orbit(GravitoView)
    ```
-3. **啟動 (Booting)**：核心呼叫每個 Orbit 的 `boot()` 方法，準備 View 引擎或資料庫連線等服務。
+3. **啟動 (Booting)**：核心呼叫每個 Gravito 的 `boot()` 方法，準備 View 引擎或資料庫連線等服務。
 4. **升空 (Liftoff)**：HTTP 核心引擎開始監聽請求。
 
 ## 程式碼該寫在哪裡？

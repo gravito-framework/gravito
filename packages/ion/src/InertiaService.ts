@@ -102,9 +102,18 @@ export class InertiaService {
       pageUrl = this.context.req.url
     }
 
+    // Resolve lazy props (functions)
+    const resolveProps = (p: Record<string, unknown>) => {
+      const resolved: Record<string, unknown> = {}
+      for (const [key, value] of Object.entries(p)) {
+        resolved[key] = typeof value === 'function' ? value() : value
+      }
+      return resolved
+    }
+
     const page = {
       component,
-      props: { ...this.sharedProps, ...props },
+      props: resolveProps({ ...this.sharedProps, ...props }),
       url: pageUrl,
       version: this.config.version,
     }

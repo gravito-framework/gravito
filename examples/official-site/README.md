@@ -14,7 +14,7 @@ This website demonstrates the full power of the Gravito ecosystem, specifically 
 ### 1. **Core Architecture** (`@gravito/core`)
 - **Micro-Kernel**: Built on `gravito-core`, leveraging the lifecycle hook system for modularity.
 - **Hono Adapter**: Utilizing `hono` as the high-performance HTTP layer running on **Bun**.
-- **Orbit System**:
+- **Kinetic Modules**:
     - **@gravito/ion**: Seamless server-side routing with modern SPA user experience.
     - **@gravito/prism**: Server-side template rendering for critical SEO paths.
     - **@gravito/stasis**: Optimized caching strategies.
@@ -46,7 +46,7 @@ This website demonstrates the full power of the Gravito ecosystem, specifically 
 ```bash
 examples/official-site/
 ├── src/
-│   ├── bootstrap.ts       # App wiring (Core + Orbits + Middleware)
+│   ├── bootstrap.ts       # App wiring (Core + Modules + Middleware)
 │   ├── index.ts           # Entry point
 │   ├── config/            # SEO, App configurations
 │   ├── controllers/       # Backend logic (Home, Docs, API)

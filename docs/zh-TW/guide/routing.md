@@ -66,11 +66,24 @@ export class UserController {
 }
 ```
 
+### ⚡️ 現代化解構語法 (工匠風格)
+
+為了追求極致開發效率，Gravito 支援直接從 `Context` 中進行物件解構。這得益於我們底層基於 Proxy 的注入系統，您可以省略 `get()` 呼叫，直接以更簡潔的方式開發：
+
+```typescript
+// 更加簡潔的寫法！
+async list({ userService, inertia }: Context) {
+  const users = await userService.all()
+  return inertia.render('Users/Index', { users })
+}
+```
+```
+
 ### 存取服務 (Accessing Services)
-Gravito 的 `Context` 物件是您進入 Gravito 生態系統的入口。使用 `c.get()` 來存取各種 Orbits 與服務：
-- `c.get('inertia')`：Inertia 全端橋接器。
-- `c.get('view')`：樣板引擎。
-- `c.get('seo')`：SEO 標籤管理器。
+Gravito 的 `Context` 物件是您進入 Gravito 生態系統的入口。使用 `c.get()` 來存取各種動力模組與服務：
+- `c.get('inertia')`：**Ion** 全端橋接器。
+- `c.get('view')`：**Prism** 樣板引擎。
+- `c.get('seo')`：**Luminosity** 標籤管理器。
 
 ---
 
@@ -82,8 +95,8 @@ Gravito 的 `Context` 物件是您進入 Gravito 生態系統的入口。使用 
 |------|--------|-------------|
 | **JSON** | `c.json(data)` | 適用於 API 開發。 |
 | **HTML** | `c.html(string)` | 回傳原始 HTML 字串。 |
-| **Inertia** | `inertia.render(name, props)` | 回傳全端 React 視圖頁面。 |
-| **View** | `view.render(name, data)` | 回傳後端渲染的樣板頁面。 |
+| **Inertia** | `inertia.render(name, props)` | 回傳 **Ion** 全端 React 視圖頁面。 |
+| **View** | `view.render(name, data)` | 回傳 **Prism** 後端渲染的樣板頁面。 |
 | **重新導向**| `c.redirect(url)` | 將使用者導向其他網址。 |
 
 ---

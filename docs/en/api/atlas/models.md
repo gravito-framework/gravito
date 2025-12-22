@@ -4,12 +4,12 @@ title: Models
 
 # Models
 
-> 基於 Orbit DB + Drizzle 的類 Eloquent `Model` API。
+> An Eloquent-like `Model` API built on top of Atlas + Drizzle.
 
-## 定義 Model
+## Defining a Model
 
 ```ts
-import { Model } from '@gravito/orbit-db'
+import { Model } from '@gravito/atlas'
 
 export class User extends Model {
   static table = { _: { name: 'users' } }
@@ -23,18 +23,18 @@ export class User extends Model {
 }
 ```
 
-## Model 初始化方式
+## Bootstrapping Models
 
-Orbit DB 會在安裝時初始化 `ModelRegistry` 中已註冊的 Models。
+Atlas initializes models registered in `ModelRegistry` during installation.
 
 ```ts
-import { ModelRegistry } from '@gravito/orbit-db'
+import { ModelRegistry } from '@gravito/atlas'
 import { users } from './schema'
 
 ModelRegistry.register(User, users, 'users')
 ```
 
-## 常用靜態方法
+## Common Static APIs
 
 - `find(id)`
 - `where(column, value)` / `whereMany(where)`
@@ -44,25 +44,25 @@ ModelRegistry.register(User, users, 'users')
 - `firstOrCreate(where, data)` / `firstOrNew(where, data)` / `updateOrCreate(where, data)`
 - `count(where?)` / `exists(where)`
 
-## 常用實例方法
+## Instance APIs
 
 - `get(key)` / `set(key, value)`
 - `save()` / `update(data)`
 - `delete()` / `forceDelete()` / `restore()` / `trashed()`
-- 關聯：`await model.relation('posts')`、`await model.load(['posts'])`
+- Relations: `await model.relation('posts')`, `await model.load(['posts'])`
 
-## 填充保護、型別轉換與時間戳
+## Mass Assignment, Casts, and Timestamps
 
 - `static fillable` / `static guarded`
 - `static casts`
-- `static timestamps`、`static createdAtColumn`、`static updatedAtColumn`
-- 軟刪除：`static usesSoftDeletes`、`static deletedAtColumn`
+- `static timestamps`, `static createdAtColumn`, `static updatedAtColumn`
+- Soft deletes: `static usesSoftDeletes`, `static deletedAtColumn`
 
-## 序列化
+## Serialization
 
 - `static hidden` / `static visible`
 - `static appends`
-- `toJSON()` 會包含已載入關聯與追加屬性
+- `toJSON()` includes loaded relations and appended attributes
 
 ## Hooks
 

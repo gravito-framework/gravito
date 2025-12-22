@@ -63,7 +63,7 @@ router.prefix('/:locale(en|zh|ja)').group((r) => {
 
 ## 🚀 Usage in Controllers
 
-Gravito's I18n orbit automatically handles the locale detection. You just need to fetch the right strings.
+Gravito's Cosmos module automatically handles the locale detection. You just need to fetch the right strings.
 
 ```typescript
 import { getTranslation } from '../services/I18nService'

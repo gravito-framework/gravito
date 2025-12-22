@@ -204,7 +204,7 @@ import type { GravitoContext } from 'gravito-core'
 - **2025-12-21**: Phase 2 complete - PlanetCore adapter integration
   - Added `_adapter` property to PlanetCore
   - `app` is now a getter returning `adapter.native`
-  - All orbit modules have GravitoVariables augmentation
+  - All Kinetic modules have GravitoVariables augmentation
   - Migration guide created at `docs/en/guide/migration-http-abstraction.md`
 - **2025-12-21**: Phase 1 complete - Created abstraction layer
 

@@ -4,7 +4,7 @@ title: 外掛開發指南
 
 # 外掛開發指南
 
-> 如何為 Gravito Galaxy 架構開發 Satellites (衛星) 與 Orbits (軌道)
+> 如何為 Gravito Galaxy 架構開發 Satellites (衛星) 與 Orbits (動力模組)
 
 Gravito 是一個微核心框架，其威力來自於生態系。本指南將協助您開發自己的擴充功能。
 
@@ -15,8 +15,8 @@ Gravito 是一個微核心框架，其威力來自於生態系。本指南將協
 | 術語 | 概念 | 用途 | 範例 |
 |------|------|------|------|
 | **PlanetCore** | 微核心 | 生命週期、Hooks、設定 | `gravito-core` |
-| **Orbit** | 基礎設施模組 | 資料庫、驗證、儲存 | `@gravito/atlas` |
-| **Satellite** | 業務邏輯外掛 | 使用 Orbit 的功能 | `user-plugin`, `blog-plugin` |
+| **Gravito** | 基礎設施模組 | 資料庫、驗證、儲存 | `@gravito/atlas` |
+| **Satellite** | 業務邏輯外掛 | 使用 Gravito 的功能 | `user-plugin`, `blog-plugin` |
 
 ---
 
@@ -58,7 +58,7 @@ import { PlanetCore } from 'gravito-core'
 
 export default function userSatellite(core: PlanetCore) {
   router.post('/users', async (c) => {
-    // 從 Context 獲取 Orbit 服務
+    // 從 Context 獲取 Gravito 服務
     const db = c.get('db')     // 由 @gravito/atlas 提供
     const auth = c.get('auth') // 由 @gravito/sentinel 提供
 
@@ -75,7 +75,7 @@ export default function userSatellite(core: PlanetCore) {
 
 ## 開發 Orbits (軌道)
 
-Orbit 是更底層的擴充，負責提供基礎設施服務。在 v0.3+ 中，Orbits 應實作 `GravitoOrbit` 介面以支援 IoC。
+Gravito 是更底層的擴充，負責提供基礎設施服務。在 v0.3+ 中，Orbits 應實作 `GravitoOrbit` 介面以支援 IoC。
 
 ### 設計原則
 
@@ -93,23 +93,23 @@ export interface GravitoOrbit {
 }
 ```
 
-### 基於類別的 Orbit 範例
+### 基於類別的 Gravito 範例
 
 ```typescript
 // orbit-custom.ts
 import { PlanetCore, GravitoOrbit } from 'gravito-core'
 import type { GravitoContext as Context, Next } from 'gravito-core'
 
-export interface CustomOrbitConfig {
+export interface CustomGravitoConfig {
   apiKey: string
   timeout?: number
 }
 
-export class OrbitCustom implements GravitoOrbit {
-  constructor(private options?: CustomOrbitConfig) {}
+export class GravitoCustom implements GravitoOrbit {
+  constructor(private options?: CustomGravitoConfig) {}
 
   install(core: PlanetCore): void {
-    const config = this.options ?? core.config.get<CustomOrbitConfig>('custom')
+    const config = this.options ?? core.config.get<CustomGravitoConfig>('custom')
     const service = new CustomService(config)
 
     core.hooks.doAction('custom:init', service)
@@ -119,13 +119,13 @@ export class OrbitCustom implements GravitoOrbit {
       await next()
     })
 
-    core.logger.info('OrbitCustom 已安裝')
+    core.logger.info('GravitoCustom 已安裝')
   }
 }
 
 // 匯出函式 API 以保持向後相容
-export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
-  const orbit = new OrbitCustom(config)
+export function orbitCustom(core: PlanetCore, config: CustomGravitoConfig) {
+  const orbit = new GravitoCustom(config)
   orbit.install(core)
 }
 ```
@@ -139,7 +139,7 @@ export function orbitCustom(core: PlanetCore, config: CustomOrbitConfig) {
 ```typescript
 // gravito.config.ts
 import { PlanetCore, defineConfig } from 'gravito-core'
-import { OrbitCustom } from './orbit-custom'
+import { GravitoCustom } from './orbit-custom'
 
 const config = defineConfig({
   config: {
@@ -148,7 +148,7 @@ const config = defineConfig({
       timeout: 5000
     }
   },
-  orbits: [OrbitCustom] // 自動解析設定
+  orbits: [GravitoCustom] // 自動解析設定
 })
 
 const core = await PlanetCore.boot(config)
@@ -157,7 +157,7 @@ export default core.liftoff()
 
 ### 資料庫整合
 
-若您的 Orbit 需要資料庫表格：
+若您的 Gravito 需要資料庫表格：
 
 1. **請勿在 `install()` 中自動執行 Migration**。
 2. 在您的套件中提供標準的 Drizzle migration 檔案。
@@ -173,7 +173,7 @@ export default core.liftoff()
 |------|------|------|
 | **Hook 名稱** | 使用 `:` 分隔 | `auth:login`, `db:connect` |
 | **Context key** | 小駝峰 | `db`, `auth`, `storage` |
-| **Orbit 類別** | `Orbit` 前綴 | `OrbitDB`, `OrbitAuth` |
+| **Gravito 類別** | `Gravito` 前綴 | `GravitoDB`, `GravitoAuth` |
 
 ### 型別安全
 
@@ -196,13 +196,13 @@ declare module 'gravito-core' {
 // orbit-custom.test.ts
 import { describe, it, expect } from 'bun:test'
 import { PlanetCore } from 'gravito-core'
-import { OrbitCustom } from './orbit-custom'
+import { GravitoCustom } from './orbit-custom'
 
-describe('OrbitCustom', () => {
+describe('GravitoCustom', () => {
   it('應該使用設定初始化', async () => {
     const core = await PlanetCore.boot({
       config: { custom: { apiKey: 'test-key' } },
-      orbits: [OrbitCustom],
+      orbits: [GravitoCustom],
     })
 
     // 驗證服務可用
@@ -213,13 +213,13 @@ describe('OrbitCustom', () => {
 
 ---
 
-## 發佈 Orbit
+## 發佈 Gravito
 
 1. **儲存庫結構：**
    ```
    orbit-custom/
    ├── src/
-   │   ├── index.ts      # 匯出 OrbitCustom 類別
+   │   ├── index.ts      # 匯出 GravitoCustom 類別
    │   └── types.ts      # TypeScript 宣告
    ├── package.json
    ├── tsconfig.json
@@ -240,7 +240,7 @@ describe('OrbitCustom', () => {
    ```
 
 3. **記錄您的 Hooks：**
-   - 列出您的 Orbit 觸發的所有 hooks
+   - 列出您的 Gravito 觸發的所有 hooks
    - 解釋參數和預期的回傳值
 
 ---

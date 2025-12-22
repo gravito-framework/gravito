@@ -25,9 +25,9 @@ As your application grows, Gravito allows you to decouple logic into independent
 
 ---
 
-## 📡 Universal Orbit Queue
+## 📡 Universal Kinetic Queue
 
-The Universal Orbit Queue is Gravito's solution for infrastructure-agnostic background processing.
+The Universal Kinetic Queue is Gravito's solution for infrastructure-agnostic background processing.
 
 ### Multi-Driver Support
 Gravito aims to support all major message queue drivers out of the box:
@@ -41,7 +41,7 @@ Your business logic remains pure. You interact with the `Queue` interface, and t
 
 ```typescript
 // Sending a job to the queue
-import { Queue } from '@gravito/orbit-queue'
+import { Queue } from '@gravito/stream'
 
 await Queue.push(new SendWelcomeEmail(user))
 ```

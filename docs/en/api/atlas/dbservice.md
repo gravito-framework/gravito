@@ -44,7 +44,7 @@ await db.transaction(async (tx) => {
 
 ## Relations
 
-Orbit DB provides relation helpers that rely on Drizzle `db.raw.query.*`:
+Atlas provides relation helpers that rely on Drizzle `db.raw.query.*`:
 
 - `findByIdWith(tableName, id, relations)`
 - `findOneWith(tableName, where, relations)`

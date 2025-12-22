@@ -1,27 +1,27 @@
 ---
-title: Orbit Inertia
+title: Ion
 ---
 
-# Orbit Inertia
+# Ion
 
 > 在後端 MVC 與前端 React/Vue 元件之間實現無縫整合。
 
 ## 安裝
 
 ```bash
-bun add @gravito/orbit-inertia @inertiajs/react
+bun add @gravito/ion @inertiajs/react
 ```
 
 ## 設定
 
-Orbit Inertia 是一個 "基礎設施 Orbit"，如果在 `gravito.config.ts` 中偵測到就會自動掛載。
+Ion 是一個 "基礎設施動力模組"，如果在 `gravito.config.ts` 中偵測到就會自動掛載。
 
 ```typescript
 // gravito.config.ts
-import { OrbitInertia } from '@gravito/orbit-inertia';
+import { OrbitIon } from '@gravito/ion';
 
 export default defineConfig({
-    orbits: [OrbitInertia],
+    orbits: [OrbitIon],
     config: {
         inertia: {
             rootView: 'app.html',
@@ -39,7 +39,7 @@ export default defineConfig({
 
 ```typescript
 // src/controllers/HomeController.ts
-import { InertiaService } from '@gravito/orbit-inertia';
+import { InertiaService } from '@gravito/ion';
 
 export class HomeController {
     index(c: Context) {
@@ -79,7 +79,7 @@ export default function Home({ user, latest_posts }: Props) {
 
 ```typescript
 // src/middleware/HandleInertiaRequests.ts
-import { InertiaService } from '@gravito/orbit-inertia';
+import { InertiaService } from '@gravito/ion';
 
 export const handleInertiaRequests = async (c: Context, next: Next) => {
     const inertia = c.get('inertia') as InertiaService;
