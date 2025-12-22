@@ -103,6 +103,17 @@ export declare class PlanetCore {
     config?: Record<string, unknown>
     adapter?: HttpAdapter
   })
+  /**
+   * Programmatically register an infrastructure module (Orbit).
+   * @since 2.0.0
+   */
+  orbit(orbit: GravitoOrbit | (new () => GravitoOrbit)): Promise<this>
+  /**
+   * Programmatically register a feature module (Satellite).
+   * Alias for register() with provider support.
+   * @since 2.0.0
+   */
+  use(satellite: ServiceProvider | ((core: PlanetCore) => void | Promise<void>)): Promise<this>
   registerGlobalErrorHandlers(
     options?: Omit<RegisterGlobalErrorHandlersOptions, 'core'>
   ): () => void

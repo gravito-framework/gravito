@@ -8,7 +8,9 @@
 import type { GravitoConfig } from './PlanetCore'
 export declare const VERSION: string
 export {
+  createGravitoAdapter,
   createHonoAdapter,
+  GravitoAdapter,
   HonoAdapter,
   HonoContextWrapper,
   HonoRequestWrapper,

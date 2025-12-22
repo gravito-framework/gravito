@@ -50,8 +50,12 @@ declare class HonoContextWrapper<V extends GravitoVariables = GravitoVariables>
 {
   private honoCtx
   private _req
-  private _statusCode
   constructor(honoCtx: Context)
+  /**
+   * Create a proxied instance to enable object destructuring of context variables
+   * This allows: async list({ userService }: Context)
+   */
+  static create<V extends GravitoVariables = GravitoVariables>(honoCtx: Context): GravitoContext<V>
   get req(): GravitoRequest
   json<T>(data: T, status?: number): Response
   text(text: string, status?: number): Response
@@ -85,27 +89,20 @@ declare function toHonoMiddleware<V extends GravitoVariables>(
   middleware: GravitoMiddleware<V>
 ): MiddlewareHandler
 /**
- * Default HTTP adapter using Hono as the underlying engine.
+ * Default HTTP adapter using the optimized Gravito Core Engine.
  *
- * This adapter wraps Hono to provide a consistent interface that can be
- * swapped out for other implementations (custom Bun, etc.) without changing
- * application code.
+ * This adapter provides a consistent interface that can be
+ * swapped out for other implementations without changing application code.
  *
  * @example
  * ```typescript
- * import { HonoAdapter } from '@gravito/core/adapters'
+ * import { GravitoAdapter } from '@gravito/core'
  *
- * const adapter = new HonoAdapter()
+ * const adapter = new GravitoAdapter()
  *
  * // Register routes
  * adapter.route('get', '/hello', async (ctx) => {
  *   return ctx.json({ message: 'Hello, World!' })
- * })
- *
- * // Serve with Bun
- * Bun.serve({
- *   port: 3000,
- *   fetch: adapter.fetch
  * })
  * ```
  */
@@ -149,4 +146,15 @@ export declare function createHonoAdapter<V extends GravitoVariables = GravitoVa
   config?: AdapterConfig
 ): HonoAdapter<V>
 export { HonoContextWrapper, HonoRequestWrapper, toHonoHandler, toHonoMiddleware }
+/**
+ * Rebranded alias for HonoAdapter.
+ * @category Rebranding
+ */
+export declare const GravitoAdapter: typeof HonoAdapter
+export type GravitoAdapter<V extends GravitoVariables = GravitoVariables> = HonoAdapter<V>
+/**
+ * Rebranded alias for createHonoAdapter.
+ * @category Rebranding
+ */
+export declare const createGravitoAdapter: typeof createHonoAdapter
 //# sourceMappingURL=HonoAdapter.d.ts.map

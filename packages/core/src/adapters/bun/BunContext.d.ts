@@ -17,6 +17,15 @@ export declare class BunContext<V extends GravitoVariables = GravitoVariables>
   res: Response | undefined
   readonly native: unknown
   constructor(request: Request, env?: Record<string, unknown>, executionCtx?: ExecutionContext)
+  /**
+   * Create a proxied instance to enable object destructuring of context variables
+   * This allows: async list({ userService }: Context)
+   */
+  static create<V extends GravitoVariables = GravitoVariables>(
+    request: Request,
+    env?: Record<string, unknown>,
+    executionCtx?: ExecutionContext
+  ): GravitoContext<V>
   json<T>(data: T, status?: ContentfulStatusCode): Response
   text(text: string, status?: ContentfulStatusCode): Response
   html(html: string, status?: ContentfulStatusCode): Response
