@@ -1,7 +1,7 @@
 import { OrbitIon } from '@gravito/ion'
 import { OrbitPrism } from '@gravito/prism'
 import { OrbitCache } from '@gravito/stasis'
-import { defineConfig, PlanetCore } from 'gravito-core'
+import { defineConfig, HonoAdapter, PlanetCore } from 'gravito-core'
 import { serveStatic } from 'hono/bun'
 import { registerHooks } from './hooks'
 import { registerRoutes } from './routes'
@@ -26,6 +26,7 @@ export async function bootstrap(options: AppConfig = {}): Promise<PlanetCore> {
     },
     // Add OrbitIon
     orbits: [OrbitCache, OrbitPrism, OrbitIon],
+    adapter: new HonoAdapter(),
   })
 
   // 2. Boot
@@ -33,15 +34,16 @@ export async function bootstrap(options: AppConfig = {}): Promise<PlanetCore> {
   core.registerGlobalErrorHandlers()
 
   // 3. Static files
-  core.app.use('/static/*', serveStatic({ root: './' }))
-  core.app.get('/favicon.ico', serveStatic({ path: './static/favicon.ico' }))
+  const app = core.app as any
+  app.use('/static/*', serveStatic({ root: './' }))
+  app.get('/favicon.ico', serveStatic({ path: './static/favicon.ico' }))
 
   // 3.1 SEO Middleware (Eat our own dog food)
   const { gravitoSeo } = await import('@gravito/luminosity-adapter-hono')
   const { seoConfig } = await import('./config/seo')
 
   // Mounted at root to catch /sitemap.xml and /robots.txt
-  core.app.use('*', gravitoSeo(seoConfig))
+  app.use('*', gravitoSeo(seoConfig))
 
   // 4. Proxy Vite dev server in development mode
   if (process.env.NODE_ENV !== 'production') {

@@ -8,8 +8,29 @@
 
 @layer base {
     body {
-        @apply antialiased text-gray-900 bg-white;
+        @apply antialiased text-gray-900 bg-void;
+        /* 
+         * Smooth Entry:
+         * Removed translateY(5px) to eliminate the "pop" jump effect reported by the user.
+         */
+        animation: fadeIn 0.3s ease-in-out;
     }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* 
+     * 🔥 View Transitions:
+     * Enable smooth cross-fade between pages for modern browsers,
+     * making the static site feel like a high-end application.
+     */
 
     /* Dark mode support needs to be handled via media query or selector in v4 if not using variant */
     @media (prefers-color-scheme: dark) {
@@ -39,13 +60,13 @@
 
     /* Fix shiki-generated div height issue inside code blocks */
     /* Use display: contents to make div not affect layout */
-    .prose pre code > div,
+    .prose pre code>div,
     .prose pre code div {
         display: contents !important;
     }
 
     /* Fallback: if contents doesn't work, use block with forced height */
-    .prose pre code > div:not(:empty),
+    .prose pre code>div:not(:empty),
     .prose pre code div:not(:empty) {
         min-height: 0 !important;
         height: fit-content !important;
@@ -63,7 +84,7 @@
         max-height: none !important;
     }
 
-    .shiki-container pre code > div,
+    .shiki-container pre code>div,
     .shiki-container pre code div {
         display: contents !important;
     }
@@ -189,4 +210,7 @@
     .h-scrollbar::-webkit-scrollbar-thumb {
         @apply bg-white/5 rounded-full hover:bg-singularity/30 transition-all border-2 border-transparent bg-clip-padding;
     }
+
+
+
 }

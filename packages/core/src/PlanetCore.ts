@@ -537,6 +537,7 @@ export class PlanetCore {
     const core = new PlanetCore({
       ...(config.logger && { logger: config.logger }),
       ...(config.config && { config: config.config }),
+      ...(config.adapter && { adapter: config.adapter }),
     })
 
     if (config.orbits) {

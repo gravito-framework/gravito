@@ -1,8 +1,9 @@
-import { Head, Link, router, usePage } from '@inertiajs/react'
+import { Head, router, usePage } from '@inertiajs/react'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { ChevronRight, Clock, Edit2, Github, MapPin } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Layout from '../components/Layout'
+import { isStaticSite, StaticLink } from '../components/StaticLink'
 import { useTrans } from '../hooks/useTrans'
 
 interface SidebarItem {
@@ -206,6 +207,9 @@ export default function Docs() {
         const isAnchor = href?.startsWith('#')
 
         if (href && !isExternal && !isAnchor) {
+          if (isStaticSite()) {
+            return // Let browser handle it for static site
+          }
           e.preventDefault()
           router.visit(href)
         }
@@ -278,13 +282,12 @@ export default function Docs() {
                     const isActive = currentPath === item.path
                     return (
                       <li key={item.path}>
-                        <Link
+                        <StaticLink
                           href={item.path}
-                          className={`block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent ${
-                            isActive
-                              ? 'text-singularity font-bold border-white/5 bg-white/[0.03] shadow-[0_0_20px_rgba(20,241,149,0.05)]'
-                              : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
-                          }`}
+                          className={`block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent ${isActive
+                            ? 'text-singularity font-bold border-white/5 bg-white/[0.03] shadow-[0_0_20px_rgba(20,241,149,0.05)]'
+                            : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
+                            }`}
                         >
                           <div className="flex items-center gap-3">
                             {isActive && (
@@ -310,7 +313,7 @@ export default function Docs() {
                               <MapPin size={12} />
                             </div>
                           )}
-                        </Link>
+                        </StaticLink>
                       </li>
                     )
                   })}
@@ -335,8 +338,8 @@ export default function Docs() {
 
         <main className="min-w-0 flex-1">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="group/panel bg-panel/10 border border-white/5 rounded-[40px] p-8 md:p-14 backdrop-blur-2xl shadow-[0_40px_120px_-20px_rgba(0,0,0,0.7)] relative overflow-hidden"
           >
@@ -352,9 +355,9 @@ export default function Docs() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-                  <Link href={isZh ? '/zh' : '/'} className="hover:text-white transition-colors">
+                  <StaticLink href={isZh ? '/zh' : '/'} className="hover:text-white transition-colors">
                     SINGULARITY
-                  </Link>
+                  </StaticLink>
                   <ChevronRight size={10} className="opacity-20" />
                   <span className="text-singularity/60">{trans('nav.docs', 'Docs')}</span>
                   <ChevronRight size={10} className="opacity-20" />
@@ -483,7 +486,7 @@ export default function Docs() {
               return (
                 <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                   {prev ? (
-                    <Link
+                    <StaticLink
                       href={prev.path}
                       className="group p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-singularity/30 transition-all flex flex-col items-start gap-4"
                     >
@@ -494,13 +497,13 @@ export default function Docs() {
                       <span className="text-lg font-black italic text-gray-400 group-hover:text-white transition-colors">
                         {prev.title}
                       </span>
-                    </Link>
+                    </StaticLink>
                   ) : (
                     <div />
                   )}
 
                   {next ? (
-                    <Link
+                    <StaticLink
                       href={next.path}
                       className="group p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-singularity/30 transition-all flex flex-col items-end gap-4 text-right"
                     >
@@ -511,7 +514,7 @@ export default function Docs() {
                       <span className="text-lg font-black italic text-gray-400 group-hover:text-white transition-colors">
                         {next.title}
                       </span>
-                    </Link>
+                    </StaticLink>
                   ) : (
                     <div />
                   )}
@@ -538,11 +541,10 @@ export default function Docs() {
                           <li key={item.id} className={`${indent} relative`}>
                             <a
                               href={`#${item.id}`}
-                              className={`block text-[13px] leading-relaxed transition-all duration-300 ${
-                                isActive
-                                  ? 'text-singularity font-black tracking-tight translate-x-1'
-                                  : 'text-gray-400 hover:text-white'
-                              }`}
+                              className={`block text-[13px] leading-relaxed transition-all duration-300 ${isActive
+                                ? 'text-singularity font-black tracking-tight translate-x-1'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
                             >
                               {item.text}
                             </a>

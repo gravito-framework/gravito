@@ -319,6 +319,13 @@ async function build() {
   await writeFile(join(outputDir, 'docs', 'index.html'), docsRedirectHtml)
   console.log('✅ /docs redirect created')
 
+  // Create redirect for /about to /en/about
+  console.log('🔄 Creating /about redirect...')
+  const aboutRedirectHtml = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/en/about" /><script>window.location.href='/en/about';</script></head><body>Redirecting to <a href="/en/about">/en/about</a>...</body></html>`
+  await mkdir(join(outputDir, 'about'), { recursive: true })
+  await writeFile(join(outputDir, 'about', 'index.html'), aboutRedirectHtml)
+  console.log('✅ /about redirect created')
+
   // Copy root assets (favicon, manifest) from static to root
   const rootAssets = [
     'favicon.ico',

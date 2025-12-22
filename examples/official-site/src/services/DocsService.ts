@@ -36,6 +36,18 @@ export interface SidebarItem {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: Utility namespace for docs processing
 export class DocsService {
+  private static highlighter: any = null
+
+  private static async getHighlighter() {
+    if (!DocsService.highlighter) {
+      DocsService.highlighter = await createHighlighter({
+        themes: ['rose-pine-moon', 'github-dark'],
+        langs: ['ts', 'js', 'bash', 'json', 'yaml', 'markdown', 'typescript', 'html', 'css'],
+      })
+    }
+    return DocsService.highlighter
+  }
+
   private static stripLeadingEmoji(value: string): string {
     // biome-ignore lint/suspicious/noMisleadingCharacterClass: Emoji regex
     return value.replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D]+[\s]+/u, '').trim()
@@ -163,11 +175,8 @@ export class DocsService {
       const raw = await fs.readFile(filePath, 'utf-8')
       const { data, content } = matter(raw)
 
-      // Initialize shiki highlighter
-      const highlighter = await createHighlighter({
-        themes: ['rose-pine-moon', 'github-dark'],
-        langs: ['ts', 'js', 'bash', 'json', 'yaml', 'markdown', 'typescript', 'html', 'css'],
-      })
+      // Get singleton highlighter
+      const highlighter = await DocsService.getHighlighter()
 
       // Configure marked with shiki
       const markedOptions = {
@@ -215,11 +224,11 @@ export class DocsService {
         if (finalHref.startsWith('./')) {
           const currentDir = slug.includes('/') ? slug.split('/').slice(0, -1).join('/') : ''
           const target = finalHref.replace(/^\.\//, '')
-          const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+          const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
           finalHref = currentDir ? `${prefix}/${currentDir}/${target}` : `${prefix}/${target}`
         } else if (finalHref.startsWith('../')) {
           // Basic parent dir support
-          const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+          const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
           finalHref = finalHref.replace(/^\.\.\//, `${prefix}/`)
         } else if (
           !finalHref.startsWith('http') &&
@@ -227,7 +236,7 @@ export class DocsService {
           !finalHref.startsWith('#')
         ) {
           // Case: "routing" instead of "./routing"
-          const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+          const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
           finalHref = `${prefix}/${finalHref}`
         }
 
@@ -246,9 +255,6 @@ export class DocsService {
       const leading = DocsService.extractAndRemoveLeadingH1(html)
       const processed = DocsService.addHeadingIdsAndToc(leading.html)
 
-      // Dispose highlighter to save memory if needed (though static might keep it)
-      // highlighter.dispose()
-
       return {
         title: (data.title as string) || leading.h1Text || 'Untitled',
         content: processed.html,
@@ -266,7 +272,7 @@ export class DocsService {
    * In a real app, this would walk the directory.
    */
   static getSidebar(locale: string): SidebarItem[] {
-    const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
+    const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
     const trans =
       locale === 'zh'
         ? {
@@ -279,6 +285,7 @@ export class DocsService {
             seo: 'SmartMap SEO 引擎',
             i18n: '國際化 (I18n)',
             image: '圖片優化 (Image)',
+            ssg: '靜態網站開發',
             deploy: '部署指南',
             api: 'API 參考',
             orbit_core: 'Core 核心',
@@ -295,6 +302,7 @@ export class DocsService {
             seo: 'SmartMap SEO Engine',
             i18n: 'Internationalization',
             image: 'Image Optimization',
+            ssg: 'Static Site Development',
             deploy: 'Deployment',
             api: 'API Reference',
             orbit_core: 'Core Kernel',
@@ -315,21 +323,10 @@ export class DocsService {
           { title: trans.seo, path: `${prefix}/guide/seo-engine` },
           { title: trans.i18n, path: `${prefix}/guide/i18n-guide` },
           { title: trans.image, path: `${prefix}/guide/image-optimization` },
+          { title: trans.ssg, path: `${prefix}/guide/static-site-development` },
           { title: trans.deploy, path: `${prefix}/guide/deployment` },
         ],
       },
-      // Hided for v1.0 release
-      /*
-      {
-        title: trans.api,
-        path: '#',
-        children: [
-          { title: trans.orbit_core, path: `${prefix}/api/core` },
-          { title: trans.orbit_inertia, path: `${prefix}/api/orbit-inertia` },
-          { title: trans.orbit_seo, path: `${prefix}/api/orbit-seo` },
-        ],
-      },
-      */
     ]
   }
 }

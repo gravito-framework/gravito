@@ -1,4 +1,3 @@
-import type { LinkProps } from '@inertiajs/react'
 import { Link } from '@inertiajs/react'
 import type React from 'react'
 
@@ -9,30 +8,42 @@ import type React from 'react'
  *
  * 注意：請根據您的實際生產環境域名更新 staticDomains 陣列
  */
-function isStaticSite(): boolean {
+export function isStaticSite(): boolean {
   if (typeof window === 'undefined') {
     return false
   }
 
   const hostname = window.location.hostname
+  const port = window.location.port
 
-  // 在此添加您的生產環境域名
-  // 這些域名會被視為靜態網站環境
+  // 🔥 Static preview server detection:
+  // Port 4173 is used by `bun run build:preview` which serves the compiled static files.
+  // In this mode, there's no Inertia backend, so we must use regular <a> tags.
+  if ((hostname === 'localhost' || hostname === '127.0.0.1') && port === '4173') {
+    return true
+  }
+
+  // 🔥 Development mode with Inertia backend (port 3000/5173):
+  // Using Inertia's <Link> allows for smooth SPA transitions.
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return false
+  }
+
+  // Production domains that should use hard reloads for safety on static CDNs
   const staticDomains = [
     'gravito.dev',
-    // 如果需要，可以添加 GitHub Pages 模式
-    // hostname.includes('github.io')
-    // 或添加其他靜態託管平台
-    // hostname.includes('vercel.app')
-    // hostname.includes('netlify.app')
+    'gravito-framework.github.io'
   ]
 
   return staticDomains.includes(hostname)
 }
 
-interface StaticLinkProps extends LinkProps {
+interface StaticLinkProps {
+  href: string | undefined | null
   children: React.ReactNode
   className?: string
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  [key: string]: any
 }
 
 /**
@@ -70,7 +81,7 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
 
   // 在動態環境中，使用 Inertia 的 Link 組件
   return (
-    <Link href={href} className={className} onClick={onClick} {...props}>
+    <Link href={href as any} className={className} onClick={onClick as any} {...props}>
       {children}
     </Link>
   )
