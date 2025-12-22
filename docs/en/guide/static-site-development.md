@@ -2,338 +2,419 @@
 title: Static Site Development Guide
 ---
 
-# 📦 Static Site Generation (SSG) Development Guide
+# 📦 Static Site Generation (SSG) with Gravito
 
-This guide documents the key differences between development mode (SSR with Inertia.js) and static site generation (SSG), along with best practices to ensure your code works correctly in both environments.
+Build blazing-fast static sites from your Gravito applications using `@gravito/freeze`.
 
-## 🎯 Overview
+## 🚀 Quick Start
 
-Gravito supports two deployment modes:
-
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| **SSR (Development)** | Full-stack with Inertia.js SPA navigation | Development, dynamic apps |
-| **SSG (Production)** | Pre-rendered static HTML files | Documentation sites, static hosting (GitHub Pages, Cloudflare Pages) |
-
-**⚠️ Critical Understanding**: In SSG mode, there is **no backend server** to handle Inertia requests. All navigation must use standard HTML links.
-
----
-
-## 🚨 Common Pitfalls & Solutions
-
-### 1. Inertia Link Component Issues
-
-**Problem**: Inertia's `<Link>` component causes issues in static sites:
-- Black mask overlay appears during navigation
-- New tabs open unexpectedly
-- Navigation hangs or loops
-
-**Root Cause**: Inertia `Link` tries to make XHR requests to the backend, but in SSG mode there is no backend.
-
-**Solution**: Use the `StaticLink` component instead:
-
-```tsx
-// ❌ DON'T use Inertia Link directly
-import { Link } from '@inertiajs/react'
-<Link href="/docs">Docs</Link>
-
-// ✅ DO use StaticLink wrapper
-import { StaticLink } from '../components/StaticLink'
-<StaticLink href="/docs">Docs</StaticLink>
-```
-
-**StaticLink Implementation**:
-```tsx
-// src/client/components/StaticLink.tsx
-import { Link } from '@inertiajs/react'
-import type { ComponentProps, ReactNode } from 'react'
-
-type LinkProps = ComponentProps<typeof Link>
-
-interface StaticLinkProps extends Omit<LinkProps, 'href'> {
-  href: string
-  children: ReactNode
-}
-
-/**
- * Detect if we're running in a static site environment
- */
-export function isStaticSite(): boolean {
-  if (typeof window === 'undefined') return false
-  
-  const hostname = window.location.hostname
-  const port = window.location.port
-  
-  // Static preview server (bun preview.ts)
-  if (hostname === 'localhost' && port === '4173') return true
-  
-  // GitHub Pages
-  if (hostname.endsWith('.github.io')) return true
-  
-  // Production domain
-  if (hostname === 'gravito.dev') return true
-  
-  // Cloudflare Pages, Vercel, Netlify
-  if (hostname.endsWith('.pages.dev')) return true
-  if (hostname.endsWith('.vercel.app')) return true
-  if (hostname.endsWith('.netlify.app')) return true
-  
-  return false
-}
-
-/**
- * Smart link component that uses native <a> for static sites
- * and Inertia Link for SSR mode
- */
-export function StaticLink({ href, children, className, ...props }: StaticLinkProps) {
-  // In static site mode, use native anchor for reliable navigation
-  if (isStaticSite()) {
-    return (
-      <a href={href} className={className}>
-        {children}
-      </a>
-    )
-  }
-
-  // In SSR mode, use Inertia Link for SPA navigation
-  return (
-    <Link href={href} className={className} {...props}>
-      {children}
-    </Link>
-  )
-}
-```
-
-**Vue StaticLink Implementation**:
-```vue
-<!-- src/client/components/StaticLink.vue -->
-<template>
-  <component :is="linkComponent" v-bind="linkProps">
-    <slot />
-  </component>
-</template>
-
-<script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
-import { computed } from 'vue'
-
-interface Props {
-  href: string
-  class?: string
-  [key: string]: unknown
-}
-
-const props = defineProps<Props>()
-
-function isStaticSite(): boolean {
-  if (typeof window === 'undefined') return false
-  
-  const hostname = window.location.hostname
-  const port = window.location.port
-  
-  // Static preview server (bun preview.ts)
-  if (hostname === 'localhost' && port === '4173') return true
-  
-  // Production domains
-  if (hostname.includes('github.io')) return true
-  if (hostname.includes('vercel.app')) return true
-  
-  return false
-}
-
-const isStatic = isStaticSite()
-
-const linkComponent = computed(() => isStatic ? 'a' : Link)
-const linkProps = computed(() => {
-  if (isStatic) {
-    const { href, class: className, ...rest } = props
-    return { href, class: className, ...rest }
-  }
-  return props
-})
-</script>
-```
-
----
-
-### 2. Locale Path Prefix Issues
-
-**Problem**: Links missing locale prefix (`/en/` or `/zh/`) cause 404 errors or infinite redirects.
-
-**Example of incorrect behavior**:
-```
-Expected: /en/docs/guide/routing
-Actual:   /docs/guide/routing  ← 404!
-```
-
-**Solution**: Always use locale prefix for ALL locales (including English):
-
-```typescript
-// ❌ DON'T assume English is the default without prefix
-const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
-
-// ✅ DO include prefix for all locales
-const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
-```
-
-**Apply this to**:
-- Sidebar link generation (`DocsService.getSidebar()`)
-- Markdown link transformation (`renderer.link`)
-- Navigation components (`getLocalizedPath()`)
-
----
-
-### 3. Locale Switcher Path Handling
-
-**Problem**: Switching from `/en/docs/page` to Chinese produces `/zh/en/docs/page` (double prefix).
-
-**Root Cause**: The switcher adds the new prefix without removing the old one.
-
-**Solution**: Strip existing locale prefix before adding new one:
-
-```typescript
-// ❌ WRONG: Directly prepend new locale
-const switchLocale = (newLang: string) => {
-  const path = window.location.pathname
-  if (newLang === 'zh') return `/zh${path}`  // Creates /zh/en/docs/...
-  return path
-}
-
-// ✅ CORRECT: Strip existing prefix first
-const switchLocale = (newLang: string) => {
-  let path = window.location.pathname
-  
-  // Strip existing locale prefix
-  if (path.startsWith('/en/') || path.startsWith('/en')) {
-    path = path.replace(/^\/en/, '') || '/'
-  } else if (path.startsWith('/zh/') || path.startsWith('/zh')) {
-    path = path.replace(/^\/zh/, '') || '/'
-  }
-  
-  // Add new locale prefix
-  if (newLang === 'zh') {
-    return path === '/' ? '/zh/' : `/zh${path}`
-  }
-  if (newLang === 'en') {
-    return path === '/' ? '/en/' : `/en${path}`
-  }
-  return path
-}
-```
-
----
-
-### 4. Missing Static Redirects
-
-**Problem**: Routes like `/about` or `/docs` don't have static files and cause 404 or infinite loops.
-
-**Solution**: Generate redirect HTML files in `build-static.ts`:
-
-```typescript
-// build-static.ts
-
-// Create redirect for /about to /en/about
-const aboutRedirectHtml = `<!DOCTYPE html><html><head>
-  <meta http-equiv="refresh" content="0; url=/en/about" />
-  <script>window.location.href='/en/about';</script>
-</head><body>Redirecting to <a href="/en/about">/en/about</a>...</body></html>`
-
-await mkdir(join(outputDir, 'about'), { recursive: true })
-await writeFile(join(outputDir, 'about', 'index.html'), aboutRedirectHtml)
-
-// Repeat for other abstract routes: /docs, /contact, etc.
-```
-
----
-
-## ✅ Development Checklist
-
-Before building for static deployment, verify:
-
-### Links & Navigation
-- [ ] All internal links use `StaticLink` component (not Inertia `Link`)
-- [ ] All route paths include locale prefix (`/en/...` or `/zh/...`)
-- [ ] Locale switcher properly strips old prefix before adding new one
-- [ ] External links use native `<a>` with `target="_blank"` when appropriate
-
-### Static Build Configuration
-- [ ] Abstract routes (`/`, `/about`, `/docs`) have redirect HTML files
-- [ ] `isStaticSite()` function includes all deployment domains
-- [ ] Sitemap includes all localized URLs
-- [ ] 404.html is generated with proper SPA fallback handling
-
-### Content Links
-- [ ] Markdown internal links use relative paths (`./routing.md`)
-- [ ] Link transformer adds correct locale prefix
-- [ ] Anchor links (`#section`) work without full page reload
-
----
-
-## 🔧 Quick Reference: File Locations
-
-| File | Purpose |
-|------|---------|
-| `src/client/components/StaticLink.tsx` | Smart link wrapper |
-| `src/client/components/Layout.tsx` | Navigation, locale switching |
-| `src/services/DocsService.ts` | Sidebar & Markdown link generation |
-| `build-static.ts` | SSG build script, redirects |
-
----
-
-## 🧪 Testing Static Build Locally
+### 1. Install the Package
 
 ```bash
-# Build and preview static site
+bun add @gravito/freeze
+```
+
+### 2. Create Configuration
+
+Create a `freeze.config.ts` in your project root:
+
+```typescript
+import { defineConfig } from '@gravito/freeze'
+
+export const freezeConfig = defineConfig({
+  // Your production domains
+  staticDomains: ['example.com', 'example.github.io'],
+  
+  // Supported languages
+  locales: ['en', 'zh'],
+  defaultLocale: 'en',
+  
+  // Production URL (for sitemap)
+  baseUrl: 'https://example.com',
+  
+  // Abstract routes that need redirects
+  redirects: [
+    { from: '/docs', to: '/en/docs/guide/getting-started' },
+    { from: '/about', to: '/en/about' },
+  ],
+})
+```
+
+### 3. Use StaticLink Component
+
+Replace Inertia `<Link>` with `StaticLink` for all internal navigation:
+
+**React:**
+```tsx
+import { createDetector } from '@gravito/freeze'
+import { Link } from '@inertiajs/react'
+import { freezeConfig } from '../freeze.config'
+
+const detector = createDetector(freezeConfig)
+
+export function StaticLink({ href, children, ...props }) {
+  const localizedHref = detector.getLocalizedPath(href, currentLocale)
+  
+  if (detector.isStaticSite()) {
+    return <a href={localizedHref} {...props}>{children}</a>
+  }
+  
+  return <Link href={localizedHref} {...props}>{children}</Link>
+}
+```
+
+**Vue:**
+```vue
+<script setup lang="ts">
+import { createDetector } from '@gravito/freeze'
+import { Link } from '@inertiajs/vue3'
+import { freezeConfig } from '../freeze.config'
+
+const detector = createDetector(freezeConfig)
+const isStatic = detector.isStaticSite()
+</script>
+
+<template>
+  <a v-if="isStatic" :href="localizedHref"><slot /></a>
+  <Link v-else :href="localizedHref"><slot /></Link>
+</template>
+```
+
+### 4. Build Static Site
+
+```bash
+# Build and preview
+bun run build:static
+bun run preview
+
+# Or use the combined command
 bun run build:preview
-
-# This runs:
-# 1. bun run build:static  - Generate all HTML files
-# 2. bun run preview       - Start local server at http://localhost:4173
-
-# Test these scenarios:
-# - Click sidebar links (should not open new tabs)
-# - Switch languages (URL should update correctly)
-# - Navigate to /about (should redirect to /en/about)
-# - Check console for errors
 ```
 
 ---
 
-## 📐 Architecture Summary
+## 📐 How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Request Flow                              │
+│                    Gravito SSG Flow                          │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  Development (SSR)          Static Site (SSG)                │
-│  ─────────────────          ────────────────                 │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │   Dev Mode   │    │  Build SSG   │    │   Deploy     │  │
+│  │  (Dynamic)   │ => │  (Freeze)    │ => │  (Static)    │  │
+│  └──────────────┘    └──────────────┘    └──────────────┘  │
 │                                                              │
-│  Browser                    Browser                          │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  Inertia Link              Native <a> tag                    │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  XHR to Server             Direct HTML load                  │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  Hono Backend              Static File Server                │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  Inertia Response          Pre-rendered HTML                 │
+│  • Inertia SPA       • Pre-render all     • GitHub Pages   │
+│  • Hot reload          pages              • Vercel         │
+│  • Backend server    • Generate           • Netlify        │
+│                        redirects          • Cloudflare     │
+│                      • Create sitemap                       │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 Golden Rules
+## 🔧 Configuration Reference
 
-1. **Always use `StaticLink`** for internal navigation
-2. **Always include locale prefix** in all paths
-3. **Always test with `bun run build:preview`** before deploying
-4. **Always add redirects** for abstract routes in `build-static.ts`
-5. **Never rely on Inertia features** in static-only pages
+### FreezeConfig Options
 
-Following these guidelines ensures your Gravito site works flawlessly in both development and production static deployment.
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `staticDomains` | `string[]` | `[]` | Production domains for static mode |
+| `previewPort` | `number` | `4173` | Local preview server port |
+| `locales` | `string[]` | `['en']` | Supported locales |
+| `defaultLocale` | `string` | `'en'` | Default locale for redirects |
+| `redirects` | `RedirectRule[]` | `[]` | Abstract route redirects |
+| `outputDir` | `string` | `'dist-static'` | Output directory |
+| `baseUrl` | `string` | - | Production URL |
+
+### Environment Detection
+
+The `FreezeDetector` automatically detects static environments:
+
+| Environment | Detection Method | Mode |
+|-------------|-----------------|------|
+| `localhost:3000` | Development server | **Dynamic** |
+| `localhost:5173` | Vite dev server | **Dynamic** |
+| `localhost:4173` | Preview server | **Static** |
+| `*.github.io` | GitHub Pages | **Static** |
+| `*.vercel.app` | Vercel | **Static** |
+| `*.netlify.app` | Netlify | **Static** |
+| `*.pages.dev` | Cloudflare Pages | **Static** |
+| Configured domains | `staticDomains` | **Static** |
+
+---
+
+## 🌍 Internationalization (i18n)
+
+### Locale-Aware Paths
+
+All paths are automatically localized:
+
+```typescript
+const detector = createDetector(config)
+
+// Add locale prefix
+detector.getLocalizedPath('/about', 'en')  // '/en/about'
+detector.getLocalizedPath('/docs', 'zh')   // '/zh/docs'
+
+// Switch locale
+detector.switchLocale('/en/docs/guide', 'zh')  // '/zh/docs/guide'
+
+// Extract locale from path
+detector.getLocaleFromPath('/zh/about')  // 'zh'
+```
+
+### Locale Switcher Example
+
+```tsx
+function LocaleSwitcher() {
+  const detector = createDetector(freezeConfig)
+  const currentPath = window.location.pathname
+  
+  const switchTo = (locale: string) => {
+    const newPath = detector.switchLocale(currentPath, locale)
+    window.location.href = newPath
+  }
+  
+  return (
+    <div>
+      <button onClick={() => switchTo('en')}>English</button>
+      <button onClick={() => switchTo('zh')}>中文</button>
+    </div>
+  )
+}
+```
+
+---
+
+## 📁 Project Structure
+
+Recommended structure for SSG projects:
+
+```
+my-site/
+├── freeze.config.ts          # SSG configuration
+├── build-static.ts           # Build script
+├── src/
+│   ├── client/
+│   │   ├── components/
+│   │   │   ├── StaticLink.tsx    # or .vue
+│   │   │   └── LocaleSwitcher.tsx
+│   │   └── pages/
+│   │       ├── Home.tsx
+│   │       └── About.tsx
+│   └── routes/
+│       └── index.ts
+├── dist-static/              # Generated static files
+│   ├── index.html
+│   ├── en/
+│   │   ├── index.html
+│   │   └── about/
+│   │       └── index.html
+│   ├── zh/
+│   │   ├── index.html
+│   │   └── about/
+│   │       └── index.html
+│   ├── about/
+│   │   └── index.html       # Redirect to /en/about
+│   ├── sitemap.xml
+│   └── robots.txt
+└── package.json
+```
+
+---
+
+## ✅ Development Checklist
+
+Before deploying your static site:
+
+### Configuration
+- [ ] Create `freeze.config.ts` with your domains and locales
+- [ ] Add all abstract routes to `redirects`
+- [ ] Set correct `baseUrl` for production
+
+### Components
+- [ ] Replace all `<Link>` with `StaticLink`
+- [ ] Implement locale switcher using `detector.switchLocale()`
+- [ ] Ensure all internal links use `getLocalizedPath()`
+
+### Build & Test
+- [ ] Run `bun run build:preview`
+- [ ] Test at http://localhost:4173
+- [ ] Verify: No black overlay on navigation
+- [ ] Verify: Language switching works correctly
+- [ ] Verify: Abstract routes redirect properly
+- [ ] Check browser console for errors
+
+### Deploy
+- [ ] Configure GitHub Pages / Vercel / Netlify
+- [ ] Set up custom domain (optional)
+- [ ] Verify production site
+
+---
+
+## 🛠️ Build Script Example
+
+A complete build script using `@gravito/freeze`:
+
+```typescript
+// build-static.ts
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import {
+  generateRedirects,
+  generateLocalizedRoutes,
+  generateSitemapEntries,
+} from '@gravito/freeze'
+import { freezeConfig } from './freeze.config'
+
+async function build() {
+  const outputDir = freezeConfig.outputDir
+  
+  // 1. Build client assets
+  console.log('⚡ Building client assets...')
+  await Bun.spawn(['bun', 'run', 'build:client']).exited
+  
+  // 2. Generate all localized routes
+  const abstractRoutes = ['/', '/about', '/docs/guide/getting-started']
+  const routes = generateLocalizedRoutes(abstractRoutes, freezeConfig.locales)
+  
+  // 3. Render each route
+  for (const route of routes) {
+    console.log(`Render: ${route}`)
+    // ... your rendering logic
+  }
+  
+  // 4. Generate redirects
+  console.log('🔄 Generating redirects...')
+  const redirects = generateRedirects(freezeConfig)
+  for (const [path, html] of redirects) {
+    const filePath = join(outputDir, path)
+    await mkdir(dirname(filePath), { recursive: true })
+    await writeFile(filePath, html)
+  }
+  
+  // 5. Generate sitemap
+  console.log('🗺️ Generating sitemap...')
+  const sitemapEntries = generateSitemapEntries(routes, freezeConfig)
+  // ... render sitemap XML
+  
+  console.log('✅ SSG Build Complete!')
+}
+
+build()
+```
+
+---
+
+## 🎯 Best Practices
+
+### 1. Always Use StaticLink
+```tsx
+// ❌ Don't use Inertia Link directly
+import { Link } from '@inertiajs/react'
+<Link href="/about">About</Link>
+
+// ✅ Use StaticLink wrapper
+import { StaticLink } from './components/StaticLink'
+<StaticLink href="/about">About</StaticLink>
+```
+
+### 2. Always Include Locale Prefix
+```typescript
+// ❌ Don't use unprefixed paths
+const path = '/docs/guide'
+
+// ✅ Always localize paths
+const path = detector.getLocalizedPath('/docs/guide', currentLocale)
+```
+
+### 3. Handle Redirects
+```typescript
+// ❌ Don't leave abstract routes without redirects
+// /about will 404
+
+// ✅ Add redirects in config
+redirects: [
+  { from: '/about', to: '/en/about' },
+]
+```
+
+### 4. Test Before Deploy
+```bash
+# Always test static build locally
+bun run build:preview
+
+# Visit http://localhost:4173
+# Test all navigation paths
+```
+
+---
+
+## 📚 API Reference
+
+### `defineConfig(options)`
+Create a validated configuration object.
+
+### `createDetector(config)`
+Create a detector instance for runtime checks.
+
+### `FreezeDetector` Methods
+| Method | Description |
+|--------|-------------|
+| `isStaticSite()` | Check if running in static mode |
+| `getLocaleFromPath(path)` | Extract locale from URL |
+| `getLocalizedPath(path, locale)` | Add locale prefix to path |
+| `switchLocale(path, newLocale)` | Switch locale in URL |
+| `needsRedirect(path)` | Check if path needs redirect |
+| `getCurrentLocale()` | Get current locale (browser only) |
+
+### Build Utilities
+| Function | Description |
+|----------|-------------|
+| `generateRedirectHtml(url)` | Create redirect HTML |
+| `generateRedirects(config)` | Generate all redirects |
+| `generateLocalizedRoutes(routes, locales)` | Create localized routes |
+| `inferRedirects(locales, default, routes)` | Auto-infer redirects |
+| `generateSitemapEntries(routes, config)` | Create sitemap with i18n |
+
+---
+
+## 🚀 Deployment Guides
+
+### GitHub Pages
+```yaml
+# .github/workflows/deploy.yml
+- name: Build static site
+  run: bun run build:static
+
+- name: Deploy to GitHub Pages
+  uses: peaceiris/actions-gh-pages@v3
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    publish_dir: ./dist-static
+```
+
+### Vercel
+```json
+// vercel.json
+{
+  "buildCommand": "bun run build:static",
+  "outputDirectory": "dist-static"
+}
+```
+
+### Netlify
+```toml
+# netlify.toml
+[build]
+  command = "bun run build:static"
+  publish = "dist-static"
+```
+
+---
+
+Following this guide ensures your Gravito application can be seamlessly deployed as a high-performance static site! 🎉

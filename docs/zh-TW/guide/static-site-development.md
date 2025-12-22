@@ -2,337 +2,418 @@
 title: 靜態網站開發指南
 ---
 
-# 📦 靜態網站生成 (SSG) 開發指南
+# 📦 使用 Gravito 建立靜態網站 (SSG)
 
-本指南記錄了開發模式 (SSR + Inertia.js) 與靜態網站生成 (SSG) 之間的關鍵差異，以及確保程式碼在兩種環境中都能正確運作的最佳實踐。
+使用 `@gravito/freeze` 將您的 Gravito 應用程式建置為極速靜態網站。
 
-## 🎯 概述
+## 🚀 快速開始
 
-Gravito 支援兩種部署模式：
-
-| 模式 | 描述 | 使用場景 |
-|------|------|----------|
-| **SSR（開發模式）** | 全端 Inertia.js SPA 導航 | 開發環境、動態應用 |
-| **SSG（生產模式）** | 預渲染的靜態 HTML 檔案 | 文件網站、靜態託管（GitHub Pages、Cloudflare Pages） |
-
-**⚠️ 關鍵理解**：在 SSG 模式下，**沒有後端伺服器**來處理 Inertia 請求。所有導航必須使用標準 HTML 連結。
-
----
-
-## 🚨 常見問題與解決方案
-
-### 1. Inertia Link 元件問題
-
-**問題**：Inertia 的 `<Link>` 元件在靜態網站中會造成問題：
-- 導航時出現黑色遮罩
-- 意外開啟新分頁
-- 導航卡住或無限迴圈
-
-**根本原因**：Inertia `Link` 嘗試向後端發送 XHR 請求，但 SSG 模式下沒有後端。
-
-**解決方案**：改用 `StaticLink` 元件：
-
-```tsx
-// ❌ 不要直接使用 Inertia Link
-import { Link } from '@inertiajs/react'
-<Link href="/docs">文件</Link>
-
-// ✅ 使用 StaticLink 包裝器
-import { StaticLink } from '../components/StaticLink'
-<StaticLink href="/docs">文件</StaticLink>
-```
-
-**StaticLink 實作**：
-```tsx
-// src/client/components/StaticLink.tsx
-import { Link } from '@inertiajs/react'
-import type { ComponentProps, ReactNode } from 'react'
-
-type LinkProps = ComponentProps<typeof Link>
-
-interface StaticLinkProps extends Omit<LinkProps, 'href'> {
-  href: string
-  children: ReactNode
-}
-
-/**
- * 偵測是否在靜態網站環境中執行
- */
-export function isStaticSite(): boolean {
-  if (typeof window === 'undefined') return false
-  
-  const hostname = window.location.hostname
-  const port = window.location.port
-  
-  // 靜態預覽伺服器 (bun preview.ts)
-  if (hostname === 'localhost' && port === '4173') return true
-  
-  // GitHub Pages
-  if (hostname.endsWith('.github.io')) return true
-  
-  // 生產網域
-  if (hostname === 'gravito.dev') return true
-  
-  // Cloudflare Pages, Vercel, Netlify
-  if (hostname.endsWith('.pages.dev')) return true
-  if (hostname.endsWith('.vercel.app')) return true
-  if (hostname.endsWith('.netlify.app')) return true
-  
-  return false
-}
-
-/**
- * 智慧連結元件：靜態網站使用原生 <a>，SSR 模式使用 Inertia Link
- */
-export function StaticLink({ href, children, className, ...props }: StaticLinkProps) {
-  // 靜態網站模式下使用原生錨點以確保可靠導航
-  if (isStaticSite()) {
-    return (
-      <a href={href} className={className}>
-        {children}
-      </a>
-    )
-  }
-
-  // SSR 模式下使用 Inertia Link 進行 SPA 導航
-  return (
-    <Link href={href} className={className} {...props}>
-      {children}
-    </Link>
-  )
-}
-```
-
-**Vue StaticLink 實作**：
-```vue
-<!-- src/client/components/StaticLink.vue -->
-<template>
-  <component :is="linkComponent" v-bind="linkProps">
-    <slot />
-  </component>
-</template>
-
-<script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
-import { computed } from 'vue'
-
-interface Props {
-  href: string
-  class?: string
-  [key: string]: unknown
-}
-
-const props = defineProps<Props>()
-
-function isStaticSite(): boolean {
-  if (typeof window === 'undefined') return false
-  
-  const hostname = window.location.hostname
-  const port = window.location.port
-  
-  // 靜態預覽伺服器 (bun preview.ts)
-  if (hostname === 'localhost' && port === '4173') return true
-  
-  // 生產網域
-  if (hostname.includes('github.io')) return true
-  if (hostname.includes('vercel.app')) return true
-  
-  return false
-}
-
-const isStatic = isStaticSite()
-
-const linkComponent = computed(() => isStatic ? 'a' : Link)
-const linkProps = computed(() => {
-  if (isStatic) {
-    const { href, class: className, ...rest } = props
-    return { href, class: className, ...rest }
-  }
-  return props
-})
-</script>
-```
-
----
-
-### 2. 語系路徑前綴問題
-
-**問題**：連結缺少語系前綴（`/en/` 或 `/zh/`）導致 404 錯誤或無限重導向。
-
-**錯誤行為範例**：
-```
-預期：/en/docs/guide/routing
-實際：/docs/guide/routing  ← 404！
-```
-
-**解決方案**：所有語系（包括英文）都必須使用語系前綴：
-
-```typescript
-// ❌ 不要假設英文是預設且不需前綴
-const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
-
-// ✅ 所有語系都包含前綴
-const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
-```
-
-**適用於**：
-- 側邊欄連結生成（`DocsService.getSidebar()`）
-- Markdown 連結轉換（`renderer.link`）
-- 導航元件（`getLocalizedPath()`）
-
----
-
-### 3. 語系切換路徑處理
-
-**問題**：從 `/en/docs/page` 切換到中文會產生 `/zh/en/docs/page`（重複前綴）。
-
-**根本原因**：切換器在添加新前綴時沒有移除舊前綴。
-
-**解決方案**：先移除現有語系前綴再添加新前綴：
-
-```typescript
-// ❌ 錯誤：直接添加新語系前綴
-const switchLocale = (newLang: string) => {
-  const path = window.location.pathname
-  if (newLang === 'zh') return `/zh${path}`  // 產生 /zh/en/docs/...
-  return path
-}
-
-// ✅ 正確：先移除現有前綴
-const switchLocale = (newLang: string) => {
-  let path = window.location.pathname
-  
-  // 移除現有語系前綴
-  if (path.startsWith('/en/') || path.startsWith('/en')) {
-    path = path.replace(/^\/en/, '') || '/'
-  } else if (path.startsWith('/zh/') || path.startsWith('/zh')) {
-    path = path.replace(/^\/zh/, '') || '/'
-  }
-  
-  // 添加新語系前綴
-  if (newLang === 'zh') {
-    return path === '/' ? '/zh/' : `/zh${path}`
-  }
-  if (newLang === 'en') {
-    return path === '/' ? '/en/' : `/en${path}`
-  }
-  return path
-}
-```
-
----
-
-### 4. 缺少靜態重導向
-
-**問題**：像 `/about` 或 `/docs` 這樣的路由沒有靜態檔案，導致 404 或無限迴圈。
-
-**解決方案**：在 `build-static.ts` 中生成重導向 HTML 檔案：
-
-```typescript
-// build-static.ts
-
-// 建立 /about 到 /en/about 的重導向
-const aboutRedirectHtml = `<!DOCTYPE html><html><head>
-  <meta http-equiv="refresh" content="0; url=/en/about" />
-  <script>window.location.href='/en/about';</script>
-</head><body>重導向至 <a href="/en/about">/en/about</a>...</body></html>`
-
-await mkdir(join(outputDir, 'about'), { recursive: true })
-await writeFile(join(outputDir, 'about', 'index.html'), aboutRedirectHtml)
-
-// 對其他抽象路由重複此操作：/docs、/contact 等
-```
-
----
-
-## ✅ 開發檢查清單
-
-在建置靜態部署之前，請驗證：
-
-### 連結與導航
-- [ ] 所有內部連結使用 `StaticLink` 元件（而非 Inertia `Link`）
-- [ ] 所有路由路徑包含語系前綴（`/en/...` 或 `/zh/...`）
-- [ ] 語系切換器在添加新前綴前正確移除舊前綴
-- [ ] 外部連結在適當時使用原生 `<a>` 配合 `target="_blank"`
-
-### 靜態建置設定
-- [ ] 抽象路由（`/`、`/about`、`/docs`）有重導向 HTML 檔案
-- [ ] `isStaticSite()` 函數包含所有部署網域
-- [ ] Sitemap 包含所有本地化 URL
-- [ ] 404.html 生成時有適當的 SPA 回退處理
-
-### 內容連結
-- [ ] Markdown 內部連結使用相對路徑（`./routing.md`）
-- [ ] 連結轉換器添加正確的語系前綴
-- [ ] 錨點連結（`#section`）可在不重新載入頁面的情況下運作
-
----
-
-## 🔧 快速參考：檔案位置
-
-| 檔案 | 用途 |
-|------|------|
-| `src/client/components/StaticLink.tsx` | 智慧連結包裝器 |
-| `src/client/components/Layout.tsx` | 導航、語系切換 |
-| `src/services/DocsService.ts` | 側邊欄和 Markdown 連結生成 |
-| `build-static.ts` | SSG 建置腳本、重導向 |
-
----
-
-## 🧪 本地測試靜態建置
+### 1. 安裝套件
 
 ```bash
-# 建置並預覽靜態網站
+bun add @gravito/freeze
+```
+
+### 2. 建立設定檔
+
+在專案根目錄建立 `freeze.config.ts`：
+
+```typescript
+import { defineConfig } from '@gravito/freeze'
+
+export const freezeConfig = defineConfig({
+  // 您的正式環境網域
+  staticDomains: ['example.com', 'example.github.io'],
+  
+  // 支援的語言
+  locales: ['en', 'zh'],
+  defaultLocale: 'en',
+  
+  // 正式環境網址（用於 Sitemap）
+  baseUrl: 'https://example.com',
+  
+  // 需要重導向的抽象路由
+  redirects: [
+    { from: '/docs', to: '/en/docs/guide/getting-started' },
+    { from: '/about', to: '/en/about' },
+  ],
+})
+```
+
+### 3. 使用 StaticLink 元件
+
+將所有內部導航的 Inertia `<Link>` 替換為 `StaticLink`：
+
+**React：**
+```tsx
+import { createDetector } from '@gravito/freeze'
+import { Link } from '@inertiajs/react'
+import { freezeConfig } from '../freeze.config'
+
+const detector = createDetector(freezeConfig)
+
+export function StaticLink({ href, children, ...props }) {
+  const localizedHref = detector.getLocalizedPath(href, currentLocale)
+  
+  if (detector.isStaticSite()) {
+    return <a href={localizedHref} {...props}>{children}</a>
+  }
+  
+  return <Link href={localizedHref} {...props}>{children}</Link>
+}
+```
+
+**Vue：**
+```vue
+<script setup lang="ts">
+import { createDetector } from '@gravito/freeze'
+import { Link } from '@inertiajs/vue3'
+import { freezeConfig } from '../freeze.config'
+
+const detector = createDetector(freezeConfig)
+const isStatic = detector.isStaticSite()
+</script>
+
+<template>
+  <a v-if="isStatic" :href="localizedHref"><slot /></a>
+  <Link v-else :href="localizedHref"><slot /></Link>
+</template>
+```
+
+### 4. 建置靜態網站
+
+```bash
+# 建置並預覽
+bun run build:static
+bun run preview
+
+# 或使用合併命令
 bun run build:preview
-
-# 此命令執行：
-# 1. bun run build:static  - 生成所有 HTML 檔案
-# 2. bun run preview       - 在 http://localhost:4173 啟動本地伺服器
-
-# 測試這些場景：
-# - 點擊側邊欄連結（不應開啟新分頁）
-# - 切換語言（URL 應正確更新）
-# - 導航至 /about（應重導向至 /en/about）
-# - 檢查控制台是否有錯誤
 ```
 
 ---
 
-## 📐 架構摘要
+## 📐 運作原理
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      請求流程                                │
+│                    Gravito SSG 流程                          │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  開發模式 (SSR)              靜態網站 (SSG)                   │
-│  ─────────────               ──────────────                  │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │   開發模式   │    │   建置 SSG   │    │     部署     │  │
+│  │  (動態)      │ => │  (凍結)      │ => │   (靜態)     │  │
+│  └──────────────┘    └──────────────┘    └──────────────┘  │
 │                                                              │
-│  瀏覽器                       瀏覽器                          │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  Inertia Link               原生 <a> 標籤                    │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  XHR 請求至伺服器            直接載入 HTML                    │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  Hono 後端                  靜態檔案伺服器                    │
-│     │                          │                             │
-│     ▼                          ▼                             │
-│  Inertia 回應               預渲染的 HTML                    │
+│  • Inertia SPA       • 預渲染所有頁面   • GitHub Pages    │
+│  • 熱重載           • 生成重導向       • Vercel          │
+│  • 後端伺服器       • 建立 Sitemap     • Netlify         │
+│                                         • Cloudflare      │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 黃金守則
+## 🔧 設定參考
 
-1. **永遠使用 `StaticLink`** 進行內部導航
-2. **永遠在所有路徑中包含語系前綴**
-3. **部署前永遠使用 `bun run build:preview`** 進行測試
-4. **永遠在 `build-static.ts` 中為抽象路由添加重導向**
-5. **永遠不要依賴 Inertia 功能** 在純靜態頁面中
+### FreezeConfig 選項
 
-遵循這些準則可確保您的 Gravito 網站在開發和生產靜態部署中都能完美運作。
+| 選項 | 類型 | 預設值 | 說明 |
+|------|------|--------|------|
+| `staticDomains` | `string[]` | `[]` | 靜態模式的正式網域 |
+| `previewPort` | `number` | `4173` | 本地預覽伺服器埠號 |
+| `locales` | `string[]` | `['en']` | 支援的語系 |
+| `defaultLocale` | `string` | `'en'` | 預設語系（用於重導向） |
+| `redirects` | `RedirectRule[]` | `[]` | 抽象路由重導向 |
+| `outputDir` | `string` | `'dist-static'` | 輸出目錄 |
+| `baseUrl` | `string` | - | 正式環境網址 |
+
+### 環境偵測
+
+`FreezeDetector` 會自動偵測靜態環境：
+
+| 環境 | 偵測方式 | 模式 |
+|------|---------|------|
+| `localhost:3000` | 開發伺服器 | **動態** |
+| `localhost:5173` | Vite 開發伺服器 | **動態** |
+| `localhost:4173` | 預覽伺服器 | **靜態** |
+| `*.github.io` | GitHub Pages | **靜態** |
+| `*.vercel.app` | Vercel | **靜態** |
+| `*.netlify.app` | Netlify | **靜態** |
+| `*.pages.dev` | Cloudflare Pages | **靜態** |
+| 設定的網域 | `staticDomains` | **靜態** |
+
+---
+
+## 🌍 國際化 (i18n)
+
+### 語系感知路徑
+
+所有路徑會自動本地化：
+
+```typescript
+const detector = createDetector(config)
+
+// 添加語系前綴
+detector.getLocalizedPath('/about', 'en')  // '/en/about'
+detector.getLocalizedPath('/docs', 'zh')   // '/zh/docs'
+
+// 切換語系
+detector.switchLocale('/en/docs/guide', 'zh')  // '/zh/docs/guide'
+
+// 從路徑提取語系
+detector.getLocaleFromPath('/zh/about')  // 'zh'
+```
+
+### 語系切換器範例
+
+```tsx
+function LocaleSwitcher() {
+  const detector = createDetector(freezeConfig)
+  const currentPath = window.location.pathname
+  
+  const switchTo = (locale: string) => {
+    const newPath = detector.switchLocale(currentPath, locale)
+    window.location.href = newPath
+  }
+  
+  return (
+    <div>
+      <button onClick={() => switchTo('en')}>English</button>
+      <button onClick={() => switchTo('zh')}>中文</button>
+    </div>
+  )
+}
+```
+
+---
+
+## 📁 專案結構
+
+SSG 專案的建議結構：
+
+```
+my-site/
+├── freeze.config.ts          # SSG 設定
+├── build-static.ts           # 建置腳本
+├── src/
+│   ├── client/
+│   │   ├── components/
+│   │   │   ├── StaticLink.tsx    # 或 .vue
+│   │   │   └── LocaleSwitcher.tsx
+│   │   └── pages/
+│   │       ├── Home.tsx
+│   │       └── About.tsx
+│   └── routes/
+│       └── index.ts
+├── dist-static/              # 生成的靜態檔案
+│   ├── index.html
+│   ├── en/
+│   │   ├── index.html
+│   │   └── about/
+│   │       └── index.html
+│   ├── zh/
+│   │   ├── index.html
+│   │   └── about/
+│   │       └── index.html
+│   ├── about/
+│   │   └── index.html       # 重導向至 /en/about
+│   ├── sitemap.xml
+│   └── robots.txt
+└── package.json
+```
+
+---
+
+## ✅ 開發檢查清單
+
+部署靜態網站之前：
+
+### 設定
+- [ ] 建立 `freeze.config.ts`，設定您的網域和語系
+- [ ] 將所有抽象路由加入 `redirects`
+- [ ] 設定正確的 `baseUrl` 用於正式環境
+
+### 元件
+- [ ] 將所有 `<Link>` 替換為 `StaticLink`
+- [ ] 使用 `detector.switchLocale()` 實作語系切換器
+- [ ] 確保所有內部連結使用 `getLocalizedPath()`
+
+### 建置與測試
+- [ ] 執行 `bun run build:preview`
+- [ ] 在 http://localhost:4173 測試
+- [ ] 驗證：導航時沒有黑色遮罩
+- [ ] 驗證：語系切換正常運作
+- [ ] 驗證：抽象路由正確重導向
+- [ ] 檢查瀏覽器控制台是否有錯誤
+
+### 部署
+- [ ] 設定 GitHub Pages / Vercel / Netlify
+- [ ] 設定自訂網域（選用）
+- [ ] 驗證正式環境網站
+
+---
+
+## 🛠️ 建置腳本範例
+
+使用 `@gravito/freeze` 的完整建置腳本：
+
+```typescript
+// build-static.ts
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import {
+  generateRedirects,
+  generateLocalizedRoutes,
+  generateSitemapEntries,
+} from '@gravito/freeze'
+import { freezeConfig } from './freeze.config'
+
+async function build() {
+  const outputDir = freezeConfig.outputDir
+  
+  // 1. 建置客戶端資源
+  console.log('⚡ 建置客戶端資源...')
+  await Bun.spawn(['bun', 'run', 'build:client']).exited
+  
+  // 2. 生成所有本地化路由
+  const abstractRoutes = ['/', '/about', '/docs/guide/getting-started']
+  const routes = generateLocalizedRoutes(abstractRoutes, freezeConfig.locales)
+  
+  // 3. 渲染每個路由
+  for (const route of routes) {
+    console.log(`渲染: ${route}`)
+    // ... 您的渲染邏輯
+  }
+  
+  // 4. 生成重導向
+  console.log('🔄 生成重導向...')
+  const redirects = generateRedirects(freezeConfig)
+  for (const [path, html] of redirects) {
+    const filePath = join(outputDir, path)
+    await mkdir(dirname(filePath), { recursive: true })
+    await writeFile(filePath, html)
+  }
+  
+  // 5. 生成 Sitemap
+  console.log('🗺️ 生成 Sitemap...')
+  const sitemapEntries = generateSitemapEntries(routes, freezeConfig)
+  // ... 渲染 sitemap XML
+  
+  console.log('✅ SSG 建置完成！')
+}
+
+build()
+```
+
+---
+
+## 🎯 最佳實踐
+
+### 1. 永遠使用 StaticLink
+```tsx
+// ❌ 不要直接使用 Inertia Link
+import { Link } from '@inertiajs/react'
+<Link href="/about">關於</Link>
+
+// ✅ 使用 StaticLink 包裝器
+import { StaticLink } from './components/StaticLink'
+<StaticLink href="/about">關於</StaticLink>
+```
+
+### 2. 永遠包含語系前綴
+```typescript
+// ❌ 不要使用無前綴的路徑
+const path = '/docs/guide'
+
+// ✅ 永遠本地化路徑
+const path = detector.getLocalizedPath('/docs/guide', currentLocale)
+```
+
+### 3. 處理重導向
+```typescript
+// ❌ 不要讓抽象路由沒有重導向
+// /about 會 404
+
+// ✅ 在設定中加入重導向
+redirects: [
+  { from: '/about', to: '/en/about' },
+]
+```
+
+### 4. 部署前測試
+```bash
+# 永遠在本地測試靜態建置
+bun run build:preview
+
+# 訪問 http://localhost:4173
+# 測試所有導航路徑
+```
+
+---
+
+## 📚 API 參考
+
+### `defineConfig(options)`
+建立經過驗證的設定物件。
+
+### `createDetector(config)`
+建立偵測器實例用於執行階段檢查。
+
+### `FreezeDetector` 方法
+| 方法 | 說明 |
+|------|------|
+| `isStaticSite()` | 檢查是否在靜態模式執行 |
+| `getLocaleFromPath(path)` | 從 URL 提取語系 |
+| `getLocalizedPath(path, locale)` | 為路徑添加語系前綴 |
+| `switchLocale(path, newLocale)` | 在 URL 中切換語系 |
+| `needsRedirect(path)` | 檢查路徑是否需要重導向 |
+| `getCurrentLocale()` | 取得目前語系（僅瀏覽器） |
+
+### 建置工具
+| 函數 | 說明 |
+|------|------|
+| `generateRedirectHtml(url)` | 建立重導向 HTML |
+| `generateRedirects(config)` | 生成所有重導向 |
+| `generateLocalizedRoutes(routes, locales)` | 建立本地化路由 |
+| `inferRedirects(locales, default, routes)` | 自動推斷重導向 |
+| `generateSitemapEntries(routes, config)` | 建立含 i18n 的 Sitemap |
+
+---
+
+## 🚀 部署指南
+
+### GitHub Pages
+```yaml
+# .github/workflows/deploy.yml
+- name: 建置靜態網站
+  run: bun run build:static
+
+- name: 部署至 GitHub Pages
+  uses: peaceiris/actions-gh-pages@v3
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    publish_dir: ./dist-static
+```
+
+### Vercel
+```json
+// vercel.json
+{
+  "buildCommand": "bun run build:static",
+  "outputDirectory": "dist-static"
+}
+```
+
+### Netlify
+```toml
+# netlify.toml
+[build]
+  command = "bun run build:static"
+  publish = "dist-static"
+```
+
+---
+
+遵循此指南，您的 Gravito 應用程式可以無縫部署為高效能靜態網站！🎉

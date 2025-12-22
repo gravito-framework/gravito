@@ -1,55 +1,129 @@
-# 🚀 Static Site Generation (SSG) Quick Checklist
+# 🧊 Gravito SSG Deployment Checklist
 
-Before deploying your Gravito site as a static website, run through this checklist.
+Quick reference checklist for deploying static sites with `@gravito/freeze`.
 
-## ✅ Pre-Build Checklist
+---
 
-### Links & Navigation
-- [ ] Use `StaticLink` instead of Inertia `Link` for all internal links
-- [ ] All paths include locale prefix (`/en/...` or `/zh/...`)
-- [ ] Locale switcher strips old prefix before adding new one
+## ⚙️ Configuration
 
-### Build Configuration  
-- [ ] Abstract routes (`/`, `/about`, `/docs`) have redirect HTML in `build-static.ts`
-- [ ] `isStaticSite()` function includes your deployment domain
-
-### Testing
-- [ ] Run `bun run build:preview` 
-- [ ] Test at http://localhost:4173
-- [ ] Click sidebar links → No new tabs, no black overlay
-- [ ] Switch languages → URL updates correctly (no `/zh/en/...`)
-- [ ] Navigate to `/about` → Redirects to `/en/about`
-
-## 🔧 Quick Fixes
-
-### Black overlay on navigation?
-```tsx
-// Change this:
-import { Link } from '@inertiajs/react'
-<Link href="/docs">Docs</Link>
-
-// To this:
-import { StaticLink } from '../components/StaticLink'
-<StaticLink href="/docs">Docs</StaticLink>
-```
-
-### Missing locale in sidebar links?
 ```typescript
-// In DocsService.ts, change:
-const prefix = locale === 'zh' ? '/zh/docs' : '/docs'
-// To:
-const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
-```
+// freeze.config.ts
+import { defineConfig } from '@gravito/freeze'
 
-### Language switch produces wrong URL?
-```typescript
-// Strip existing prefix first:
-let path = window.location.pathname
-if (path.startsWith('/en')) path = path.replace(/^\/en/, '') || '/'
-if (path.startsWith('/zh')) path = path.replace(/^\/zh/, '') || '/'
-// Then add new prefix
+export const freezeConfig = defineConfig({
+  staticDomains: ['your-domain.com'],
+  locales: ['en', 'zh'],
+  defaultLocale: 'en',
+  baseUrl: 'https://your-domain.com',
+  redirects: [
+    { from: '/docs', to: '/en/docs/guide/getting-started' },
+    { from: '/about', to: '/en/about' },
+  ],
+})
 ```
 
 ---
 
-📚 Full documentation: `/docs/guide/static-site-development`
+## ✅ Pre-Deploy Checklist
+
+### 1. Configuration
+- [ ] `freeze.config.ts` exists with correct settings
+- [ ] All production domains in `staticDomains`
+- [ ] All locales defined in `locales`
+- [ ] All abstract routes in `redirects`
+- [ ] Correct `baseUrl` for production
+
+### 2. Components
+- [ ] All `<Link>` replaced with `<StaticLink>`
+- [ ] `StaticLink` uses `detector.getLocalizedPath()`
+- [ ] Locale switcher uses `detector.switchLocale()`
+
+### 3. Paths
+- [ ] All internal links have locale prefix (`/en/...`, `/zh/...`)
+- [ ] No hardcoded paths without locale
+
+### 4. Build & Test
+- [ ] `bun run build:static` completes without errors
+- [ ] `bun run build:preview` runs successfully
+- [ ] Tested at http://localhost:4173
+- [ ] ✓ No black overlay on link clicks
+- [ ] ✓ Language switching works
+- [ ] ✓ Abstract routes redirect correctly
+- [ ] ✓ No console errors
+
+### 5. Assets
+- [ ] All images load correctly
+- [ ] CSS styles applied
+- [ ] JavaScript bundles load
+
+### 6. SEO
+- [ ] `sitemap.xml` generated
+- [ ] `robots.txt` generated
+- [ ] Meta tags present on all pages
+
+---
+
+## 🚀 Quick Commands
+
+```bash
+# Install
+bun add @gravito/freeze
+
+# Build static site
+bun run build:static
+
+# Preview locally
+bun run preview
+
+# Build + Preview
+bun run build:preview
+```
+
+---
+
+## 🔍 Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Black overlay on click | Using Inertia `<Link>` | Replace with `<StaticLink>` |
+| 404 on routes | Missing locale prefix | Use `getLocalizedPath()` |
+| Double locale prefix | Incorrect switcher | Use `switchLocale()` |
+| Redirect loop | Missing redirect HTML | Add to `redirects` config |
+
+---
+
+## 📁 Expected Output Structure
+
+```
+dist-static/
+├── index.html              ← Redirect to /en
+├── 404.html
+├── sitemap.xml
+├── robots.txt
+├── en/
+│   ├── index.html
+│   ├── about/index.html
+│   └── docs/...
+├── zh/
+│   ├── index.html
+│   ├── about/index.html
+│   └── docs/...
+├── about/index.html        ← Redirect to /en/about
+├── docs/index.html         ← Redirect to /en/docs/...
+└── assets/
+    ├── *.js
+    └── *.css
+```
+
+---
+
+## 🎯 Golden Rules
+
+1. **Always use `StaticLink`** - Never use raw Inertia `<Link>`
+2. **Always localize paths** - Use `getLocalizedPath()` for all internal links
+3. **Always test before deploy** - Run `bun run build:preview`
+4. **Always add redirects** - Configure abstract routes in `freeze.config.ts`
+
+---
+
+Ready to deploy? Run `bun run build:static` and ship it! 🚀
