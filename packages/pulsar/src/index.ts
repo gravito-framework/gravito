@@ -29,14 +29,6 @@ export { RedisSessionStore } from './stores/RedisSessionStore'
 export { SqliteSessionStore } from './stores/SqliteSessionStore'
 export * from './types'
 
-// Module augmentation for Hono (backward compatibility)
-declare module 'hono' {
-  interface ContextVariableMap {
-    session: SessionService
-    csrf: CsrfService
-  }
-}
-
 // Module augmentation for GravitoVariables (new abstraction)
 declare module 'gravito-core' {
   interface GravitoVariables {

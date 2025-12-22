@@ -477,13 +477,6 @@ export function validateRequest<T>(RequestClass: new () => FormRequest<T>): Midd
   }
 }
 
-// Type augmentation for Hono context (backward compatibility)
-declare module 'hono' {
-  interface ContextVariableMap {
-    validated: unknown
-  }
-}
-
 // Module augmentation for GravitoVariables (new abstraction)
 declare module 'gravito-core' {
   interface GravitoVariables {

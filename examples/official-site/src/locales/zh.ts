@@ -25,8 +25,8 @@ export default {
     subtitle: '為未來而建',
     bun_title: 'Bun Runtime',
     bun_desc: '疾速運行時，原生支援編譯與測試。',
-    hono_title: 'Gravito Core',
-    hono_desc: '自研極致高效能核心，Nano-overhead I/O 與強大的專屬請求生命週期管理。',
+    engine_title: 'Gravito Core',
+    engine_desc: '自研極致高效能核心，Nano-overhead I/O 與強大的專屬請求生命週期管理。',
     ts_title: 'TypeScript',
     ts_desc: '全架構型別安全，從第一行程式開始。',
   },
@@ -37,7 +37,7 @@ export default {
     sectionDesc: 'Gravito 採用微內核設計，首波 1.0 版本將釋出最穩定且強大的基礎模組。',
     kernel_title: 'PlanetCore',
     kernel_subtitle: '核心靈魂',
-    kernel_desc: '極致輕量化核心，只負責 I/O 協調與生命週期。',
+    kernel_desc: '自研的高效能微內核，負責極速 I/O 協調與生命週期管理，是一切模組的引力中心。',
     inertia_title: 'Ion',
     inertia_subtitle: '全棧橋接 (Inertia)',
     inertia_desc: '讓後端完全掌控前端 UI，打造如 SPA 般的流暢體驗。',
@@ -55,6 +55,40 @@ export default {
     i18n_subtitle: '全球引力 (I18n)',
     i18n_desc: '原生多語系偵測與路徑路由，具備強大的型別安全翻譯機制，輕鬆擴展全球市場。',
     getStarted: '開始使用',
+  },
+  features_page: {
+    hero_title: '突破極限的自研核心',
+    hero_subtitle: 'Gravito Core (PlanetCore) 是我們一切創新的起源。',
+    core_deep_dive_title: '為什麼我們選擇自研？',
+    core_deep_dive_desc:
+      '在現有的開發生態中，我們發現大多數框架雖然功能強大，但往往伴隨著沈重的運行時負擔與不可控的外部依賴。Gravito Core 的誕生是為了重新奪回對性能的絕對掌控。',
+    adv_title: 'Core 強大之處',
+    adv1_title: '毫秒級路由預解析',
+    adv1_desc:
+      '不同於其他框架在運行時進行動態正則匹配，Gravito Core 在啟動階段就將路由樹優化為最簡跳轉路徑，實現真正的零損耗轉發。',
+    adv2_title: '引擎無關 (Engine Agnostic)',
+    adv2_desc:
+      '核心與底層 HTTP 引擎完全解耦。您可以隨時在 Hono、Bun Native 或 Express 間切換，而無需修改任何業務邏輯。',
+    adv3_title: 'AI 代理人友好 (AI-First)',
+    adv3_desc:
+      '深度的型別推導與可預測的代碼契約，這不是巧合，而是專為讓 Cursor、Windsurf 等 AI 助手能「理解」您的系統而設計的架構。',
+    adv4_title: '極致輕量與零依賴',
+    adv4_desc:
+      '核心體積保持在極低水平，且不強加任何外部依賴。您只需為實際啟用的模組消耗性能，絕無多餘的運行負擔。',
+    perf_title: '極致性能範式',
+    perf_desc:
+      '每一微秒都至關重要。PlanetCore 消除了不必要的抽象層，為您的應用提供最原始、最直接的性能表現。',
+    perf_latency: '回應延遲',
+    perf_boot: '啟動時間',
+    perf_deps: '外部依賴',
+    ready_title: '準備好感受引力了嗎？',
+    choices_title: '為什麼是這些技術？',
+    bun_title: '為什麼選擇 Bun 而非 Node.js？',
+    bun_desc:
+      'Bun 不僅是一個運行時，更是為了現代 Web 打造的全能引擎。它提供了 Node.js 無法比擬的啟動速度、原生高性能 HTTP server 以及內建的打包工具。在 Gravito 中，Bun 讓我們的冷啟動時間縮短了 10 倍以上，且免去了繁瑣的配置。',
+    ts_title: '為什麼堅持 TypeScript？',
+    ts_desc:
+      '我們相信「型別即文檔」。TypeScript 提供的靜態檢查與型別推導是構建大型系統的基石。更重要的是，在 AI 協作開發的時代，清晰的型別定義能讓 AI 代理人提供更精準的代碼建議，極大地提升開發效率。',
   },
   benchmarks: {
     sectionBadge: '性能實驗室',
