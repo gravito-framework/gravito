@@ -28,7 +28,7 @@
     "@sinclair/typebox": "^0.34.0"
   },
   "peerDependencies": {
-    "hono": "^4.0.0"
+    "gravito-core": "1.0.0-beta.2"
   },
   "devDependencies": {
     "bun-types": "^1.1.0",
@@ -46,7 +46,6 @@
     "validation",
     "typebox",
     "schema",
-    "hono",
     "middleware",
     "typescript"
   ],

@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Standard Authentication Orbit for Galaxy Architecture using Hono JWT",
+  "description": "Standard Authentication Orbit for Gravito Core with JWT support",
   "module": "./dist/index.mjs",
   "main": "./dist/index.cjs",
   "type": "module",

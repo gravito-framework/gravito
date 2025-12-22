@@ -1,8 +1,8 @@
 ---
-title: Gravito CLI
+title: Orbit Pulse (CLI)
 ---
 
-# Gravito CLI
+# Orbit Pulse
 
 The official CLI for scaffolding and managing Gravito projects.
 
@@ -12,10 +12,10 @@ Gravito CLI provides a comprehensive suite of tools to help you build, test, and
 
 ```bash
 # Global install (recommended)
-bun add -g @gravito/cli
+bun add -g @gravito/pulse
 
 # Or use npx/bunx
-bunx @gravito/cli create my-app
+bunx @gravito/pulse create my-app
 ```
 
 ## Usage
@@ -95,7 +95,7 @@ gravito schedule:work
 
 | Template | Description |
 |----------|-------------|
-| `basic` | Minimal setup with PlanetCore + Hono. Great for APIs and simple backends. |
+| `basic` | Minimal setup with PlanetCore + Gravito Core. Great for APIs and simple backends. |
 | `inertia-react` | Full-stack monolith with Inertia.js + React + Vite. Build modern SPAs with server-side routing. |
 
 ## Development
