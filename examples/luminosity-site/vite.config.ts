@@ -10,11 +10,18 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: true,
     rollupOptions: {
-      input: './src/client/app.ts',
+      input: 'app.ts',
+      output: {
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]',
+      },
     },
   },
   server: {
-    origin: 'http://localhost:5173',
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
     cors: true,
   },
   resolve: {

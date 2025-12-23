@@ -1,19 +1,22 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Luminosity</title>
-    
+
     {{#if isDev}}
-    <script type="module" src="http://localhost:5173/@vite/client"></script>
-    <script type="module" src="http://localhost:5173/src/client/app.ts"></script>
+    <script type="module" src="/@vite/client"></script>
+    <script type="module" src="/app.ts"></script>
     {{else}}
-    <!-- Production assets will be injected here -->
+    <link rel="stylesheet" href="/static/build/assets/app.css">
+    <script type="module" src="/static/build/assets/app.js"></script>
     {{/if}}
 </head>
+
 <body class="bg-black">
     <div id="app" data-page='{{{ page }}}'></div>
 </body>
+
 </html>
