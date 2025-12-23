@@ -6,7 +6,6 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'Home', component: Home },
     { path: '/features', name: 'Features', component: () => import('../views/Features.vue') },
-    { path: '/gravits', name: 'Gravits', component: () => import('../views/Gravits.vue') },
   ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {

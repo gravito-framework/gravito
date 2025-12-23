@@ -25,7 +25,6 @@
       <div class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
         <router-link to="/" class="hover:text-atlas-cyan transition-colors" active-class="text-atlas-cyan">Home</router-link>
         <router-link to="/features" class="hover:text-atlas-cyan transition-colors" active-class="text-atlas-cyan">Features</router-link>
-        <router-link to="/gravits" class="hover:text-atlas-cyan transition-colors" active-class="text-atlas-cyan">Gravits</router-link>
         <a href="https://gravito.dev/docs" target="_blank" class="hover:text-atlas-cyan transition-colors">Docs</a>
       </div>
       <div class="flex items-center gap-6">
