@@ -28,6 +28,9 @@ import React, { useRef, useState } from 'react'
 import { GravitoImage as Image } from '../components/GravitoImage'
 import Layout from '../components/Layout'
 
+// Dynamic Import for WebGL component to avoid SSG/Hydration issues
+const HeroGL = React.lazy(() => import('../components/HeroGL').then(mod => ({ default: mod.HeroGL })))
+
 type Translation = Record<string, Record<string, string>>
 
 // 強化版 Hero 組件（Star Shuttle Effect）
@@ -55,22 +58,22 @@ const AdvancedHero = ({ t }: { t: Translation }) => {
     char,
   }))
 
+  // 避免 SSG/Hydration 不匹配，只在客戶端渲染 WebGL
+  const [isClient, setIsClient] = useState(false)
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   return (
     <section className="relative h-[120vh] flex items-center justify-center overflow-hidden bg-void">
-      {/* 0. Hero 背景圖片 (Parallax) */}
-      <motion.div style={{ y: y1, opacity }} className="absolute inset-0 z-0">
-        <Image
-          src="/static/image/hero.jpg"
-          alt="Gravito Universe"
-          className="w-full h-full object-cover opacity-60 scale-110"
-          width={1920}
-          height={1080}
-          loading="eager"
-          fetchpriority="high"
-          srcset={[768, 1280, 2560]}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-void/60 via-transparent to-void" />
-        <div className="absolute inset-0 bg-radial-[circle_at_center,_transparent_0%,_var(--color-void)_120%] opacity-80" />
+      {/* 0. Hero Background (WebGL) */}
+      <motion.div style={{ opacity }} className="absolute inset-0 z-0">
+        {isClient && (
+          <React.Suspense fallback={null}>
+            <HeroGL />
+          </React.Suspense>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-void/20 via-transparent to-void" />
       </motion.div>
 
       {/* 1. Star Shuttle Effect */}
@@ -165,7 +168,7 @@ const AdvancedHero = ({ t }: { t: Translation }) => {
           </Link>
 
           <a
-            href="https://github.com/GravitoFramework/gravito"
+            href="https://github.com/gravito-framework/gravito"
             target="_blank"
             rel="noopener noreferrer"
             className="group px-8 py-4 bg-void/40 backdrop-blur-xl border border-white/10 text-white font-bold rounded-full hover:bg-white/10 transition-all hover:border-white/30 flex items-center gap-2"
@@ -326,7 +329,7 @@ const TechIcon = ({ type }: { type: string }) => {
         </defs>
         {/* Shadow */}
         <path
-          d="M71.09,20.74c-.16-.17-.33-.34-.5-.5s-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5A26.46,26.46,0,0,1,75.5,35.7c0,16.57-16.82,30.05-37.5,30.05-11.58,0-21.94-4.23-28.83-10.86l.5.5.5.5.5.5.5.5.5.5.5.5.5.5C19.55,65.3,30.14,69.75,42,69.75c20.68,0,37.5-13.48,37.5-30C79.5,32.69,76.46,26,71.09,20.74Z"
+          d="M71.09,20.74c-.16-.17-.33-.34-.5-.5s-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5-.33-.34-.5-.5A26.46,26.46,0,0,1,75.5,35.7c0,16.57-16.82,30.05-37.5,30.05-11.58,0-21.94-4.23-28.83-10.86l.5.5.5.5.5.5.5.5.5.5.5.5.5.5C19.55,65.3,30.14,69.75,42,69.75c20.68,0,37.5-13.48,37.5-30C79.5,32.69,76.46,26,71.09,20.74Z"
           fill="#CCBEA7"
           opacity="0.3"
         />

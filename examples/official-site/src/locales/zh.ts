@@ -26,7 +26,7 @@ export default {
     bun_title: 'Bun Runtime',
     bun_desc: '疾速運行時，原生支援編譯與測試。',
     engine_title: 'Gravito Core',
-    engine_desc: '自研極致高效能核心，Nano-overhead I/O 與強大的專屬請求生命週期管理。',
+    engine_desc: '自主開發的高效能核心，具備 Nano-overhead I/O 與精確的請求生命週期管理。',
     ts_title: 'TypeScript',
     ts_desc: '全架構型別安全，從第一行程式開始。',
   },
@@ -37,7 +37,7 @@ export default {
     sectionDesc: 'Gravito 採用微內核設計，首波 1.0 版本將釋出最穩定且強大的基礎模組。',
     kernel_title: 'PlanetCore',
     kernel_subtitle: '核心靈魂',
-    kernel_desc: '自研的高效能微內核，負責極速 I/O 協調與生命週期管理，是一切模組的引力中心。',
+    kernel_desc: '自主開發的高效能微內核，負責極速 I/O 協調與生命週期管理，是所有模組的引力中心。',
     inertia_title: 'Ion',
     inertia_subtitle: '全棧橋接 (Inertia)',
     inertia_desc: '讓後端完全掌控前端 UI，打造如 SPA 般的流暢體驗。',
@@ -57,9 +57,9 @@ export default {
     getStarted: '開始使用',
   },
   features_page: {
-    hero_title: '突破極限的自研核心',
+    hero_title: '突破極限的自主架構',
     hero_subtitle: 'Gravito Core (PlanetCore) 是我們一切創新的起源。',
-    core_deep_dive_title: '為什麼我們選擇自研？',
+    core_deep_dive_title: '為何堅持自主研發核心？',
     core_deep_dive_desc:
       '在現有的開發生態中，我們發現大多數框架雖然功能強大，但往往伴隨著沈重的運行時負擔與不可控的外部依賴。Gravito Core 的誕生是為了重新奪回對性能的絕對掌控。',
     adv_title: 'Core 強大之處',
@@ -94,7 +94,7 @@ export default {
     sectionBadge: '性能實驗室',
     sectionTitle: '超越極限的',
     sectionTitleHighlight: '效率',
-    sectionDesc: '基於自研核心與 Bun 的強大基礎，Gravito 將性能損耗降至接近零。',
+    sectionDesc: '基於原生核心與 Bun 的強大基礎，Gravito 將性能損耗降至極低水平。',
     rps_title: '每秒請求數 (RPS)',
     rps_desc: '相較於傳統 Node.js 框架，我們提供數倍的吞吐量。',
     latency_title: '平均延遲 (Latency)',
@@ -109,7 +109,7 @@ export default {
     integrity: '架構完整性',
   },
   footer: {
-    desc: '為工匠打造的高效能框架。基於自研高效能核心 & Bun 建構，追求極致速度與簡潔。',
+    desc: '為開發工匠打造的高效能框架。基於自主研發核心與 Bun 驅動，追求極致速度與簡約架構。',
     links: '連結',
     home: '首頁',
     connect: '社群',
@@ -122,7 +122,7 @@ export default {
     missionDesc: '為開發者提供一個既尊重開發時間、又尊重機器資源的框架。',
     pillarsTitle: '奇點三大支柱',
     pillar1_title: '無與倫比的速度',
-    pillar1_desc: '透過自研核心與 Bun 的深度整合，我們徹底消除了傳統 Node.js 堆棧的臃腫。',
+    pillar1_desc: '透過原生核心與 Bun 的深度整合，我們徹底消除了傳統開發堆棧的肥厚與臃腫。',
     pillar2_title: '架構師的禪意',
     pillar2_desc:
       '融合經典 MVC 的優雅與現代 Node.js 生態（如 Next.js）的靈活性。Gravito 既能微縮至純粹的內容網站，也能擴展為高密度的企業級核心應用。',
@@ -173,7 +173,7 @@ export default {
     dnaLaravelGaps:
       'Laravel 雖然完整度高，但在 Bun 時代其擁腫的內核與性能瓶頸，已無法滿足新一代高併發應用的需求。',
     dnaGravitoAdv:
-      'Gravito 在 Bun 與自研核心的極速基礎上，原生整合了排程與隊列機制，以精簡的內核提供最高等級的基礎架構支援。',
+      'Gravito 在 Bun 與原創核心的極速基礎上，原生整合了排程與隊列機制，提供最高等級的基礎架構支援。',
     featDecouplingTitle: '微服務無痛抽離',
     featDecouplingDesc:
       '從消息消費者 (Consumer) 到解耦服務。Gravito 的架構允許您在擴展時直接抽離功能模組成為獨立微服務，無需任何重新開發。',
