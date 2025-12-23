@@ -9,25 +9,22 @@ Explore common patterns and best practices for integrating Luminosity into your 
 
 ## 1. Basic Static Sitemap
 
-For small sites or static content, you can provide a simple array of URLs.
+For small sites or static content, you can pass a simple array of URLs.
 
 ```typescript
 import { Luminosity } from '@gravito/luminosity'
 
-const engine = new Luminosity({
+const lux = new Luminosity({
   path: './public',
   hostname: 'https://mysite.com'
 })
 
-// Define static entries
-const entries = [
+// Pass static array
+await lux.generate([
   { url: '/', changefreq: 'daily', priority: 1.0 },
   { url: '/about', changefreq: 'monthly', priority: 0.8 },
   { url: '/contact', changefreq: 'yearly', priority: 0.5 }
-]
-
-// Generate sitemap.xml
-await engine.generate(entries)
+])
 ```
 
 ## 2. Streaming from Database (High Performance)
@@ -38,26 +35,26 @@ For large datasets (e.g., e-commerce products, user profiles), use **Async Itera
 import { Luminosity } from '@gravito/luminosity'
 import { db } from './my-database' // Your DB client
 
-const engine = new Luminosity({
+const lux = new Luminosity({
   path: './public',
   hostname: 'https://shop.com'
 })
 
 // Generator function yields records one by one
-async function* getProductEntries() {
+async function* getEntries() {
   const stream = db.select('slug', 'updated_at').from('products').stream()
   
   for await (const product of stream) {
     yield {
       url: `/product/${product.slug}`,
-      lastmod: product.updated_at, // ISO 8601 string or Date object
+      lastmod: product.updated_at,
       changefreq: 'weekly'
     }
   }
 }
 
 // Luminosity consumes the stream directly
-await engine.generate(getProductEntries())
+await lux.generate(getEntries())
 ```
 
 ## 3. Integration with Hono
@@ -72,17 +69,14 @@ import { serveStatic } from 'hono/bun'
 const app = new Hono()
 const lux = new Luminosity({ path: './dist' })
 
-// 1. Generate on startup (or via cron)
-await lux.generate(myEntries)
+// 1. Generate on startup
+await lux.generate(async function* () {
+   // ... yield entries ...
+})
 
 // 2. Serve the generated files
 app.use('/sitemap*.xml', serveStatic({ root: './dist' }))
 app.use('/robots.txt', serveStatic({ root: './dist' }))
-
-// 3. (Optional) Dynamic Robots.txt control
-app.get('/robots.txt', (c) => {
-  return c.text(lux.robots().allow('*').build())
-})
 
 export default app
 ```
@@ -102,6 +96,4 @@ const entries = [
     ]
   }
 ]
-
-await engine.generate(entries)
 ```

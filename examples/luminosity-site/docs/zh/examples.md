@@ -9,25 +9,22 @@ order: 5
 
 ## 1. 基礎靜態 Sitemap
 
-對於小型網站或靜態內容，您可以直接提供一個 URL 陣列。
+對於小型網站或靜態內容，您可以直接傳遞 URL 陣列。
 
 ```typescript
 import { Luminosity } from '@gravito/luminosity'
 
-const engine = new Luminosity({
+const lux = new Luminosity({
   path: './public',
   hostname: 'https://mysite.com'
 })
 
-// 定義靜態條目
-const entries = [
+// 傳遞靜態陣列
+await lux.generate([
   { url: '/', changefreq: 'daily', priority: 1.0 },
   { url: '/about', changefreq: 'monthly', priority: 0.8 },
   { url: '/contact', changefreq: 'yearly', priority: 0.5 }
-]
-
-// 生成 sitemap.xml
-await engine.generate(entries)
+])
 ```
 
 ## 2. 資料庫串流 (極致效能)
@@ -38,31 +35,31 @@ await engine.generate(entries)
 import { Luminosity } from '@gravito/luminosity'
 import { db } from './my-database' // 您的資料庫客戶端
 
-const engine = new Luminosity({
+const lux = new Luminosity({
   path: './public',
   hostname: 'https://shop.com'
 })
 
-// Generator 函數逐一產出記錄
-async function* getProductEntries() {
+// Generator 函式逐行產出數據
+async function* getEntries() {
   const stream = db.select('slug', 'updated_at').from('products').stream()
   
   for await (const product of stream) {
     yield {
       url: `/product/${product.slug}`,
-      lastmod: product.updated_at, // ISO 8601 字串或 Date 物件
+      lastmod: product.updated_at,
       changefreq: 'weekly'
     }
   }
 }
 
-// Luminosity 直接消耗串流，無需載入所有資料至記憶體
-await engine.generate(getProductEntries())
+// Luminosity 直接消費這個串流
+await lux.generate(getEntries())
 ```
 
-## 3. 整合 Hono 框架
+## 3. 與 Hono 整合
 
-Luminosity 與 Hono 等現代邊緣框架完美相容。
+Luminosity 與 Hono 等現代邊緣框架完美結合。
 
 ```typescript
 import { Hono } from 'hono'
@@ -72,24 +69,21 @@ import { serveStatic } from 'hono/bun'
 const app = new Hono()
 const lux = new Luminosity({ path: './dist' })
 
-// 1. 啟動時生成 (或透過 cron job)
-await lux.generate(myEntries)
+// 1. 啟動時生成
+await lux.generate(async function* () {
+   // ... yield entries ...
+})
 
-// 2. 提供生成的文件
+// 2. 提供靜態檔案服務
 app.use('/sitemap*.xml', serveStatic({ root: './dist' }))
 app.use('/robots.txt', serveStatic({ root: './dist' }))
-
-// 3. (可選) 動態 Robots.txt 控制
-app.get('/robots.txt', (c) => {
-  return c.text(lux.robots().allow('*').build())
-})
 
 export default app
 ```
 
 ## 4. 多語言支援 (i18n)
 
-使用 `links` 屬性來處理頁面的在地化版本 (alternate links)。
+使用 alternate links 處理頁面的多語言版本。
 
 ```typescript
 const entries = [
@@ -102,6 +96,4 @@ const entries = [
     ]
   }
 ]
-
-await engine.generate(entries)
 ```

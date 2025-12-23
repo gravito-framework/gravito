@@ -47,9 +47,15 @@ const getPath = (path: string) => {
         <div>
           <h4 class="font-bold mb-6 text-sm uppercase tracking-widest text-emerald-500">Community</h4>
           <ul class="space-y-4">
-            <li><a href="https://github.com/gravito-framework/gravito" class="text-gray-400 hover:text-white transition-colors">GitHub</a></li>
+            <li>
+              <a href="https://github.com/gravito-framework/gravito" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                GitHub
+              </a>
+            </li>
+            <!-- Pending Community Creation
             <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Discord</a></li>
             <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Twitter</a></li>
+            -->
           </ul>
         </div>
       </div>

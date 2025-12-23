@@ -40,3 +40,8 @@ test-create-app/
 
 # Build artifacts
 
+
+# Luminosity Artifacts
+.luminosity/
+examples/*/static/build/
+examples/*/dist/

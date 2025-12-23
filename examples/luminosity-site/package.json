@@ -9,6 +9,7 @@
     "dev:vite": "vite",
     "build:client": "vite build",
     "build:static": "NODE_ENV=production bun build-static.ts",
+    "build:ssg": "bun run build:static",
     "preview": "bun run preview.ts",
     "lux:stats": "bun src/cli.ts stats",
     "lux:warm": "bun src/cli.ts warm",

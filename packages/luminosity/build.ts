@@ -1,7 +1,7 @@
 import { build } from 'bun'
 
 await build({
-  entrypoints: ['src/index.ts'],
+  entrypoints: ['src/index.ts', 'src/cli.ts'],
   outdir: 'dist',
   format: 'esm',
   target: 'bun',
