@@ -2,8 +2,8 @@
  * @fileoverview React component for displaying processing video with real-time status
  */
 
-import { useState, useEffect } from 'react'
-import type { ProcessingStatus, FileOutput } from '../types'
+import { useEffect, useState } from 'react'
+import type { FileOutput, ProcessingStatus } from '../types'
 
 /**
  * ProcessingVideo component props
@@ -58,8 +58,7 @@ export function ProcessingVideo({
   const [videoSrc, setVideoSrc] = useState<string | null>(placeholder || null)
 
   useEffect(() => {
-    const endpoint =
-      statusEndpoint || `/forge/status/${jobId}/stream`
+    const endpoint = statusEndpoint || `/forge/status/${jobId}/stream`
     const eventSource = new EventSource(endpoint)
 
     eventSource.onmessage = (event) => {
@@ -135,11 +134,8 @@ export function ProcessingVideo({
         </div>
       )}
       {videoSrc && (
-        <video
-          src={videoSrc}
-          controls
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-        >
+        // biome-ignore lint/a11y/useMediaCaption: Preview video component, captions not available
+        <video src={videoSrc} controls style={{ width: '100%', height: 'auto', display: 'block' }}>
           Your browser does not support the video tag.
         </video>
       )}

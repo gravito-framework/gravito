@@ -2,8 +2,8 @@
  * @fileoverview React component for displaying processing status
  */
 
-import { useState, useEffect } from 'react'
-import type { ProcessingStatus } from '../types'
+import { useEffect, useState } from 'react'
+import type { ProcessingStatus as ProcessingStatusType } from '../types'
 
 /**
  * ProcessingStatus component props
@@ -30,27 +30,19 @@ export interface ProcessingStatusProps {
  *
  * Displays processing status with progress bar and messages.
  */
-export function ProcessingStatus({
-  jobId,
-  statusEndpoint,
-  className,
-}: ProcessingStatusProps) {
-  const [status, setStatus] = useState<ProcessingStatus | null>(null)
+export function ProcessingStatus({ jobId, statusEndpoint, className }: ProcessingStatusProps) {
+  const [status, setStatus] = useState<ProcessingStatusType | null>(null)
 
   useEffect(() => {
-    const endpoint =
-      statusEndpoint || `/forge/status/${jobId}/stream`
+    const endpoint = statusEndpoint || `/forge/status/${jobId}/stream`
     const eventSource = new EventSource(endpoint)
 
     eventSource.onmessage = (event) => {
       try {
-        const newStatus = JSON.parse(event.data) as ProcessingStatus
+        const newStatus = JSON.parse(event.data) as ProcessingStatusType
         setStatus(newStatus)
 
-        if (
-          newStatus.status === 'completed' ||
-          newStatus.status === 'failed'
-        ) {
+        if (newStatus.status === 'completed' || newStatus.status === 'failed') {
           eventSource.close()
         }
       } catch (error) {
@@ -107,9 +99,7 @@ export function ProcessingStatus({
         <div style={{ color: '#4CAF50' }}>Processing completed!</div>
       )}
       {status.status === 'failed' && (
-        <div style={{ color: '#f44336' }}>
-          Processing failed: {status.error}
-        </div>
+        <div style={{ color: '#f44336' }}>Processing failed: {status.error}</div>
       )}
     </div>
   )

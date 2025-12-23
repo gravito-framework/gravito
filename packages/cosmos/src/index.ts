@@ -1,5 +1,5 @@
 import type { GravitoOrbit, PlanetCore } from 'gravito-core'
-import { type I18nConfig, I18nManager, type I18nService } from './I18nService'
+import { type I18nConfig, I18nManager, type I18nService, localeMiddleware } from './I18nService'
 
 declare module 'gravito-core' {
   interface Variables {
