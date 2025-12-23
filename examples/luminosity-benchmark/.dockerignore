@@ -1,0 +1,5 @@
+node_modules
+dist
+dist-sitemaps
+*.sqlite
+.DS_Store

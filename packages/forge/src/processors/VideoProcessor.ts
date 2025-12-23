@@ -2,9 +2,9 @@
  * @fileoverview Video processor using FFmpeg
  */
 
+import { randomUUID } from 'node:crypto'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { randomUUID } from 'crypto'
 import { FFmpegAdapter } from '../adapters/FFmpegAdapter'
 import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
 import { BaseProcessor } from './BaseProcessor'
@@ -156,7 +156,7 @@ export class VideoProcessor extends BaseProcessor {
       const rotation = this.getRotationFilter(options.rotate)
       if (rotation) {
         // Combine with existing video filter if any
-        const existingVf = args.findIndex((arg) => arg === '-vf')
+        const existingVf = args.indexOf('-vf')
         if (existingVf !== -1) {
           // Append to existing filter
           const currentFilter = args[existingVf + 1]

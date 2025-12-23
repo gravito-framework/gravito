@@ -189,7 +189,9 @@ export class FluxEngine {
     workflowId: string
   ): Promise<FluxResult<TData> | null> {
     const state = await this.storage.load(workflowId)
-    if (!state) return null
+    if (!state) {
+      return null
+    }
 
     // TODO: Implement resume logic
     throw new Error('Resume not yet implemented')

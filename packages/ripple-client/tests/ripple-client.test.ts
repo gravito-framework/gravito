@@ -2,7 +2,7 @@
  * @fileoverview Tests for @gravito/ripple-client
  */
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Channel, PresenceChannel, PrivateChannel } from '../src/Channel'
 import { createRippleClient, RippleClient } from '../src/RippleClient'
 

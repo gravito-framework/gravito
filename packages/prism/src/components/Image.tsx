@@ -1,6 +1,6 @@
+import type React from 'react'
 import type { ImageOptions } from '../ImageService'
 import { ImageService } from '../ImageService'
-import React from 'react'
 
 /**
  * Props for the `Image` component.

@@ -133,7 +133,6 @@ export class OrbitFlux implements GravitoOrbit {
         case 'sqlite':
           storageAdapter = new BunSQLiteStorage({ path: dbPath })
           break
-        case 'memory':
         default:
           storageAdapter = new MemoryStorage()
       }

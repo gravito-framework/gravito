@@ -2,9 +2,9 @@
  * @fileoverview Image processor using ImageMagick
  */
 
+import { randomUUID } from 'node:crypto'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { randomUUID } from 'crypto'
 import { ImageMagickAdapter } from '../adapters/ImageMagickAdapter'
 import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
 import { BaseProcessor } from './BaseProcessor'

@@ -24,7 +24,9 @@ export class DevServer {
     // 2. Single Email Preview
     router.get(`${prefix}/:id`, (ctx) => {
       const id = ctx.req.param('id')
-      if (!id) return ctx.text('Bad Request', 400)
+      if (!id) {
+        return ctx.text('Bad Request', 400)
+      }
 
       const entry = this.mailbox.get(id)
       if (!entry) {
@@ -36,7 +38,9 @@ export class DevServer {
     // 3. Iframe Content: HTML
     router.get(`${prefix}/:id/html`, (ctx) => {
       const id = ctx.req.param('id')
-      if (!id) return ctx.text('Bad Request', 400)
+      if (!id) {
+        return ctx.text('Bad Request', 400)
+      }
 
       const entry = this.mailbox.get(id)
       if (!entry) {
@@ -48,7 +52,9 @@ export class DevServer {
     // 4. Iframe Content: Text
     router.get(`${prefix}/:id/text`, (ctx) => {
       const id = ctx.req.param('id')
-      if (!id) return ctx.text('Bad Request', 400)
+      if (!id) {
+        return ctx.text('Bad Request', 400)
+      }
 
       const entry = this.mailbox.get(id)
       if (!entry) {
@@ -62,7 +68,9 @@ export class DevServer {
     // 5. Raw JSON
     router.get(`${prefix}/:id/raw`, (ctx) => {
       const id = ctx.req.param('id')
-      if (!id) return ctx.json({ error: 'Bad Request' }, 400)
+      if (!id) {
+        return ctx.json({ error: 'Bad Request' }, 400)
+      }
 
       const entry = this.mailbox.get(id)
       if (!entry) {
@@ -78,7 +86,9 @@ export class DevServer {
 
     router.delete(`${prefix}/:id`, (ctx) => {
       const id = ctx.req.param('id')
-      if (!id) return ctx.json({ success: false, error: 'Bad Request' }, 400)
+      if (!id) {
+        return ctx.json({ success: false, error: 'Bad Request' }, 400)
+      }
 
       const success = this.mailbox.delete(id)
       return ctx.json({ success })

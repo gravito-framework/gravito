@@ -7,7 +7,7 @@
  */
 
 import { Channel, PresenceChannel, PrivateChannel } from './Channel'
-import type { ClientMessage, RippleClientConfig, ServerMessage } from './types'
+import type { RippleClientConfig, ServerMessage } from './types'
 
 /**
  * Client connection states
@@ -331,7 +331,7 @@ export class RippleClient {
           // Heartbeat response
           break
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('[Ripple] Failed to parse message:', raw)
     }
   }

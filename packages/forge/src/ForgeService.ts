@@ -2,8 +2,8 @@
  * @fileoverview Forge service - Core file processing service
  */
 
+import { randomUUID } from 'node:crypto'
 import type { StorageProvider } from '@gravito/nebula'
-import { randomUUID } from 'crypto'
 import { ImagePipeline } from './pipelines/ImagePipeline'
 import { VideoPipeline } from './pipelines/VideoPipeline'
 import { ImageProcessor } from './processors/ImageProcessor'
@@ -11,13 +11,7 @@ import type { Processor } from './processors/Processor'
 import { VideoProcessor } from './processors/VideoProcessor'
 import { ProcessingStatusManager } from './status/ProcessingStatus'
 import type { StatusStore } from './status/StatusStore'
-import type {
-  FileInput,
-  FileOutput,
-  ProcessingProgress,
-  ProcessingStatus,
-  ProcessOptions,
-} from './types'
+import type { FileInput, FileOutput, ProcessingStatus, ProcessOptions } from './types'
 
 /**
  * Forge service configuration
@@ -121,7 +115,7 @@ export class ForgeService {
    * @returns A promise that resolves to the processing job details.
    * @throws {Error} If the status store is not configured.
    */
-  async processAsync(input: FileInput, options: ProcessOptions = {}): Promise<ProcessingJob> {
+  async processAsync(_input: FileInput, _options: ProcessOptions = {}): Promise<ProcessingJob> {
     if (!this.statusStore) {
       throw new Error('Status store is required for async processing')
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { join } from 'path'
+import { join } from 'node:path'
 import { TemplateEngine } from '../src/TemplateEngine'
 
 describe('Orbit Prism V2', () => {

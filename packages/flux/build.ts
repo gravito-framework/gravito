@@ -1,5 +1,5 @@
+import { existsSync, rmSync } from 'node:fs'
 import { build } from 'bun'
-import { existsSync, rmSync } from 'fs'
 
 // Clean dist
 if (existsSync('./dist')) {

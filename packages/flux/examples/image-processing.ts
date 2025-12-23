@@ -27,8 +27,12 @@ interface UploadInput {
 
 const detectMimeType = async (buffer: Uint8Array): Promise<string> => {
   // Check magic bytes (simplified)
-  if (buffer[0] === 0xff && buffer[1] === 0xd8) return 'image/jpeg'
-  if (buffer[0] === 0x89 && buffer[1] === 0x50) return 'image/png'
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+    return 'image/jpeg'
+  }
+  if (buffer[0] === 0x89 && buffer[1] === 0x50) {
+    return 'image/png'
+  }
   return 'application/octet-stream'
 }
 

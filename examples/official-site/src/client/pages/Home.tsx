@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import {
   motion,
   useInView,
@@ -25,7 +25,6 @@ import {
   Zap,
 } from 'lucide-react'
 import React, { useRef, useState } from 'react'
-import { GravitoImage as Image } from '../components/GravitoImage'
 import Layout from '../components/Layout'
 import { StaticLink } from '../components/StaticLink'
 
@@ -39,7 +38,7 @@ type Translation = Record<string, Record<string, string>>
 // 強化版 Hero 組件（Star Shuttle Effect）
 const AdvancedHero = ({ t, locale }: { t: Translation; locale: string }) => {
   const { scrollY } = useScroll()
-  const y1 = useTransform(scrollY, [0, 500], [0, 200])
+  const _y1 = useTransform(scrollY, [0, 500], [0, 200])
   const opacity = useTransform(scrollY, [0, 300], [1, 0])
   const _blur = useTransform(scrollY, [0, 300], [0, 10])
 

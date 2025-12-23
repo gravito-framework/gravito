@@ -6,7 +6,7 @@
  * @module @gravito/ripple/channels
  */
 
-import type { ClientData, PresenceUserInfo, RippleWebSocket } from '../types'
+import type { PresenceUserInfo, RippleWebSocket } from '../types'
 import { CHANNEL_PREFIXES } from './Channel'
 
 /**
@@ -38,7 +38,9 @@ export class ChannelManager {
    */
   removeClient(clientId: string): string[] {
     const ws = this.clients.get(clientId)
-    if (!ws) return []
+    if (!ws) {
+      return []
+    }
 
     const leftChannels: string[] = []
 
@@ -75,13 +77,15 @@ export class ChannelManager {
    */
   subscribe(clientId: string, channel: string, userInfo?: PresenceUserInfo): boolean {
     const ws = this.clients.get(clientId)
-    if (!ws) return false
+    if (!ws) {
+      return false
+    }
 
     // Add to channel subscriptions
     if (!this.subscriptions.has(channel)) {
       this.subscriptions.set(channel, new Set())
     }
-    this.subscriptions.get(channel)!.add(clientId)
+    this.subscriptions.get(channel)?.add(clientId)
 
     // Track in client's channel set
     ws.data.channels.add(channel)
@@ -101,7 +105,9 @@ export class ChannelManager {
    */
   unsubscribe(clientId: string, channel: string): boolean {
     const ws = this.clients.get(clientId)
-    if (!ws) return false
+    if (!ws) {
+      return false
+    }
 
     // Remove from channel subscriptions
     const channelSubs = this.subscriptions.get(channel)
@@ -128,7 +134,9 @@ export class ChannelManager {
    */
   getSubscribers(channel: string): RippleWebSocket[] {
     const clientIds = this.subscriptions.get(channel)
-    if (!clientIds) return []
+    if (!clientIds) {
+      return []
+    }
 
     return Array.from(clientIds)
       .map((id) => this.clients.get(id))
@@ -154,7 +162,7 @@ export class ChannelManager {
     if (!this.presenceMembers.has(channel)) {
       this.presenceMembers.set(channel, new Map())
     }
-    this.presenceMembers.get(channel)!.set(userInfo.id, userInfo)
+    this.presenceMembers.get(channel)?.set(userInfo.id, userInfo)
   }
 
   /**

@@ -1,7 +1,6 @@
 import { Head } from '@inertiajs/react'
 import { motion } from 'framer-motion'
-import { Activity, Code, Cpu, Layers, Share2, Shield, Terminal, Zap } from 'lucide-react'
-import React from 'react'
+import { Activity, Cpu, Layers, Share2, Terminal, Zap } from 'lucide-react'
 import Layout from '../components/Layout'
 
 type Translation = Record<string, Record<string, string>>
