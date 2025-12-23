@@ -40,7 +40,8 @@ export default {
       'Gravito uses a micro-kernel design. The initial 1.0 release features our most stable and powerful base modules.',
     kernel_title: 'PlanetCore',
     kernel_subtitle: 'The Soul of Gravito',
-    kernel_desc: 'Our self-developed high-performance micro-kernel. Precision-engineered for rapid I/O coordination and lifecycle management.',
+    kernel_desc:
+      'Our self-developed high-performance micro-kernel. Precision-engineered for rapid I/O coordination and lifecycle management.',
     inertia_title: 'Ion',
     inertia_subtitle: 'Full-stack Bridge (Inertia)',
     inertia_desc: 'Let the backend fully control UI, creating a seamless SPA-like experience.',
@@ -65,7 +66,7 @@ export default {
     hero_subtitle: 'Gravito Core (PlanetCore) is the genesis of all our innovation.',
     core_deep_dive_title: 'Why Self-Developed?',
     core_deep_dive_desc:
-      "Modern frameworks are powerful, but they often come with heavy runtime overhead and unpredictable external dependencies. Gravito Core was built to reclaim absolute control over performance.",
+      'Modern frameworks are powerful, but they often come with heavy runtime overhead and unpredictable external dependencies. Gravito Core was built to reclaim absolute control over performance.',
     adv_title: 'Why It Matters',
     adv1_title: 'Zero-Overhead Pre-compiled Routing',
     adv1_desc:

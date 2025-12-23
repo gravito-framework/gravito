@@ -2,12 +2,12 @@
  * @fileoverview Process file job for async processing
  */
 
+import type { StorageProvider } from '@gravito/nebula'
 import { Job } from '@gravito/stream'
-import type { FileInput, FileOutput, ProcessOptions, ProcessingProgress } from '../types'
-import { ForgeService } from '../ForgeService'
+import type { ForgeService } from '../ForgeService'
 import { ProcessingStatusManager } from '../status/ProcessingStatus'
 import type { StatusStore } from '../status/StatusStore'
-import type { StorageProvider } from '@gravito/nebula'
+import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
 
 /**
  * Process file job data
@@ -61,14 +61,7 @@ export class ProcessFileJob extends Job {
    * Handle job execution
    */
   async handle(): Promise<void> {
-    const {
-      jobId,
-      input,
-      options,
-      statusStore,
-      storage,
-      forgeService,
-    } = this.data
+    const { jobId, input, options, statusStore, storage, forgeService } = this.data
 
     if (!statusStore) {
       throw new Error('Status store is required for ProcessFileJob')
@@ -94,11 +87,7 @@ export class ProcessFileJob extends Job {
         ...options,
         onProgress: async (progress: ProcessingProgress) => {
           if (status) {
-            status = ProcessingStatusManager.processing(
-              status,
-              progress.progress,
-              progress.message
-            )
+            status = ProcessingStatusManager.processing(status, progress.progress, progress.message)
             await statusStore.set(status)
           }
         },
@@ -106,11 +95,7 @@ export class ProcessFileJob extends Job {
 
       // Upload to storage if configured
       if (storage && output.path) {
-        status = ProcessingStatusManager.processing(
-          status,
-          90,
-          'Uploading to storage'
-        )
+        status = ProcessingStatusManager.processing(status, 90, 'Uploading to storage')
         await statusStore.set(status)
 
         const file = Bun.file(output.path)
@@ -137,8 +122,7 @@ export class ProcessFileJob extends Job {
       }
 
       // Mark as failed
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
       status = ProcessingStatusManager.failed(status, errorMessage)
       await statusStore.set(status)
 
@@ -157,10 +141,7 @@ export class ProcessFileJob extends Job {
     if (statusStore) {
       const status = await statusStore.get(jobId)
       if (status) {
-        const failedStatus = ProcessingStatusManager.failed(
-          status,
-          error.message
-        )
+        const failedStatus = ProcessingStatusManager.failed(status, error.message)
         await statusStore.set(failedStatus)
       }
     }

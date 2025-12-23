@@ -2,12 +2,12 @@
  * @fileoverview Image processor using ImageMagick
  */
 
-import { join } from 'node:path'
 import { mkdir } from 'node:fs/promises'
+import { join } from 'node:path'
 import { randomUUID } from 'crypto'
-import { BaseProcessor } from './BaseProcessor'
-import type { FileInput, FileOutput, ProcessOptions, ProcessingProgress } from '../types'
 import { ImageMagickAdapter } from '../adapters/ImageMagickAdapter'
+import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
+import { BaseProcessor } from './BaseProcessor'
 
 /**
  * Image processor options
@@ -57,7 +57,10 @@ export class ImageProcessor extends BaseProcessor {
    * @param options - Processing options (may include onProgress callback)
    * @returns Processed file output
    */
-  async process(input: FileInput, options: ProcessOptions & { onProgress?: (progress: ProcessingProgress) => void }): Promise<FileOutput> {
+  async process(
+    input: FileInput,
+    options: ProcessOptions & { onProgress?: (progress: ProcessingProgress) => void }
+  ): Promise<FileOutput> {
     // Ensure temp directory exists
     await mkdir(this.tempDir, { recursive: true })
 
@@ -131,11 +134,12 @@ export class ImageProcessor extends BaseProcessor {
 
     // Resize
     if (options.width || options.height) {
-      const resize = options.width && options.height
-        ? `${options.width}x${options.height}`
-        : options.width
-        ? `${options.width}x`
-        : `x${options.height}`
+      const resize =
+        options.width && options.height
+          ? `${options.width}x${options.height}`
+          : options.width
+            ? `${options.width}x`
+            : `x${options.height}`
       args.push('-resize', resize)
     }
 

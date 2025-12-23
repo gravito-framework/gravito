@@ -3,10 +3,10 @@
  * @module @gravito/ripple-client/react
  */
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { RippleClient, type ConnectionState } from './RippleClient'
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import type { Channel, PresenceChannel, PrivateChannel } from './Channel'
-import type { RippleClientConfig, EventCallback, PresenceUser } from './types'
+import { type ConnectionState, RippleClient } from './RippleClient'
+import type { EventCallback, PresenceUser, RippleClientConfig } from './types'
 
 // ─────────────────────────────────────────────────────────────
 // Context
@@ -18,24 +18,24 @@ const RippleContext = createContext<RippleClient | null>(null)
  * Provider component for Ripple client
  */
 export function RippleProvider({
-    client,
-    children,
+  client,
+  children,
 }: {
-    client: RippleClient
-    children: ReactNode
+  client: RippleClient
+  children: ReactNode
 }) {
-    return <RippleContext.Provider value={client}> {children} </RippleContext.Provider>
+  return <RippleContext.Provider value={client}> {children} </RippleContext.Provider>
 }
 
 /**
  * Hook to get the Ripple client instance
  */
 export function useRippleClient(): RippleClient {
-    const client = useContext(RippleContext)
-    if (!client) {
-        throw new Error('useRippleClient must be used within a RippleProvider')
-    }
-    return client
+  const client = useContext(RippleContext)
+  if (!client) {
+    throw new Error('useRippleClient must be used within a RippleProvider')
+  }
+  return client
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -62,24 +62,24 @@ export function useRippleClient(): RippleClient {
  * ```
  */
 export function useRipple(config: RippleClientConfig) {
-    const [client] = useState(() => new RippleClient(config))
-    const [state, setState] = useState<ConnectionState>('disconnected')
+  const [client] = useState(() => new RippleClient(config))
+  const [state, setState] = useState<ConnectionState>('disconnected')
 
-    const connect = async () => {
-        try {
-            await client.connect()
-            setState('connected')
-        } catch {
-            setState('disconnected')
-        }
+  const connect = async () => {
+    try {
+      await client.connect()
+      setState('connected')
+    } catch {
+      setState('disconnected')
     }
+  }
 
-    const disconnect = () => {
-        client.disconnect()
-        setState('disconnected')
-    }
+  const disconnect = () => {
+    client.disconnect()
+    setState('disconnected')
+  }
 
-    return { client, state, connect, disconnect }
+  return { client, state, connect, disconnect }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -99,54 +99,54 @@ export function useRipple(config: RippleClientConfig) {
  * ```
  */
 export function useChannel<T = unknown>(
-    channelName: string,
-    eventName: string
+  channelName: string,
+  eventName: string
 ): { channel: Channel | null; data: T | null } {
-    const client = useRippleClient()
-    const [channel, setChannel] = useState<Channel | null>(null)
-    const [data, setData] = useState<T | null>(null)
+  const client = useRippleClient()
+  const [channel, setChannel] = useState<Channel | null>(null)
+  const [data, setData] = useState<T | null>(null)
 
-    useEffect(() => {
-        const ch = client.channel(channelName)
-        setChannel(ch)
+  useEffect(() => {
+    const ch = client.channel(channelName)
+    setChannel(ch)
 
-        ch.listen<T>(eventName, (eventData) => {
-            setData(eventData)
-        })
+    ch.listen<T>(eventName, (eventData) => {
+      setData(eventData)
+    })
 
-        return () => {
-            client.leave(channelName)
-        }
-    }, [client, channelName, eventName])
+    return () => {
+      client.leave(channelName)
+    }
+  }, [client, channelName, eventName])
 
-    return { channel, data }
+  return { channel, data }
 }
 
 /**
  * Hook to subscribe to a private channel
  */
 export function usePrivateChannel<T = unknown>(
-    channelName: string,
-    eventName: string
+  channelName: string,
+  eventName: string
 ): { channel: PrivateChannel | null; data: T | null } {
-    const client = useRippleClient()
-    const [channel, setChannel] = useState<PrivateChannel | null>(null)
-    const [data, setData] = useState<T | null>(null)
+  const client = useRippleClient()
+  const [channel, setChannel] = useState<PrivateChannel | null>(null)
+  const [data, setData] = useState<T | null>(null)
 
-    useEffect(() => {
-        const ch = client.private(channelName)
-        setChannel(ch)
+  useEffect(() => {
+    const ch = client.private(channelName)
+    setChannel(ch)
 
-        ch.listen<T>(eventName, (eventData) => {
-            setData(eventData)
-        })
+    ch.listen<T>(eventName, (eventData) => {
+      setData(eventData)
+    })
 
-        return () => {
-            client.leave(channelName)
-        }
-    }, [client, channelName, eventName])
+    return () => {
+      client.leave(channelName)
+    }
+  }, [client, channelName, eventName])
 
-    return { channel, data }
+  return { channel, data }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -172,25 +172,27 @@ export function usePrivateChannel<T = unknown>(
  * ```
  */
 export function usePresence(channelName: string): {
-    channel: PresenceChannel | null
-    members: PresenceUser[]
+  channel: PresenceChannel | null
+  members: PresenceUser[]
 } {
-    const client = useRippleClient()
-    const [channel, setChannel] = useState<PresenceChannel | null>(null)
-    const [members, setMembers] = useState<PresenceUser[]>([])
+  const client = useRippleClient()
+  const [channel, setChannel] = useState<PresenceChannel | null>(null)
+  const [members, setMembers] = useState<PresenceUser[]>([])
 
-    useEffect(() => {
-        const ch = client.join(channelName)
-        setChannel(ch)
+  useEffect(() => {
+    const ch = client.join(channelName)
+    setChannel(ch)
 
-        ch.here((users) => setMembers(users))
-        ch.joining((user) => setMembers((prev: PresenceUser[]) => [...prev, user]))
-        ch.leaving((user) => setMembers((prev: PresenceUser[]) => prev.filter((m: PresenceUser) => m.id !== user.id)))
+    ch.here((users) => setMembers(users))
+    ch.joining((user) => setMembers((prev: PresenceUser[]) => [...prev, user]))
+    ch.leaving((user) =>
+      setMembers((prev: PresenceUser[]) => prev.filter((m: PresenceUser) => m.id !== user.id))
+    )
 
-        return () => {
-            client.leave(channelName)
-        }
-    }, [client, channelName])
+    return () => {
+      client.leave(channelName)
+    }
+  }, [client, channelName])
 
-    return { channel, members }
+  return { channel, members }
 }

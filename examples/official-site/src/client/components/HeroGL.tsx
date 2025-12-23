@@ -2,52 +2,52 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
 export function HeroGL() {
-    const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        if (!containerRef.current) return
+  useEffect(() => {
+    if (!containerRef.current) return
 
-        // --- Scene Setup ---
-        const scene = new THREE.Scene()
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
-        const renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            powerPreference: 'high-performance'
-        })
+    // --- Scene Setup ---
+    const scene = new THREE.Scene()
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    })
 
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        containerRef.current.appendChild(renderer.domElement)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    containerRef.current.appendChild(renderer.domElement)
 
-        // --- Texture Loading ---
-        const loader = new THREE.TextureLoader()
-        const texture = loader.load('/static/image/hero.jpg', (tex) => {
-            if (material) {
-                material.uniforms.uTextureResolution.value.set(tex.image.width, tex.image.height)
-            }
-        })
+    // --- Texture Loading ---
+    const loader = new THREE.TextureLoader()
+    const texture = loader.load('/static/image/hero.jpg', (tex) => {
+      if (material) {
+        material.uniforms.uTextureResolution.value.set(tex.image.width, tex.image.height)
+      }
+    })
 
-        texture.minFilter = THREE.LinearFilter
-        texture.magFilter = THREE.LinearFilter
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
 
-        // --- Shader Material ---
-        const geometry = new THREE.PlaneGeometry(2, 2)
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                uTime: { value: 0 },
-                uTexture: { value: texture },
-                uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-                uTextureResolution: { value: new THREE.Vector2(1920, 1080) }
-            },
-            vertexShader: `
+    // --- Shader Material ---
+    const geometry = new THREE.PlaneGeometry(2, 2)
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uTexture: { value: texture },
+        uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        uTextureResolution: { value: new THREE.Vector2(1920, 1080) },
+      },
+      vertexShader: `
         varying vec2 vUv;
         void main() {
           vUv = uv;
           gl_Position = vec4(position, 1.0);
         }
       `,
-            fragmentShader: `
+      fragmentShader: `
         uniform float uTime;
         uniform sampler2D uTexture;
         uniform vec2 uResolution;
@@ -114,45 +114,45 @@ export function HeroGL() {
           gl_FragColor = color;
         }
       `,
-        })
+    })
 
-        const mesh = new THREE.Mesh(geometry, material)
-        scene.add(mesh)
+    const mesh = new THREE.Mesh(geometry, material)
+    scene.add(mesh)
 
-        // --- Animation ---
-        let animationId: number
-        const animate = (time: number) => {
-            animationId = requestAnimationFrame(animate)
-            material.uniforms.uTime.value = time * 0.001
-            renderer.render(scene, camera)
-        }
-        animate(0)
+    // --- Animation ---
+    let animationId: number
+    const animate = (time: number) => {
+      animationId = requestAnimationFrame(animate)
+      material.uniforms.uTime.value = time * 0.001
+      renderer.render(scene, camera)
+    }
+    animate(0)
 
-        // --- Resize ---
-        const handleResize = () => {
-            const width = window.innerWidth
-            const height = window.innerHeight
-            renderer.setSize(width, height)
-            material.uniforms.uResolution.value.set(width, height)
-        }
-        window.addEventListener('resize', handleResize)
+    // --- Resize ---
+    const handleResize = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      renderer.setSize(width, height)
+      material.uniforms.uResolution.value.set(width, height)
+    }
+    window.addEventListener('resize', handleResize)
 
-        return () => {
-            window.removeEventListener('resize', handleResize)
-            cancelAnimationFrame(animationId)
-            if (containerRef.current && renderer.domElement.parentNode) {
-                containerRef.current.removeChild(renderer.domElement)
-            }
-            geometry.dispose()
-            material.dispose()
-            renderer.dispose()
-        }
-    }, [])
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      cancelAnimationFrame(animationId)
+      if (containerRef.current && renderer.domElement.parentNode) {
+        containerRef.current.removeChild(renderer.domElement)
+      }
+      geometry.dispose()
+      material.dispose()
+      renderer.dispose()
+    }
+  }, [])
 
-    return (
-        <div
-            ref={containerRef}
-            className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
-        />
-    )
+  return (
+    <div
+      ref={containerRef}
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
+    />
+  )
 }

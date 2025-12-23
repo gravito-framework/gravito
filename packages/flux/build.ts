@@ -3,62 +3,67 @@ import { existsSync, rmSync } from 'fs'
 
 // Clean dist
 if (existsSync('./dist')) {
-    rmSync('./dist', { recursive: true })
+  rmSync('./dist', { recursive: true })
 }
 
 // ─────────────────────────────────────────────────────────────
 // Build ESM for Bun (full features including BunSQLiteStorage)
 // ─────────────────────────────────────────────────────────────
 await build({
-    entrypoints: ['./src/index.ts', './src/bun.ts'],
-    outdir: './dist',
-    target: 'bun',
-    format: 'esm',
-    external: ['gravito-core'],
-    splitting: true,
-    naming: '[dir]/[name].js',
+  entrypoints: ['./src/index.ts', './src/bun.ts'],
+  outdir: './dist',
+  target: 'bun',
+  format: 'esm',
+  external: ['gravito-core'],
+  splitting: true,
+  naming: '[dir]/[name].js',
 })
 
 // ─────────────────────────────────────────────────────────────
 // Build ESM for Node (without Bun-specific imports)
 // ─────────────────────────────────────────────────────────────
 await build({
-    entrypoints: ['./src/index.node.ts'],
-    outdir: './dist/node',
-    target: 'node',
-    format: 'esm',
-    external: ['gravito-core'],
-    splitting: false,
-    naming: 'index.mjs',
+  entrypoints: ['./src/index.node.ts'],
+  outdir: './dist/node',
+  target: 'node',
+  format: 'esm',
+  external: ['gravito-core'],
+  splitting: false,
+  naming: 'index.mjs',
 })
 
 // ─────────────────────────────────────────────────────────────
 // Build CJS for Node (legacy CommonJS support)
 // ─────────────────────────────────────────────────────────────
 await build({
-    entrypoints: ['./src/index.node.ts'],
-    outdir: './dist/node',
-    target: 'node',
-    format: 'cjs',
-    external: ['gravito-core'],
-    splitting: false,
-    naming: 'index.cjs',
+  entrypoints: ['./src/index.node.ts'],
+  outdir: './dist/node',
+  target: 'node',
+  format: 'cjs',
+  external: ['gravito-core'],
+  splitting: false,
+  naming: 'index.cjs',
 })
 
 // ─────────────────────────────────────────────────────────────
 // Generate type declarations
 // ─────────────────────────────────────────────────────────────
-const tsc = Bun.spawn([
-    'bunx', 'tsc',
+const tsc = Bun.spawn(
+  [
+    'bunx',
+    'tsc',
     '--emitDeclarationOnly',
     '--declaration',
     '--declarationMap',
-    '--declarationDir', './dist'
-], {
+    '--declarationDir',
+    './dist',
+  ],
+  {
     cwd: import.meta.dir,
     stdout: 'inherit',
     stderr: 'inherit',
-})
+  }
+)
 
 await tsc.exited
 

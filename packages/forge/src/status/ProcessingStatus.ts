@@ -2,7 +2,7 @@
  * @fileoverview Processing status management
  */
 
-import type { ProcessingStatus, FileOutput } from '../types'
+import type { FileOutput, ProcessingStatus } from '../types'
 
 /**
  * Status change callback
@@ -75,10 +75,7 @@ export class ProcessingStatusManager {
    * @param result - Processing result
    * @returns Updated status
    */
-  static completed(
-    status: ProcessingStatus,
-    result: FileOutput
-  ): ProcessingStatus {
+  static completed(status: ProcessingStatus, result: FileOutput): ProcessingStatus {
     return this.update(status, {
       status: 'completed',
       progress: 100,

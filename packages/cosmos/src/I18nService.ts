@@ -205,11 +205,7 @@ export class I18nManager implements I18nService {
   /**
    * Internal translation logic used by instances
    */
-  translate(
-    locale: string,
-    key: string,
-    replacements?: Record<string, string | number>
-  ): string {
+  translate(locale: string, key: string, replacements?: Record<string, string | number>): string {
     const keys = key.split('.')
     let value: any = this.translations[locale]
 

@@ -2,8 +2,8 @@
  * @fileoverview Server-Sent Events handler for real-time status updates
  */
 
-import type { StatusStore } from './StatusStore'
 import type { ProcessingStatus } from '../types'
+import type { StatusStore } from './StatusStore'
 
 /**
  * SSE handler for processing status streaming
@@ -22,13 +22,10 @@ export class SSEHandler {
     const initialStatus = await this.statusStore.get(jobId)
 
     if (!initialStatus) {
-      return new Response(
-        JSON.stringify({ error: 'Job not found' }),
-        {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
+      return new Response(JSON.stringify({ error: 'Job not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     // Create readable stream
@@ -37,43 +34,30 @@ export class SSEHandler {
       async start(controller) {
         // Send initial status
         const encoder = new TextEncoder()
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify(initialStatus)}\n\n`)
-        )
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(initialStatus)}\n\n`))
 
         // If already completed or failed, close stream
-        if (
-          initialStatus.status === 'completed' ||
-          initialStatus.status === 'failed'
-        ) {
+        if (initialStatus.status === 'completed' || initialStatus.status === 'failed') {
           controller.close()
           return
         }
 
         // Subscribe to status changes
-        const unsubscribe = handler.statusStore.onChange(
-          jobId,
-          (newStatus: ProcessingStatus) => {
-            try {
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify(newStatus)}\n\n`)
-              )
+        const unsubscribe = handler.statusStore.onChange(jobId, (newStatus: ProcessingStatus) => {
+          try {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(newStatus)}\n\n`))
 
-              // Close stream if completed or failed
-              if (
-                newStatus.status === 'completed' ||
-                newStatus.status === 'failed'
-              ) {
-                unsubscribe()
-                controller.close()
-              }
-            } catch (error) {
-              console.error('[SSEHandler] Error sending status:', error)
+            // Close stream if completed or failed
+            if (newStatus.status === 'completed' || newStatus.status === 'failed') {
               unsubscribe()
               controller.close()
             }
+          } catch (error) {
+            console.error('[SSEHandler] Error sending status:', error)
+            unsubscribe()
+            controller.close()
           }
-        )
+        })
 
         // Handle client disconnect
         // Note: In Bun, we can detect disconnect via AbortSignal

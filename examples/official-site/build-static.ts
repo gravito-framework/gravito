@@ -68,15 +68,15 @@ async function build() {
       const html = await res.text()
       const finalHtml = gaId
         ? html.replace(
-          '<!-- Google Analytics Placeholder -->',
-          `<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
+            '<!-- Google Analytics Placeholder -->',
+            `<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
              <script>
                window.dataLayer = window.dataLayer || [];
                function gtag(){dataLayer.push(arguments);}
                gtag('js', new Date());
                gtag('config', '${gaId}');
              </script>`
-        )
+          )
         : html
 
       const indexPath = join(outputDir, 'index.html')
@@ -137,15 +137,15 @@ async function build() {
         const html = await res.text()
         const finalHtml = gaId
           ? html.replace(
-            '<!-- Google Analytics Placeholder -->',
-            `<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
+              '<!-- Google Analytics Placeholder -->',
+              `<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
              <script>
                window.dataLayer = window.dataLayer || [];
                function gtag(){dataLayer.push(arguments);}
                gtag('js', new Date());
                gtag('config', '${gaId}');
              </script>`
-          )
+            )
           : html
 
         // For paths like /en/docs/foo, we save to en/docs/foo/index.html

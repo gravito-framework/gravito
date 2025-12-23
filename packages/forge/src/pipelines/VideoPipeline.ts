@@ -2,10 +2,10 @@
  * @fileoverview Video processing pipeline
  */
 
-import { BasePipeline } from './BasePipeline'
 import type { Processor } from '../processors/Processor'
-import type { ProcessOptions } from '../types'
 import { VideoProcessor } from '../processors/VideoProcessor'
+import type { ProcessOptions } from '../types'
+import { BasePipeline } from './BasePipeline'
 
 /**
  * Video processing pipeline
@@ -49,11 +49,7 @@ export class VideoPipeline extends BasePipeline {
    * @param quality - Quality (CRF value, 0-51)
    * @returns Pipeline instance
    */
-  transcode(
-    format: string,
-    codec?: string,
-    quality?: number
-  ): this {
+  transcode(format: string, codec?: string, quality?: number): this {
     return this.add(this.videoProcessor, {
       format,
       codec,

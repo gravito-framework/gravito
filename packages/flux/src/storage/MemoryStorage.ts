@@ -6,7 +6,7 @@
  * @module @gravito/flux/storage
  */
 
-import type { WorkflowStorage, WorkflowState, WorkflowFilter } from '../types'
+import type { WorkflowFilter, WorkflowState, WorkflowStorage } from '../types'
 
 /**
  * Memory Storage
@@ -15,63 +15,61 @@ import type { WorkflowStorage, WorkflowState, WorkflowFilter } from '../types'
  * Data is not persisted across restarts.
  */
 export class MemoryStorage implements WorkflowStorage {
-    private store = new Map<string, WorkflowState>()
+  private store = new Map<string, WorkflowState>()
 
-    async save(state: WorkflowState): Promise<void> {
-        this.store.set(state.id, {
-            ...state,
-            updatedAt: new Date(),
-        })
+  async save(state: WorkflowState): Promise<void> {
+    this.store.set(state.id, {
+      ...state,
+      updatedAt: new Date(),
+    })
+  }
+
+  async load(id: string): Promise<WorkflowState | null> {
+    return this.store.get(id) ?? null
+  }
+
+  async list(filter?: WorkflowFilter): Promise<WorkflowState[]> {
+    let results = Array.from(this.store.values())
+
+    if (filter?.name) {
+      results = results.filter((s) => s.name === filter.name)
     }
 
-    async load(id: string): Promise<WorkflowState | null> {
-        return this.store.get(id) ?? null
+    if (filter?.status) {
+      const statuses = Array.isArray(filter.status) ? filter.status : [filter.status]
+      results = results.filter((s) => statuses.includes(s.status))
     }
 
-    async list(filter?: WorkflowFilter): Promise<WorkflowState[]> {
-        let results = Array.from(this.store.values())
+    // Sort by createdAt desc
+    results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 
-        if (filter?.name) {
-            results = results.filter((s) => s.name === filter.name)
-        }
-
-        if (filter?.status) {
-            const statuses = Array.isArray(filter.status)
-                ? filter.status
-                : [filter.status]
-            results = results.filter((s) => statuses.includes(s.status))
-        }
-
-        // Sort by createdAt desc
-        results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-
-        // Apply pagination
-        if (filter?.offset) {
-            results = results.slice(filter.offset)
-        }
-        if (filter?.limit) {
-            results = results.slice(0, filter.limit)
-        }
-
-        return results
+    // Apply pagination
+    if (filter?.offset) {
+      results = results.slice(filter.offset)
+    }
+    if (filter?.limit) {
+      results = results.slice(0, filter.limit)
     }
 
-    async delete(id: string): Promise<void> {
-        this.store.delete(id)
-    }
+    return results
+  }
 
-    async init(): Promise<void> {
-        // No-op for memory storage
-    }
+  async delete(id: string): Promise<void> {
+    this.store.delete(id)
+  }
 
-    async close(): Promise<void> {
-        this.store.clear()
-    }
+  async init(): Promise<void> {
+    // No-op for memory storage
+  }
 
-    /**
-     * Get store size (for testing)
-     */
-    size(): number {
-        return this.store.size
-    }
+  async close(): Promise<void> {
+    this.store.clear()
+  }
+
+  /**
+   * Get store size (for testing)
+   */
+  size(): number {
+    return this.store.size
+  }
 }

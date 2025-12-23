@@ -2,11 +2,11 @@
  * @fileoverview Basic tests for @gravito/forge
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { ForgeService } from '../src/ForgeService'
-import { MemoryStatusStore } from '../src/status/StatusStore'
-import { VideoProcessor } from '../src/processors/VideoProcessor'
 import { ImageProcessor } from '../src/processors/ImageProcessor'
+import { VideoProcessor } from '../src/processors/VideoProcessor'
+import { MemoryStatusStore } from '../src/status/StatusStore'
 
 describe('ForgeService', () => {
   let service: ForgeService
@@ -107,4 +107,3 @@ describe('MemoryStatusStore', () => {
     unsubscribe()
   })
 })
-

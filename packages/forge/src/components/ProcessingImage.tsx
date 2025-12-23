@@ -2,8 +2,8 @@
  * @fileoverview React component for displaying processing image with real-time status
  */
 
-import { useState, useEffect } from 'react'
-import type { ProcessingStatus, FileOutput } from '../types'
+import { useEffect, useState } from 'react'
+import type { FileOutput, ProcessingStatus } from '../types'
 
 /**
  * ProcessingImage component props
@@ -58,8 +58,7 @@ export function ProcessingImage({
   const [imageSrc, setImageSrc] = useState<string | null>(placeholder || null)
 
   useEffect(() => {
-    const endpoint =
-      statusEndpoint || `/forge/status/${jobId}/stream`
+    const endpoint = statusEndpoint || `/forge/status/${jobId}/stream`
     const eventSource = new EventSource(endpoint)
 
     eventSource.onmessage = (event) => {

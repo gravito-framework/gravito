@@ -18,10 +18,7 @@ export interface ProcessorAdapter {
    * @param options - Execution options
    * @returns Output file path
    */
-  execute(
-    args: string[],
-    options?: AdapterOptions
-  ): Promise<string>
+  execute(args: string[], options?: AdapterOptions): Promise<string>
 
   /**
    * Get processing progress (if supported)

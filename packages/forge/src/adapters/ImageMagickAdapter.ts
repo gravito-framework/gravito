@@ -3,8 +3,8 @@
  */
 
 import { spawn } from 'bun'
-import type { ProcessorAdapter, AdapterOptions } from './ProcessorAdapter'
 import type { ProcessingProgress } from '../types'
+import type { AdapterOptions, ProcessorAdapter } from './ProcessorAdapter'
 
 /**
  * ImageMagick adapter
@@ -27,10 +27,7 @@ export class ImageMagickAdapter implements ProcessorAdapter {
    * @param options - Execution options
    * @returns Output file path
    */
-  async execute(
-    args: string[],
-    options: AdapterOptions = {}
-  ): Promise<string> {
+  async execute(args: string[], options: AdapterOptions = {}): Promise<string> {
     const { output, onProgress, timeout = 60000 } = options // Default 1 minute
 
     if (!output) {

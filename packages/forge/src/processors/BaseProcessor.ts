@@ -2,8 +2,8 @@
  * @fileoverview Base processor implementation
  */
 
+import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
 import type { Processor } from './Processor'
-import type { FileInput, FileOutput, ProcessOptions, ProcessingProgress } from '../types'
 
 /**
  * Base processor implementation

@@ -2,9 +2,9 @@
  * @fileoverview Base pipeline implementation
  */
 
-import type { Pipeline, PipelineStep } from './Pipeline'
 import type { Processor } from '../processors/Processor'
 import type { FileInput, FileOutput, ProcessOptions } from '../types'
+import type { Pipeline, PipelineStep } from './Pipeline'
 
 /**
  * Base pipeline implementation
@@ -40,9 +40,7 @@ export class BasePipeline implements Pipeline {
       // Check if processor supports the current file type
       const mimeType = this.getMimeType(currentInput)
       if (!step.processor.supports(mimeType)) {
-        throw new Error(
-          `Processor does not support MIME type: ${mimeType}`
-        )
+        throw new Error(`Processor does not support MIME type: ${mimeType}`)
       }
 
       // Process the file
@@ -101,4 +99,3 @@ export class BasePipeline implements Pipeline {
     return 'application/octet-stream'
   }
 }
-

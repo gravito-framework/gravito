@@ -2,10 +2,10 @@
  * @fileoverview Image processing pipeline
  */
 
-import { BasePipeline } from './BasePipeline'
+import { ImageProcessor } from '../processors/ImageProcessor'
 import type { Processor } from '../processors/Processor'
 import type { ProcessOptions } from '../types'
-import { ImageProcessor } from '../processors/ImageProcessor'
+import { BasePipeline } from './BasePipeline'
 
 /**
  * Image processing pipeline

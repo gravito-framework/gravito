@@ -3,8 +3,8 @@
  */
 
 import { spawn } from 'bun'
-import type { ProcessorAdapter, AdapterOptions } from './ProcessorAdapter'
 import type { ProcessingProgress } from '../types'
+import type { AdapterOptions, ProcessorAdapter } from './ProcessorAdapter'
 
 /**
  * FFmpeg adapter
@@ -88,11 +88,7 @@ export class FFmpegAdapter implements ProcessorAdapter {
         if (code === 0) {
           resolve(output)
         } else {
-          reject(
-            new Error(
-              `FFmpeg failed with code ${code}: ${stderrBuffer.slice(-500)}`
-            )
-          )
+          reject(new Error(`FFmpeg failed with code ${code}: ${stderrBuffer.slice(-500)}`))
         }
       })
 
@@ -116,11 +112,18 @@ export class FFmpegAdapter implements ProcessorAdapter {
     const timeMatch = stderr.match(/time=(\d+):(\d+):(\d+\.\d+)/)
     const durationMatch = stderr.match(/Duration: (\d+):(\d+):(\d+\.\d+)/)
 
-    if (timeMatch && durationMatch && timeMatch[1] && timeMatch[2] && timeMatch[3] && durationMatch[1] && durationMatch[2] && durationMatch[3]) {
+    if (
+      timeMatch &&
+      durationMatch &&
+      timeMatch[1] &&
+      timeMatch[2] &&
+      timeMatch[3] &&
+      durationMatch[1] &&
+      durationMatch[2] &&
+      durationMatch[3]
+    ) {
       const currentTime =
-        parseInt(timeMatch[1]) * 3600 +
-        parseInt(timeMatch[2]) * 60 +
-        parseFloat(timeMatch[3])
+        parseInt(timeMatch[1]) * 3600 + parseInt(timeMatch[2]) * 60 + parseFloat(timeMatch[3])
       const totalTime =
         parseInt(durationMatch[1]) * 3600 +
         parseInt(durationMatch[2]) * 60 +

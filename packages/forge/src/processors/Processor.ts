@@ -2,7 +2,7 @@
  * @fileoverview Processor interface for file processing
  */
 
-import type { FileInput, FileOutput, ProcessOptions, ProcessingProgress } from '../types'
+import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
 
 /**
  * Processor interface

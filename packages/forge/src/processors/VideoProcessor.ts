@@ -2,12 +2,12 @@
  * @fileoverview Video processor using FFmpeg
  */
 
-import { join } from 'node:path'
 import { mkdir } from 'node:fs/promises'
+import { join } from 'node:path'
 import { randomUUID } from 'crypto'
-import { BaseProcessor } from './BaseProcessor'
-import type { FileInput, FileOutput, ProcessOptions, ProcessingProgress } from '../types'
 import { FFmpegAdapter } from '../adapters/FFmpegAdapter'
+import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
+import { BaseProcessor } from './BaseProcessor'
 
 /**
  * Video processor options
@@ -56,7 +56,10 @@ export class VideoProcessor extends BaseProcessor {
    * @param options - Processing options (may include onProgress callback)
    * @returns Processed file output
    */
-  async process(input: FileInput, options: ProcessOptions & { onProgress?: (progress: ProcessingProgress) => void }): Promise<FileOutput> {
+  async process(
+    input: FileInput,
+    options: ProcessOptions & { onProgress?: (progress: ProcessingProgress) => void }
+  ): Promise<FileOutput> {
     // Ensure temp directory exists
     await mkdir(this.tempDir, { recursive: true })
 
@@ -139,11 +142,12 @@ export class VideoProcessor extends BaseProcessor {
 
     // Resize
     if (options.width || options.height) {
-      const scale = options.width && options.height
-        ? `${options.width}:${options.height}`
-        : options.width
-        ? `${options.width}:-1`
-        : `-1:${options.height}`
+      const scale =
+        options.width && options.height
+          ? `${options.width}:${options.height}`
+          : options.width
+            ? `${options.width}:-1`
+            : `-1:${options.height}`
       args.push('-vf', `scale=${scale}`)
     }
 
