@@ -95,7 +95,7 @@ async function buildPackage(pkg: PackageInfo): Promise<boolean> {
         const pkgJsonPath = join(pkg.path, 'package.json');
         const content = await readFile(pkgJsonPath, 'utf-8');
         const json = JSON.parse(content);
-        
+
         if (!json.scripts || !json.scripts.build) {
             console.log(`\n📦 ${pkg.name} 沒有 build 腳本，跳過構建`);
             return true;
@@ -199,8 +199,13 @@ async function publishPackage(pkg: PackageInfo): Promise<boolean> {
             console.log(`  ✅ ${pkg.name}@${pkg.version} 發布成功`);
             return true;
         } else {
-            // 如果失敗，檢查是否是因為版本衝突（雖然 checkPackageExists 已檢查，但可能存在競爭）
-            // 由於 stdio: inherit，我們無法直接抓取 stdout，但可以依靠 exit code 或之前已檢查過
+            // 如果發布失敗，做最後一次確認是否是因為版本已存在（處理 npm view 的延遲或快取問題）
+            const doubleCheck = await checkPackageExists(pkg);
+            if (doubleCheck) {
+                console.log(`  ⚠️  ${pkg.name}@${pkg.version} 發布失敗，但檢測到版本已存在，視為成功（跳過）。`);
+                return true;
+            }
+
             console.error(`  ❌ ${pkg.name}@${pkg.version} 發布失敗 (碼: ${code})`);
             return false;
         }
