@@ -14,7 +14,24 @@ const { t, locale } = useI18n()
 
 <template>
   <Layout>
-    <Head title="Luminosity - Atomic Sitemap Engine" />
+    <Head>
+      <title>{{ t.hero.title }} - Luminosity SEO</title>
+      <meta name="description" :content="t.hero.subtitle + ' - ' + t.hero.desc" />
+      
+      <!-- Open Graph / Facebook -->
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://lux.gravito.dev/" />
+      <meta property="og:title" :content="t.hero.title + ' - Luminosity SEO'" />
+      <meta property="og:description" :content="t.hero.subtitle" />
+      <meta property="og:image" content="https://lux.gravito.dev/og-image.png" />
+
+      <!-- Twitter -->
+      <meta property="twitter:card" content="summary_large_image" />
+      <meta property="twitter:url" content="https://lux.gravito.dev/" />
+      <meta property="twitter:title" :content="t.hero.title + ' - Luminosity SEO'" />
+      <meta property="twitter:description" :content="t.hero.subtitle" />
+      <meta property="twitter:image" content="https://lux.gravito.dev/og-image.png" />
+    </Head>
     
     <!-- Hero Section -->
     <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">

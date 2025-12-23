@@ -3,10 +3,14 @@ import { Head, Link } from '@inertiajs/vue3'
 import { ChevronRight, Clock, Clock3, Edit2, Github, MapPin } from 'lucide-vue-next'
 import Layout from '../components/Layout.vue'
 
-interface SidebarItem {
+interface SidebarSection {
+  title: string
+  items: SidebarLink[]
+}
+
+interface SidebarLink {
   title: string
   href: string
-  children?: SidebarItem[]
 }
 
 interface TocItem {
@@ -18,7 +22,7 @@ interface TocItem {
 defineProps<{
   title: string
   content: string
-  sidebar: SidebarItem[]
+  sidebar: SidebarSection[]
   currentPath: string
   toc: TocItem[]
 }>()
@@ -27,7 +31,22 @@ defineProps<{
 <template>
   <Layout>
     <Head>
-      <title>{{ title }} | Luminosity Docs</title>
+      <title>{{ title }} - Luminosity Docs</title>
+      <meta name="description" :content="`Documentation for ${title} - Luminosity SEO Engine`" />
+      
+      <!-- Open Graph / Facebook -->
+      <meta property="og:type" content="article" />
+      <meta property="og:url" :content="'https://lux.gravito.dev' + currentPath" />
+      <meta property="og:title" :content="`${title} - Luminosity Documentation`" />
+      <meta property="og:description" :content="`Comprehensive guide and API reference for ${title}.`" />
+      <meta property="og:image" content="https://lux.gravito.dev/og-image.png" />
+
+      <!-- Twitter -->
+      <meta property="twitter:card" content="summary_large_image" />
+      <meta property="twitter:url" :content="'https://lux.gravito.dev' + currentPath" />
+      <meta property="twitter:title" :content="`${title} - Luminosity Documentation`" />
+      <meta property="twitter:description" :content="`Comprehensive guide and API reference for ${title}.`" />
+      <meta property="twitter:image" content="https://lux.gravito.dev/og-image.png" />
     </Head>
 
     <div class="mx-auto w-full max-w-screen-2xl px-6 py-10 lg:flex lg:gap-14 relative z-10">
@@ -58,14 +77,14 @@ defineProps<{
                   :href="item.href"
                   :class="[
                     'block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent',
-                    currentPath === item.path
+                    currentPath === item.href
                       ? 'text-emerald-400 font-bold border-white/5 bg-white/[0.03]'
                       : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
                   ]"
                 >
                   <div class="flex items-center gap-3">
-                    <div v-if="currentPath === item.path" class="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                    <span :class="currentPath === item.path ? 'translate-x-0' : 'group-hover:translate-x-1 transition-transform'">
+                    <div v-if="currentPath === item.href" class="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                    <span :class="currentPath === item.href ? 'translate-x-0' : 'group-hover:translate-x-1 transition-transform'">
                       {{ item.title }}
                     </span>
                   </div>
