@@ -30,7 +30,7 @@ const getPath = (path: string) => {
 
 const navLinks = [
   { label: 'Features', path: '/features' },
-  { label: 'Documentation', path: '/docs' },
+  { label: 'Documentation', path: '/docs/introduction' },
   { label: 'Frameworks', path: '/docs/frameworks' },
   { label: 'Gravito Framework', path: 'https://gravito.dev/en/docs/guide/seo-engine' },
   { label: 'GitHub', path: 'https://github.com/gravito-framework/gravito/tree/main/packages/luminosity' },
