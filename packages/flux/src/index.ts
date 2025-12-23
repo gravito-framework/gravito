@@ -34,6 +34,7 @@ export { WorkflowBuilder, createWorkflow } from './builder/WorkflowBuilder'
 
 // Storage
 export { MemoryStorage } from './storage/MemoryStorage'
+export { BunSQLiteStorage, type BunSQLiteStorageOptions } from './storage/BunSQLiteStorage'
 
 // Logger
 export { FluxConsoleLogger, FluxSilentLogger } from './logger/FluxLogger'
