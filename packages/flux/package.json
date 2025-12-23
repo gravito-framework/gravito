@@ -3,13 +3,29 @@
     "version": "1.0.0-alpha.1",
     "description": "Platform-agnostic workflow engine for Gravito",
     "type": "module",
-    "main": "./dist/index.js",
-    "module": "./dist/index.js",
+    "main": "./dist/node/index.cjs",
+    "module": "./dist/node/index.mjs",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
+            "bun": {
+                "import": "./dist/index.js",
+                "types": "./dist/index.d.ts"
+            },
+            "node": {
+                "import": "./dist/node/index.mjs",
+                "require": "./dist/node/index.cjs",
+                "types": "./dist/index.node.d.ts"
+            },
+            "import": "./dist/node/index.mjs",
+            "require": "./dist/node/index.cjs",
             "types": "./dist/index.d.ts"
+        },
+        "./bun": {
+            "bun": {
+                "import": "./dist/bun.js",
+                "types": "./dist/bun.d.ts"
+            }
         }
     },
     "files": [
@@ -39,7 +55,8 @@
         "workflow",
         "state-machine",
         "pipeline",
-        "bun"
+        "bun",
+        "node"
     ],
     "author": "Gravito Team",
     "license": "MIT",
