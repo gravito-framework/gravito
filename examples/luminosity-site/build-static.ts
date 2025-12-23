@@ -23,41 +23,115 @@ async function build() {
   // 2. Initialize Core
   const core = await bootstrap({ port: 3000 })
   const outputDir = join(process.cwd(), 'dist-static')
-
   await mkdir(outputDir, { recursive: true })
 
-  // Render Routes
-  const routes = ['/', '/features', '/docs/introduction', '/docs/getting-started']
+  // Load Services
+  const { DocsService } = await import('./src/services/DocsService')
+
+  // Define Base Meta
+  const baseUrl = 'https://lux.gravito.dev'
+  const baseMeta = {
+    title: 'Luminosity',
+    description: 'The SmartMap Engine for modern web apps.',
+    image: 'https://lux.gravito.dev/og-image.png',
+  }
+
+  // Collect Routes
+  interface RouteTask {
+    path: string
+    meta: { title: string; description: string; url: string }
+  }
+  const routes: RouteTask[] = []
+
+  // Add Home (English)
+  routes.push({
+    path: '/',
+    meta: {
+      title: 'Luminosity - Atomic Sitemap Engine',
+      description: 'High-performance, intelligent sitemap generation for modern web applications.',
+      url: baseUrl,
+    },
+  })
+
+  // Add Features (English)
+  routes.push({
+    path: '/features',
+    meta: {
+      title: 'Features - Luminosity',
+      description:
+        'Explore the powerful features of Luminosity: LSM Tree storage, Incremental Updates, and more.',
+      url: baseUrl + '/features',
+    },
+  })
+
+  // Add Docs Routes
+  const locales = ['en', 'zh']
+  for (const locale of locales) {
+    const sections = await DocsService.getSidebar(locale)
+    for (const section of sections) {
+      for (const item of section.items) {
+        routes.push({
+          path: item.href,
+          meta: {
+            title: `${item.title} - ${locale === 'zh' ? 'Luminosity 指南' : 'Luminosity Docs'}`,
+            description: `Documentation for ${item.title} in Luminosity SEO Engine.`,
+            url: baseUrl + item.href,
+          },
+        })
+      }
+    }
+  }
+
+  // Helper to Inject Meta
+  const injectMeta = (html: string, meta: RouteTask['meta']) => {
+    const tags = [
+      `<title>${meta.title}</title>`,
+      `<meta name="description" content="${meta.description}">`,
+      `<meta property="og:title" content="${meta.title}">`,
+      `<meta property="og:description" content="${meta.description}">`,
+      `<meta property="og:url" content="${meta.url}">`,
+      `<meta property="og:type" content="website">`,
+      `<meta property="og:image" content="${baseMeta.image}">`,
+      `<meta name="twitter:card" content="summary_large_image">`,
+      `<meta name="twitter:title" content="${meta.title}">`,
+      `<meta name="twitter:description" content="${meta.description}">`,
+      `<meta name="twitter:image" content="${baseMeta.image}">`,
+    ].join('\n    ')
+
+    // Replace existing <title> and inject new tags
+    return html.replace(/<title>.*?<\/title>/, '').replace('</head>', `${tags}\n</head>`)
+  }
 
   // 3. Render Loop
-  for (const pathname of routes) {
-    console.log(`Render: ${pathname}`)
+  console.log(`🚀 Rendering ${routes.length} pages...`)
+
+  for (const task of routes) {
+    console.log(`Render: ${task.path}`)
     try {
-      const res = await (core.app as any).request(pathname)
+      const res = await (core.app as any).request(task.path)
       if (res.status !== 200) {
-        console.error(`❌ Failed ${res.status}: ${pathname}`)
-        console.error(await res.text())
+        console.error(`❌ Failed ${res.status}: ${task.path}`)
         continue
       }
 
-      const html = await res.text()
-      const filePath = join(outputDir, pathname === '/' ? 'index.html' : `${pathname}/index.html`)
+      let html = await res.text()
+      html = injectMeta(html, task.meta)
+
+      const filePath = join(
+        outputDir,
+        task.path === '/' ? 'index.html' : `${task.path.replace(/^\//, '')}/index.html`
+      )
       await mkdir(dirname(filePath), { recursive: true })
       await writeFile(filePath, html)
-      console.log(`✅ Rendered: ${pathname}`)
+      console.log(`✅ Rendered: ${task.path}`)
     } catch (e) {
-      console.error(`❌ Error rendering ${pathname}:`, e)
+      console.error(`❌ Error rendering ${task.path}:`, e)
     }
   }
 
   // 4. Generate SEO Assets (Luminosity)
   console.log('🌟 Generating Sitemap & Robots via Luminosity...')
-
-  // Dynamic import to avoid earlier execution issues if any
   const { SeoEngine, SeoRenderer, RobotsBuilder } = await import('@gravito/luminosity')
-  const { DocsService } = await import('./src/services/DocsService')
-
-  const baseUrl = 'https://lux.gravito.dev'
 
   // Initialize Engine
   const engine = new SeoEngine({
@@ -67,39 +141,21 @@ async function build() {
     branding: { enabled: true, watermark: 'Powered by Gravito Luminosity' },
     incremental: {
       logDir: join(process.cwd(), '.luminosity'),
-      compactInterval: 0, // Disable auto compaction for build script
+      compactInterval: 0,
     },
   })
 
   await engine.init()
   const strategy = engine.getStrategy()
 
-  // Add Static Routes
-  const staticRoutes = ['/', '/features']
-  for (const r of staticRoutes) {
+  // Add All Routes to Sitemap Strategy
+  for (const task of routes) {
     await strategy.add({
-      url: baseUrl + r,
+      url: task.meta.url,
       lastmod: new Date(),
-      changefreq: 'daily',
-      priority: r === '/' ? 1.0 : 0.8,
+      changefreq: task.path.includes('docs') ? 'weekly' : 'daily',
+      priority: task.path === '/' ? 1.0 : 0.8,
     })
-  }
-
-  // Add Docs Routes
-  const locales = ['en', 'zh']
-  for (const locale of locales) {
-    const sections = await DocsService.getSidebar(locale)
-    for (const section of sections) {
-      for (const item of section.items) {
-        const fullUrl = baseUrl + item.href
-        await strategy.add({
-          url: fullUrl,
-          lastmod: new Date(),
-          changefreq: 'weekly',
-          priority: 0.7,
-        })
-      }
-    }
   }
 
   // Get Entries & Render
