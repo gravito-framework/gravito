@@ -71,7 +71,7 @@ async function build() {
     for (const section of sections) {
       for (const item of section.items) {
         routes.push({
-          path: item.href,
+          path: item.href || '',
           meta: {
             title: `${item.title} - ${locale === 'zh' ? 'Luminosity 指南' : 'Luminosity Docs'}`,
             description: `Documentation for ${item.title} in Luminosity SEO Engine.`,
@@ -202,6 +202,8 @@ async function build() {
   try {
     const staticDir = join(process.cwd(), 'static')
     await cp(staticDir, join(outputDir, 'static'), { recursive: true })
+    // Also copy favicon to root
+    await cp(join(staticDir, 'favicon.ico'), join(outputDir, 'favicon.ico'))
   } catch (_e) {
     console.warn('⚠️  No static directory found or failed to copy.')
   }
