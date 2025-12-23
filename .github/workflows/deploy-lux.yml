@@ -3,7 +3,8 @@ name: Deploy Luminosity Site (lux.gravito.dev)
 on:
   push:
     branches:
-      - feature/sitemap-site # 暫時設為您的 feature branch，合併後請改為 main
+      - main
+      - feature/sitemap-site
     paths:
       - 'examples/luminosity-site/**'
       - 'packages/luminosity/**'
