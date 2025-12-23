@@ -27,14 +27,17 @@ import {
 import React, { useRef, useState } from 'react'
 import { GravitoImage as Image } from '../components/GravitoImage'
 import Layout from '../components/Layout'
+import { StaticLink } from '../components/StaticLink'
 
 // Dynamic Import for WebGL component to avoid SSG/Hydration issues
-const HeroGL = React.lazy(() => import('../components/HeroGL').then(mod => ({ default: mod.HeroGL })))
+const HeroGL = React.lazy(() =>
+  import('../components/HeroGL').then((mod) => ({ default: mod.HeroGL }))
+)
 
 type Translation = Record<string, Record<string, string>>
 
 // 強化版 Hero 組件（Star Shuttle Effect）
-const AdvancedHero = ({ t }: { t: Translation }) => {
+const AdvancedHero = ({ t, locale }: { t: Translation; locale: string }) => {
   const { scrollY } = useScroll()
   const y1 = useTransform(scrollY, [0, 500], [0, 200])
   const opacity = useTransform(scrollY, [0, 300], [1, 0])
@@ -157,15 +160,15 @@ const AdvancedHero = ({ t }: { t: Translation }) => {
           transition={{ delay: 3, duration: 0.8 }}
           className="mt-12 flex flex-col md:flex-row gap-6 items-center"
         >
-          <Link
-            href="/docs/guide/getting-started"
+          <StaticLink
+            href={`/${locale}/docs/guide/getting-started`}
             className="group relative px-8 py-4 bg-white text-void font-bold rounded-full overflow-hidden transition-all hover:scale-110 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.3)]"
           >
             <span className="relative z-10 flex items-center gap-2">
               <Rocket className="w-5 h-5 group-hover:animate-bounce" />
               {t.hero.startBtn}
             </span>
-          </Link>
+          </StaticLink>
 
           <a
             href="https://github.com/gravito-framework/gravito"
@@ -198,7 +201,7 @@ const GravitoLanding = ({ t, locale }: HomeProps) => {
         <meta name="keywords" content={t.site.keywords} />
       </Head>
       {/* Hero Section - 強化版引力透鏡效果 */}
-      <AdvancedHero t={t} />
+      <AdvancedHero t={t} locale={locale} />
 
       {/* Tech Stack Section */}
       <StackSection t={t} />
@@ -396,7 +399,12 @@ const TechIcon = ({ type }: { type: string }) => {
 const StackSection = ({ t }: { t: Translation }) => {
   const stack = [
     { type: 'bun', title: t.stack.bun_title, desc: t.stack.bun_desc, color: 'text-orange-400' },
-    { type: 'gravito', title: t.stack.engine_title, desc: t.stack.engine_desc, color: 'text-cyan-500' },
+    {
+      type: 'gravito',
+      title: t.stack.engine_title,
+      desc: t.stack.engine_desc,
+      color: 'text-cyan-500',
+    },
     { type: 'ts', title: t.stack.ts_title, desc: t.stack.ts_desc, color: 'text-blue-400' },
   ]
 
