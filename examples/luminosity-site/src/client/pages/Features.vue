@@ -16,26 +16,26 @@ const getPath = (path: string) => {
 const points = computed(() => [
   {
     icon: Zap,
-    title: t.value.features_page.points.atomic.title,
-    desc: t.value.features_page.points.atomic.desc,
+    title: t.value?.features_page?.points?.atomic?.title,
+    desc: t.value?.features_page?.points?.atomic?.desc,
     color: 'bg-emerald-500/20 text-emerald-400',
   },
   {
     icon: Share2,
-    title: t.value.features_page.points.compaction.title,
-    desc: t.value.features_page.points.compaction.desc,
+    title: t.value?.features_page?.points?.compaction?.title,
+    desc: t.value?.features_page?.points?.compaction?.desc,
     color: 'bg-green-500/20 text-green-400',
   },
   {
     icon: Activity,
-    title: t.value.features_page.points.zerocopy.title,
-    desc: t.value.features_page.points.zerocopy.desc,
+    title: t.value?.features_page?.points?.zerocopy?.title,
+    desc: t.value?.features_page?.points?.zerocopy?.desc,
     color: 'bg-teal-500/20 text-teal-400',
   },
   {
     icon: Layers,
-    title: t.value.features_page.points.tiered.title,
-    desc: t.value.features_page.points.tiered.desc,
+    title: t.value?.features_page?.points?.tiered?.title,
+    desc: t.value?.features_page?.points?.tiered?.desc,
     color: 'bg-emerald-600/20 text-emerald-300',
   },
 ])
@@ -62,11 +62,11 @@ const points = computed(() => [
         </div>
 
         <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter text-white mb-6 uppercase">
-          {{ t.features_page.hero.title }} <span class="text-emerald-500">{{ t.features_page.hero.highlight }}</span>
+          {{ t?.features_page?.hero?.title }} <span class="text-emerald-500">{{ t?.features_page?.hero?.highlight }}</span>
         </h1>
 
         <p class="text-xl text-gray-400 font-medium max-w-2xl mx-auto">
-          {{ t.features_page.hero.desc }}
+          {{ t?.features_page?.hero?.desc }}
         </p>
       </div>
     </section>
@@ -77,10 +77,10 @@ const points = computed(() => [
         <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
           <div>
             <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-8 uppercase">
-              {{ t.features_page.core.title }} <span class="text-emerald-500">{{ t.features_page.core.highlight }}</span> {{ t.features_page.core.suffix }}
+              {{ t?.features_page?.core?.title }} <span class="text-emerald-500">{{ t?.features_page?.core?.highlight }}</span> {{ t?.features_page?.core?.suffix }}
             </h2>
             <p class="text-lg text-gray-400 leading-relaxed font-light">
-              {{ t.features_page.core.desc }}
+              {{ t?.features_page?.core?.desc }}
             </p>
 
             <!-- Code Sample -->
@@ -139,10 +139,10 @@ const points = computed(() => [
     <section class="relative py-24 px-6 bg-white/[0.02] border-y border-white/5 z-20">
       <div class="max-w-6xl mx-auto text-center mb-16">
         <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-6 uppercase">
-            {{ t.features_page.architecture.title }} <span class="text-emerald-500">{{ t.features_page.architecture.highlight }}</span>
+            {{ t?.features_page?.architecture?.title }} <span class="text-emerald-500">{{ t?.features_page?.architecture?.highlight }}</span>
         </h2>
         <p class="text-lg text-gray-400 leading-relaxed font-light max-w-3xl mx-auto">
-            {{ t.features_page.architecture.desc }}
+            {{ t?.features_page?.architecture?.desc }}
         </p>
       </div>
       
@@ -152,7 +152,7 @@ const points = computed(() => [
             <div class="p-6 rounded-2xl bg-black border border-white/10 text-center relative group">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">INPUT</div>
                 <div class="mb-4 text-emerald-500 flex justify-center"><Activity :size="32" /></div>
-                <div class="text-white font-bold">{{ t.features_page.architecture.step1 }}</div>
+                <div class="text-white font-bold">{{ t?.features_page?.architecture?.step1 }}</div>
                 <div class="absolute right-[-1rem] top-1/2 -translate-y-1/2 text-gray-700 hidden md:block">
                    <ChevronRight :size="24" />
                 </div>
@@ -160,7 +160,7 @@ const points = computed(() => [
              <!-- Step 2 -->
              <div class="p-6 rounded-2xl bg-black border border-white/10 text-center relative group">
                 <div class="mb-4 text-emerald-500 flex justify-center"><Zap :size="32" /></div>
-                <div class="text-white font-bold">{{ t.features_page.architecture.step2 }}</div>
+                <div class="text-white font-bold">{{ t?.features_page?.architecture?.step2 }}</div>
                  <div class="absolute right-[-1rem] top-1/2 -translate-y-1/2 text-gray-700 hidden md:block">
                    <ChevronRight :size="24" />
                 </div>
@@ -168,7 +168,7 @@ const points = computed(() => [
              <!-- Step 3 -->
              <div class="p-6 rounded-2xl bg-black border border-white/10 text-center relative group">
                 <div class="mb-4 text-emerald-500 flex justify-center"><Layers :size="32" /></div>
-                <div class="text-white font-bold">{{ t.features_page.architecture.step3 }}</div>
+                <div class="text-white font-bold">{{ t?.features_page?.architecture?.step3 }}</div>
                  <div class="absolute right-[-1rem] top-1/2 -translate-y-1/2 text-gray-700 hidden md:block">
                    <ChevronRight :size="24" />
                 </div>
@@ -177,7 +177,7 @@ const points = computed(() => [
              <div class="p-6 rounded-2xl bg-black border border-white/10 text-center relative group">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">OUTPUT</div>
                 <div class="mb-4 text-emerald-500 flex justify-center"><Share2 :size="32" /></div>
-                <div class="text-white font-bold">{{ t.features_page.architecture.step4 }}</div>
+                <div class="text-white font-bold">{{ t?.features_page?.architecture?.step4 }}</div>
             </div>
         </div>
       </div>
@@ -216,19 +216,19 @@ const points = computed(() => [
                 </div>
                 <div class="order-1 md:order-2">
                     <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-8 uppercase">
-                    {{ t.features_page.governance.title }} <span class="text-emerald-500">{{ t.features_page.governance.highlight }}</span>
+                    {{ t?.features_page?.governance?.title }} <span class="text-emerald-500">{{ t?.features_page?.governance?.highlight }}</span>
                     </h2>
                     <p class="text-lg text-gray-400 leading-relaxed font-light mb-12">
-                     {{ t.features_page.governance.desc }}
+                     {{ t?.features_page?.governance?.desc }}
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="p-6 rounded-2xl bg-white/[0.03] border-l-2 border-emerald-500">
-                             <h4 class="text-white font-bold mb-2">{{ t.features_page.governance.cards.rate_limit.title }}</h4>
-                             <p class="text-sm text-gray-400">{{ t.features_page.governance.cards.rate_limit.desc }}</p>
+                             <h4 class="text-white font-bold mb-2">{{ t?.features_page?.governance?.cards?.rate_limit?.title }}</h4>
+                             <p class="text-sm text-gray-400">{{ t?.features_page?.governance?.cards?.rate_limit?.desc }}</p>
                         </div>
                         <div class="p-6 rounded-2xl bg-white/[0.03] border-l-2 border-emerald-500">
-                             <h4 class="text-white font-bold mb-2">{{ t.features_page.governance.cards.stale.title }}</h4>
-                             <p class="text-sm text-gray-400">{{ t.features_page.governance.cards.stale.desc }}</p>
+                             <h4 class="text-white font-bold mb-2">{{ t?.features_page?.governance?.cards?.stale?.title }}</h4>
+                             <p class="text-sm text-gray-400">{{ t?.features_page?.governance?.cards?.stale?.desc }}</p>
                         </div>
                     </div>
                 </div>
@@ -240,10 +240,10 @@ const points = computed(() => [
     <section class="relative py-24 px-6 bg-white/[0.02] border-t border-white/5 z-20">
         <div class="max-w-4xl mx-auto text-center">
              <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-6 uppercase">
-                {{ t.features_page.cli.title }} <span class="text-emerald-500">{{ t.features_page.cli.highlight }}</span>
+                {{ t?.features_page?.cli?.title }} <span class="text-emerald-500">{{ t?.features_page?.cli?.highlight }}</span>
             </h2>
             <p class="text-lg text-gray-400 mb-12">
-                {{ t.features_page.cli.desc }}
+                {{ t?.features_page?.cli?.desc }}
             </p>
             <div class="text-left bg-black rounded-xl border border-white/10 p-6 font-mono text-sm shadow-2xl overflow-hidden">
                 <div class="flex gap-2 mb-4 border-b border-white/10 pb-4">
@@ -272,12 +272,12 @@ const points = computed(() => [
 
     <!-- Bottom CTA -->
     <section class="py-32 px-6 text-center bg-black border-t border-white/5">
-      <h2 class="text-3xl font-bold text-white mb-8">{{ t.features_page.cta.title }}</h2>
+      <h2 class="text-3xl font-bold text-white mb-8">{{ t?.features_page?.cta?.title }}</h2>
       <Link
         :href="getPath('/docs')"
         class="px-10 py-4 bg-emerald-500 text-black font-black italic rounded-full hover:scale-105 active:scale-95 transition-all inline-block"
       >
-        {{ t.features_page.cta.btn }}
+        {{ t?.features_page?.cta?.btn }}
       </Link>
     </section>
   </Layout>

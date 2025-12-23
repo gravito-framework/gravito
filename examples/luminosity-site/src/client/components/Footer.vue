@@ -1,5 +1,14 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3'
 import Logo from './Logo.vue'
+import { useI18n } from '../composables/useI18n'
+
+const { locale } = useI18n()
+
+const getPath = (path: string) => {
+  if (locale.value === 'zh') return `/zh${path}`
+  return path
+}
 </script>
 
 <template>
@@ -17,9 +26,21 @@ import Logo from './Logo.vue'
         <div>
           <h4 class="font-bold mb-6 text-sm uppercase tracking-widest text-emerald-500">Resources</h4>
           <ul class="space-y-4">
-            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">API Reference</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Examples</a></li>
+            <li>
+              <Link :href="getPath('/docs/introduction')" class="text-gray-400 hover:text-white transition-colors">
+                Documentation
+              </Link>
+            </li>
+            <li>
+              <Link :href="getPath('/docs/benchmark')" class="text-gray-400 hover:text-white transition-colors">
+                Benchmark Report
+              </Link>
+            </li>
+            <li>
+              <a href="https://github.com/gravito-framework/gravito/tree/main/examples" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                Examples
+              </a>
+            </li>
           </ul>
         </div>
         
