@@ -106,8 +106,18 @@ function safeEquals(a: string, b: string): boolean {
 }
 
 export class OrbitPulsar implements GravitoOrbit {
+  /**
+   * Create a new OrbitPulsar instance.
+   *
+   * @param options - The session configuration options.
+   */
   constructor(private options: OrbitPulsarOptions = {}) {}
 
+  /**
+   * Install the session management orbit into PlanetCore.
+   *
+   * @param core - The PlanetCore instance.
+   */
   install(core: PlanetCore): void {
     const configFromCore = core.config.has('session')
       ? (core.config.get<OrbitPulsarOptions>('session') ?? {})

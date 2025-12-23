@@ -65,6 +65,9 @@ export class InertiaService {
    * The solution: Escape backslash-quote sequences (\" from JSON.stringify)
    * as \\&quot; so they become \\&quot; in HTML, which the browser decodes
    * to \\" (valid JSON), not \&quot; (invalid JSON).
+   *
+   * @param value - The string to escape.
+   * @returns The escaped string.
    */
   private escapeForSingleQuotedHtmlAttribute(value: string): string {
     // First escape ampersands to prevent breaking existing HTML entities
@@ -190,6 +193,8 @@ export class InertiaService {
 
   /**
    * Get all shared props
+   *
+   * @returns A shallow copy of the shared props object.
    */
   public getSharedProps(): Record<string, unknown> {
     return { ...this.sharedProps }

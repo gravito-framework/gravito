@@ -76,6 +76,11 @@ export class OrbitEcho {
   private dispatcher?: WebhookDispatcher
   private echoConfig: EchoConfig
 
+  /**
+   * Create a new OrbitEcho instance.
+   *
+   * @param config - The configuration object for providers and dispatcher.
+   */
   constructor(config: EchoConfig = {}) {
     this.echoConfig = config
     this.receiver = new WebhookReceiver()
@@ -98,6 +103,10 @@ export class OrbitEcho {
 
   /**
    * Install into PlanetCore
+   *
+   * Registers the OrbitEcho instance and its components into the service container.
+   *
+   * @param core - The PlanetCore instance.
    */
   install(core: PlanetCore): void {
     // Bind instances
@@ -110,6 +119,8 @@ export class OrbitEcho {
 
   /**
    * Get webhook receiver
+   *
+   * @returns The WebhookReceiver instance.
    */
   getReceiver(): WebhookReceiver {
     return this.receiver
@@ -117,6 +128,8 @@ export class OrbitEcho {
 
   /**
    * Get webhook dispatcher
+   *
+   * @returns The WebhookDispatcher instance, or undefined if not configured.
    */
   getDispatcher(): WebhookDispatcher | undefined {
     return this.dispatcher
@@ -124,6 +137,8 @@ export class OrbitEcho {
 
   /**
    * Get configuration
+   *
+   * @returns The EchoConfig object.
    */
   getConfig(): EchoConfig {
     return this.echoConfig

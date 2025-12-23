@@ -17,7 +17,11 @@ export class Channel {
   ) {}
 
   /**
-   * Listen for an event on this channel
+   * Listen for an event on this channel.
+   *
+   * @param event - The event name.
+   * @param callback - Function to execute when the event is received.
+   * @returns The Channel instance for chaining.
    */
   listen<T = unknown>(event: string, callback: EventCallback<T>): this {
     if (!this.listeners.has(event)) {
@@ -28,7 +32,11 @@ export class Channel {
   }
 
   /**
-   * Stop listening for an event
+   * Stop listening for an event.
+   *
+   * @param event - The event name (optional). If omitted, all listeners for all events are removed.
+   * @param callback - The specific callback to remove (optional). If omitted, all listeners for the event are removed.
+   * @returns The Channel instance for chaining.
    */
   stopListening(event?: string, callback?: EventCallback): this {
     if (!event) {
@@ -42,7 +50,10 @@ export class Channel {
   }
 
   /**
-   * Dispatch an event to all listeners
+   * Dispatch an event to all listeners.
+   *
+   * @param event - The event name.
+   * @param data - The event data.
    * @internal
    */
   _dispatch(event: string, data: unknown): void {
@@ -59,7 +70,13 @@ export class Channel {
   }
 
   /**
-   * Send a client event (whisper) to other subscribers
+   * Send a client event (whisper) to other subscribers.
+   *
+   * Whispers are not broadcast back to the sender.
+   *
+   * @param event - The event name.
+   * @param data - The event data.
+   * @returns The Channel instance for chaining.
    */
   whisper(event: string, data: unknown): this {
     this.sendMessage({
@@ -73,27 +90,42 @@ export class Channel {
 }
 
 /**
- * Private channel - requires authentication
+ * Private channel - requires authentication.
  */
 export class PrivateChannel extends Channel {
+  /**
+   * Create a new PrivateChannel instance.
+   *
+   * @param name - The base name of the channel.
+   * @param sendMessage - Function to send messages to the server.
+   */
   constructor(name: string, sendMessage: (msg: object) => void) {
     super(`private-${name}`, sendMessage)
   }
 }
 
 /**
- * Presence channel - tracks online users
+ * Presence channel - tracks online users.
  */
 export class PresenceChannel extends Channel {
   private members: PresenceUser[] = []
   private presenceCallbacks: PresenceCallbacks = {}
 
+  /**
+   * Create a new PresenceChannel instance.
+   *
+   * @param name - The base name of the channel.
+   * @param sendMessage - Function to send messages to the server.
+   */
   constructor(name: string, sendMessage: (msg: object) => void) {
     super(`presence-${name}`, sendMessage)
   }
 
   /**
-   * Callback when receiving initial member list
+   * Register a callback for when the initial member list is received.
+   *
+   * @param callback - Function that receives an array of users.
+   * @returns The PresenceChannel instance for chaining.
    */
   here(callback: (users: PresenceUser[]) => void): this {
     this.presenceCallbacks.here = callback
@@ -101,7 +133,10 @@ export class PresenceChannel extends Channel {
   }
 
   /**
-   * Callback when a user joins
+   * Register a callback for when a user joins the channel.
+   *
+   * @param callback - Function that receives the user object.
+   * @returns The PresenceChannel instance for chaining.
    */
   joining(callback: (user: PresenceUser) => void): this {
     this.presenceCallbacks.joining = callback
@@ -109,7 +144,10 @@ export class PresenceChannel extends Channel {
   }
 
   /**
-   * Callback when a user leaves
+   * Register a callback for when a user leaves the channel.
+   *
+   * @param callback - Function that receives the user object.
+   * @returns The PresenceChannel instance for chaining.
    */
   leaving(callback: (user: PresenceUser) => void): this {
     this.presenceCallbacks.leaving = callback
@@ -117,14 +155,19 @@ export class PresenceChannel extends Channel {
   }
 
   /**
-   * Get current members
+   * Get the current list of members in the channel.
+   *
+   * @returns An array of `PresenceUser` objects.
    */
   getMembers(): PresenceUser[] {
     return [...this.members]
   }
 
   /**
-   * Handle presence events
+   * Handle presence events from the server.
+   *
+   * @param event - The presence event type ('join', 'leave', or 'members').
+   * @param data - The event data.
    * @internal
    */
   _handlePresence(event: 'join' | 'leave' | 'members', data: unknown): void {

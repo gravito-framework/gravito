@@ -71,9 +71,11 @@ export class RippleServer {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Attempt to upgrade an HTTP request to WebSocket
+   * Attempt to upgrade an HTTP request to WebSocket.
    *
-   * @returns true if upgraded, false otherwise
+   * @param req - The HTTP request.
+   * @param server - The Bun server instance.
+   * @returns True if the request was upgraded, false otherwise.
    */
   upgrade(req: Request, server: Server<ClientData>): boolean {
     const url = new URL(req.url)
@@ -93,7 +95,9 @@ export class RippleServer {
   }
 
   /**
-   * Get WebSocket handler configuration for Bun.serve
+   * Get WebSocket handler configuration for Bun.serve.
+   *
+   * @returns An object containing the WebSocket event handlers.
    */
   getHandler(): WebSocketHandlerConfig {
     return {
@@ -272,14 +276,22 @@ export class RippleServer {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Broadcast an event to a channel
+   * Broadcast an event to a channel.
+   *
+   * @param channel - The channel name.
+   * @param event - The event name.
+   * @param data - The event data.
    */
   broadcast(channel: string, event: string, data: unknown): void {
     this.broadcastToChannel(channel, event, data)
   }
 
   /**
-   * Broadcast to specific client IDs
+   * Broadcast to specific client IDs.
+   *
+   * @param clientIds - An array of client IDs.
+   * @param event - The event name.
+   * @param data - The event data.
    */
   broadcastToClients(clientIds: string[], event: string, data: unknown): void {
     for (const clientId of clientIds) {
@@ -339,14 +351,20 @@ export class RippleServer {
   }
 
   /**
-   * Get server statistics
+   * Get server statistics.
+   *
+   * @returns An object containing connection and channel statistics.
    */
   getStats() {
     return this.channels.getStats()
   }
 
   /**
-   * Initialize the server
+   * Initialize the server.
+   *
+   * Initializes the driver and starts the ping interval.
+   *
+   * @returns A promise that resolves when initialization is complete.
    */
   async init(): Promise<void> {
     await this.driver.init?.()
@@ -362,7 +380,11 @@ export class RippleServer {
   }
 
   /**
-   * Shutdown the server
+   * Shutdown the server.
+   *
+   * Clears the ping interval and shuts down the driver.
+   *
+   * @returns A promise that resolves when shutdown is complete.
    */
   async shutdown(): Promise<void> {
     if (this.pingInterval) {

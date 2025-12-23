@@ -25,14 +25,33 @@ export class TemplateEngine {
     this.viewsDir = viewsDir
   }
 
+  /**
+   * Register a custom helper function.
+   *
+   * @param name - The name of the helper.
+   * @param fn - The helper function.
+   */
   public registerHelper(name: string, fn: HelperFunction): void {
     this.helpers.set(name, fn)
   }
 
+  /**
+   * Unregister a custom helper function.
+   *
+   * @param name - The name of the helper to remove.
+   */
   public unregisterHelper(name: string): void {
     this.helpers.delete(name)
   }
 
+  /**
+   * Render a view with data.
+   *
+   * @param view - The view name (e.g., 'home' or 'auth/login').
+   * @param data - The data to pass to the view.
+   * @param options - Render options (e.g., legacy layout).
+   * @returns The rendered HTML string.
+   */
   public render(
     view: string,
     data: Record<string, unknown> = {},
@@ -83,6 +102,11 @@ export class TemplateEngine {
 
   // --- Core Compilation Pipeline ---
 
+  /**
+   * Core compilation pipeline.
+   *
+   * @internal
+   */
   private compile(template: string, data: Record<string, unknown>, ctx: RenderContext): string {
     let result = template
 

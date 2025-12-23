@@ -61,6 +61,12 @@ export class OrbitSitemap {
     this.options = options
   }
 
+  /**
+   * Create a dynamic sitemap configuration.
+   *
+   * @param options - The dynamic sitemap options.
+   * @returns An OrbitSitemap instance configured for dynamic generation.
+   */
   static dynamic(options: DynamicSitemapOptions): OrbitSitemap {
     return new OrbitSitemap('dynamic', {
       path: '/sitemap.xml',
@@ -68,6 +74,12 @@ export class OrbitSitemap {
     })
   }
 
+  /**
+   * Create a static sitemap configuration.
+   *
+   * @param options - The static sitemap options.
+   * @returns An OrbitSitemap instance configured for static generation.
+   */
   static static(options: StaticSitemapOptions): OrbitSitemap {
     return new OrbitSitemap('static', {
       filename: 'sitemap.xml',
@@ -75,6 +87,11 @@ export class OrbitSitemap {
     })
   }
 
+  /**
+   * Install the sitemap module into PlanetCore.
+   *
+   * @param core - The PlanetCore instance.
+   */
   install(core: PlanetCore): void {
     if (this.mode === 'dynamic') {
       this.installDynamic(core)
@@ -149,6 +166,12 @@ export class OrbitSitemap {
     core.router.get(shardRoute, handler)
   }
 
+  /**
+   * Generate the sitemap (static mode only).
+   *
+   * @returns A promise that resolves when generation is complete.
+   * @throws {Error} If called in dynamic mode.
+   */
   async generate(): Promise<void> {
     if (this.mode !== 'static') {
       throw new Error('generate() can only be called in static mode')
@@ -196,7 +219,11 @@ export class OrbitSitemap {
   }
 
   /**
-   * 增量生成
+   * Generate incremental sitemap updates (static mode only).
+   *
+   * @param since - Only include items modified since this date.
+   * @returns A promise that resolves when incremental generation is complete.
+   * @throws {Error} If called in dynamic mode, or if incremental generation is not enabled/configured.
    */
   async generateIncremental(since?: Date): Promise<void> {
     if (this.mode !== 'static') {
@@ -229,7 +256,11 @@ export class OrbitSitemap {
   }
 
   /**
-   * 背景生成（非同步）
+   * Generate sitemap asynchronously in the background (static mode only).
+   *
+   * @param options - Options for the async generation job.
+   * @returns A promise resolving to the job ID.
+   * @throws {Error} If called in dynamic mode.
    */
   async generateAsync(options?: {
     incremental?: boolean
@@ -307,7 +338,10 @@ export class OrbitSitemap {
   }
 
   /**
-   * 安裝 API endpoints（用於觸發生成、查詢進度等）
+   * Install API endpoints for triggering and monitoring sitemap generation.
+   *
+   * @param core - The PlanetCore instance.
+   * @param basePath - The base path for the API endpoints (default: '/admin/sitemap').
    */
   installApiEndpoints(core: PlanetCore, basePath = '/admin/sitemap'): void {
     const opts = this.options as StaticSitemapOptions
@@ -356,7 +390,7 @@ export class OrbitSitemap {
   }
 
   /**
-   * 將 AsyncIterable 轉換為陣列
+   * Convert an AsyncIterable to an array.
    */
   private async toArray<T>(iterable: AsyncIterable<T>): Promise<T[]> {
     const array: T[] = []

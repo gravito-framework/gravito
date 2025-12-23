@@ -50,6 +50,11 @@ export class RippleClient {
   > &
     RippleClientConfig
 
+  /**
+   * Create a new RippleClient instance.
+   *
+   * @param config - The Ripple client configuration.
+   */
   constructor(config: RippleClientConfig) {
     this.config = {
       authEndpoint: '/broadcasting/auth',
@@ -65,7 +70,11 @@ export class RippleClient {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Connect to the WebSocket server
+   * Connect to the WebSocket server.
+   *
+   * Initializes the WebSocket connection and handles the initial handshake.
+   *
+   * @returns A promise that resolves when connected and handshaked.
    */
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -111,7 +120,9 @@ export class RippleClient {
   }
 
   /**
-   * Disconnect from the server
+   * Disconnect from the server.
+   *
+   * Closes the active WebSocket connection and clears all state.
    */
   disconnect(): void {
     this.state = 'disconnected'
@@ -124,14 +135,20 @@ export class RippleClient {
   }
 
   /**
-   * Get current connection state
+   * Get the current connection state.
+   *
+   * @returns The connection state string.
    */
   getState(): ConnectionState {
     return this.state
   }
 
   /**
-   * Get socket ID (available after connection)
+   * Get the socket ID assigned by the server.
+   *
+   * Available only after a successful connection.
+   *
+   * @returns The socket ID or null.
    */
   getSocketId(): string | null {
     return this.socketId
@@ -142,7 +159,10 @@ export class RippleClient {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Subscribe to a public channel
+   * Subscribe to a public channel.
+   *
+   * @param name - The name of the channel.
+   * @returns A Channel instance.
    */
   channel(name: string): Channel {
     if (this.channels.has(name)) {
@@ -156,7 +176,12 @@ export class RippleClient {
   }
 
   /**
-   * Subscribe to a private channel
+   * Subscribe to a private channel.
+   *
+   * Requires authentication through the configured auth endpoint.
+   *
+   * @param name - The name of the channel (without 'private-' prefix).
+   * @returns A PrivateChannel instance.
    */
   private(name: string): PrivateChannel {
     const fullName = `private-${name}`
@@ -171,7 +196,12 @@ export class RippleClient {
   }
 
   /**
-   * Join a presence channel
+   * Join a presence channel.
+   *
+   * Presence channels allow you to see who else is subscribed to the channel.
+   *
+   * @param name - The name of the channel (without 'presence-' prefix).
+   * @returns A PresenceChannel instance.
    */
   join(name: string): PresenceChannel {
     const fullName = `presence-${name}`
@@ -186,7 +216,9 @@ export class RippleClient {
   }
 
   /**
-   * Leave a channel
+   * Leave a channel and stop receiving events from it.
+   *
+   * @param name - The base name of the channel.
    */
   leave(name: string): void {
     // Find channel with any prefix

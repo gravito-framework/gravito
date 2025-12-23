@@ -8,23 +8,23 @@
  * @since 2.0.0
  */
 declare global {
-  interface ExecutionContext {
-    waitUntil(promise: Promise<unknown>): void
-    passThroughOnException(): void
-  }
+    interface ExecutionContext {
+        waitUntil(promise: Promise<unknown>): void;
+        passThroughOnException(): void;
+    }
 }
 /**
  * Standard HTTP methods supported by Gravito
  */
-export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head'
+export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';
 /**
  * HTTP status codes
  */
-export type StatusCode = number
+export type StatusCode = number;
 /**
  * Content-bearing HTTP status codes (excludes 1xx, 204, 304)
  */
-export type ContentfulStatusCode = Exclude<StatusCode, 100 | 101 | 102 | 103 | 204 | 304>
+export type ContentfulStatusCode = Exclude<StatusCode, 100 | 101 | 102 | 103 | 204 | 304>;
 /**
  * Base context variables available in every request
  * Orbits can extend this interface via module augmentation
@@ -40,37 +40,33 @@ export type ContentfulStatusCode = Exclude<StatusCode, 100 | 101 | 102 | 103 | 2
  * ```
  */
 export interface GravitoVariables {
-  /**
-   * The PlanetCore instance
-   * @remarks Always available in PlanetCore-managed contexts
-   */
-  core?: unknown
-  /**
-   * Logger instance
-   */
-  logger?: unknown
-  /**
-   * Configuration manager
-   */
-  config?: unknown
-  /**
-   * Cookie jar for managing response cookies
-   */
-  cookieJar?: unknown
-  /**
-   * URL generator helper
-   */
-  route?: (
-    name: string,
-    params?: Record<string, unknown>,
-    query?: Record<string, unknown>
-  ) => string
-  [key: string]: unknown
+    /**
+     * The PlanetCore instance
+     * @remarks Always available in PlanetCore-managed contexts
+     */
+    core?: unknown;
+    /**
+     * Logger instance
+     */
+    logger?: unknown;
+    /**
+     * Configuration manager
+     */
+    config?: unknown;
+    /**
+     * Cookie jar for managing response cookies
+     */
+    cookieJar?: unknown;
+    /**
+     * URL generator helper
+     */
+    route?: (name: string, params?: Record<string, unknown>, query?: Record<string, unknown>) => string;
+    [key: string]: unknown;
 }
 /**
  * Validated request data targets
  */
-export type ValidationTarget = 'json' | 'query' | 'param' | 'header' | 'form' | 'cookie'
+export type ValidationTarget = 'json' | 'query' | 'param' | 'header' | 'form' | 'cookie';
 /**
  * GravitoRequest - Unified request interface
  *
@@ -85,66 +81,70 @@ export type ValidationTarget = 'json' | 'query' | 'param' | 'header' | 'form' | 
  * ```
  */
 export interface GravitoRequest {
-  /** Full request URL */
-  readonly url: string
-  /** HTTP method (uppercase) */
-  readonly method: string
-  /** Request path without query string */
-  readonly path: string
-  /**
-   * Get a route parameter value
-   * @param name - Parameter name (e.g., 'id' for route '/users/:id')
-   */
-  param(name: string): string | undefined
-  /**
-   * Get all route parameters
-   */
-  params(): Record<string, string>
-  /**
-   * Get a query string parameter
-   * @param name - Query parameter name
-   */
-  query(name: string): string | undefined
-  /**
-   * Get all query parameters
-   */
-  queries(): Record<string, string | string[]>
-  /**
-   * Get a request header value
-   * @param name - Header name (case-insensitive)
-   */
-  header(name: string): string | undefined
-  /**
-   * Get all request headers
-   */
-  header(): Record<string, string>
-  /**
-   * Parse request body as JSON
-   * @throws {Error} If body is not valid JSON
-   */
-  json<T = unknown>(): Promise<T>
-  /**
-   * Parse request body as text
-   */
-  text(): Promise<string>
-  /**
-   * Parse request body as FormData
-   */
-  formData(): Promise<FormData>
-  /**
-   * Parse request body as ArrayBuffer
-   */
-  arrayBuffer(): Promise<ArrayBuffer>
-  /**
-   * Get the raw Request object
-   */
-  readonly raw: Request
-  /**
-   * Get validated data from a specific source
-   * @param target - The validation target
-   * @throws {Error} If validation was not performed for this target
-   */
-  valid<T = unknown>(target: ValidationTarget): T
+    /** Full request URL */
+    readonly url: string;
+    /** HTTP method (uppercase) */
+    readonly method: string;
+    /** Request path without query string */
+    readonly path: string;
+    /**
+     * Get a route parameter value
+     * @param name - Parameter name (e.g., 'id' for route '/users/:id')
+     */
+    param(name: string): string | undefined;
+    /**
+     * Get all route parameters
+     */
+    params(): Record<string, string>;
+    /**
+     * Get a query string parameter
+     * @param name - Query parameter name
+     */
+    query(name: string): string | undefined;
+    /**
+     * Get all query parameters
+     */
+    queries(): Record<string, string | string[]>;
+    /**
+     * Get a request header value
+     * @param name - Header name (case-insensitive)
+     */
+    header(name: string): string | undefined;
+    /**
+     * Get all request headers
+     */
+    header(): Record<string, string>;
+    /**
+     * Parse request body as JSON
+     * @throws {Error} If body is not valid JSON
+     */
+    json<T = unknown>(): Promise<T>;
+    /**
+     * Parse request body as text
+     */
+    text(): Promise<string>;
+    /**
+     * Parse request body as FormData
+     */
+    formData(): Promise<FormData>;
+    /**
+     * Parse request body as ArrayBuffer
+     */
+    arrayBuffer(): Promise<ArrayBuffer>;
+    /**
+     * Parse form data (urlencoded or multipart)
+     */
+    parseBody<T = unknown>(): Promise<T>;
+    /**
+     * Get the raw Request object
+     */
+    readonly raw: Request;
+    /**
+     * Get validated data from a specific source
+     * @param target - The validation target
+     * @throws {Error} If validation was not performed for this target
+     */
+    valid<T = unknown>(target: ValidationTarget): T;
 }
 /**
  * GravitoContext - Unified request context
@@ -165,103 +165,99 @@ export interface GravitoRequest {
  * ```
  */
 export interface GravitoContext<V extends GravitoVariables = GravitoVariables> {
-  /** The incoming request */
-  readonly req: GravitoRequest
-  /**
-   * Send a JSON response
-   * @param data - Data to serialize as JSON
-   * @param status - HTTP status code (default: 200)
-   */
-  json<T>(data: T, status?: ContentfulStatusCode): Response
-  /**
-   * Send a plain text response
-   * @param text - Text content
-   * @param status - HTTP status code (default: 200)
-   */
-  text(text: string, status?: ContentfulStatusCode): Response
-  /**
-   * Send an HTML response
-   * @param html - HTML content
-   * @param status - HTTP status code (default: 200)
-   */
-  html(html: string, status?: ContentfulStatusCode): Response
-  /**
-   * Send a redirect response
-   * @param url - Target URL
-   * @param status - Redirect status code (default: 302)
-   */
-  redirect(url: string, status?: 301 | 302 | 303 | 307 | 308): Response
-  /**
-   * Create a Response with no body
-   * @param status - HTTP status code
-   */
-  body(data: BodyInit | null, status?: StatusCode): Response
-  /**
-   * Stream a response
-   * @param stream - ReadableStream to send
-   * @param status - HTTP status code (default: 200)
-   */
-  stream(stream: ReadableStream, status?: ContentfulStatusCode): Response
-  /**
-   * Set a response header
-   * @param name - Header name
-   * @param value - Header value
-   * @param options - Options (append: true to add multiple values)
-   */
-  header(
-    name: string,
-    value: string,
-    options?: {
-      append?: boolean
-    }
-  ): void
-  /**
-   * Get a request header
-   * @param name - Header name (case-insensitive)
-   */
-  header(name: string): string | undefined
-  /**
-   * Set the response status code
-   * @param code - HTTP status code
-   */
-  status(code: StatusCode): void
-  /**
-   * Get a context variable
-   * @param key - Variable key
-   */
-  get<K extends keyof V>(key: K): V[K]
-  /**
-   * Set a context variable
-   * @param key - Variable key
-   * @param value - Variable value
-   */
-  set<K extends keyof V>(key: K, value: V[K]): void
-  /**
-   * Get the execution context (for Cloudflare Workers, etc.)
-   */
-  readonly executionCtx?: ExecutionContext
-  /**
-   * Get environment bindings (for Cloudflare Workers, etc.)
-   */
-  readonly env?: Record<string, unknown>
-  /**
-   * Access the native context object from the underlying HTTP engine.
-   *
-   * ⚠️ WARNING: Using this ties your code to a specific adapter.
-   * Prefer using the abstraction methods when possible.
-   *
-   * @example
-   * ```typescript
-   * // Only when absolutely necessary
-   * const honoCtx = ctx.native as Context // Hono Context
-   * ```
-   */
-  readonly native: unknown
+    /** The incoming request */
+    readonly req: GravitoRequest;
+    /**
+     * Send a JSON response
+     * @param data - Data to serialize as JSON
+     * @param status - HTTP status code (default: 200)
+     */
+    json<T>(data: T, status?: ContentfulStatusCode): Response;
+    /**
+     * Send a plain text response
+     * @param text - Text content
+     * @param status - HTTP status code (default: 200)
+     */
+    text(text: string, status?: ContentfulStatusCode): Response;
+    /**
+     * Send an HTML response
+     * @param html - HTML content
+     * @param status - HTTP status code (default: 200)
+     */
+    html(html: string, status?: ContentfulStatusCode): Response;
+    /**
+     * Send a redirect response
+     * @param url - Target URL
+     * @param status - Redirect status code (default: 302)
+     */
+    redirect(url: string, status?: 301 | 302 | 303 | 307 | 308): Response;
+    /**
+     * Create a Response with no body
+     * @param status - HTTP status code
+     */
+    body(data: BodyInit | null, status?: StatusCode): Response;
+    /**
+     * Stream a response
+     * @param stream - ReadableStream to send
+     * @param status - HTTP status code (default: 200)
+     */
+    stream(stream: ReadableStream, status?: ContentfulStatusCode): Response;
+    /**
+     * Set a response header
+     * @param name - Header name
+     * @param value - Header value
+     * @param options - Options (append: true to add multiple values)
+     */
+    header(name: string, value: string, options?: {
+        append?: boolean;
+    }): void;
+    /**
+     * Get a request header
+     * @param name - Header name (case-insensitive)
+     */
+    header(name: string): string | undefined;
+    /**
+     * Set the response status code
+     * @param code - HTTP status code
+     */
+    status(code: StatusCode): void;
+    /**
+     * Get a context variable
+     * @param key - Variable key
+     */
+    get<K extends keyof V>(key: K): V[K];
+    /**
+     * Set a context variable
+     * @param key - Variable key
+     * @param value - Variable value
+     */
+    set<K extends keyof V>(key: K, value: V[K]): void;
+    /**
+     * Get the execution context (for Cloudflare Workers, etc.)
+     */
+    readonly executionCtx?: ExecutionContext;
+    /**
+     * Get environment bindings (for Cloudflare Workers, etc.)
+     */
+    readonly env?: Record<string, unknown>;
+    /**
+     * Access the native context object from the underlying HTTP engine.
+     *
+     * ⚠️ WARNING: Using this ties your code to a specific adapter.
+     * Prefer using the abstraction methods when possible.
+     *
+     * @example
+     * ```typescript
+     * // Only when absolutely necessary
+     * const honoCtx = ctx.native as Context // Hono Context
+     * ```
+     */
+    readonly native: unknown;
 }
 /**
  * Next function for middleware chain
  */
-export type GravitoNext = () => Promise<void>
+export type GravitoNext = () => Promise<void>;
 /**
  * GravitoHandler - Standard route handler type
  *
@@ -274,9 +270,7 @@ export type GravitoNext = () => Promise<void>
  * }
  * ```
  */
-export type GravitoHandler<V extends GravitoVariables = GravitoVariables> = (
-  ctx: GravitoContext<V>
-) => Response | Promise<Response>
+export type GravitoHandler<V extends GravitoVariables = GravitoVariables> = (ctx: GravitoContext<V>) => Response | Promise<Response>;
 /**
  * GravitoMiddleware - Standard middleware type
  *
@@ -290,21 +284,13 @@ export type GravitoHandler<V extends GravitoVariables = GravitoVariables> = (
  * }
  * ```
  */
-export type GravitoMiddleware<V extends GravitoVariables = GravitoVariables> = (
-  ctx: GravitoContext<V>,
-  next: GravitoNext
-) => Response | Promise<Response | undefined | undefined>
+export type GravitoMiddleware<V extends GravitoVariables = GravitoVariables> = (ctx: GravitoContext<V>, next: GravitoNext) => Response | void | Promise<Response | void | undefined>;
 /**
  * Error handler type
  */
-export type GravitoErrorHandler<V extends GravitoVariables = GravitoVariables> = (
-  error: Error,
-  ctx: GravitoContext<V>
-) => Response | Promise<Response>
+export type GravitoErrorHandler<V extends GravitoVariables = GravitoVariables> = (error: Error, ctx: GravitoContext<V>) => Response | Promise<Response>;
 /**
  * Not found handler type
  */
-export type GravitoNotFoundHandler<V extends GravitoVariables = GravitoVariables> = (
-  ctx: GravitoContext<V>
-) => Response | Promise<Response>
+export type GravitoNotFoundHandler<V extends GravitoVariables = GravitoVariables> = (ctx: GravitoContext<V>) => Response | Promise<Response>;
 //# sourceMappingURL=types.d.ts.map
