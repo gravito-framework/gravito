@@ -6,7 +6,7 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import type { Channel, PresenceChannel, PrivateChannel } from './Channel'
 import { type ConnectionState, RippleClient } from './RippleClient'
-import type { EventCallback, PresenceUser, RippleClientConfig } from './types'
+import type { PresenceUser, RippleClientConfig } from './types'
 
 // ─────────────────────────────────────────────────────────────
 // Context

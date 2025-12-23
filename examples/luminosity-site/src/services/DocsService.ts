@@ -87,7 +87,7 @@ class DocsServiceImpl {
 
           pages.push({
             title: (data.title as string) || slug,
-            href: `/${locale === 'en' ? '' : locale + '/'}docs/${slug}`,
+            href: `/${locale === 'en' ? '' : `${locale}/`}docs/${slug}`,
             order: (data.order as number) || 999,
           })
         }

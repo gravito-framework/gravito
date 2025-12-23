@@ -23,7 +23,9 @@ export function setupViteProxy(core: PlanetCore): void {
           break
         } catch (e) {
           retries++
-          if (retries > 3) throw e
+          if (retries > 3) {
+            throw e
+          }
           await new Promise((resolve) => setTimeout(resolve, 100))
         }
       }
@@ -39,8 +41,9 @@ export function setupViteProxy(core: PlanetCore): void {
         response.headers.forEach((value, key) => {
           if (
             ['content-encoding', 'transfer-encoding', 'content-length'].includes(key.toLowerCase())
-          )
+          ) {
             return
+          }
           c.header(key, value)
         })
         return c.body(null, 304)

@@ -45,7 +45,9 @@ export class BunSQLiteStorage implements WorkflowStorage {
    * Initialize storage (create tables)
    */
   async init(): Promise<void> {
-    if (this.initialized) return
+    if (this.initialized) {
+      return
+    }
 
     this.db.run(`
       CREATE TABLE IF NOT EXISTS ${this.tableName} (
@@ -119,7 +121,9 @@ export class BunSQLiteStorage implements WorkflowStorage {
 
     const row = stmt.get({ $id: id }) as SQLiteRow | null
 
-    if (!row) return null
+    if (!row) {
+      return null
+    }
 
     return this.rowToState(row)
   }

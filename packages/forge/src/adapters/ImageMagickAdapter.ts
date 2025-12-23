@@ -3,7 +3,6 @@
  */
 
 import { spawn } from 'bun'
-import type { ProcessingProgress } from '../types'
 import type { AdapterOptions, ProcessorAdapter } from './ProcessorAdapter'
 
 /**

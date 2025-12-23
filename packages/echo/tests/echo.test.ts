@@ -79,8 +79,8 @@ describe('SignatureValidator', () => {
       const result = parseStripeSignature(header)
 
       expect(result).not.toBeNull()
-      expect(result!.timestamp).toBe(1234567890)
-      expect(result!.signatures).toEqual(['abc123', 'def456'])
+      expect(result?.timestamp).toBe(1234567890)
+      expect(result?.signatures).toEqual(['abc123', 'def456'])
     })
 
     it('should return null for invalid format', () => {

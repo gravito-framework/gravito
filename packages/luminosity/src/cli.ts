@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { SeoEngine } from './index'
 
 const args = process.argv.slice(2)
 const command = args[0]

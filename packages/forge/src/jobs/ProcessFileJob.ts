@@ -7,7 +7,7 @@ import { Job } from '@gravito/stream'
 import type { ForgeService } from '../ForgeService'
 import { ProcessingStatusManager } from '../status/ProcessingStatus'
 import type { StatusStore } from '../status/StatusStore'
-import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
+import type { FileInput, ProcessingProgress, ProcessOptions } from '../types'
 
 /**
  * Process file job data

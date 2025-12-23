@@ -41,7 +41,7 @@ export class LocalDriver implements RippleDriver {
     if (!this.listeners.has(channel)) {
       this.listeners.set(channel, new Set())
     }
-    this.listeners.get(channel)!.add(callback)
+    this.listeners.get(channel)?.add(callback)
   }
 
   async unsubscribe(channel: string): Promise<void> {

@@ -3,6 +3,7 @@ import { DocsService } from '../services/DocsService'
 
 export class DocsController {
   show = async (c: GravitoContext) => {
+    // biome-ignore lint/suspicious/noExplicitAny: Inertia type
     const inertia = c.get('inertia') as any
     const _locale = (c.get('locale') as string) || 'en'
 

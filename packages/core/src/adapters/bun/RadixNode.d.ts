@@ -10,7 +10,7 @@ export declare class RadixNode {
   paramName: string | null
   regex: RegExp | null
   constructor(segment?: string, type?: NodeType)
-  toJSON(): Record<string, unknown>
-  static fromJSON(json: Record<string, unknown>): RadixNode
+  toJSON(): any
+  static fromJSON(json: any): RadixNode
 }
 //# sourceMappingURL=RadixNode.d.ts.map

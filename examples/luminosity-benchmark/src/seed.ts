@@ -5,7 +5,7 @@ import Database from 'better-sqlite3'
 
 const DB_PATH = path.join(process.cwd(), 'db.sqlite')
 const TOTAL_RECORDS = 1_000_000
-const BATCH_SIZE = 10_000
+const _BATCH_SIZE = 10_000
 
 console.log('🌌 Luminosity Benchmark: Initializing Big Bang Sequence...')
 

@@ -46,7 +46,9 @@ const sitemap = OrbitSitemap.static({
 
           // Track peak memory
           const currentMem = process.memoryUsage().heapUsed / 1024 / 1024
-          if (currentMem > maxMemory) maxMemory = currentMem
+          if (currentMem > maxMemory) {
+            maxMemory = currentMem
+          }
 
           if (processedCount % 100_000 === 0) {
             process.stdout.write(

@@ -25,7 +25,7 @@ export class ContextManager {
    * Create a new workflow context
    */
   create<TInput>(name: string, input: TInput, stepCount: number): WorkflowContext<TInput> {
-    const history: StepExecution[] = Array.from({ length: stepCount }, (_, i) => ({
+    const history: StepExecution[] = Array.from({ length: stepCount }, (_, _i) => ({
       name: '',
       status: 'pending',
       retries: 0,

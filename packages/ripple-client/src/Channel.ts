@@ -27,7 +27,7 @@ export class Channel {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set())
     }
-    this.listeners.get(event)!.add(callback as EventCallback)
+    this.listeners.get(event)?.add(callback as EventCallback)
     return this
   }
 

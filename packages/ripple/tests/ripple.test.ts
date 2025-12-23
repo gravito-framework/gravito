@@ -4,7 +4,6 @@
 
 import { beforeEach, describe, expect, it } from 'bun:test'
 import {
-  CHANNEL_PREFIXES,
   ChannelManager,
   createChannel,
   PresenceChannel,

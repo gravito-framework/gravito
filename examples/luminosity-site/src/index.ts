@@ -2,6 +2,7 @@ import { serveStatic } from 'hono/bun'
 import { bootstrap } from './bootstrap'
 
 const core = await bootstrap()
+// biome-ignore lint/suspicious/noExplicitAny: Internal
 const app = core.app as any
 
 // Static assets

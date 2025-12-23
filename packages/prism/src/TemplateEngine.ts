@@ -159,7 +159,7 @@ export class TemplateEngine {
         if (!ctx.stacks.has(name)) {
           ctx.stacks.set(name, [])
         }
-        ctx.stacks.get(name)!.push(content.trim())
+        ctx.stacks.get(name)?.push(content.trim())
       }
     }
   }
@@ -194,7 +194,9 @@ export class TemplateEngine {
     ctx: RenderContext,
     depth = 0
   ): string {
-    if (depth > 10) throw new Error('Maximum component depth exceeded')
+    if (depth > 10) {
+      throw new Error('Maximum component depth exceeded')
+    }
 
     let result = template
     let hasComponent = true
@@ -246,7 +248,7 @@ export class TemplateEngine {
       let componentTemplate = ''
       try {
         componentTemplate = this.readTemplate(`components/${tagName}`)
-      } catch (e) {
+      } catch (_e) {
         console.warn(`Component x-${tagName} not found.`)
         // Replace with comment to prevent infinite loop
         const fullMatch = result.substring(startIndex, finalCloseIndex + `</x-${tagName}>`.length)
@@ -291,15 +293,24 @@ export class TemplateEngine {
       const valSingle = match[3]
       const valRaw = match[4]
 
-      if (!key) continue
+      if (!key) {
+        continue
+      }
 
-      if (valDouble !== undefined) args[key] = valDouble
-      else if (valSingle !== undefined) args[key] = valSingle
-      else if (valRaw !== undefined) {
-        if (valRaw === 'true') args[key] = true
-        else if (valRaw === 'false') args[key] = false
-        else if (!isNaN(Number(valRaw))) args[key] = Number(valRaw)
-        else args[key] = valRaw
+      if (valDouble !== undefined) {
+        args[key] = valDouble
+      } else if (valSingle !== undefined) {
+        args[key] = valSingle
+      } else if (valRaw !== undefined) {
+        if (valRaw === 'true') {
+          args[key] = true
+        } else if (valRaw === 'false') {
+          args[key] = false
+        } else if (!Number.isNaN(Number(valRaw))) {
+          args[key] = Number(valRaw)
+        } else {
+          args[key] = valRaw
+        }
       } else {
         args[key] = true
       }
@@ -421,11 +432,17 @@ export class TemplateEngine {
     while (match !== null) {
       const key = match[1]
       if (key) {
-        if (match[3] !== undefined) args[key] = match[3]
-        else if (match[4] !== undefined) args[key] = match[4]
-        else if (match[5] !== undefined) args[key] = Number(match[5])
-        else if (match[6] !== undefined) args[key] = match[6] === 'true'
-        else if (match[7] !== undefined) args[key] = match[7]
+        if (match[3] !== undefined) {
+          args[key] = match[3]
+        } else if (match[4] !== undefined) {
+          args[key] = match[4]
+        } else if (match[5] !== undefined) {
+          args[key] = Number(match[5])
+        } else if (match[6] !== undefined) {
+          args[key] = match[6] === 'true'
+        } else if (match[7] !== undefined) {
+          args[key] = match[7]
+        }
       }
       match = argPattern.exec(argsString)
     }

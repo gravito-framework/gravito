@@ -52,7 +52,9 @@ export class FFmpegAdapter implements ProcessorAdapter {
           try {
             while (true) {
               const { done, value } = await reader.read()
-              if (done) break
+              if (done) {
+                break
+              }
 
               const text = decoder.decode(value, { stream: true })
               stderrBuffer += text
@@ -65,7 +67,7 @@ export class FFmpegAdapter implements ProcessorAdapter {
                 }
               }
             }
-          } catch (error) {
+          } catch (_error) {
             // Ignore read errors
           }
         })()
@@ -123,10 +125,12 @@ export class FFmpegAdapter implements ProcessorAdapter {
       durationMatch[3]
     ) {
       const currentTime =
-        parseInt(timeMatch[1]) * 3600 + parseInt(timeMatch[2]) * 60 + parseFloat(timeMatch[3])
+        parseInt(timeMatch[1], 10) * 3600 +
+        parseInt(timeMatch[2], 10) * 60 +
+        parseFloat(timeMatch[3])
       const totalTime =
-        parseInt(durationMatch[1]) * 3600 +
-        parseInt(durationMatch[2]) * 60 +
+        parseInt(durationMatch[1], 10) * 3600 +
+        parseInt(durationMatch[2], 10) * 60 +
         parseFloat(durationMatch[3])
 
       if (totalTime > 0) {

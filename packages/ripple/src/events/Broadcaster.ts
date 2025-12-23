@@ -48,7 +48,7 @@ export function broadcast(event: BroadcastEvent): void {
   const channels = event.broadcastOn()
   const eventName = event.broadcastAs()
   const data = event.broadcastWith()
-  const except = event.broadcastExcept()
+  const _except = event.broadcastExcept()
 
   const channelList = Array.isArray(channels) ? channels : [channels]
 

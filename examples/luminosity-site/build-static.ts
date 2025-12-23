@@ -60,7 +60,7 @@ async function build() {
       title: 'Features - Luminosity',
       description:
         'Explore the powerful features of Luminosity: LSM Tree storage, Incremental Updates, and more.',
-      url: baseUrl + '/features',
+      url: `${baseUrl}/features`,
     },
   })
 
@@ -176,7 +176,7 @@ async function build() {
     resolvers: [],
     mode: 'incremental',
   })
-  const sitemapXml = renderer.render(entries, baseUrl + '/sitemap.xml')
+  const sitemapXml = renderer.render(entries, `${baseUrl}/sitemap.xml`)
 
   await writeFile(join(outputDir, 'sitemap.xml'), sitemapXml)
   console.log('✅ Generated sitemap.xml')

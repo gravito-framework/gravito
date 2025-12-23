@@ -96,7 +96,7 @@ export class WebhookReceiver {
       providerHandlers.set(eventType, [])
     }
 
-    providerHandlers.get(eventType)!.push(handler as WebhookHandler)
+    providerHandlers.get(eventType)?.push(handler as WebhookHandler)
     return this
   }
 
@@ -108,7 +108,7 @@ export class WebhookReceiver {
       this.globalHandlers.set(providerName, [])
     }
 
-    this.globalHandlers.get(providerName)!.push(handler as WebhookHandler)
+    this.globalHandlers.get(providerName)?.push(handler as WebhookHandler)
     return this
   }
 

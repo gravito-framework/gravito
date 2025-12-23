@@ -63,7 +63,7 @@ export class GenericProvider implements WebhookProvider {
     const timestampStr = this.getHeader(headers, this.timestampHeader)
     if (timestampStr) {
       const timestamp = parseInt(timestampStr, 10)
-      if (isNaN(timestamp) || !validateTimestamp(timestamp, this.tolerance)) {
+      if (Number.isNaN(timestamp) || !validateTimestamp(timestamp, this.tolerance)) {
         return {
           valid: false,
           error: 'Timestamp validation failed',
