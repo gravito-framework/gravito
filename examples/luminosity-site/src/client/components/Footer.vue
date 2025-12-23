@@ -37,9 +37,9 @@ const getPath = (path: string) => {
               </Link>
             </li>
             <li>
-              <a href="https://github.com/gravito-framework/gravito/tree/main/examples" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+              <Link :href="getPath('/docs/examples')" class="text-gray-400 hover:text-white transition-colors">
                 Examples
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
