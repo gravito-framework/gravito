@@ -39,6 +39,9 @@ export { BunSQLiteStorage, type BunSQLiteStorageOptions } from './storage/BunSQL
 // Logger
 export { FluxConsoleLogger, FluxSilentLogger } from './logger/FluxLogger'
 
+// Gravito Integration
+export { OrbitFlux, type OrbitFluxOptions } from './orbit/OrbitFlux'
+
 // Core (for advanced usage)
 export { StateMachine } from './core/StateMachine'
 export { StepExecutor } from './core/StepExecutor'
@@ -64,4 +67,5 @@ export type {
     FluxConfig,
     FluxResult,
 } from './types'
+
 
