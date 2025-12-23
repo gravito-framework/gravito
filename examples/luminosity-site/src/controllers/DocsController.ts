@@ -4,7 +4,7 @@ import { DocsService } from '../services/DocsService'
 export class DocsController {
   show = async (c: GravitoContext) => {
     const inertia = c.get('inertia') as any
-    const _locale = c.get('locale') || 'en'
+    const _locale = (c.get('locale') as string) || 'en'
 
     // Remove locale prefix and /docs prefix to get the clean slug
     let path = c.req.path
@@ -31,6 +31,7 @@ export class DocsController {
       toc: [], // DocsService.getDoc doesn't return TOC yet, pass empty or implement
       sidebar,
       currentPath: c.req.path,
+      locale: _locale,
     })
   }
 }

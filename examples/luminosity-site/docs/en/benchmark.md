@@ -1,3 +1,8 @@
+---
+title: Performance Benchmark
+order: 6
+---
+
 # 🔥 Performance Benchmark
 
 Luminosity is engineered for **extreme scale**. We don't just claim performance; we prove it.

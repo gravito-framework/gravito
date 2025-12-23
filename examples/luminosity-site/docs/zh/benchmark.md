@@ -1,4 +1,9 @@
-# 🔥 效能實證 (Benchmark)
+---
+title: 性能基準測試
+order: 6
+---
+
+# 🔥 效能基準測試實證 (Benchmark)
 
 Luminosity 專為 **極大規模 (Extreme Scale)** 而設計。我們不只空談效能，我們用數據證明。
 透過獨特的 **串流架構 (Streaming Architecture)**，Luminosity 能夠以極低的固定記憶體消耗，為數百萬個 URL 生成 Sitemap。
