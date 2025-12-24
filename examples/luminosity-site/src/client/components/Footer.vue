@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
+import { StaticLink } from '@gravito/freeze-vue'
 import Logo from './Logo.vue'
 import { useI18n } from '../composables/useI18n'
 
@@ -27,19 +27,19 @@ const getPath = (path: string) => {
           <h4 class="font-bold mb-6 text-sm uppercase tracking-widest text-emerald-500">Resources</h4>
           <ul class="space-y-4">
             <li>
-              <Link :href="getPath('/docs/introduction')" class="text-gray-400 hover:text-white transition-colors">
+                          <StaticLink :href="getPath('/docs/introduction')" class="text-gray-400 hover:text-white transition-colors">
                 Documentation
-              </Link>
+              </StaticLink>
             </li>
             <li>
-              <Link :href="getPath('/docs/benchmark')" class="text-gray-400 hover:text-white transition-colors">
+              <StaticLink :href="getPath('/docs/benchmark')" class="text-gray-400 hover:text-white transition-colors">
                 Benchmark Report
-              </Link>
+              </StaticLink>
             </li>
             <li>
-              <Link :href="getPath('/docs/examples')" class="text-gray-400 hover:text-white transition-colors">
+              <StaticLink :href="getPath('/docs/examples')" class="text-gray-400 hover:text-white transition-colors">
                 Examples
-              </Link>
+              </StaticLink>
             </li>
           </ul>
         </div>

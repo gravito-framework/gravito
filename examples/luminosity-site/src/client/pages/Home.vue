@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { Activity, Zap, HardDrive, FileText, ChevronRight, Share2, Shield, Search } from 'lucide-vue-next';
+import { StaticLink } from '@gravito/freeze-vue';
 import Layout from '../components/Layout.vue';
 import Logo from '../components/Logo.vue';
 import { useI18n } from '../composables/useI18n';
@@ -67,18 +68,18 @@ const { t, locale } = useI18n()
         </p>
         
         <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <Link 
+          <StaticLink 
             :href="locale === 'zh' ? '/zh/features' : '/features'"
             class="w-full sm:w-auto px-10 py-5 bg-white text-black font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2"
           >
             {{ t?.hero?.ctaPro }} <ChevronRight :size="20" />
-          </Link>
-          <Link 
+          </StaticLink>
+          <StaticLink 
             :href="locale === 'zh' ? '/zh/docs' : '/docs'"
             class="w-full sm:w-auto px-10 py-5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/5 transition-all backdrop-blur-sm"
           >
             {{ t?.hero?.ctaDocs }}
-          </Link>
+          </StaticLink>
         </div>
       </div>
 
@@ -241,7 +242,7 @@ const { t, locale } = useI18n()
 
         <!-- Full Report Link -->
         <div class="mt-12 text-center animate-fade-in" style="animation-delay: 0.5s">
-          <Link 
+          <StaticLink 
             :href="locale === 'zh' ? '/zh/docs/benchmark' : '/docs/benchmark'"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all font-mono text-sm group"
           >
@@ -250,7 +251,7 @@ const { t, locale } = useI18n()
               {{ locale === 'zh' ? '查看完整基準測試報告' : 'View Full Benchmark Report' }}
             </span>
             <ChevronRight :size="16" class="group-hover:translate-x-1 transition-transform" />
-          </Link>
+          </StaticLink>
         </div>
 
       </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
+import { StaticLink } from '@gravito/freeze-vue'
 import { ChevronRight, Clock, Clock3, Edit2, Github, MapPin } from 'lucide-vue-next'
 import Layout from '../components/Layout.vue'
 
@@ -73,7 +74,7 @@ defineProps<{
             </h3>
             <ul class="space-y-1 ml-1">
               <li v-for="item in section.items" :key="item.href">
-                <Link
+                <StaticLink
                   :href="item.href"
                   :class="[
                     'block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent',
@@ -88,7 +89,7 @@ defineProps<{
                       {{ item.title }}
                     </span>
                   </div>
-                </Link>
+                </StaticLink>
               </li>
             </ul>
           </div>

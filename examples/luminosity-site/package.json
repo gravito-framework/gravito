@@ -16,6 +16,7 @@
     "lux:compact": "bun src/cli.ts compact"
   },
   "dependencies": {
+    "@gravito/freeze-vue": "workspace:*",
     "@gravito/ion": "workspace:*",
     "@gravito/luminosity": "workspace:*",
     "@gravito/luminosity-adapter-hono": "workspace:*",

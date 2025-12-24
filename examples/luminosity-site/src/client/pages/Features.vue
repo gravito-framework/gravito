@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import { Activity, Code, Cpu, Layers, Share2, Shield, Terminal, Zap, ChevronRight } from 'lucide-vue-next'
+import { StaticLink } from '@gravito/freeze-vue'
 import Layout from '../components/Layout.vue'
 import { useI18n } from '../composables/useI18n'
 import { computed } from 'vue'
@@ -273,12 +274,12 @@ const points = computed(() => [
     <!-- Bottom CTA -->
     <section class="py-32 px-6 text-center bg-black border-t border-white/5">
       <h2 class="text-3xl font-bold text-white mb-8">{{ t?.features_page?.cta?.title }}</h2>
-      <Link
+      <StaticLink
         :href="getPath('/docs')"
         class="px-10 py-4 bg-emerald-500 text-black font-black italic rounded-full hover:scale-105 active:scale-95 transition-all inline-block"
       >
         {{ t?.features_page?.cta?.btn }}
-      </Link>
+      </StaticLink>
     </section>
   </Layout>
 </template>

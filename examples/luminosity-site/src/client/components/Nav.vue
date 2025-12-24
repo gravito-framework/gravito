@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Logo from './Logo.vue'
+import { StaticLink } from '@gravito/freeze-vue'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { usePage, Link } from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3'
 import { Globe, ChevronDown } from 'lucide-vue-next'
 
 const isScrolled = ref(false)
@@ -61,9 +62,9 @@ const switchLang = (lang: string) => {
     :class="{ 'py-4 backdrop-blur-xl bg-void/80 border-b border-white/5 shadow-2xl shadow-singularity/5': isScrolled }"
   >
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
-      <Link :href="getPath('/')">
+      <StaticLink :href="getPath('/')">
         <Logo size="sm" />
-      </Link>
+      </StaticLink>
       
       <nav class="hidden md:flex items-center gap-2 p-1.5 backdrop-blur-md bg-white/5 rounded-2xl border border-white/5">
         <template v-for="link in navLinks" :key="link.path">
@@ -75,13 +76,13 @@ const switchLang = (lang: string) => {
             >
               {{ link.label }}
             </a>
-            <Link 
+            <StaticLink 
               v-else
               :href="getPath(link.path)"
               class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-singularity hover:bg-white/5 rounded-xl transition-all"
             >
               {{ link.label }}
-            </Link>
+            </StaticLink>
         </template>
       </nav>
       
