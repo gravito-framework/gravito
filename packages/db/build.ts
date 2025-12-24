@@ -15,7 +15,7 @@ const tsup = spawn(
     'esm,cjs',
     '--dts',
     '--external',
-    'gravito-core,bun:sqlite',
+    'gravito-core,bun:sqlite,bun',
     '--outDir',
     'dist',
   ],
