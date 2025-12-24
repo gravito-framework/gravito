@@ -22,7 +22,7 @@ Raw Read (基準線)
 <div class="relative">
 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
 <span class="text-gray-400">SQLite (In-Memory)</span>
-<span class="text-atlas-cyan font-bold">3,523,000 <span class="text-[9px] opacity-60 font-normal">ops/sec</span></span>
+<span class="text-atlas-cyan font-bold">3,523,000 <span class="text-[9px] opacity-60 font-normal">筆/秒</span></span>
 </div>
 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
 <div class="h-full bg-atlas-cyan shadow-[0_0_10px_cyan]" style="width: 100%"></div>
@@ -32,7 +32,7 @@ Raw Read (基準線)
 <div class="relative">
 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
 <span class="text-gray-400">MariaDB</span>
-<span class="text-white">1,111,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+<span class="text-white">1,111,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">筆/秒</span></span>
 </div>
 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
 <div class="h-full bg-atlas-cyan/60" style="width: 31.5%"></div>
@@ -42,7 +42,7 @@ Raw Read (基準線)
 <div class="relative">
 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
 <span class="text-gray-400">PostgreSQL</span>
-<span class="text-white">1,110,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+<span class="text-white">1,110,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">筆/秒</span></span>
 </div>
 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
 <div class="h-full bg-atlas-cyan/60" style="width: 31.5%"></div>
@@ -52,7 +52,7 @@ Raw Read (基準線)
 <div class="relative">
 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
 <span class="text-gray-400">MySQL 8.0</span>
-<span class="text-white">521,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+<span class="text-white">521,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">筆/秒</span></span>
 </div>
 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
 <div class="h-full bg-atlas-cyan/30" style="width: 14.7%"></div>
