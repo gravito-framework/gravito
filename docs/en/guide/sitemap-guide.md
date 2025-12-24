@@ -7,12 +7,13 @@ A comprehensive guide to using Sitemap for generating XML sitemaps, from basic u
 ## 📚 Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Basic Usage](#basic-usage)
-3. [Enterprise Features](#enterprise-features)
-4. [Incremental Generation](#incremental-generation)
-5. [301 Redirect Handling](#301-redirect-handling)
-6. [Best Practices](#best-practices)
-7. [Troubleshooting](#troubleshooting)
+2. [Node.js Runtime Demo](#nodejs-runtime-demo)
+3. [Basic Usage](#basic-usage)
+4. [Enterprise Features](#enterprise-features)
+5. [Incremental Generation](#incremental-generation)
+6. [301 Redirect Handling](#301-redirect-handling)
+7. [Best Practices](#best-practices)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -41,6 +42,16 @@ await sitemap.generate()
 ```
 
 That's it! Your sitemap is generated at `./dist/sitemap.xml`.
+
+---
+
+## 🧰 Node.js Runtime Demo
+
+If you want to validate sitemap rendering on a pure Node runtime, use the Express adapter example:
+
+- `examples/luminosity-node`
+
+Note: Some features are only supported when running on Gravito core.
 
 ---
 
@@ -1084,4 +1095,3 @@ const jobId = await sitemap.generateAsync({
 ---
 
 **Need help?** Open an issue on [GitHub](https://github.com/gravito-framework/gravito/issues).
-

@@ -1,0 +1,16 @@
+{
+  "name": "luminosity-node-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {
+    "@gravito/luminosity": "workspace:*",
+    "@gravito/luminosity-adapter-express": "workspace:*",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

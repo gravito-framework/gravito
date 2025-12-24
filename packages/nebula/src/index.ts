@@ -135,16 +135,17 @@ export class OrbitStorage implements GravitoOrbit {
       )
     }
 
-    const storageService = {
-      ...provider,
-      // Wrap methods if we want to add hooks later
+    const storageService: StorageProvider = {
       put: async (key: string, data: Blob | Buffer | string) => {
         // Hook: storage:upload
         const finalData = await core.hooks.applyFilters('storage:upload', data, { key })
-        await provider?.put(key, finalData)
+        await provider!.put(key, finalData)
         // Action: storage:uploaded
         await core.hooks.doAction('storage:uploaded', { key })
       },
+      get: (key: string) => provider!.get(key),
+      delete: (key: string) => provider!.delete(key),
+      getUrl: (key: string) => provider!.getUrl(key),
     }
 
     // Inject helper into context
@@ -196,11 +197,13 @@ export default function orbitStorage(core: PlanetCore, options: OrbitStorageOpti
   }
 
   return {
-    ...provider,
     put: async (key: string, data: Blob | Buffer | string) => {
       const finalData = await core.hooks.applyFilters('storage:upload', data, { key })
-      await provider?.put(key, finalData)
+      await provider!.put(key, finalData)
       await core.hooks.doAction('storage:uploaded', { key })
     },
+    get: (key: string) => provider!.get(key),
+    delete: (key: string) => provider!.delete(key),
+    getUrl: (key: string) => provider!.getUrl(key),
   }
 }

@@ -1,25 +1,38 @@
-import { build } from 'bun'
+import { spawn } from 'bun'
 
-await build({
-  entrypoints: ['src/index.ts', 'src/cli.ts'],
-  outdir: 'dist',
-  format: 'esm',
-  target: 'bun',
-  splitting: false,
-  minify: false,
-  sourcemap: 'external',
-  external: ['typescript'],
-})
+console.log('Building @gravito/luminosity...')
 
-console.log('📝 Generating type declarations...')
-const tsc = Bun.spawn(['bunx', 'tsc', '--emitDeclarationOnly', '--skipLibCheck'], {
-  stdout: 'inherit',
-  stderr: 'inherit',
-})
-const exitCode = await tsc.exited
-if (exitCode !== 0) {
-  console.warn('⚠️ Warning: Type generation issues')
+// Clean dist
+await Bun.$`rm -rf dist`
+
+// Use tsup for multi-format build
+const tsup = spawn(
+  [
+    'npx',
+    'tsup',
+    'src/index.ts',
+    'src/cli.ts',
+    '--format',
+    'esm,cjs',
+    '--dts',
+    '--external',
+    'typescript',
+    '--outDir',
+    'dist',
+  ],
+  {
+    stdout: 'inherit',
+    stderr: 'inherit',
+  }
+)
+
+const tsupCode = await tsup.exited
+if (tsupCode !== 0) {
+  console.error('❌ tsup build failed')
+  process.exit(1)
 }
 
-console.log('✅ Build completed')
+// Type declaration generation is now handled by tsup --dts
+
+console.log('✅ Build complete!')
 process.exit(0)

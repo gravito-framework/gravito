@@ -85,6 +85,13 @@ import { seoConfig } from './config/seo'
 app.use('*', gravitoSeo(seoConfig))
 ```
 
+### Node.js 執行環境示範 (Express)
+如果你想驗證 Luminosity 在純 Node runtime 的表現，可以使用 Express adapter 範例：
+
+- `examples/luminosity-node`
+
+注意：部分功能僅在使用 Gravito core 時提供。
+
 ### 3. 在控制器中動態管理 Meta
 您可以針對特定的路由，在控制器中覆寫 Meta 標籤。
 

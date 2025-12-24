@@ -2,6 +2,8 @@
 
 Luminosity is the intelligent **SmartMap Engine** for modern, data-intensive web applications. It automates your SEO strategy by managing sitemaps, robots.txt, and search engine pings with unparalleled precision.
 
+For the most complete experience (deep integration, lifecycle hooks, and official adapters), run Luminosity with the Gravito core framework.
+
 ## Why Luminosity?
 
 Sitemaps are often an afterthought in web development. As your site grows to thousands or millions of pages, traditional sitemap generation becomes a bottleneck—slow, resource-heavy, and often stale.

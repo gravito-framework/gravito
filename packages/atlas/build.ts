@@ -5,28 +5,19 @@ console.log('Building @gravito/atlas...')
 // Clean dist
 await Bun.$`rm -rf dist`
 
-// Build with Bun
-await Bun.build({
-  entrypoints: ['./src/index.ts'],
-  outdir: './dist',
-  format: 'esm',
-  target: 'node',
-  minify: false,
-  splitting: true,
-  external: ['pg', 'mysql2', 'better-sqlite3', 'mongodb', 'ioredis'],
-})
-
-console.log('📝 Generating type declarations...')
-const tsc = spawn(
+// Use tsup for multi-format build
+const tsup = spawn(
   [
-    'bunx',
-    'tsc',
-    '--emitDeclarationOnly',
-    '--declaration',
-    '--declarationMap',
+    'npx',
+    'tsup',
+    'src/index.ts',
+    '--format',
+    'esm,cjs',
+    '--dts',
+    '--external',
+    'pg,mysql2,better-sqlite3,mongodb,ioredis',
     '--outDir',
     'dist',
-    '--skipLibCheck',
   ],
   {
     stdout: 'inherit',
@@ -34,10 +25,13 @@ const tsc = spawn(
   }
 )
 
-const code = await tsc.exited
-if (code !== 0) {
-  console.warn('⚠️  Type generation had warnings/errors, but continuing...')
+const tsupCode = await tsup.exited
+if (tsupCode !== 0) {
+  console.error('❌ tsup build failed')
+  process.exit(1)
 }
+
+// Type declaration generation is now handled by tsup --dts
 
 console.log('✅ Build complete!')
 process.exit(0)

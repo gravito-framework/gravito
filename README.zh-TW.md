@@ -43,6 +43,11 @@ core.liftoff();
 - [插件開發指南](./docs/zh-TW/guide/plugin-development.md)
 - [English Documentation](./README.md)
 
+## 🧪 範例
+
+- `examples/luminosity-benchmark`：用 Bun 進行 sitemap 高負載效能測試。
+- `examples/luminosity-node`：Node.js + Express 執行環境示範，使用官方 adapter。
+
 ## 📦 生態系 (Orbits)
 
 Gravito 提供了豐富的官方 Orbit 模組，所有模組皆為可插拔設計 (Pluggable)：

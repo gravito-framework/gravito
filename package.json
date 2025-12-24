@@ -7,7 +7,7 @@
         "examples/*"
     ],
     "scripts": {
-        "build": "bun run --filter './packages/*' build",
+        "build": "npx turbo run build",
         "test": "bun run --filter '*' test",
         "test:ci": "bun run --filter './packages/*' test",
         "lint": "biome lint .",
@@ -29,7 +29,8 @@
         "@types/node": "latest",
         "bun-types": "latest",
         "simple-git-hooks": "^2.13.1",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "turbo": "latest"
     },
     "simple-git-hooks": {
         "pre-commit": "export PATH=\"$HOME/.bun/bin:$PATH\" && bunx lint-staged && bun run typecheck && bun run test"

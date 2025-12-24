@@ -5,49 +5,27 @@ console.log('Building @gravito/constellation...')
 // Clean dist
 await Bun.$`rm -rf dist`
 
-// Build ESM
-await Bun.build({
-  entrypoints: ['./src/index.ts'],
-  outdir: './dist',
-  target: 'node',
-  format: 'esm',
-  naming: '[name].mjs',
-  external: [
-    'gravito-core',
-    'hono',
-    '@aws-sdk/client-s3',
-    '@google-cloud/storage',
-    '@gravito/stream',
-  ],
-})
+const external = [
+  'gravito-core',
+  'hono',
+  '@aws-sdk/client-s3',
+  '@google-cloud/storage',
+  '@gravito/stream',
+]
 
-// Build CJS
-await Bun.build({
-  entrypoints: ['./src/index.ts'],
-  outdir: './dist',
-  target: 'node',
-  format: 'cjs',
-  naming: '[name].cjs',
-  external: [
-    'gravito-core',
-    'hono',
-    '@aws-sdk/client-s3',
-    '@google-cloud/storage',
-    '@gravito/stream',
-  ],
-})
-
-console.log('📝 Generating type declarations...')
-const tsc = spawn(
+// Use tsup for multi-format build
+const tsup = spawn(
   [
-    'bunx',
-    'tsc',
-    '--emitDeclarationOnly',
-    '--declaration',
-    '--declarationMap',
+    'npx',
+    'tsup',
+    'src/index.ts',
+    '--format',
+    'esm,cjs',
+    '--dts',
+    '--external',
+    external.join(','),
     '--outDir',
     'dist',
-    '--skipLibCheck',
   ],
   {
     stdout: 'inherit',
@@ -55,10 +33,13 @@ const tsc = spawn(
   }
 )
 
-const code = await tsc.exited
-if (code !== 0) {
-  console.warn('⚠️  Type generation had warnings/errors, but continuing...')
+const tsupCode = await tsup.exited
+if (tsupCode !== 0) {
+  console.error('❌ tsup build failed')
+  process.exit(1)
 }
+
+// Type declaration generation is now handled by tsup --dts
 
 console.log('✅ Build complete!')
 process.exit(0)

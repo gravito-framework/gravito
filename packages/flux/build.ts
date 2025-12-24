@@ -33,24 +33,40 @@ await build({
 })
 
 // ─────────────────────────────────────────────────────────────
-// Build CJS for Node (legacy CommonJS support)
+// Build CJS for Node (legacy CommonJS support) using tsup
 // ─────────────────────────────────────────────────────────────
-await build({
-  entrypoints: ['./src/index.node.ts'],
-  outdir: './dist/node',
-  target: 'node',
-  format: 'cjs',
-  external: ['gravito-core'],
-  splitting: false,
-  naming: 'index.cjs',
-})
+const tsupCjs = Bun.spawn(
+  [
+    'npx',
+    'tsup',
+    'src/index.node.ts',
+    '--format',
+    'cjs',
+    '--external',
+    'gravito-core',
+    '--outDir',
+    'dist/node',
+    '--no-dts', // types already generated
+    '--clean',
+    'false'
+  ],
+  {
+    stdout: 'inherit',
+    stderr: 'inherit',
+  }
+)
+const tsupCjsCode = await tsupCjs.exited
+if (tsupCjsCode !== 0) {
+  console.error('❌ tsup CJS build failed')
+  process.exit(1)
+}
 
 // ─────────────────────────────────────────────────────────────
 // Generate type declarations
 // ─────────────────────────────────────────────────────────────
 const tsc = Bun.spawn(
   [
-    'bunx',
+    'npx',
     'tsc',
     '--emitDeclarationOnly',
     '--declaration',

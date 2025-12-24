@@ -90,6 +90,13 @@ import { seoConfig } from './config/seo'
 app.use('*', gravitoSeo(seoConfig))
 ```
 
+### Node.js Runtime Demo (Express)
+If you want to validate Luminosity on a pure Node runtime, use the Express adapter example:
+
+- `examples/luminosity-node`
+
+Note: Some features are only supported when running on Gravito core.
+
 ### 3. Dynamic Meta Tags in Controllers
 Inject dynamic meta tags for social media sharing directly from your controllers.
 

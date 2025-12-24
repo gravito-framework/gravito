@@ -43,6 +43,13 @@ Detailed documentation is available in the [docs](./docs) directory.
 - [Plugin Development Guide](./docs/en/guide/plugin-development.md)
 - [中文文檔](./README.zh-TW.md)
 
+## 🧪 Examples
+
+- `examples/luminosity-benchmark`: Bun benchmark for high-volume sitemap performance.
+- `examples/luminosity-node`: Node.js + Express runtime demo using the official adapter.
+
+Note: Some features are only available when running on Gravito core.
+
 ## 📦 Ecosystem (Orbits)
 Gravito provides a rich set of official Orbit modules, all designed to be completely pluggable:
 
