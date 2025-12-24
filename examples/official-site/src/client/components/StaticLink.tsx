@@ -62,7 +62,7 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
 
   // 處理路徑前綴
   const finalHref =
-    href && href.startsWith('/') && !href.startsWith(basePath + '/') ? `${basePath}${href}` : href
+    href?.startsWith('/') && !href.startsWith(`${basePath}/`) ? `${basePath}${href}` : href
 
   if (isStatic) {
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

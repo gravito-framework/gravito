@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
 import { MongoDBDriver } from '../src/drivers/MongoDBDriver'
 
 // Mock mongodb
@@ -71,7 +71,7 @@ describe('MongoDBDriver', () => {
 
     const result = await driver.query(protocol)
     expect(result.rowCount).toBe(1)
-    expect(result.rows[0]!.name).toBe('Test')
+    expect(result.rows[0]?.name).toBe('Test')
     expect(mockDb.collection).toHaveBeenCalledWith('users')
     expect(mockCollection.find).toHaveBeenCalled()
   })

@@ -19,7 +19,7 @@ try {
 
   // Determine if we need CJS. Typically yes for ecosystem compat.
   // Bun doesn't emit CJS easily.
-  // If we can't use tsup, we might skip CJS for now if the repo is moving to ESM-only 
+  // If we can't use tsup, we might skip CJS for now if the repo is moving to ESM-only
   // OR we can try to use tsup via $`...` which might work better than spawn() for some reason?
   // Let's try to stick to ESM-only for now if possible, as it simplifies things.
   // But wait, older tools might need CJS.

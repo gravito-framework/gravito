@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, jest, spyOn } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, jest } from 'bun:test'
 import { DB } from '../src/DB'
 import { PostgresGrammar } from '../src/grammar/PostgresGrammar'
 import { Model } from '../src/orm/model/Model'

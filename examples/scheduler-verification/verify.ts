@@ -7,19 +7,19 @@ console.log('--- 開始排程分散式驗證 ---')
 console.log('模擬啟動兩個 Worker 實例...')
 
 const startWorker = (name: string, role: string) => {
-    const p = spawn('bun', ['run', 'src/index.ts'], {
-        env: { ...process.env, INSTANCE_NAME: name, NODE_ROLE: role }
-    })
+  const p = spawn('bun', ['run', 'src/index.ts'], {
+    env: { ...process.env, INSTANCE_NAME: name, NODE_ROLE: role },
+  })
 
-    p.stdout.on('data', (data) => {
-        process.stdout.write(data.toString())
-    })
+  p.stdout.on('data', (data) => {
+    process.stdout.write(data.toString())
+  })
 
-    p.stderr.on('data', (data) => {
-        process.stderr.write(`[${name} ERROR] ${data}`)
-    })
+  p.stderr.on('data', (data) => {
+    process.stderr.write(`[${name} ERROR] ${data}`)
+  })
 
-    return p
+  return p
 }
 
 // 實例 1: 角色為 worker
@@ -32,10 +32,10 @@ const worker2 = startWorker('Instance-B', 'worker')
 const admin = startWorker('Instance-Admin', 'admin')
 
 process.on('SIGINT', () => {
-    worker1.kill()
-    worker2.kill()
-    admin.kill()
-    process.exit()
+  worker1.kill()
+  worker2.kill()
+  admin.kill()
+  process.exit()
 })
 
 console.log('驗證重點：')

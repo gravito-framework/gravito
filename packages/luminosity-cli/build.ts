@@ -1,4 +1,4 @@
-import { spawn, write, file } from 'bun'
+import { file, spawn, write } from 'bun'
 
 console.log('Building @gravito/luminosity-cli...')
 

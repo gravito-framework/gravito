@@ -72,7 +72,9 @@ export class MongoDBDriver implements DriverContract {
 
     try {
       const protocol = JSON.parse(protocolJson) as MongoQueryProtocol
-      if (!this.db) throw new ConnectionError('MongoDB not connected')
+      if (!this.db) {
+        throw new ConnectionError('MongoDB not connected')
+      }
       const collection = this.db.collection(protocol.collection)
 
       if (protocol.operation === 'find') {
@@ -113,7 +115,9 @@ export class MongoDBDriver implements DriverContract {
 
     try {
       const protocol = JSON.parse(protocolJson) as MongoQueryProtocol
-      if (!this.db) throw new ConnectionError('MongoDB not connected')
+      if (!this.db) {
+        throw new ConnectionError('MongoDB not connected')
+      }
       const collection = this.db.collection(protocol.collection)
 
       if (protocol.operation === 'insert') {

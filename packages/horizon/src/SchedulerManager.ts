@@ -145,7 +145,7 @@ export class SchedulerManager {
       }
       throw err
     }
-    // Note: We DO NOT release the lock here if successful. 
+    // Note: We DO NOT release the lock here if successful.
     // It will expire based on lockTtl, preventing other nodes from running it in the same minute window.
   }
 

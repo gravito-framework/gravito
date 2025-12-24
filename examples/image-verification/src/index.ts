@@ -1,18 +1,17 @@
-import { PlanetCore, type GravitoContext } from 'gravito-core'
+import { mkdir } from 'node:fs/promises'
+import { join } from 'node:path'
 import { OrbitForge } from '@gravito/forge'
 import { OrbitStorage, type StorageProvider } from '@gravito/nebula'
-import { OrbitStream } from '@gravito/stream'
 import { OrbitPlasma } from '@gravito/plasma' // Import Redis module
-import { join } from 'node:path'
-import { mkdir } from 'node:fs/promises'
-import { Job } from '@gravito/stream' // Import Job class
+import { Job, OrbitStream } from '@gravito/stream'
+import { type GravitoContext, PlanetCore } from 'gravito-core'
 
 // Global core reference for Jobs running in the same process
 let appCore: PlanetCore
 
 // 1. Define Mock Remote Storage Providers (unchanged)
 class S3MockProvider implements StorageProvider {
-  constructor(private bucket: string) { }
+  constructor(private bucket: string) {}
 
   async put(key: string, data: Blob | Buffer | string): Promise<void> {
     console.log(`[S3 MOCK] Uploading to bucket "${this.bucket}": ${key}`)
@@ -38,7 +37,7 @@ class S3MockProvider implements StorageProvider {
 }
 
 class GCSMockProvider implements StorageProvider {
-  constructor(private bucket: string) { }
+  constructor(private bucket: string) {}
 
   async put(key: string, data: Blob | Buffer | string): Promise<void> {
     console.log(`[GCS MOCK] Uploading to bucket "${this.bucket}": ${key}`)
@@ -109,7 +108,9 @@ class ProcessImageJob extends Job {
       // 2. Upload to Local Storage (for preview)
       const localKey = `processed/${Date.now()}-${filename}.webp`
       const processedFile = processed.path ? Bun.file(processed.path) : (processed as any).buffer
-      if (!processedFile) throw new Error('Processed file path is missing')
+      if (!processedFile) {
+        throw new Error('Processed file path is missing')
+      }
 
       await localStore.put(localKey, processedFile)
       const localUrl = localStore.getUrl(localKey)
@@ -130,11 +131,11 @@ class ProcessImageJob extends Job {
           result: {
             url: remoteUrl,
             path: localUrl, // Using localUrl for path for demo purposes
-            size: (await processedFile.size), // Assuming Bun.file has size, or use processed.size
-            mimeType: 'image/webp'
+            size: await processedFile.size, // Assuming Bun.file has size, or use processed.size
+            mimeType: 'image/webp',
           },
           createdAt: Date.now(),
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
         })
       }
     } catch (err: any) {
@@ -147,7 +148,7 @@ class ProcessImageJob extends Job {
           progress: 0,
           error: err.message,
           createdAt: Date.now(),
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
         })
       }
       throw err // Re-throw to mark job as failed in stream
@@ -165,12 +166,12 @@ const core = await PlanetCore.boot({
     stream: {
       default: 'redis', // Use redis for stream
       connections: {
-        redis: { driver: 'redis', queue: 'image-processing-queue' }
+        redis: { driver: 'redis', queue: 'image-processing-queue' },
       },
       jobs: {
-        'ProcessImageJob': ProcessImageJob
-      }
-    }
+        ProcessImageJob: ProcessImageJob,
+      },
+    },
   },
   orbits: [
     new OrbitPlasma(), // Redis client
@@ -179,29 +180,29 @@ const core = await PlanetCore.boot({
     // Storage Engine (Configured with Multiple Providers)
     new OrbitStorage({
       exposeAs: 'storage',
-      local: { root: './storage/local', baseUrl: '/storage' }
+      local: { root: './storage/local', baseUrl: '/storage' },
     }),
 
     // Remote Storage Simulations
     new OrbitStorage({
       exposeAs: 's3',
-      provider: new S3MockProvider('my-production-bucket')
+      provider: new S3MockProvider('my-production-bucket'),
     }),
 
     new OrbitStorage({
       exposeAs: 'gcs',
-      provider: new GCSMockProvider('my-asset-bucket')
+      provider: new GCSMockProvider('my-asset-bucket'),
     }),
 
     // Forge Engine (File Processing)
     new OrbitForge({
       image: {
         imagemagickPath: 'magick',
-        tempDir: './storage/tmp'
+        tempDir: './storage/tmp',
       },
-      sse: { enabled: true } // Enable SSE for status updates
-    })
-  ]
+      sse: { enabled: true }, // Enable SSE for status updates
+    }),
+  ],
 })
 
 // Assign initialized core to global variable for Job access
@@ -299,15 +300,15 @@ router.get('/', (c: GravitoContext) => {
                     if (data.error) throw new Error(data.error);
 
                     currentJobId = data.jobId;
-                    statusText.innerText = \`任務已排隊 (ID: \${currentJobId})，等待處理...\`;
+                    statusText.innerText = '任務已排隊 (ID: ' + currentJobId + ')，等待處理...';
                     
                     // Start SSE to listen for job status updates
-                    const eventSource = new EventSource(\`/forge/status/\${currentJobId}/stream\`);
+                    const eventSource = new EventSource('/forge/status/' + currentJobId + '/stream');
 
                     eventSource.onmessage = (event) => {
                         const statusUpdate = JSON.parse(event.data);
                         console.log('Job Status Update:', statusUpdate);
-                        statusText.innerText = \`[\${statusUpdate.status.toUpperCase()}] \${statusUpdate.message || '處理中...'}\`;
+                        statusText.innerText = '[' + statusUpdate.status.toUpperCase() + '] ' + (statusUpdate.message || '處理中...');
 
                         if (statusUpdate.status === 'completed') {
                             localPreview.src = statusUpdate.result.path;
@@ -345,8 +346,8 @@ router.get('/', (c: GravitoContext) => {
 
 router.post('/upload', async (c: GravitoContext) => {
   const body = await c.req.parseBody()
-  const image = body['image']
-  const target = body['target'] as string // 's3' or 'gcs'
+  const image = body.image
+  const target = body.target as string // 's3' or 'gcs'
 
   if (!(image instanceof File)) {
     return c.json({ error: 'No image uploaded' }, 400)
@@ -367,14 +368,14 @@ router.post('/upload', async (c: GravitoContext) => {
       filename: image.name,
       mimeType: image.type,
       target: target,
-      remoteKeyPrefix: target === 's3' ? 'uploads/s3' : 'uploads/gcs'
+      remoteKeyPrefix: target === 's3' ? 'uploads/s3' : 'uploads/gcs',
     })
 
     // Immediately return job ID for status tracking
     return c.json({ jobId, message: 'Image processing job dispatched.' })
   } catch (err: any) {
     console.error('Job dispatch failed:', err)
-    return c.json({ error: 'Failed to dispatch image processing job: ' + err.message }, 500)
+    return c.json({ error: `Failed to dispatch image processing job: ${err.message}` }, 500)
   }
 })
 
@@ -383,7 +384,9 @@ router.get('/storage/*', async (c: GravitoContext) => {
   const path = c.req.path.replace('/storage/', '')
   const storage = c.get('storage') as OrbitStorage
   const file = await storage.get(path)
-  if (!file) return c.text('Not Found', 404)
+  if (!file) {
+    return c.text('Not Found', 404)
+  }
   return c.body(file)
 })
 
