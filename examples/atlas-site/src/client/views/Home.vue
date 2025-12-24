@@ -16,7 +16,7 @@
              {{ t('hero.title_line1') }}
           </h1>
           
-          <p class="text-gray-500 max-w-sm text-sm leading-relaxed font-light animate-slide-in-up border-l border-atlas-cyan/20 pl-4 mb-10">
+          <p class="text-gray-300 max-w-lg text-base leading-relaxed animate-slide-in-up border-l-2 border-atlas-cyan/50 pl-6 mb-10 shadow-black drop-shadow-md">
             {{ t('hero.desc') }}
           </p>
 
