@@ -294,6 +294,51 @@ Factory.<span class="text-blue-300">define</span>(User, ({ <span class="text-ora
               </div>
           </div>
 
+          <!-- Section 7: CLI (Full Width HUD / Terminal) -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                  <div class="inline-block bg-atlas-cyan/10 text-atlas-cyan px-3 py-1 rounded-full text-xs font-mono mb-4 border border-atlas-cyan/20">Control Interface</div>
+                  <h2 class="text-3xl font-bold text-white mb-6">{{ t('features.cli_title') }}</h2>
+                  <p class="text-gray-400 mb-8 leading-relaxed">
+                      {{ t('features.cli_desc') }}
+                  </p>
+
+                  <StaticLink to="/docs/cli" class="inline-flex items-center gap-2 text-atlas-cyan hover:text-white transition-all group font-mono text-sm">
+                      <span class="border-b border-atlas-cyan/50 group-hover:border-white transition-all">{{ t('features.cli_button') }}</span>
+                  </StaticLink>
+              </div>
+              <div class="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative">
+                   <div class="flex items-center justify-between px-4 py-3 bg-white/5 border-b border-white/5">
+                        <div class="flex gap-1.5">
+                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/40"></div>
+                        </div>
+                        <div class="text-[9px] font-mono text-gray-500 tracking-widest">ATLAS_TERMINAL_SESSION</div>
+                   </div>
+                   <div class="p-6 font-mono text-sm">
+                        <div class="flex gap-2 mb-2">
+                             <span class="text-green-400">$</span>
+                             <span class="text-white">bun atlas migrate</span>
+                        </div>
+                        <div class="text-gray-500 mb-1">Running migrations...</div>
+                        <div class="text-atlas-cyan flex gap-2">
+                             <span>✓</span>
+                             <span>2024_12_24_084201_create_logs_table</span>
+                        </div>
+                        <div class="text-atlas-cyan flex gap-2 mb-4">
+                             <span>✓</span>
+                             <span>2024_12_24_091530_add_context_to_users</span>
+                        </div>
+                        <div class="text-gray-400 mb-2">Done. Database schema synchronized.</div>
+                        <div class="flex gap-2">
+                             <span class="text-green-400">$</span>
+                             <span class="w-2 h-5 bg-atlas-cyan/80 animate-pulse"></span>
+                        </div>
+                   </div>
+              </div>
+          </div>
+
           <!-- Section 5: Raw Query & Execution (Right Code, Left Text) -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative">
               <div class="order-2 lg:order-1 relative z-10">
@@ -357,13 +402,95 @@ Factory.<span class="text-blue-300">define</span>(User, ({ <span class="text-ora
 )</pre>
               </div>
           </div>
+          <!-- Section 6: Connection Nexus (Unified DX) -->
+          <div class="pt-16 border-t border-white/5">
+              <div class="text-center mb-16">
+                  <div class="text-atlas-cyan font-mono text-[10px] tracking-[0.4em] uppercase mb-4">Connection_Orchestration_Active</div>
+                  <h2 class="text-4xl font-bold text-white mb-4">{{ t('connection_hub.title') }}</h2>
+                  <p class="text-gray-500 max-w-2xl mx-auto">{{ t('connection_hub.subtitle') }}</p>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                  <!-- Central Config Logic -->
+                  <div class="lg:col-span-2 bg-black/60 border border-white/10 rounded-3xl p-8 relative overflow-hidden group">
+                      <div class="absolute top-0 right-0 p-4 opacity-20">
+                          <svg class="w-24 h-24 text-atlas-cyan" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7L12 1222 7L12 2Z opacity-50"/><path d="M2 12L12 17L22 12 opacity-30"/><path d="M2 17L12 22L22 17 opacity-10"/></svg>
+                      </div>
+                      
+                      <div class="relative z-10">
+                          <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                              <div class="w-2 h-2 rounded-full bg-atlas-cyan animate-pulse"></div>
+                              {{ t('connection_hub.driver_protocol_title') }}
+                          </h3>
+                          
+                          <pre class="bg-black/40 rounded-xl p-6 font-mono text-sm leading-relaxed border border-white/5 text-gray-300">
+<span class="text-comment text-gray-500">// atlas.config.ts - Central Data Hub</span>
+<span class="text-purple-400">export default</span> <span class="text-blue-300">defineConfig</span>({
+  default: <span class="text-green-300">'sqlite'</span>,
+  connections: {
+    sqlite: { driver: <span class="text-green-300">'sqlite'</span>, database: <span class="text-green-300">'db.sqlite'</span> },
+    mongodb: { driver: <span class="text-green-300">'mongodb'</span>, uri: <span class="text-blue-300">process</span>.<span class="text-blue-300">env</span>.<span class="text-blue-300">MONGO_URI</span> },
+    redis: { driver: <span class="text-green-300">'redis'</span>, host: <span class="text-green-300">'127.0.0.1'</span> }
+  }
+})
+
+<span class="text-comment text-gray-500">// Freedom to switch anywhere in your app</span>
+<span class="text-purple-400">const</span> users = <span class="text-purple-400">await</span> <span class="text-yellow-400">DB</span>.<span class="text-blue-300">connection</span>(<span class="text-green-300">'mongodb'</span>).<span class="text-blue-300">table</span>(<span class="text-green-300">'users'</span>).<span class="text-blue-300">get</span>()
+<span class="text-purple-400">await</span> <span class="text-yellow-400">DB</span>.<span class="text-blue-300">connection</span>(<span class="text-green-300">'redis'</span>).<span class="text-blue-300">set</span>(<span class="text-green-300">'recent_users'</span>, users)</pre>
+                      </div>
+                  </div>
+
+                  <!-- Satellite Info -->
+                  <div class="space-y-6">
+                      <div class="bg-white/5 border border-white/10 p-6 rounded-2xl hover:border-atlas-cyan/40 transition-all cursor-default group">
+                          <div class="text-atlas-cyan font-bold mb-2 flex items-center gap-2">
+                              <div class="w-1.5 h-1.5 rounded-full bg-atlas-cyan"></div>
+                              {{ t('connection_hub.switching_title') }}
+                          </div>
+                          <p class="text-xs text-gray-500 leading-relaxed mb-4">
+                              {{ t('connection_hub.switching_desc') }}
+                          </p>
+                          <div class="flex gap-2">
+                             <StaticLink to="/docs/mongodb" class="text-[10px] font-mono text-gray-400 border border-white/10 px-3 py-1.5 rounded-lg hover:bg-white/5 hover:text-white transition-all">
+                                MongoDB →
+                             </StaticLink>
+                             <StaticLink to="/docs/redis" class="text-[10px] font-mono text-gray-400 border border-white/10 px-3 py-1.5 rounded-lg hover:bg-white/5 hover:text-white transition-all">
+                                Redis →
+                             </StaticLink>
+                          </div>
+                       </div>
+
+                       <div class="bg-white/5 border border-white/10 p-6 rounded-2xl opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-default relative overflow-hidden">
+                          <!-- Bun Performance Tag -->
+                          <div class="absolute -right-8 -top-8 w-24 h-24 bg-orange-500/10 rotate-45 border-b border-orange-500/20 flex items-end justify-center pb-2">
+                              <span class="text-[8px] font-bold text-orange-400 tracking-widest uppercase">Bun Native</span>
+                          </div>
+
+                          <div class="text-gray-400 font-bold mb-2 text-sm flex items-center gap-2">
+                              <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 16h-1v-4h1v4zm0-6h-1V7h1v5z"/></svg>
+                              {{ t('connection_hub.bun_engine_title') }}
+                          </div>
+                          <p class="text-[10px] text-gray-600 font-mono mb-4">
+                            {{ t('connection_hub.bun_engine_desc') }}
+                          </p>
+                          <StaticLink to="/docs/mongodb" class="block w-full py-2 bg-orange-500/5 hover:bg-orange-500/10 text-[10px] font-center text-center font-mono text-orange-400 uppercase tracking-widest border border-orange-500/10 transition-all">
+                             Optimize with Bun →
+                          </StaticLink>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { marked } from 'marked'
 import { useI18n } from 'vue-i18n'
 import DataSortingGrid from '@/client/components/DataSortingGrid.vue'
+import StaticLink from '@/client/components/StaticLink.vue'
 const { t } = useI18n()
 </script>
 

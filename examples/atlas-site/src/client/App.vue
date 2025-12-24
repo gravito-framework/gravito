@@ -40,10 +40,10 @@
       </div>
       <div class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
         <template v-for="link in navLinks" :key="link.path">
-            <a v-if="link.external" :href="link.path" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t(link.name) }}</a>
-            <router-link v-else :to="link.path" class="hover:text-atlas-cyan transition-colors" active-class="text-atlas-cyan">{{ t(link.name) }}</router-link>
+            <StaticLink v-if="link.external" :href="link.path" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t(link.name) }}</StaticLink>
+            <StaticLink v-else :to="link.path" class="hover:text-atlas-cyan transition-colors" active-class="text-atlas-cyan">{{ t(link.name) }}</StaticLink>
         </template>
-        <a href="https://gravito.dev/docs" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t('nav.docs') }}</a>
+        <StaticLink href="https://gravito.dev/docs" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t('nav.docs') }}</StaticLink>
       </div>
       <div class="flex items-center gap-6">
           <button @click="toggleLang" class="text-gray-400 hover:text-white font-mono text-xs border border-white/20 px-3 py-1 rounded transition-colors uppercase">
@@ -279,6 +279,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import Footer from './components/Footer.vue'
+import StaticLink from './components/StaticLink.vue'
 
 const { t, locale } = useI18n()
 

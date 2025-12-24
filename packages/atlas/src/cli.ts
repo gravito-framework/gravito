@@ -6,6 +6,8 @@
  */
 
 import { resolve } from 'node:path'
+import { MakeMigrationCommand } from './commands/MakeMigrationCommand'
+import { MakeModelCommand } from './commands/MakeModelCommand'
 import { Migrator } from './migration/Migrator'
 import { SeederRunner } from './seed/SeederRunner'
 
@@ -113,6 +115,26 @@ async function main() {
         break
       }
 
+      case 'make:model': {
+        const name = args[1]
+        if (!name) {
+          console.error('Error: Model name required')
+          process.exit(1)
+        }
+        await new MakeModelCommand().handle({ name, path: flags.path as string })
+        break
+      }
+
+      case 'make:migration': {
+        const name = args[1]
+        if (!name) {
+          console.error('Error: Migration name required')
+          process.exit(1)
+        }
+        await new MakeMigrationCommand().handle({ name, path: flags.path as string })
+        break
+      }
+
       default:
         console.log(`
 Orbit Database CLI
@@ -126,9 +148,11 @@ Commands:
   migrate:fresh       Drop all tables and re-run all migrations
   migrate:status      Show status of migrations
   seed                Run all seeders
+  make:model <name>   Create a new model
+  make:migration <n>  Create a new migration
 
 Flags:
-  --path <path>       Path to migrations directory
+  --path <path>       Path to migrations/models directory
   --seed-path <path>  Path to seeders directory
   --step <n>          Number of batches to rollback (default: 1)
 `)

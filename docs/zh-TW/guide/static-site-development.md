@@ -430,7 +430,7 @@ bun run build:preview
 | `getCurrentLocale()` | 取得目前語系（僅瀏覽器） |
 
 ### 建置工具
-| 函數 | 說明 |
+| 函式 | 說明 |
 |------|------|
 | `generateRedirectHtml(url)` | 建立重導向 HTML |
 | `generateRedirects(config)` | 生成所有重導向 |

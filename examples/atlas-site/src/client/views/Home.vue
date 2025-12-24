@@ -22,12 +22,12 @@
 
           <!-- CTA Buttons (Restored & Refined) -->
           <div class="flex gap-4 animate-slide-in-up">
-            <a href="#installation" class="px-5 py-2.5 bg-atlas-cyan/10 border border-atlas-cyan/40 text-atlas-cyan text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-atlas-cyan hover:text-black transition-all">
+            <StaticLink href="#installation" class="px-5 py-2.5 bg-atlas-cyan/10 border border-atlas-cyan/40 text-atlas-cyan text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-atlas-cyan hover:text-black transition-all">
                 {{ t('nav.install') }}
-            </a>
-            <router-link to="/features" class="px-5 py-2.5 bg-white/5 border border-white/10 text-gray-500 text-[10px] font-bold tracking-[0.2em] uppercase hover:border-white hover:text-white transition-all">
+            </StaticLink>
+            <StaticLink to="/features" class="px-5 py-2.5 bg-white/5 border border-white/10 text-gray-500 text-[10px] font-bold tracking-[0.2em] uppercase hover:border-white hover:text-white transition-all">
                 {{ t('nav.features') }}
-            </router-link>
+            </StaticLink>
           </div>
       </div>
 
@@ -49,6 +49,7 @@ import { useI18n } from 'vue-i18n'
 import Features from '@/client/components/Features.vue'
 import Installation from '@/client/components/Installation.vue'
 import LiveConsole from '@/client/components/LiveConsole.vue'
+import StaticLink from '@/client/components/StaticLink.vue'
 
 const { t } = useI18n()
 </script>
