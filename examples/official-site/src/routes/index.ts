@@ -9,7 +9,7 @@ export function registerRoutes(core: PlanetCore): void {
   // Middleware to set locale
   const setLocale = (locale: string) => async (c: any, next: any) => {
     c.set('locale', locale)
-    await next()
+    return await next()
   }
 
   // ─────────────────────────────────────────────
@@ -63,7 +63,7 @@ export function registerRoutes(core: PlanetCore): void {
   // ─────────────────────────────────────────────
   const apiLogger = async (c: any, next: any) => {
     console.log(`[API] ${c.req.method} ${c.req.url}`)
-    await next()
+    return await next()
   }
 
   router
