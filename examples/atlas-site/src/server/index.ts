@@ -1,29 +1,37 @@
 import { Hono } from 'hono'
+import { DB } from './db.js' // Ensure .js extension for local imports in ESM/Bun
+import User from './models/User.js'
 
 const app = new Hono()
 
-app.get('/api/demo', (c) => {
-  // In a real scenario, this would use DB.table('exoplanets')...
-  // Since SQLite driver is not yet available in Atlas kernel, we mock the response
-  // to verify the full stack connectivity (Vue -> Vite Proxy -> Hono -> API Response)
+app.get('/api/demo', async (c) => {
+  try {
+    // Get recent users
+    const users = await User.query().orderBy('id', 'desc').limit(5).get()
+    
+    // Get stats
+    const totalUsers = await User.count()
+    const totalPosts = await DB.table('posts').count()
 
-  return c.json({
-    success: true,
-    executed_at: new Date().toISOString(),
-    sql: `select * from "exoplanets" where "gravity_g" >= 1.8 order by "distance_ly" asc limit 1`,
-    data: {
-      id: 42,
-      name: 'Kepler-186f',
-      gravity_g: 1.82,
-      distance_ly: 582,
-      type: 'Super-Earth',
-      discovered: '2014-04-17',
-    },
-  })
+    return c.json({
+      success: true,
+      executed_at: new Date().toISOString(),
+      stats: {
+          users: totalUsers,
+          posts: totalPosts
+      },
+      data: users,
+    })
+  } catch (err: any) {
+      return c.json({
+          success: false,
+          error: err.message
+      }, 500)
+  }
 })
 
 const port = 3000
-console.log(`🌌 Atlas Mock Server running on http://localhost:${port}`)
+console.log(`🌌 Atlas Server running on http://localhost:${port}`)
 
 export default {
   port,

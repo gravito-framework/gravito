@@ -18,6 +18,16 @@ DB.configure({
         sqlite: {
             driver: 'sqlite',
             database: dbPath,
+        },
+        redis: {
+            driver: 'redis',
+            host: '127.0.0.1',
+            port: 6379,
+        },
+        mongodb: {
+            driver: 'mongodb',
+            uri: 'mongodb://localhost:27017',
+            database: 'atlas_test'
         }
     }
 })

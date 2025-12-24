@@ -3,7 +3,7 @@ import { Schema } from '@gravito/atlas'
 export default class CreatePosts {
   async up() {
     await Schema.create('posts', (table) => {
-      table.increments('id')
+      table.id()
       table.integer('user_id').unsigned()
       table.string('title')
       table.text('content')

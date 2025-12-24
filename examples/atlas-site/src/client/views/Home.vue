@@ -46,6 +46,7 @@
                 <div class="text-3xl md:text-4xl font-bold text-white tabular-nums tracking-tight">
                     1.1M+ <span class="text-sm font-normal text-atlas-cyan/70">{{ t('benchmark.ops_sec') }}</span>
                 </div>
+                <div class="text-[9px] text-gray-600 mt-1 uppercase tracking-wider">{{ t('benchmark.raw_read_sub') }}</div>
             </div>
             
              <!-- Stat 2: Hydration -->
@@ -54,6 +55,7 @@
                 <div class="text-3xl md:text-4xl font-bold text-white tabular-nums tracking-tight">
                     42k+ <span class="text-sm font-normal text-purple-400/70">{{ t('benchmark.ops_sec') }}</span>
                 </div>
+                <div class="text-[9px] text-gray-600 mt-1 uppercase tracking-wider">{{ t('benchmark.hydration_sub') }}</div>
             </div>
 
              <!-- Stat 3: Throughput -->
@@ -62,7 +64,7 @@
                 <div class="text-3xl md:text-4xl font-bold text-white tabular-nums tracking-tight">
                     70k+ <span class="text-sm font-normal text-green-400/70">{{ t('benchmark.records') }}</span>
                 </div>
-                <div class="text-[9px] text-gray-600 mt-1 uppercase tracking-wider">{{ t('benchmark.memory') }}</div>
+                <div class="text-[9px] text-gray-600 mt-1 uppercase tracking-wider">{{ t('benchmark.throughput_sub') }}</div>
             </div>
         </div>
     </div>

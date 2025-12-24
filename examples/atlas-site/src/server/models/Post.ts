@@ -2,7 +2,7 @@ import { Model, column, BelongsTo } from '@gravito/atlas'
 import User from './User.js'
 
 export default class Post extends Model {
-  static table = 'posts'
+  static tableName = 'posts'
 
   @column({ isPrimary: true })
   declare id: number
