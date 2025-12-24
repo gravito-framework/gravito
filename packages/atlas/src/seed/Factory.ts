@@ -53,6 +53,34 @@ export class Factory<T extends Record<string, unknown>> {
   }
 
   /**
+   * Define a factory for a model
+   */
+  static define<T extends Record<string, unknown>>(
+    modelOrTable: typeof Model | string,
+    definition: FactoryDefinition<T>
+  ): Factory<T> {
+    const options: FactoryOptions =
+      typeof modelOrTable === 'string' ? { table: modelOrTable } : { model: modelOrTable }
+    return new Factory(definition, options)
+  }
+
+  /**
+   * Create a factory for a specific model
+   */
+  static model(model: typeof Model): Factory<any> {
+    // In a real app, this would look up the defined factory for this model
+    // For this implementation, we return a generic factory
+    return new Factory(() => ({}), { model })
+  }
+
+  /**
+   * Create and insert multiple records
+   */
+  async createMany(n: number, attributes: FactoryState<T> = {}): Promise<T[]> {
+    return this.count(n).create(attributes)
+  }
+
+  /**
    * Set the number of records to generate
    */
   count(n: number): this {
@@ -135,12 +163,16 @@ export class Factory<T extends Record<string, unknown>> {
     }
 
     // Bulk Insert
-    await DB.table(table).insert(records)
+    const inserted = await DB.table<T>(table).insert(records)
 
-    // TODO: Ideally we should return the fresh models from DB if possible
-    // But basic insert returns void or IDs depending on driver.
-    // For seeding, just returning the data we inserted is often enough.
+    // Return fresh models from DB if available
+    if (inserted && inserted.length > 0) {
+      // Merge attributes to keep any local overrides not in DB?
+      // No, DB is truth.
+      return inserted
+    }
 
+    // Fallback if driver doesn't return rows
     return records
   }
 

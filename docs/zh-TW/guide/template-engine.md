@@ -34,7 +34,7 @@ export class HomeController {
 
     // 2. 渲染樣版
     // 第一個參數是相對於 `src/views` 的路徑
-    // 第二個參數是傳遞給視圖的數據
+    // 第二個參數是傳遞給視圖的資料
     return c.html(view.render('home', {
       title: '歡迎回家',
       visitors: 1024,
@@ -64,7 +64,7 @@ src/
 
 ### 變數 (Variables)
 
-顯示從控制器傳遞的數據。
+顯示從控制器傳遞的資料。
 
 ```html
 <h1>你好, {{ name }}!</h1>

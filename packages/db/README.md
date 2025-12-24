@@ -25,14 +25,14 @@ const db = drizzle(client);
 // Register the orbit
 orbitDB(core, {
   db,
-  databaseType: 'postgresql', // 完整支援 PostgreSQL
+  databaseType: 'postgresql', // Full PostgreSQL support
   exposeAs: 'db'
 });
 
 // Use in routes
 core.app.get('/users', async (c) => {
   const db = c.get('db'); // DBService instance
-  const users = await db.raw.select().from(users); // 或使用 db.findById(), db.findOne() 等
+  const users = await db.raw.select().from(users); // Or use db.findById(), db.findOne(), etc.
   return c.json({ users });
 });
 ```
@@ -67,5 +67,5 @@ core.app.get('/users', async (c) => {
 ## 📚 Documentation
 
 For detailed API documentation, examples, and advanced usage, see:
-- [中文文檔](../../docs/zh-TW/api/orbit-db.md)
+- [Traditional Chinese Docs](../../docs/zh-TW/api/orbit-db.md)
 - [English Docs](../../docs/en/api/orbit-db.md)

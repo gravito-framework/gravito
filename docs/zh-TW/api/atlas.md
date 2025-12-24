@@ -26,7 +26,7 @@ title: Atlas
 
 - 在每個請求的 Gravito `Context` 注入 `DBService`
 - 透過 `db.raw` 存取底層 Drizzle 實例
-- 交易、CRUD 輔助、分頁、批量操作、聚合函數
+- 交易、CRUD 輔助、分頁、批量操作、聚合函式
 - 基於 Drizzle `db.raw.query.*` 的關聯查詢
 - 可選的查詢日誌與 Hooks（`db:query`、`db:transaction:*`、`db:migrate:*` 等）
 

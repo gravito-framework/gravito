@@ -8,7 +8,7 @@ import type { QueryBuilderContract } from '../../types'
 import { SchemaRegistry } from '../schema/SchemaRegistry'
 import type { ColumnType, TableSchema } from '../schema/types'
 import { DirtyTracker } from './DirtyTracker'
-import { SOFT_DELETES_KEY } from './decorators'
+import { COLUMN_KEY, SOFT_DELETES_KEY } from './decorators'
 import {
   ColumnNotFoundError,
   ModelNotFoundError,
@@ -73,6 +73,7 @@ export abstract class Model {
 
   /** Table name */
   static table: string
+  static tableName: string
 
   /** Primary key column */
   static primaryKey = 'id'
@@ -80,6 +81,11 @@ export abstract class Model {
   static visible: string[] = []
   static appends: string[] = []
   static observers: any[] = []
+
+  /** Enable automatic timestamps */
+  static timestamps = true
+  static createdAtColumn = 'created_at'
+  static updatedAtColumn = 'updated_at'
 
   /** Attribute casting definition */
   static casts: Record<string, string> = {}
@@ -267,7 +273,7 @@ export abstract class Model {
       },
 
       ownKeys(target) {
-        return [...Object.keys(model._attributes), ...Reflect.ownKeys(target)]
+        return [...new Set([...Object.keys(model._attributes), ...Reflect.ownKeys(target)])]
       },
 
       getOwnPropertyDescriptor(target, prop) {
@@ -317,13 +323,14 @@ export abstract class Model {
    */
   protected async _validateAttribute(key: string, value: unknown): Promise<void> {
     const modelCtor = this.constructor as typeof Model
+    const table = modelCtor.getTable()
     const schema = await this._getSchema()
 
     const column = schema.columns.get(key)
 
     if (!column) {
       if (modelCtor.strictMode) {
-        throw new ColumnNotFoundError(modelCtor.table, key)
+        throw new ColumnNotFoundError(table, key)
       }
       return
     }
@@ -338,8 +345,14 @@ export abstract class Model {
       const jsType = this._getJSType(value)
       const expectedTypes = this._getExpectedJSTypes(column.type)
 
+      // SQLite specific: if column is string but we get an object, check if it might be JSON
+      if (jsType === 'object' && expectedTypes.includes('string')) {
+        // Allow it - the driver will handle serialization
+        return
+      }
+
       if (!expectedTypes.includes(jsType)) {
-        throw new TypeMismatchError(modelCtor.table, key, expectedTypes.join(' | '), jsType)
+        throw new TypeMismatchError(table, key, expectedTypes.join(' | '), jsType)
       }
     }
   }
@@ -444,12 +457,40 @@ export abstract class Model {
   }
 
   /**
+   * Get the table name for this model
+   */
+  static getTable(): string {
+    const self = this as any
+    const table = self.tableName || self.table
+    if (!table) {
+      throw new Error(`Model ${this.name} has no table defined.`)
+    }
+    return table
+  }
+
+  /**
    * Get cached schema
    */
   protected async _getSchema(): Promise<TableSchema> {
     if (!this._schema) {
-      const modelCtor = this.constructor as typeof Model
-      this._schema = await SchemaRegistry.getInstance().get(modelCtor.table)
+      const modelCtor = this.constructor as any
+      const connection = DB.connection(modelCtor.connection)
+      const table = modelCtor.getTable()
+
+      // Fast path for non-SQL drivers
+      if (
+        connection.getDriver().getDriverName() === 'mongodb' ||
+        connection.getDriver().getDriverName() === 'redis'
+      ) {
+        return {
+          table: table,
+          columns: new Map(),
+          primaryKey: [modelCtor.primaryKey],
+          capturedAt: Date.now(),
+        }
+      }
+
+      this._schema = await SchemaRegistry.getInstance().get(table)
     }
     return this._schema
   }
@@ -518,12 +559,13 @@ export abstract class Model {
     localKey?: string
   ) {
     const modelCtor = this.constructor as typeof Model
-    const fk = foreignKey ?? `${modelCtor.table.replace(/s$/, '')}_id`
+    const table = modelCtor.getTable()
+    const fk = foreignKey ?? `${table.replace(/s$/, '')}_id`
     const lk = localKey ?? modelCtor.primaryKey
     const localValue = this._attributes[lk]
 
     const connection = DB.connection(related.connection)
-    const builder = connection.table<ModelAttributes>(related.table).where(fk, localValue)
+    const builder = connection.table<ModelAttributes>(related.getTable()).where(fk, localValue)
 
     // Wrap get to hydrate
     const originalGet = builder.get.bind(builder)
@@ -558,12 +600,13 @@ export abstract class Model {
     foreignKey?: string,
     ownerKey?: string
   ) {
-    const fk = foreignKey ?? `${related.table.replace(/s$/, '')}_id`
+    const table = related.getTable()
+    const fk = foreignKey ?? `${table.replace(/s$/, '')}_id`
     const ok = ownerKey ?? related.primaryKey
     const foreignValue = this._attributes[fk]
 
     const connection = DB.connection(related.connection)
-    const builder = connection.table<ModelAttributes>(related.table).where(ok, foreignValue)
+    const builder = connection.table<ModelAttributes>(table).where(ok, foreignValue)
 
     // Wrap first to hydrate
     const originalFirst = builder.first.bind(builder)
@@ -591,8 +634,10 @@ export abstract class Model {
     relatedKey?: string
   ): Promise<R[]> {
     const modelCtor = this.constructor as typeof Model
-    const fpk = foreignPivotKey ?? `${modelCtor.table.replace(/s$/, '')}_id`
-    const rpk = relatedPivotKey ?? `${related.table.replace(/s$/, '')}_id`
+    const table = modelCtor.getTable()
+    const relatedTable = related.getTable()
+    const fpk = foreignPivotKey ?? `${table.replace(/s$/, '')}_id`
+    const rpk = relatedPivotKey ?? `${relatedTable.replace(/s$/, '')}_id`
     const lk = localKey ?? modelCtor.primaryKey
     const rk = relatedKey ?? related.primaryKey
     const localValue = this._attributes[lk]
@@ -610,7 +655,7 @@ export abstract class Model {
     }
 
     // Get related models
-    const rows = await connection.table<ModelAttributes>(related.table).whereIn(rk, pivots).get()
+    const rows = await connection.table<ModelAttributes>(relatedTable).whereIn(rk, pivots).get()
 
     return rows.map((row) => related.hydrate<R>(row)) as R[]
   }
@@ -635,7 +680,8 @@ export abstract class Model {
     localKey?: string
   ): AsyncGenerator<R[], void, unknown> {
     const modelCtor = this.constructor as typeof Model
-    const fk = foreignKey ?? `${modelCtor.table.replace(/s$/, '')}_id`
+    const table = modelCtor.getTable()
+    const fk = foreignKey ?? `${table.replace(/s$/, '')}_id`
     const lk = localKey ?? modelCtor.primaryKey
     const localValue = this._attributes[lk]
 
@@ -644,7 +690,7 @@ export abstract class Model {
 
     while (true) {
       const rows = await connection
-        .table<ModelAttributes>(related.table)
+        .table<ModelAttributes>(related.getTable())
         .where(fk, localValue)
         .orderBy(related.primaryKey)
         .limit(chunkSize)
@@ -702,7 +748,30 @@ export abstract class Model {
     // Trigger creating event
     await this.emit('creating')
 
-    const result = await connection.table<ModelAttributes>(modelCtor.table).insert(this._attributes)
+    // Handle Timestamps
+    if (modelCtor.timestamps) {
+      const now = new Date()
+      if (!this._attributes[modelCtor.createdAtColumn]) {
+        this._setAttribute(modelCtor.createdAtColumn, now)
+      }
+      if (!this._attributes[modelCtor.updatedAtColumn]) {
+        this._setAttribute(modelCtor.updatedAtColumn, now)
+      }
+    }
+
+    // Handle @column(autoCreate)
+    const columns = (modelCtor as any)[COLUMN_KEY]
+    if (columns) {
+      for (const [prop, options] of Object.entries(columns)) {
+        if ((options as any).autoCreate && !this._attributes[prop]) {
+          this._setAttribute(prop, new Date())
+        }
+      }
+    }
+
+    const result = await connection
+      .table<ModelAttributes>(modelCtor.getTable())
+      .insert(this._attributes)
 
     // Set primary key from result
     if (Array.isArray(result) && result.length > 0) {
@@ -735,12 +804,30 @@ export abstract class Model {
     // Trigger updating event
     await this.emit('updating')
 
+    // Handle Timestamps
+    if (modelCtor.timestamps) {
+      this._setAttribute(modelCtor.updatedAtColumn, new Date())
+    }
+
+    // Handle @column(autoUpdate)
+    const columns = (modelCtor as any)[COLUMN_KEY]
+    if (columns) {
+      for (const [prop, options] of Object.entries(columns)) {
+        if ((options as any).autoUpdate) {
+          this._setAttribute(prop, new Date())
+        }
+      }
+    }
+
     const dirty = this.getDirty()
     if (Object.keys(dirty).length === 0) {
       return this // Nothing to update
     }
 
-    await connection.table(modelCtor.table).where(modelCtor.primaryKey, this.getKey()).update(dirty)
+    await connection
+      .table(modelCtor.getTable())
+      .where(modelCtor.primaryKey, this.getKey())
+      .update(dirty)
 
     this._dirtyTracker.sync(this._attributes)
 
@@ -772,12 +859,11 @@ export abstract class Model {
     } else {
       const connection = DB.connection(modelCtor.connection)
       const affected = await connection
-        .table(modelCtor.table)
+        .table(modelCtor.getTable())
         .where(modelCtor.primaryKey, this.getKey())
         .delete()
       result = affected > 0
     }
-
     if (result) {
       this._exists = !softDeletes
       await this.emit('deleted')
@@ -809,7 +895,7 @@ export abstract class Model {
     const modelCtor = this.constructor as any
     const connection = DB.connection(modelCtor.connection)
     const affected = await connection
-      .table(modelCtor.table)
+      .table(modelCtor.getTable())
       .where(modelCtor.primaryKey, this.getKey())
       .forceDelete()
 
@@ -866,7 +952,7 @@ export abstract class Model {
     const connection = DB.connection(modelCtor.connection)
 
     const row = await connection
-      .table<ModelAttributes>(modelCtor.table)
+      .table<ModelAttributes>(modelCtor.getTable())
       .where(modelCtor.primaryKey, this.getKey())
       .first()
 
@@ -883,6 +969,14 @@ export abstract class Model {
   // ============================================================================
 
   /**
+   * Get the first record
+   */
+  static async first<T extends Model>(this: ModelConstructor<T> & typeof Model): Promise<T | null> {
+    const result = await this.query().first()
+    return result as T | null
+  }
+
+  /**
    * Find a model by primary key
    */
   static async find<T extends Model>(
@@ -892,7 +986,7 @@ export abstract class Model {
     const connection = DB.connection(this.connection)
 
     const row = await connection
-      .table<ModelAttributes>(this.table)
+      .table<ModelAttributes>(this.getTable())
       .where(this.primaryKey, key)
       .first()
 
@@ -924,7 +1018,7 @@ export abstract class Model {
     const connection = DB.connection(this.connection)
 
     const rows = await connection
-      .table<ModelAttributes>(this.table)
+      .table<ModelAttributes>(this.getTable())
       .limit(1000) // Auto-chunking defense
       .get()
 
@@ -973,7 +1067,7 @@ export abstract class Model {
 
     while (true) {
       const rows = await connection
-        .table<ModelAttributes>(this.table)
+        .table<ModelAttributes>(this.getTable())
         .orderBy(this.primaryKey)
         .limit(chunkSize)
         .offset(offset)
@@ -1016,7 +1110,7 @@ export abstract class Model {
 
     while (true) {
       const rows = await connection
-        .table<ModelAttributes>(this.table)
+        .table<ModelAttributes>(this.getTable())
         .orderBy(this.primaryKey) // Deterministic ordering
         .limit(chunkSize)
         .offset(offset)
@@ -1024,6 +1118,11 @@ export abstract class Model {
 
       if (rows.length === 0) {
         break
+      }
+
+      // Log progress for large streams
+      if (offset > 0 && offset % 5000 === 0) {
+        process.stdout.write(` [${offset}...] `)
       }
 
       yield rows.map((row) => this.hydrate<T>(row))
@@ -1050,7 +1149,10 @@ export abstract class Model {
    */
   static query<T extends Model>(this: ModelConstructor<T> & typeof Model) {
     const connection = DB.connection(this.connection)
-    const builder = connection.table<ModelAttributes>(this.table)
+    const builder = connection.table<ModelAttributes>(this.getTable())
+
+    // Attach model context
+    ;(builder as any).setModel(this)
 
     // Check for Soft Deletes
     const softDeletes = (this as any)[SOFT_DELETES_KEY]
@@ -1064,6 +1166,12 @@ export abstract class Model {
     const originalGet = builder.get.bind(builder)
     ;(builder as unknown as { get: () => Promise<T[]> }).get = async (): Promise<T[]> => {
       const rows = await originalGet()
+
+      // Fast Path: Skip hydration if read-only
+      if ((builder as any).getIsReadOnly?.()) {
+        return rows as unknown as T[]
+      }
+
       const models = rows.map((row) => this.hydrate<T>(row)) as unknown as T[]
 
       // Handle eager loading
@@ -1083,6 +1191,11 @@ export abstract class Model {
         const row = await originalFirst()
         if (!row) {
           return null
+        }
+
+        // Fast Path: Skip hydration if read-only
+        if ((builder as any).getIsReadOnly?.()) {
+          return row as unknown as T
         }
 
         const model = this.hydrate<T>(row)
@@ -1138,7 +1251,8 @@ export abstract class Model {
    */
   static async count(this: ModelConstructor<Model> & typeof Model): Promise<number> {
     const connection = DB.connection(this.connection)
-    const result = await connection.table(this.table).count()
+    const table = this.tableName || this.table
+    const result = await connection.table(table).count()
     return typeof result === 'number' ? result : 0
   }
 
@@ -1166,6 +1280,9 @@ export abstract class Model {
 
     // 1. Process attributes (trigger accessors)
     for (const key of Object.keys(attributes)) {
+      if (key.startsWith('_')) {
+        continue
+      }
       result[key] = (this as any)[key]
     }
 

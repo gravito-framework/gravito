@@ -2,167 +2,140 @@
 
 > The Standard Database Orbit - Custom Query Builder & ORM for Gravito
 
-**完全自主開發的資料庫查詢建構器**，對標 Laravel 的 DB Facade，提供流暢的查詢語法。
+**@gravito/atlas** is a high-performance, developer-centric database toolkit for the Gravito ecosystem. It provides a fluent Query Builder, a robust Active Record ORM, and database versioning tools inspired by the best patterns of Laravel and Drizzle.
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Performance](https://img.shields.io/badge/performance-40k--models/sec-brightgreen)](docs/ATLAS_PERFORMANCE_WHITEPAPER.md)
 
 ## 📦 Installation
 
 ```bash
 bun add @gravito/atlas
 
-# 安裝對應的資料庫驅動 (按需)
-bun add pg          # PostgreSQL
-# bun add mysql2    # MySQL/MariaDB (coming soon)
-# bun add better-sqlite3  # SQLite (coming soon)
+# Install the driver for your database
+bun add pg              # PostgreSQL
+bun add mysql2          # MySQL / MariaDB
+bun add better-sqlite3  # SQLite (for non-Bun environments)
 ```
 
 ## 🚀 Quick Start
 
+### 1. Configuration
+
 ```typescript
 import { DB } from '@gravito/atlas'
 
-// 1. 配置連線
-DB.addConnection('default', {
-  driver: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  database: 'myapp',
-  username: 'postgres',
-  password: 'secret'
+DB.configure({
+  default: 'postgres',
+  connections: {
+    postgres: {
+      driver: 'postgres',
+      host: 'localhost',
+      database: 'myapp',
+      username: 'postgres',
+      password: 'password'
+    }
+  }
 })
+```
 
-// 2. 查詢資料
+### 2. Using Query Builder
+
+```typescript
 const users = await DB.table('users')
   .where('status', 'active')
+  .where('age', '>', 18)
   .orderBy('created_at', 'desc')
   .limit(10)
   .get()
 ```
 
-## ✨ Features
-
-### Query Builder
+### 3. Using Active Record ORM
 
 ```typescript
-// SELECT with conditions
-const users = await DB.table('users')
-  .where('status', 'active')
-  .where('age', '>', 18)
-  .whereIn('role', ['admin', 'moderator'])
-  .whereNull('deleted_at')
-  .get()
+import { Model, column, HasMany } from '@gravito/atlas'
 
-// INSERT
-await DB.table('users').insert({
-  name: 'John Doe',
-  email: 'john@example.com'
-})
+class User extends Model {
+  static table = 'users'
 
-// UPDATE
-await DB.table('users')
-  .where('id', 1)
-  .update({ name: 'Jane Doe' })
+  @column({ isPrimary: true })
+  declare id: number
 
-// DELETE
-await DB.table('users')
-  .where('id', 1)
-  .delete()
+  @column()
+  declare email: string
+
+  @HasMany(() => Post)
+  declare posts: Post[]
+}
+
+// Find and Update
+const user = await User.find(1)
+user.email = 'new@example.com'
+await user.save()
+
+// Eager Loading
+const usersWithPosts = await User.with('posts').get()
 ```
 
-### JOINs
+## ✨ Core Features
 
+### 🛡️ Secure by Default
+Built-in protection against SQL injection via **Auto-Parameterization**. All user inputs are treated as bindings, never interpolated.
+
+### 🧠 Memory Safe Streams
+Handle millions of records without heap overflows using our cursor-based streaming API.
 ```typescript
-const posts = await DB.table('posts')
-  .join('users', 'posts.user_id', '=', 'users.id')
-  .select('posts.title', 'users.name as author')
-  .get()
+for await (const users of User.cursor(500)) {
+  for (const user of users) {
+    await process(user)
+  }
+}
 ```
 
-### Aggregates
-
+### 🛠️ Schema & Migrations
+Manage your database versioning with a familiar, expressive syntax.
 ```typescript
-const count = await DB.table('users').count()
-const total = await DB.table('orders').sum('amount')
-const avg = await DB.table('products').avg('price')
-```
+import { Schema } from '@gravito/atlas'
 
-### Pagination
-
-```typescript
-const result = await DB.table('users').paginate(10, 1)
-// { data: [...], pagination: { page, perPage, total, totalPages, hasNext, hasPrev } }
-```
-
-### Transactions
-
-```typescript
-await DB.transaction(async (db) => {
-  await db.table('accounts').where('id', 1).decrement('balance', 100)
-  await db.table('accounts').where('id', 2).increment('balance', 100)
+await Schema.create('users', (table) => {
+  table.id()
+  table.string('email').unique()
+  table.json('settings').nullable()
+  table.timestamps()
 })
 ```
 
-### Raw SQL
+### 💻 Command Line Interface (Orbit)
+Accelerate development with built-in scaffolding.
+```bash
+# Generate a model
+bun orbit make:model User
 
-```typescript
-const results = await DB.raw('SELECT * FROM users WHERE id = $1', [1])
+# Generate a migration
+bun orbit make:migration create_users_table
+
+# Run migrations
+bun orbit migrate
 ```
 
 ## 🗄️ Supported Databases
 
-| Database | Status |
-|----------|--------|
-| PostgreSQL | ✅ Supported |
-| MySQL | 🔜 Coming Soon |
-| MariaDB | 🔜 Coming Soon |
-| SQLite | 🔜 Coming Soon |
+| Database | Status | Driver |
+|----------|--------|--------|
+| **PostgreSQL** | ✅ Supported | `pg` |
+| **MySQL** | ✅ Supported | `mysql2` |
+| **MariaDB** | ✅ Supported | `mysql2` |
+| **SQLite** | ✅ Supported | `bun:sqlite` / `better-sqlite3` |
 
-## 📚 API Reference
+## 📊 Performance
 
-### DB Facade
+Atlas is designed for the edge. In our benchmarks, it achieves:
+*   **1.1M+** Raw reads per second.
+*   **42,000+** Full Active Record hydrations per second.
+*   **Constant memory profile** during massive data streams.
 
-| Method | Description |
-|--------|-------------|
-| `DB.addConnection(name, config)` | 添加資料庫連線 |
-| `DB.table(name)` | 取得 Query Builder |
-| `DB.raw(sql, bindings)` | 執行原生 SQL |
-| `DB.transaction(callback)` | 執行事務 |
-| `DB.connection(name)` | 取得指定連線 |
-
-### Query Builder
-
-| Method | Description |
-|--------|-------------|
-| `select(...columns)` | 選擇欄位 |
-| `where(column, operator?, value)` | WHERE 條件 |
-| `whereIn(column, values)` | WHERE IN |
-| `whereNull(column)` | WHERE IS NULL |
-| `join(table, first, operator, second)` | INNER JOIN |
-| `orderBy(column, direction?)` | ORDER BY |
-| `groupBy(...columns)` | GROUP BY |
-| `limit(n)` | LIMIT |
-| `offset(n)` | OFFSET |
-| `get()` | 執行並取得結果 |
-| `first()` | 取得第一筆 |
-| `find(id)` | 依 ID 查詢 |
-| `count()` | 計數 |
-| `insert(data)` | 插入資料 |
-| `update(data)` | 更新資料 |
-| `delete()` | 刪除資料 |
-| `paginate(perPage, page)` | 分頁 |
-
-## 🛠️ Development
-
-```bash
-# Build
-bun run build
-
-# Test
-bun test
-
-# Type check
-bun run typecheck
-```
+[Read the full Performance Whitepaper](../../docs/ATLAS_PERFORMANCE_WHITEPAPER.md)
 
 ## 📄 License
 
-MIT
+MIT © Gravito Framework

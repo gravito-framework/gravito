@@ -57,7 +57,7 @@ import { LocaleSwitcher } from '@gravito/freeze-vue'
 <template>
   <header>
     <LocaleSwitcher locale="en">English</LocaleSwitcher>
-    <LocaleSwitcher locale="zh">中文</LocaleSwitcher>
+    <LocaleSwitcher locale="zh">Chinese</LocaleSwitcher>
   </header>
 </template>
 ```
@@ -77,7 +77,7 @@ const { isStatic, locale, getLocalizedPath, navigateToLocale } = useFreeze()
     <p>Mode: {{ isStatic ? 'Static' : 'Dynamic' }}</p>
     <p>Locale: {{ locale }}</p>
     <a :href="getLocalizedPath('/about')">About</a>
-    <button @click="navigateToLocale('zh')">Switch to 中文</button>
+    <button @click="navigateToLocale('zh')">Switch to Chinese</button>
   </div>
 </template>
 ```
@@ -114,7 +114,7 @@ Smart link component.
 Locale switching link.
 
 ```vue
-<LocaleSwitcher locale="zh">中文</LocaleSwitcher>
+<LocaleSwitcher locale="zh">Chinese</LocaleSwitcher>
 ```
 
 | Prop | Type | Description |

@@ -425,7 +425,7 @@ const handleSubmit = () => {
     <span v-if="form.errors.content">{{ form.errors.content }}</span>
     
     <button type="submit" :disabled="form.processing">
-      {{ form.processing ? '提交中...' : '發布' }}
+      {{ form.processing ? '提交中...' : '發佈' }}
     </button>
   </form>
 </template>

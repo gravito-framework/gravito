@@ -1,0 +1,21 @@
+import { column, HasMany, Model } from '@gravito/atlas'
+import Post from './Post.js' // Use .js extension for ESM if needed, or ts-node handles it. Bun handles ts.
+
+export default class User extends Model {
+  static tableName = 'users'
+
+  @column({ isPrimary: true })
+  declare id: number
+
+  @column()
+  declare name: string
+
+  @column()
+  declare email: string
+
+  @column()
+  declare password: string
+
+  @HasMany(() => Post)
+  declare posts: Post[]
+}

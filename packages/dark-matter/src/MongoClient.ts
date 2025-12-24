@@ -159,7 +159,6 @@ export class MongoClient implements MongoClientContract {
 
   private async loadMongoDBModule(): Promise<MongoDBModule> {
     try {
-      // @ts-expect-error - mongodb is an optional peer dependency
       const mongodb = await import('mongodb')
       return mongodb as unknown as MongoDBModule
     } catch {

@@ -1,27 +1,27 @@
 # @gravito/radiance
 
-輕量、高效的廣播系統，支援多種驅動（Pusher、Ably、Redis、WebSocket）。借鑑 Laravel 架構但保持 Gravito 的核心價值（高效能、低耗、輕量、AI 友善）。
+Lightweight, high-performance broadcasting for Gravito with multiple drivers (Pusher, Ably, Redis, WebSocket).
 
-> **狀態**：v0.1.0 - 核心功能已完成，支援多種廣播驅動
+**Status**: v0.1.0 - core features complete with multiple broadcast drivers.
 
-## 特性
+## Features
 
-- **零運行時開銷**：純類型包裝，直接委派給驅動
-- **多驅動支援**：Pusher、Ably、Redis、WebSocket
-- **完全模組化**：按需安裝驅動，核心包極小
-- **與 Events 整合**：事件可實作 `ShouldBroadcast` 自動廣播
-- **頻道授權**：支援私有頻道和存在頻道授權
-- **AI 友善**：完整的型別推導、清晰的 JSDoc、直觀的 API
+- **Zero runtime overhead**: Pure type wrappers that delegate to drivers
+- **Multi-driver support**: Pusher, Ably, Redis, WebSocket
+- **Modular**: Install only the driver you need
+- **Events integration**: Events can implement `ShouldBroadcast`
+- **Channel authorization**: Private and presence channels supported
+- **AI-friendly**: Strong typing, clear JSDoc, and predictable APIs
 
-## 安裝
+## Installation
 
 ```bash
 bun add @gravito/radiance
 ```
 
-## 快速開始
+## Quick Start
 
-### 1. 配置 OrbitRadiance
+### 1. Configure OrbitRadiance
 
 ```typescript
 import { PlanetCore } from 'gravito-core'
@@ -38,7 +38,7 @@ const core = await PlanetCore.boot({
         cluster: 'mt1',
       },
       authorizeChannel: async (channel, socketId, userId) => {
-        // 實作頻道授權邏輯
+        // Implement channel auth logic here
         return true
       },
     }),
@@ -46,7 +46,7 @@ const core = await PlanetCore.boot({
 })
 ```
 
-### 2. 創建可廣播事件
+### 2. Create a broadcastable event
 
 ```typescript
 import { Event, ShouldBroadcast } from 'gravito-core'
@@ -75,14 +75,13 @@ class OrderShipped extends Event implements ShouldBroadcast {
 }
 ```
 
-### 3. 分發事件（自動廣播）
+### 3. Dispatch events (auto broadcast)
 
 ```typescript
-// 分發事件時會自動廣播
 await core.events.dispatch(new OrderShipped(order))
 ```
 
-### 4. 手動廣播
+### 4. Manual broadcast
 
 ```typescript
 const broadcast = c.get('broadcast') as BroadcastManager
@@ -95,7 +94,7 @@ await broadcast.broadcast(
 )
 ```
 
-## 驅動
+## Drivers
 
 ### Pusher
 
@@ -106,8 +105,8 @@ OrbitRadiance.configure({
     appId: 'your-app-id',
     key: 'your-key',
     secret: 'your-secret',
-    cluster: 'mt1', // 可選
-    useTLS: true, // 可選
+    cluster: 'mt1',
+    useTLS: true,
   },
 })
 ```
@@ -128,19 +127,17 @@ OrbitRadiance.configure({
 ```typescript
 import { RedisDriver } from '@gravito/radiance'
 
-// 需要先設置 Redis 客戶端
 const redisDriver = new RedisDriver({
   url: 'redis://localhost:6379',
 })
 
-// 設置 Redis 客戶端
 redisDriver.setRedisClient(redisClient)
 
 OrbitRadiance.configure({
   driver: 'redis',
   config: {
     url: 'redis://localhost:6379',
-    keyPrefix: 'gravito:broadcast:', // 可選
+    keyPrefix: 'gravito:broadcast:',
   },
 })
 ```
@@ -152,11 +149,9 @@ OrbitRadiance.configure({
   driver: 'websocket',
   config: {
     getConnections: () => {
-      // 返回所有 WebSocket 連接
       return Array.from(websocketConnections.values())
     },
     filterConnectionsByChannel: (channel) => {
-      // 根據頻道過濾連接（可選）
       return Array.from(websocketConnections.values()).filter(
         (conn) => conn.subscribedChannels.includes(channel)
       )
@@ -165,9 +160,9 @@ OrbitRadiance.configure({
 })
 ```
 
-## 頻道類型
+## Channel Types
 
-### 公開頻道
+### Public
 
 ```typescript
 import { PublicChannel } from '@gravito/radiance'
@@ -179,7 +174,7 @@ class PublicEvent extends Event implements ShouldBroadcast {
 }
 ```
 
-### 私有頻道
+### Private
 
 ```typescript
 import { PrivateChannel } from '@gravito/radiance'
@@ -191,7 +186,7 @@ class PrivateEvent extends Event implements ShouldBroadcast {
 }
 ```
 
-### 存在頻道
+### Presence
 
 ```typescript
 import { PresenceChannel } from '@gravito/radiance'
@@ -203,16 +198,15 @@ class PresenceEvent extends Event implements ShouldBroadcast {
 }
 ```
 
-## 頻道授權
+## Channel Authorization
 
-私有頻道和存在頻道需要授權。在配置中提供 `authorizeChannel` 回調：
+Private and presence channels require authorization.
 
 ```typescript
 OrbitRadiance.configure({
   driver: 'pusher',
   config: { /* ... */ },
   authorizeChannel: async (channel, socketId, userId) => {
-    // 檢查使用者是否有權限存取此頻道
     if (channel.startsWith('private-user.')) {
       const channelUserId = channel.replace('private-user.', '')
       return userId?.toString() === channelUserId
@@ -222,26 +216,25 @@ OrbitRadiance.configure({
 })
 ```
 
-## API 參考
+## API Reference
 
 ### BroadcastManager
 
-#### 方法
+#### Methods
 
-- `broadcast(event, channel, data, eventName): Promise<void>` - 廣播事件
-- `authorizeChannel(channel, socketId, userId): Promise<{ auth, channel_data? } | null>` - 授權頻道存取
-- `setDriver(driver: BroadcastDriver): void` - 設置廣播驅動
-- `setAuthCallback(callback: ChannelAuthorizationCallback): void` - 設置授權回調
+- `broadcast(event, channel, data, eventName): Promise<void>` - Broadcast an event
+- `authorizeChannel(channel, socketId, userId): Promise<{ auth, channel_data? } | null>` - Authorize channel access
+- `setDriver(driver: BroadcastDriver): void` - Set the broadcast driver
+- `setAuthCallback(callback: ChannelAuthorizationCallback): void` - Set the auth callback
 
 ### ShouldBroadcast
 
-事件實作此介面可自動廣播：
+Events implementing `ShouldBroadcast` will be broadcast automatically:
 
-- `broadcastOn(): string | Channel` - 指定廣播頻道（必須實作）
-- `broadcastWith?(): Record<string, unknown>` - 指定廣播資料（可選）
-- `broadcastAs?(): string` - 指定廣播事件名稱（可選）
+- `broadcastOn(): string | Channel` - Broadcast channel (required)
+- `broadcastWith?(): Record<string, unknown>` - Payload (optional)
+- `broadcastAs?(): string` - Event name (optional)
 
-## 授權
+## License
 
 MIT © Carl Lee
-

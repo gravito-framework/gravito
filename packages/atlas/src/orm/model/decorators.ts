@@ -13,6 +13,7 @@ export interface SoftDeletesOptions {
  * Meta keys for decorators
  */
 export const SOFT_DELETES_KEY = Symbol('soft_deletes')
+export const COLUMN_KEY = Symbol('column')
 
 /**
  * Soft Deletes Decorator
@@ -32,4 +33,33 @@ export function SoftDeletes(options: SoftDeletesOptions = {}): ClassDecorator {
 
     // Add boot method logic if needed, or we'll check this in Model.query()
   }
+}
+
+/**
+ * Column Decorator Options
+ */
+export interface ColumnOptions {
+  isPrimary?: boolean
+  autoCreate?: boolean
+  autoUpdate?: boolean
+  name?: string
+  serializeAs?: string | null // Name in JSON or null to hide
+}
+
+/**
+ * Column Decorator
+ * Marks a property as a database column
+ */
+export function column(options: ColumnOptions = {}): PropertyDecorator {
+  return (target: any, propertyKey: string | symbol) => {
+    const ctor = target.constructor
+    if (!ctor[COLUMN_KEY]) {
+      ctor[COLUMN_KEY] = {}
+    }
+    ctor[COLUMN_KEY][propertyKey] = options
+  }
+}
+// Add type-specific helpers (chaining/static methods style)
+;(column as any).dateTime = (options: ColumnOptions = {}) => {
+  return column(options)
 }

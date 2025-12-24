@@ -508,7 +508,6 @@ export class MongoQueryBuilder<T = Document> implements MongoCollectionContract<
   }
 
   private async loadObjectId(): Promise<{ ObjectId: MongoObjectIdConstructor }> {
-    // @ts-expect-error - mongodb is optional peer dependency
     const mongodb = await import('mongodb')
     return mongodb
   }

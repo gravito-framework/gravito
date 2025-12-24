@@ -21,14 +21,13 @@ export abstract class SchemaGrammar {
    */
   compileCreate(blueprint: Blueprint): string {
     const columns = blueprint.getColumns()
-    const columnsSql = columns.map((col) => this.compileColumn(col)).join(',\n  ')
+    const columnsSql = columns.map((col) => this.compileColumn(col, blueprint)).join(',\n  ')
 
-    // Primary key constraints
-    const primaryCols = columns.filter((col) => col.isPrimary())
-    const primarySql =
-      primaryCols.length > 1
-        ? `,\n  PRIMARY KEY (${primaryCols.map((c) => this.wrapColumn(c.name)).join(', ')})`
-        : ''
+    // Primary key constraints at the bottom if multiple
+    const primaryCols = blueprint.getColumns().filter((col) => col.isPrimary())
+    const primarySql = this.shouldAddPrimaryAtBottom(blueprint)
+      ? `,\n  PRIMARY KEY (${primaryCols.map((c) => this.wrapColumn(c.name)).join(', ')})`
+      : ''
 
     // Foreign key constraints
     const fks = blueprint.getForeignKeys()
@@ -61,7 +60,7 @@ export abstract class SchemaGrammar {
 
     // Add columns
     for (const column of blueprint.getColumns()) {
-      statements.push(`ALTER TABLE ${table} ADD COLUMN ${this.compileColumn(column)}`)
+      statements.push(`ALTER TABLE ${table} ADD COLUMN ${this.compileColumn(column, blueprint)}`)
     }
 
     // Drop columns
@@ -92,9 +91,17 @@ export abstract class SchemaGrammar {
   // ============================================================================
 
   /**
+   * Determine if primary key should be added at the bottom of the statement
+   */
+  protected shouldAddPrimaryAtBottom(blueprint: Blueprint): boolean {
+    const primaryCols = blueprint.getColumns().filter((c) => c.isPrimary())
+    return primaryCols.length > 1
+  }
+
+  /**
    * Compile a column definition
    */
-  protected compileColumn(column: ColumnDefinition): string {
+  protected compileColumn(column: ColumnDefinition, _blueprint: Blueprint): string {
     const parts: string[] = [this.wrapColumn(column.name), this.compileType(column)]
 
     // Modifiers
@@ -103,7 +110,10 @@ export abstract class SchemaGrammar {
     }
 
     if (column.isAutoIncrement()) {
-      parts.push(this.compileAutoIncrement())
+      const autoInc = this.compileAutoIncrement()
+      if (autoInc && autoInc.length > 0) {
+        parts.push(autoInc)
+      }
     }
 
     if (column.isNullable()) {
@@ -116,8 +126,13 @@ export abstract class SchemaGrammar {
       parts.push(`DEFAULT ${this.compileDefault(column.getDefault())}`)
     }
 
-    if (column.isPrimary() && !column.isAutoIncrement()) {
-      parts.push('PRIMARY KEY')
+    if (column.isPrimary() && !this.shouldAddPrimaryAtBottom(_blueprint)) {
+      // If not multiple PKs, add it inline
+      // Note: SQLite and others might already have added it via compileAutoIncrement
+      const currentSql = parts.join(' ').toUpperCase()
+      if (!currentSql.includes('PRIMARY KEY')) {
+        parts.push('PRIMARY KEY')
+      }
     }
 
     if (column.isUnique()) {
@@ -169,9 +184,6 @@ export abstract class SchemaGrammar {
   // Index Compilation
   // ============================================================================
 
-  /**
-   * Compile CREATE INDEX statement
-   */
   /**
    * Compile CREATE INDEX statement
    */
