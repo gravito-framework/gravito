@@ -58,7 +58,7 @@ function Header() {
   return (
     <header>
       <LocaleSwitcher locale="en">English</LocaleSwitcher>
-      <LocaleSwitcher locale="zh">中文</LocaleSwitcher>
+      <LocaleSwitcher locale="zh">Chinese</LocaleSwitcher>
     </header>
   )
 }
@@ -78,7 +78,7 @@ function CustomComponent() {
       <p>Mode: {isStatic ? 'Static' : 'Dynamic'}</p>
       <p>Locale: {locale}</p>
       <a href={getLocalizedPath('/about')}>About</a>
-      <button onClick={() => navigateToLocale('zh')}>Switch to 中文</button>
+    <button onClick={() => navigateToLocale('zh')}>Switch to Chinese</button>
     </div>
   )
 }
@@ -124,7 +124,7 @@ Smart link component.
 Locale switching link.
 
 ```tsx
-<LocaleSwitcher locale="zh">中文</LocaleSwitcher>
+<LocaleSwitcher locale="zh">Chinese</LocaleSwitcher>
 ```
 
 | Prop | Type | Description |

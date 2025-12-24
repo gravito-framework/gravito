@@ -1,23 +1,23 @@
 # @gravito/mass
 
-TypeBox-based validation for Gravito - High-performance schema validation with full TypeScript support.
+TypeBox-based validation for Gravito. High-performance schema validation with full TypeScript support.
 
-## 特色
+## Features
 
-- **高效能驗證**: 基於 TypeBox，比 Zod 更快的執行速度
-- **完整 TypeScript 支援**: 自動推導型別，無需手動定義
-- **Hono 整合**: 完美整合 Hono 的驗證中間件
-- **多種資料來源**: 支援 JSON、Query、Param、Form 驗證
+- **Fast validation**: TypeBox-powered validators with strong runtime performance
+- **Full TypeScript support**: Type inference without manual typings
+- **Hono integration**: Works seamlessly with Hono validation middleware
+- **Multiple sources**: Validate JSON, query, params, and form data
 
-## 安裝
+## Installation
 
 ```bash
 bun add @gravito/mass
 ```
 
-## 基本使用
+## Quick Start
 
-### JSON 驗證
+### JSON validation
 
 ```typescript
 import { Hono } from 'hono'
@@ -37,7 +37,7 @@ app.post('/login',
 )
 ```
 
-### Query 參數驗證
+### Query validation
 
 ```typescript
 app.get('/search',
@@ -52,7 +52,7 @@ app.get('/search',
 )
 ```
 
-### Route 參數驗證
+### Route param validation
 
 ```typescript
 app.get('/users/:id',
@@ -66,40 +66,33 @@ app.get('/users/:id',
 )
 ```
 
-## Schema 建構器
+## Schema Builder
 
-`Schema` 物件提供所有 TypeBox 的建構器：
+`Schema` exposes TypeBox constructors:
 
 ```typescript
 import { Schema } from '@gravito/mass'
 
-// 基本型別
 Schema.String()
 Schema.Number()
 Schema.Boolean()
 Schema.Array(Schema.String())
 
-// 物件
 Schema.Object({
   name: Schema.String(),
   age: Schema.Number()
 })
 
-// 選填欄位
 Schema.Optional(Schema.String())
-
-// 預設值
 Schema.String({ default: 'hello' })
-
-// 驗證規則
 Schema.String({ minLength: 2, maxLength: 100 })
 Schema.Number({ minimum: 0, maximum: 100 })
 Schema.String({ format: 'email' })
 ```
 
-## 與 Hono Client 整合
+## Hono Client Integration
 
-使用 `app.route()` 方法串接路由模組，可以獲得完整的型別推導：
+When you compose routes with `app.route()`, you get full type inference for the client:
 
 ```typescript
 // app.ts
@@ -113,8 +106,6 @@ export default app
 export type AppRoutes = typeof routes
 ```
 
-前端使用時可以獲得完整的型別提示：
-
 ```typescript
 // client.ts
 import { hc } from 'hono/client'
@@ -124,22 +115,16 @@ export const createClient = (baseUrl: string) => {
   return hc<AppRoutes>(baseUrl)
 }
 
-// 使用時有完整的型別提示
 const client = createClient('http://localhost:3000')
 const result = await client.api.users.login.$post({
   json: { username: 'user', password: 'pass' }
 })
 ```
 
-## 效能優勢
+## Performance Notes
 
-TypeBox 相較於 Zod 的優勢：
-
-- **編譯時驗證**: TypeBox 在編譯時生成驗證器，執行時效能更高
-- **更小的 bundle**: 產生的程式碼更小
-- **更好的型別推導**: 與 TypeScript 深度整合
+TypeBox generates validators at build-time for faster runtime performance, smaller bundles, and strong TypeScript inference.
 
 ## License
 
 MIT
-

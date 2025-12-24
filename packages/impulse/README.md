@@ -124,8 +124,8 @@ export class StoreUserRequest extends FormRequest {
   // Map field.code to custom message
   messages() {
     return {
-      'email.invalid_string': '請輸入有效的 Email 地址',
-      'name.too_small': '名稱至少需要 2 個字元',
+      'email.invalid_string': 'Please enter a valid email address',
+      'name.too_small': 'Name must be at least 2 characters',
     }
   }
 }
@@ -138,21 +138,21 @@ Implement `MessageProvider` for full localization:
 ```typescript
 import type { MessageProvider } from '@gravito/impulse'
 
-export class ChineseMessageProvider implements MessageProvider {
+export class CustomMessageProvider implements MessageProvider {
   getMessage(code: string, field: string, defaultMessage: string): string {
     const messages: Record<string, string> = {
-      'email.invalid_string': '電子郵件格式不正確',
-      'name.too_small': '名稱太短',
+      'email.invalid_string': 'Invalid email format',
+      'name.too_small': 'Name is too short',
     }
     return messages[`${field}.${code}`] ?? defaultMessage
   }
 
   getValidationFailedMessage(): string {
-    return '驗證失敗'
+    return 'Validation failed'
   }
 
   getUnauthorizedMessage(): string {
-    return '未授權'
+    return 'Unauthorized'
   }
 }
 
@@ -161,7 +161,7 @@ export class LocalizedRequest extends FormRequest {
   schema = z.object({ email: z.string().email() })
 
   options = {
-    messageProvider: new ChineseMessageProvider(),
+    messageProvider: new CustomMessageProvider(),
   }
 }
 ```

@@ -687,7 +687,7 @@ console.log(user.get('metadata'));          // object (已解析 JSON)
 - `'date'` - 轉 Date 物件
 - `'json'` - JSON 字串轉物件
 - `'array'` - 轉陣列
-- 自訂函數 - `(value: unknown) => unknown`
+- 自訂函式 - `(value: unknown) => unknown`
 
 ### 存取器和修改器（Accessors & Mutators）
 
@@ -1006,7 +1006,7 @@ gravito db:seed --class UsersSeeder
 在程式碼中：
 
 ```typescript
-// 定義 seed 函數
+// 定義 seed 函式
 ```
 
 ## 部署
@@ -1170,7 +1170,7 @@ const result = await db.raw
   .groupBy(users.id)
   .having(sql`count(${posts.id}) > 0`);
 
-// 使用 SQL 函數
+// 使用 SQL 函式
 import { sql, count } from 'drizzle-orm';
 
 const result = await db.raw

@@ -1,26 +1,26 @@
 # @gravito/flare
 
-輕量、高效的通知系統，支援多種通道（郵件、資料庫、廣播、Slack、SMS）。借鑑 Laravel 架構但保持 Gravito 的核心價值（高效能、低耗、輕量、AI 友善）。
+> Lightweight, high-performance notifications for Gravito with multi-channel delivery (mail, database, broadcast, Slack, SMS).
 
-> **狀態**：v0.1.0 - 核心功能已完成，支援多種通知通道
+**Status**: v0.1.0 - core features complete with multiple channel support.
 
-## 特性
+## Features
 
-- **零運行時開銷**：純類型包裝，直接委派給驅動
-- **多通道支援**：郵件、資料庫、廣播、Slack、SMS
-- **完全模組化**：按需安裝通道，核心包極小
-- **隊列化支援**：整合 `@gravito/stream`，支援異步發送
-- **AI 友善**：完整的型別推導、清晰的 JSDoc、直觀的 API
+- **Zero runtime overhead**: Pure type wrappers that delegate to channel drivers
+- **Multi-channel delivery**: Mail, database, broadcast, Slack, SMS
+- **Modular by design**: Install only the channels you need
+- **Queue support**: Works with `@gravito/stream` for async delivery
+- **AI-friendly**: Strong typing, clear JSDoc, and predictable APIs
 
-## 安裝
+## Installation
 
 ```bash
 bun add @gravito/flare
 ```
 
-## 快速開始
+## Quick Start
 
-### 1. 建立通知類別
+### 1. Create a notification
 
 ```typescript
 import { Notification } from '@gravito/flare'
@@ -56,7 +56,7 @@ class InvoicePaid extends Notification {
 }
 ```
 
-### 2. 配置 OrbitFlare
+### 2. Configure OrbitFlare
 
 ```typescript
 import { PlanetCore } from 'gravito-core'
@@ -82,23 +82,23 @@ const core = await PlanetCore.boot({
 })
 ```
 
-### 3. 發送通知
+### 3. Send a notification
 
 ```typescript
-// 在 Controller 中
+// In a controller
 const notifications = c.get('notifications') as NotificationManager
 
 await notifications.send(user, new InvoicePaid(invoice))
 ```
 
-### 4. 隊列化通知
+## Queueing Notifications
 
 ```typescript
 import { Notification, ShouldQueue } from '@gravito/flare'
 
 class SendEmailNotification extends Notification implements ShouldQueue {
   queue = 'notifications'
-  delay = 60 // 延遲 60 秒
+  delay = 60 // delay by 60 seconds
 
   via(user: Notifiable): string[] {
     return ['mail']
@@ -113,15 +113,14 @@ class SendEmailNotification extends Notification implements ShouldQueue {
   }
 }
 
-// 自動推送到隊列
 await notifications.send(user, new SendEmailNotification())
 ```
 
-## 通道
+## Channels
 
-### 郵件通道
+### Mail
 
-需要安裝 `@gravito/signal`：
+Requires `@gravito/signal`:
 
 ```typescript
 via(user: Notifiable): string[] {
@@ -138,9 +137,9 @@ toMail(user: Notifiable): MailMessage {
 }
 ```
 
-### 資料庫通道
+### Database
 
-需要資料庫服務支援：
+Requires database support:
 
 ```typescript
 via(user: Notifiable): string[] {
@@ -155,9 +154,9 @@ toDatabase(user: Notifiable): DatabaseNotification {
 }
 ```
 
-### 廣播通道
+### Broadcast
 
-需要安裝 `@gravito/radiance`：
+Requires `@gravito/radiance`:
 
 ```typescript
 via(user: Notifiable): string[] {
@@ -172,7 +171,7 @@ toBroadcast(user: Notifiable): BroadcastNotification {
 }
 ```
 
-### Slack 通道
+### Slack
 
 ```typescript
 via(user: Notifiable): string[] {
@@ -187,7 +186,7 @@ toSlack(user: Notifiable): SlackMessage {
 }
 ```
 
-### SMS 通道
+### SMS
 
 ```typescript
 via(user: Notifiable): string[] {
@@ -202,29 +201,28 @@ toSms(user: Notifiable): SmsMessage {
 }
 ```
 
-## API 參考
+## API Reference
 
 ### Notification
 
-所有通知都應該繼承 `Notification` 類別。
+Every notification should extend `Notification`.
 
-#### 方法
+#### Methods
 
-- `via(notifiable: Notifiable): string[]` - 指定通知通道（必須實作）
-- `toMail(notifiable: Notifiable): MailMessage` - 郵件訊息（可選）
-- `toDatabase(notifiable: Notifiable): DatabaseNotification` - 資料庫通知（可選）
-- `toBroadcast(notifiable: Notifiable): BroadcastNotification` - 廣播通知（可選）
-- `toSlack(notifiable: Notifiable): SlackMessage` - Slack 訊息（可選）
-- `toSms(notifiable: Notifiable): SmsMessage` - SMS 訊息（可選）
+- `via(notifiable: Notifiable): string[]` - Choose delivery channels (required)
+- `toMail(notifiable: Notifiable): MailMessage` - Mail payload (optional)
+- `toDatabase(notifiable: Notifiable): DatabaseNotification` - Database payload (optional)
+- `toBroadcast(notifiable: Notifiable): BroadcastNotification` - Broadcast payload (optional)
+- `toSlack(notifiable: Notifiable): SlackMessage` - Slack payload (optional)
+- `toSms(notifiable: Notifiable): SmsMessage` - SMS payload (optional)
 
 ### NotificationManager
 
-#### 方法
+#### Methods
 
-- `send(notifiable: Notifiable, notification: Notification): Promise<void>` - 發送通知
-- `channel(name: string, channel: NotificationChannel): void` - 註冊自訂通道
+- `send(notifiable: Notifiable, notification: Notification): Promise<void>` - Send notification
+- `channel(name: string, channel: NotificationChannel): void` - Register a custom channel
 
-## 授權
+## License
 
 MIT © Carl Lee
-

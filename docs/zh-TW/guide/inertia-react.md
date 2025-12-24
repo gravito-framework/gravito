@@ -438,7 +438,7 @@ function AdvancedForm() {
       {errors.content && <span>{errors.content}</span>}
       
       <button type="submit" disabled={processing}>
-        {processing ? '提交中...' : '發布'}
+        {processing ? '提交中...' : '發佈'}
       </button>
     </form>
   )

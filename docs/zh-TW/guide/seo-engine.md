@@ -12,7 +12,7 @@ Luminosity SEO 引擎可以根據您的應用規模與流量，設定為三種�
 |------|----------|--------------|
 | **`dynamic`** | 中小型網站 | **瞬時模式**：每次請求時即時生成，保證資料絕對最新。 |
 | **`cached`** | 高流量網站 | **發光模式**：將資料緩存在記憶體中，提供極速的存取回應。 |
-| **`incremental`**| 百萬級網址 | **恆星模式**：專為海量數據設計，具備最強穿透力。 |
+| **`incremental`**| 百萬級網址 | **恆星模式**：專為海量資料設計，具備最強穿透力。 |
 
 ---
 
@@ -116,12 +116,12 @@ export class PostController {
 當您需要處理數千萬個網址時，Luminosity 不僅僅是生成一個檔案，而是建立了一套完整的 **「Sitemap 生命週期管理系統」**。這套架構確保了從網站啟動到日後的每一天，都能維持恆星級的效能。
 
 ### 階段 1：從零到一的冷啟動 (Initial Cold Start)
-在首次啟動時，Luminosity 透過 **流式處理 (Streaming)** 避免內存崩潰。它不會一次將千萬筆數據加載到記憶體，而是像流水一樣，邊讀取資料庫邊將其寫入磁碟日誌。
+在首次啟動時，Luminosity 透過 **流式處理 (Streaming)** 避免內存崩潰。它不會一次將千萬筆資料加載到記憶體，而是像流水一樣，邊讀取資料庫邊將其寫入磁碟日誌。
 - **逐批處理**：利用 `batchSize` 進行分批讀取。
 - **磁碟固化**：每一批處理完畢後立即寫入磁碟，確保即使過程中斷也能從斷點恢復。
 
 ### 階段 2：日誌追加與固化存儲 (Log Persistence)
-一旦初始數據建立完畢，Luminosity 就轉入 **增量模式**。
+一旦初始資料建立完畢，Luminosity 就轉入 **增量模式**。
 - **追加式更新 (LSM-log)**：任何新的頁面或變動都會被視為一條「追加日誌」，直接寫入增量日誌檔。
 - **跳過掃描**：您不再需要為了增加一個網址而重新掃描整個資料庫，系統只關心那「少數的變動」。
 
@@ -129,8 +129,8 @@ export class PostController {
 `incremental.compactInterval` 控制著背景維護任務的頻率（例如每 24 小時）。在這段期間，系統會執行以下 **原子操作 (Atomic Operations)**：
 
 1.  **合併與去重 (Merge & Dedupe)**：將 `.jsonl` 日誌中的數萬條變更紀錄與主快照合併。若同一網址有多次變更（如 `add` -> `update` -> `remove`），只會保留最終狀態。
-2.  **日誌輪替 (Log Rotation)**：確認數據固化後，清空舊的日誌檔，防止硬碟空間無限膨脹。
-3.  **物理檔案發布 (Physical Emission)**：重新計算所有網址的分頁佈局，並生成靜態的 `sitemap-index.xml` 與 `sitemap-N.xml` (Gzip)。這意味著您的 Web Server (Nginx/CDN) 可以直接提供靜態檔案，**完全消耗零 CPU 資源**。
+2.  **日誌輪替 (Log Rotation)**：確認資料固化後，清空舊的日誌檔，防止硬碟空間無限膨脹。
+3.  **物理檔案發佈 (Physical Emission)**：重新計算所有網址的分頁佈局，並生成靜態的 `sitemap-index.xml` 與 `sitemap-N.xml` (Gzip)。這意味著您的 Web Server (Nginx/CDN) 可以直接提供靜態檔案，**完全消耗零 CPU 資源**。
 4.  **影子寫入與原子交換 (Shadow Swap)**：為了防止在寫入大檔案時發生並發讀取衝突，所有檔案會先寫入 `.shadow` 暫存區。生成完畢後，系統執行作業系統層級的 **原子重命名 (Atomic Rename)**，瞬間替換舊檔。這確保了訪客永遠不會讀取到「寫入中」或「損毀」的半成品。
 
 ### 🚀 千萬級抓取範例
@@ -182,11 +182,11 @@ export const seoConfig: SeoConfig = {
 
 ## 🔍 運作細節：存儲與水合 (Storage & Hydration)
 
-了解恆星級架構的底層行為，能讓您更安心地處理千萬級數據：
+了解恆星級架構的底層行為，能讓您更安心地處理千萬級資料：
 
 ### 1. 物理檔案存放在哪處？
 所有 Sitemap 的「狀態」都儲存在您設定的 `logDir` 中（預設建議為 `.gravito/seo`）。
-- **`sitemap.snapshot.json`**：這是您的數據「快照」，也是系統的主資料庫。
+- **`sitemap.snapshot.json`**：這是您的資料「快照」，也是系統的主資料庫。
 - **`sitemap.ops.jsonl`**：這是「追加日誌」，記錄了自上次壓縮後的所有變動。
 - **XML 分頁檔案**：由渲染器根據快照自動生成在公開目錄。
 
@@ -207,7 +207,7 @@ export const seoConfig: SeoConfig = {
 
 1.  **佈署只需一秒**：您不需要安裝 Redis、Kafka 或任何外部索引資料庫。只需將 `mode` 切換為 `incremental`，引擎就會自動在本地進行日誌管理。
 2.  **維運「設後不理」**：壓縮任務（Compaction）會由背景 Worker 自動執行，您不需要編寫 Cron Job，也不需要手動搬運檔案。
-3.  **無痛遷移**：當您的網站從 1,000 個網址成長到 1,000 萬個時，您的代碼 **不需要做任何變更**。Luminosity 會隨著您的數據規模自動進化。
+3.  **無痛遷移**：當您的網站從 1,000 個網址成長到 1,000 萬個時，您的代碼 **不需要做任何變更**。Luminosity 會隨著您的資料規模自動進化。
 
 ---
 
@@ -217,7 +217,7 @@ export const seoConfig: SeoConfig = {
 
 ### 1. 使用共享持久性磁碟 (Recommended)
 將 `logDir` 指向一個共享的網路文件系統，例如 AWS EFS、Google Cloud Filestore 或 K8s 的 Persistent Volume (PV)。
-- **優點**：所有容器實例共享同一個快照與日誌，保證數據一致性。
+- **優點**：所有容器實例共享同一個快照與日誌，保證資料一致性。
 - **配置範例 (Docker Compose)**：
   ```yaml
   services:
@@ -231,7 +231,7 @@ export const seoConfig: SeoConfig = {
   ```
 
 ### 2. 靜態預生成 (Build-time Generation / SSG)
-如果您的數據在佈署後變動頻率不高，可以結合 `@gravito/freeze` 在 CI/CD 階段完成第一次生成。
+如果您的資料在佈署後變動頻率不高，可以結合 `@gravito/freeze` 在 CI/CD 階段完成第一次生成。
 - **流程**：在 Docker Build 階段執行 `luminosity build`，並將生成的 XML 檔案封裝進鏡像中。
 - **優點**：完全無狀態 (Stateless)，具備極致的擴展性能，且無需掛載磁碟。
 
@@ -417,7 +417,7 @@ npx luminosity generate --config ./seo.config.ts --out ./public/sitemap.xml
 ```
 
 ### 2. 強制壓縮 (Force Compaction)
-在 `incremental` 模式下，您可以隨時手動觸發日誌壓縮，這在進行大規模數據匯入後非常有用：
+在 `incremental` 模式下，您可以隨時手動觸發日誌壓縮，這在進行大規模資料匯入後非常有用：
 
 ```bash
 npx luminosity compact
