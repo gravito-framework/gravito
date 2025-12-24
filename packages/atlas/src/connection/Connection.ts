@@ -41,6 +41,7 @@ export class Connection implements ConnectionContract {
     this.grammar = this.createGrammar()
 
     // Proxy driver methods (e.g. redis.set, mongodb.collection)
+    // biome-ignore lint/correctness/noConstructorReturn: This proxy is intentional for dynamic driver method access
     return new Proxy(this, {
       get(target: any, prop: string | symbol) {
         if (prop in target) {

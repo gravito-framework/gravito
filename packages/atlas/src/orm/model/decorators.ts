@@ -52,11 +52,11 @@ export interface ColumnOptions {
  */
 export function column(options: ColumnOptions = {}): PropertyDecorator {
   return (target: any, propertyKey: string | symbol) => {
-    const constructor = target.constructor
-    if (!constructor[COLUMN_KEY]) {
-      constructor[COLUMN_KEY] = {}
+    const ctor = target.constructor
+    if (!ctor[COLUMN_KEY]) {
+      ctor[COLUMN_KEY] = {}
     }
-    constructor[COLUMN_KEY][propertyKey] = options
+    ctor[COLUMN_KEY][propertyKey] = options
   }
 }
 // Add type-specific helpers (chaining/static methods style)
