@@ -37,6 +37,36 @@
       </div>
     </main>
 
+    <!-- Benchmark Statistics Bar -->
+    <div class="relative z-20 max-w-7xl mx-auto px-8 mb-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-sm">
+            <!-- Stat 1: Raw Read -->
+            <div class="flex flex-col items-center justify-center p-4 border-b md:border-b-0 md:border-r border-white/5">
+                <div class="text-gray-500 font-mono text-[10px] uppercase tracking-widest mb-2">{{ t('benchmark.raw_read') }}</div>
+                <div class="text-3xl md:text-4xl font-bold text-white tabular-nums tracking-tight">
+                    1.1M+ <span class="text-sm font-normal text-atlas-cyan/70">{{ t('benchmark.ops_sec') }}</span>
+                </div>
+            </div>
+            
+             <!-- Stat 2: Hydration -->
+            <div class="flex flex-col items-center justify-center p-4 border-b md:border-b-0 md:border-r border-white/5">
+                <div class="text-gray-500 font-mono text-[10px] uppercase tracking-widest mb-2">{{ t('benchmark.hydration') }}</div>
+                <div class="text-3xl md:text-4xl font-bold text-white tabular-nums tracking-tight">
+                    42k+ <span class="text-sm font-normal text-purple-400/70">{{ t('benchmark.ops_sec') }}</span>
+                </div>
+            </div>
+
+             <!-- Stat 3: Throughput -->
+            <div class="flex flex-col items-center justify-center p-4">
+                <div class="text-gray-500 font-mono text-[10px] uppercase tracking-widest mb-2">{{ t('benchmark.throughput') }}</div>
+                <div class="text-3xl md:text-4xl font-bold text-white tabular-nums tracking-tight">
+                    70k+ <span class="text-sm font-normal text-green-400/70">{{ t('benchmark.records') }}</span>
+                </div>
+                <div class="text-[9px] text-gray-600 mt-1 uppercase tracking-wider">{{ t('benchmark.memory') }}</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Enhanced Features Section (Moved up visually to connect) -->
     <Features id="features" class="relative z-20" />
     <Installation id="installation" class="relative z-20" />
