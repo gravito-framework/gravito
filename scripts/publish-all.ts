@@ -116,9 +116,23 @@ async function buildPackage(pkg: PackageInfo): Promise<boolean> {
 }
 
 async function testPackage(pkg: PackageInfo): Promise<boolean> {
+    // 檢查 package.json 是否有 test 腳本
+    try {
+        const pkgJsonPath = join(pkg.path, 'package.json');
+        const content = await readFile(pkgJsonPath, 'utf-8');
+        const json = JSON.parse(content);
+
+        if (!json.scripts || !json.scripts.test) {
+            console.log(`\n🧪 ${pkg.name} 沒有 test 腳本，跳過測試`);
+            return true;
+        }
+    } catch {
+        // 如果讀取失敗，繼續嘗試測試
+    }
+
     console.log(`\n🧪 測試 ${pkg.name}...`);
     try {
-        await execAsync('bun test', { cwd: pkg.path });
+        await execAsync('bun run test', { cwd: pkg.path });
         console.log(`  ✅ ${pkg.name} 測試通過`);
         return true;
     } catch (e: any) {

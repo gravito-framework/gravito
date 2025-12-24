@@ -24,9 +24,9 @@ const OFFICIAL_SITE_PACKAGES = [
 // 版本配置
 const VERSION_CONFIG = {
   // 官網使用的套件：beta 版本
-  officialSite: '1.0.0-beta.2',
+  officialSite: '1.0.0-beta.4',
   // 其他套件：alpha 版本
-  others: '1.0.0-alpha.2',
+  others: '1.0.0-alpha.5',
 };
 
 interface PackageInfo {
