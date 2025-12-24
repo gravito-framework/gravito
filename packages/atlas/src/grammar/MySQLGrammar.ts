@@ -114,7 +114,7 @@ export class MySQLGrammar extends Grammar {
   override compileJsonPath(column: string, _value: unknown): string {
     const [field, ...path] = column.split('->')
     const jsonPath = path.length > 0 ? `$.${path.join('.')}` : '$'
-    
+
     // settings->theme => JSON_UNQUOTE(JSON_EXTRACT(`settings`, '$.theme'))
     return `JSON_UNQUOTE(JSON_EXTRACT(${this.wrapColumn(field ?? '')}, '${jsonPath}')) = ?`
   }
@@ -124,17 +124,17 @@ export class MySQLGrammar extends Grammar {
   }
 
   override compileUpdateJson(query: CompiledQuery, column: string, _value: unknown): string {
-      const [field, ...path] = column.split('->')
-      const jsonPath = `$.${path.join('.')}`
-      const wrappedField = this.wrapColumn(field ?? '')
-      
-      // UPDATE users SET settings = JSON_SET(settings, '$.theme', 'dark') WHERE ...
-      const setClause = `${wrappedField} = JSON_SET(${wrappedField}, '${jsonPath}', ?)`
-      
-      let sql = `UPDATE ${this.wrapTable(query.table)} SET ${setClause}`
-      if (query.wheres.length > 0) {
-          sql += ` ${this.compileWheres(query, 1)}`
-      }
-      return sql
+    const [field, ...path] = column.split('->')
+    const jsonPath = `$.${path.join('.')}`
+    const wrappedField = this.wrapColumn(field ?? '')
+
+    // UPDATE users SET settings = JSON_SET(settings, '$.theme', 'dark') WHERE ...
+    const setClause = `${wrappedField} = JSON_SET(${wrappedField}, '${jsonPath}', ?)`
+
+    let sql = `UPDATE ${this.wrapTable(query.table)} SET ${setClause}`
+    if (query.wheres.length > 0) {
+      sql += ` ${this.compileWheres(query, 1)}`
+    }
+    return sql
   }
 }

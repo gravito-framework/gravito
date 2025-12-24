@@ -231,25 +231,27 @@ export async function eagerLoad<T extends Model>(
 
   // Resolve defaults if missing
   if (!foreignKey) {
-      if (type === 'belongsTo') {
-          foreignKey = `${relatedTable.replace(/s$/, '')}_id`
-      } else if (type === 'hasMany' || type === 'hasOne') {
-          foreignKey = `${parentTable.replace(/s$/, '')}_id`
-      } else if (type === 'belongsToMany') {
-          foreignKey = `${parentTable.replace(/s$/, '')}_id`
-      }
+    if (type === 'belongsTo') {
+      foreignKey = `${relatedTable.replace(/s$/, '')}_id`
+    } else if (type === 'hasMany' || type === 'hasOne') {
+      foreignKey = `${parentTable.replace(/s$/, '')}_id`
+    } else if (type === 'belongsToMany') {
+      foreignKey = `${parentTable.replace(/s$/, '')}_id`
+    }
   }
 
   if (!localKey) {
-      if (type === 'belongsTo') {
-          localKey = Related.primaryKey
-      } else {
-          localKey = parentModel.primaryKey
-      }
+    if (type === 'belongsTo') {
+      localKey = Related.primaryKey
+    } else {
+      localKey = parentModel.primaryKey
+    }
   }
 
   // Ensure they are strings now
-  if (!foreignKey || !localKey) throw new Error("Could not resolve keys")
+  if (!foreignKey || !localKey) {
+    throw new Error('Could not resolve keys')
+  }
 
   // Get parent keys
   const parentKeys = parents.map((p) => (p as any)[localKey])
@@ -314,9 +316,8 @@ export async function eagerLoad<T extends Model>(
       for (const parent of parents) {
         const pk = (parent as any)[localKey]
         // Handle MongoDB _id vs id mapping in results
-        const items = relatedByFk.get(pk) ?? 
-                     (typeof pk === 'string' ? relatedByFk.get(pk) : undefined) ?? 
-                     []
+        const items =
+          relatedByFk.get(pk) ?? (typeof pk === 'string' ? relatedByFk.get(pk) : undefined) ?? []
 
         if (type === 'hasOne') {
           ;(parent as any)[currentRelation] = items[0] ?? null
@@ -366,17 +367,17 @@ export async function eagerLoad<T extends Model>(
 
     case 'belongsToMany': {
       let { pivotTable, relatedKey } = relationMeta
-      
+
       const relatedTable = (Related as any).getTable()
       const parentTable = (parentModel as any).getTable()
 
       // Resolve pivot defaults
       if (!pivotTable) {
-          const tables = [parentTable, relatedTable].sort()
-          pivotTable = `${tables[0]}_${tables[1]}`
+        const tables = [parentTable, relatedTable].sort()
+        pivotTable = `${tables[0]}_${tables[1]}`
       }
       if (!relatedKey) {
-          relatedKey = `${relatedTable.replace(/s$/, '')}_id`
+        relatedKey = `${relatedTable.replace(/s$/, '')}_id`
       }
 
       if (!pivotTable || !relatedKey) {

@@ -3,16 +3,16 @@
  * @description Represents a database connection
  */
 
-import { MongoGrammar } from '../grammar/MongoGrammar'
-import { MySQLGrammar } from '../grammar/MySQLGrammar'
-import { PostgresGrammar } from '../grammar/PostgresGrammar'
-import { SQLiteGrammar } from '../grammar/SQLiteGrammar'
-import { NullGrammar } from '../grammar/NullGrammar'
+import { MongoDBDriver } from '../drivers/MongoDBDriver'
 import { MySQLDriver } from '../drivers/MySQLDriver'
 import { PostgresDriver } from '../drivers/PostgresDriver'
-import { SQLiteDriver } from '../drivers/SQLiteDriver'
-import { MongoDBDriver } from '../drivers/MongoDBDriver'
 import { RedisDriver } from '../drivers/RedisDriver'
+import { SQLiteDriver } from '../drivers/SQLiteDriver'
+import { MongoGrammar } from '../grammar/MongoGrammar'
+import { MySQLGrammar } from '../grammar/MySQLGrammar'
+import { NullGrammar } from '../grammar/NullGrammar'
+import { PostgresGrammar } from '../grammar/PostgresGrammar'
+import { SQLiteGrammar } from '../grammar/SQLiteGrammar'
 import { QueryBuilder } from '../query/QueryBuilder'
 import type {
   ConnectionConfig,
@@ -47,11 +47,15 @@ export class Connection implements ConnectionContract {
           return target[prop]
         }
         // Fallback to driver if method exists there
-        if (typeof prop === 'string' && target.driver && typeof (target.driver as any)[prop] === 'function') {
+        if (
+          typeof prop === 'string' &&
+          target.driver &&
+          typeof (target.driver as any)[prop] === 'function'
+        ) {
           return (target.driver as any)[prop].bind(target.driver)
         }
         return undefined
-      }
+      },
     })
   }
 

@@ -8,7 +8,7 @@ app.get('/api/demo', async (c) => {
   try {
     // Get recent users
     const users = await User.query().orderBy('id', 'desc').limit(5).get()
-    
+
     // Get stats
     const totalUsers = await User.count()
     const totalPosts = await DB.table('posts').count()
@@ -17,16 +17,19 @@ app.get('/api/demo', async (c) => {
       success: true,
       executed_at: new Date().toISOString(),
       stats: {
-          users: totalUsers,
-          posts: totalPosts
+        users: totalUsers,
+        posts: totalPosts,
       },
       data: users,
     })
   } catch (err: any) {
-      return c.json({
-          success: false,
-          error: err.message
-      }, 500)
+    return c.json(
+      {
+        success: false,
+        error: err.message,
+      },
+      500
+    )
   }
 })
 

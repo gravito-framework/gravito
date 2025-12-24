@@ -5,7 +5,12 @@
 
 import { DB } from '../DB'
 import { Blueprint } from './Blueprint'
-import { MySQLSchemaGrammar, PostgresSchemaGrammar, SQLiteSchemaGrammar, type SchemaGrammar } from './grammars'
+import {
+  MySQLSchemaGrammar,
+  PostgresSchemaGrammar,
+  type SchemaGrammar,
+  SQLiteSchemaGrammar,
+} from './grammars'
 
 /**
  * Schema Facade
@@ -44,10 +49,10 @@ export class Schema {
    */
   private static getGrammar(): SchemaGrammar {
     const driver = Schema.getDriverName()
-    
+
     // If grammar exists but doesn't match current driver, reset it
     if (Schema.grammar && !Schema.isGrammarMatch(Schema.grammar, driver)) {
-        Schema.grammar = null
+      Schema.grammar = null
     }
 
     if (!Schema.grammar) {
@@ -60,10 +65,16 @@ export class Schema {
    * Check if grammar instance matches driver
    */
   private static isGrammarMatch(grammar: SchemaGrammar, driver: string): boolean {
-      if (driver === 'postgres' || driver === 'postgresql') return grammar instanceof PostgresSchemaGrammar
-      if (driver === 'mysql' || driver === 'mariadb') return grammar instanceof MySQLSchemaGrammar
-      if (driver === 'sqlite') return grammar instanceof SQLiteSchemaGrammar
-      return false
+    if (driver === 'postgres' || driver === 'postgresql') {
+      return grammar instanceof PostgresSchemaGrammar
+    }
+    if (driver === 'mysql' || driver === 'mariadb') {
+      return grammar instanceof MySQLSchemaGrammar
+    }
+    if (driver === 'sqlite') {
+      return grammar instanceof SQLiteSchemaGrammar
+    }
+    return false
   }
 
   private static getDriverName(): string {
@@ -71,8 +82,8 @@ export class Schema {
     const config = DB.getConnectionConfig(Schema.connectionName)
     // Fallback to default connection if Schema.connectionName is not set
     if (!config && !Schema.connectionName) {
-        const defaultConfig = DB.getConnectionConfig()
-        return defaultConfig?.driver ?? 'postgres'
+      const defaultConfig = DB.getConnectionConfig()
+      return defaultConfig?.driver ?? 'postgres'
     }
     return config?.driver ?? 'postgres'
   }

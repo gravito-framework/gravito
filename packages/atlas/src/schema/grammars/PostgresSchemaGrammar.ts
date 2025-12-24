@@ -80,10 +80,11 @@ export class PostgresSchemaGrammar extends SchemaGrammar {
 
   protected override compileColumn(column: ColumnDefinition, blueprint: Blueprint): string {
     if (column.isAutoIncrement()) {
-        const serialType = column.type === 'bigInteger' ? 'BIGSERIAL' : 'SERIAL'
-        // If it's a primary key and we aren't adding it at the bottom, add it here
-        const primary = (column.isPrimary() && !this.shouldAddPrimaryAtBottom(blueprint)) ? ' PRIMARY KEY' : ''
-        return `${this.wrapColumn(column.name)} ${serialType}${primary}`
+      const serialType = column.type === 'bigInteger' ? 'BIGSERIAL' : 'SERIAL'
+      // If it's a primary key and we aren't adding it at the bottom, add it here
+      const primary =
+        column.isPrimary() && !this.shouldAddPrimaryAtBottom(blueprint) ? ' PRIMARY KEY' : ''
+      return `${this.wrapColumn(column.name)} ${serialType}${primary}`
     }
     return super.compileColumn(column, blueprint)
   }
@@ -97,7 +98,9 @@ export class PostgresSchemaGrammar extends SchemaGrammar {
   // ============================================================================
 
   protected compileFullTextIndex(table: string, index: IndexDefinition): string {
-    const columns = index.columns.map((c) => `to_tsvector('english', ${this.wrapColumn(c)})`).join(' || ')
+    const columns = index.columns
+      .map((c) => `to_tsvector('english', ${this.wrapColumn(c)})`)
+      .join(' || ')
     return `CREATE INDEX ${this.wrapColumn(index.name)} ON ${this.wrapTable(table)} USING GIN (${columns})`
   }
 

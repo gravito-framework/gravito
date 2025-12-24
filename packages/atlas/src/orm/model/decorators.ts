@@ -2,8 +2,6 @@
  * Relationship and Model Decorators
  */
 
-import type { Model } from './Model'
-
 /**
  * Soft Deletes Decorator Options
  */
@@ -61,8 +59,7 @@ export function column(options: ColumnOptions = {}): PropertyDecorator {
     constructor[COLUMN_KEY][propertyKey] = options
   }
 }
-
 // Add type-specific helpers (chaining/static methods style)
 ;(column as any).dateTime = (options: ColumnOptions = {}) => {
-    return column(options)
+  return column(options)
 }

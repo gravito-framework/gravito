@@ -1,6 +1,6 @@
-import { Command } from './Command'
 import * as readline from 'node:readline'
 import * as Atlas from '../index'
+import { Command } from './Command'
 
 export class TinkerCommand extends Command {
   signature = 'tinker'
@@ -13,27 +13,29 @@ export class TinkerCommand extends Command {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: 'atlas> '
+      prompt: 'atlas> ',
     })
 
     rl.prompt()
 
     for await (const line of rl) {
       const input = line.trim()
-      if (input === 'exit' || input === 'quit') break
+      if (input === 'exit' || input === 'quit') {
+        break
+      }
 
       try {
         // Create context with pre-loaded modules
-        const context = { ...Atlas, console }
-        
+        const _context = { ...Atlas, console }
+
         // Wrap in async function to support await
         const script = `(async () => { return (${input}) })()`
-        
+
         // Use Function instead of eval for slightly better isolation
         const result = await new Function('Atlas', `return ${script}`)(Atlas)
-        
+
         if (result !== undefined) {
-            console.log(result)
+          console.log(result)
         }
       } catch (e: any) {
         console.error('Error:', e.message)

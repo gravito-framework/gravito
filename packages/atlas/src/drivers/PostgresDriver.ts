@@ -109,7 +109,7 @@ export class PostgresDriver implements DriverContract {
     bindings: unknown[] = []
   ): Promise<QueryResult<T>> {
     const client = await this.getClient()
-    const params = bindings.map(b => b === undefined ? null : b)
+    const params = bindings.map((b) => (b === undefined ? null : b))
 
     try {
       const result = await client.query(sql, params)
@@ -140,7 +140,7 @@ export class PostgresDriver implements DriverContract {
    */
   async execute(sql: string, bindings: unknown[] = []): Promise<ExecuteResult> {
     const client = await this.getClient()
-    const params = bindings.map(b => b === undefined ? null : b)
+    const params = bindings.map((b) => (b === undefined ? null : b))
 
     try {
       const result = await client.query(sql, params)
@@ -272,7 +272,9 @@ export class PostgresDriver implements DriverContract {
       const pg = await import('pg')
       return pg as unknown as PgModule
     } catch (e) {
-      throw new Error(`PostgreSQL driver requires the "pg" package. Please install it: bun add pg. Original Error: ${e}`)
+      throw new Error(
+        `PostgreSQL driver requires the "pg" package. Please install it: bun add pg. Original Error: ${e}`
+      )
     }
   }
 }

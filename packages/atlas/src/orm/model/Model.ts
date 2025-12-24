@@ -30,7 +30,7 @@ export type ModelConstructor<T extends Model> = new () => T
  * Model static interface
  */
 export interface ModelStatic<T extends Model> {
-  new(): T
+  new (): T
   table: string
   primaryKey: string
   connection?: string
@@ -249,7 +249,7 @@ export abstract class Model {
           const studly = prop.replace(/(?:^|_|(?=[A-Z]))(.)/g, (_, c) => c.toUpperCase())
           const mutator = `set${studly}Attribute`
           if (typeof (target as any)[mutator] === 'function') {
-            ; (target as any)[mutator].call(receiver, value)
+            ;(target as any)[mutator].call(receiver, value)
             return true
           }
         }
@@ -347,8 +347,8 @@ export abstract class Model {
 
       // SQLite specific: if column is string but we get an object, check if it might be JSON
       if (jsType === 'object' && expectedTypes.includes('string')) {
-          // Allow it - the driver will handle serialization
-          return
+        // Allow it - the driver will handle serialization
+        return
       }
 
       if (!expectedTypes.includes(jsType)) {
@@ -460,10 +460,12 @@ export abstract class Model {
    * Get the table name for this model
    */
   static getTable(): string {
-      const self = this as any
-      const table = self.tableName || self.table
-      if (!table) throw new Error(`Model ${this.name} has no table defined.`)
-      return table
+    const self = this as any
+    const table = self.tableName || self.table
+    if (!table) {
+      throw new Error(`Model ${this.name} has no table defined.`)
+    }
+    return table
   }
 
   /**
@@ -474,15 +476,18 @@ export abstract class Model {
       const modelCtor = this.constructor as any
       const connection = DB.connection(modelCtor.connection)
       const table = modelCtor.getTable()
-      
+
       // Fast path for non-SQL drivers
-      if (connection.getDriver().getDriverName() === 'mongodb' || connection.getDriver().getDriverName() === 'redis') {
-          return {
-              table: table,
-              columns: new Map(),
-              primaryKey: [modelCtor.primaryKey],
-              capturedAt: Date.now()
-          }
+      if (
+        connection.getDriver().getDriverName() === 'mongodb' ||
+        connection.getDriver().getDriverName() === 'redis'
+      ) {
+        return {
+          table: table,
+          columns: new Map(),
+          primaryKey: [modelCtor.primaryKey],
+          capturedAt: Date.now(),
+        }
       }
 
       this._schema = await SchemaRegistry.getInstance().get(table)
@@ -564,10 +569,10 @@ export abstract class Model {
 
     // Wrap get to hydrate
     const originalGet = builder.get.bind(builder)
-      ; (builder as unknown as { get: () => Promise<R[]> }).get = async (): Promise<R[]> => {
-        const rows = await originalGet()
-        return rows.map((row) => related.hydrate<R>(row)) as R[]
-      }
+    ;(builder as unknown as { get: () => Promise<R[]> }).get = async (): Promise<R[]> => {
+      const rows = await originalGet()
+      return rows.map((row) => related.hydrate<R>(row)) as R[]
+    }
 
     return builder
   }
@@ -736,125 +741,130 @@ export abstract class Model {
   /**
    * Perform insert
    */
-    protected async _performInsert(): Promise<this> {
-      const modelCtor = this.constructor as typeof Model
-      const connection = DB.connection(modelCtor.connection)
-  
-      // Trigger creating event
-      await this.emit('creating')
-  
-      // Handle Timestamps
-      if (modelCtor.timestamps) {
-          const now = new Date()
-          if (!this._attributes[modelCtor.createdAtColumn]) {
-               this._setAttribute(modelCtor.createdAtColumn, now)
-          }
-          if (!this._attributes[modelCtor.updatedAtColumn]) {
-               this._setAttribute(modelCtor.updatedAtColumn, now)
-          }
+  protected async _performInsert(): Promise<this> {
+    const modelCtor = this.constructor as typeof Model
+    const connection = DB.connection(modelCtor.connection)
+
+    // Trigger creating event
+    await this.emit('creating')
+
+    // Handle Timestamps
+    if (modelCtor.timestamps) {
+      const now = new Date()
+      if (!this._attributes[modelCtor.createdAtColumn]) {
+        this._setAttribute(modelCtor.createdAtColumn, now)
       }
-  
-      // Handle @column(autoCreate)
-      const columns = (modelCtor as any)[COLUMN_KEY]
-      if (columns) {
-          for (const [prop, options] of Object.entries(columns)) {
-              if ((options as any).autoCreate && !this._attributes[prop]) {
-                   this._setAttribute(prop, new Date())
-              }
-          }
+      if (!this._attributes[modelCtor.updatedAtColumn]) {
+        this._setAttribute(modelCtor.updatedAtColumn, now)
       }
-  
-      const result = await connection.table<ModelAttributes>(modelCtor.getTable()).insert(this._attributes)
-  
-      // Set primary key from result
-      if (Array.isArray(result) && result.length > 0) {
-        const pk = result[0]
-        if (typeof pk === 'object' && pk !== null) {
-          this._attributes[modelCtor.primaryKey] = (pk as Record<string, unknown>)[
-            modelCtor.primaryKey
-          ]
-        } else {
-          this._attributes[modelCtor.primaryKey] = pk
+    }
+
+    // Handle @column(autoCreate)
+    const columns = (modelCtor as any)[COLUMN_KEY]
+    if (columns) {
+      for (const [prop, options] of Object.entries(columns)) {
+        if ((options as any).autoCreate && !this._attributes[prop]) {
+          this._setAttribute(prop, new Date())
         }
       }
-  
-      this._exists = true
-      this._dirtyTracker.sync(this._attributes)
-  
-      // Trigger created event
-      await this.emit('created')
-  
-      return this
     }
-  
-    /**
-     * Perform update
-     */
-    protected async _performUpdate(): Promise<this> {
-      const modelCtor = this.constructor as typeof Model
-      const connection = DB.connection(modelCtor.connection)
-  
-      // Trigger updating event
-      await this.emit('updating')
-  
-      // Handle Timestamps
-      if (modelCtor.timestamps) {
-           this._setAttribute(modelCtor.updatedAtColumn, new Date())
-      }
-  
-      // Handle @column(autoUpdate)
-      const columns = (modelCtor as any)[COLUMN_KEY]
-      if (columns) {
-          for (const [prop, options] of Object.entries(columns)) {
-              if ((options as any).autoUpdate) {
-                   this._setAttribute(prop, new Date())
-              }
-          }
-      }
-  
-      const dirty = this.getDirty()
-      if (Object.keys(dirty).length === 0) {
-        return this // Nothing to update
-      }
-  
-      await connection.table(modelCtor.getTable()).where(modelCtor.primaryKey, this.getKey()).update(dirty)
-  
-      this._dirtyTracker.sync(this._attributes)
-  
-      // Trigger updated event
-      await this.emit('updated')
-  
-      return this
-    }
-  
-    /**
-     * Delete the model
-     */
-    async delete(): Promise<boolean> {
-      if (!this._exists) {
-        return false
-      }
-  
-      await this.emit('deleting')
-  
-      const modelCtor = this.constructor as any
-      const softDeletes = modelCtor[SOFT_DELETES_KEY]
-      let result: boolean
-  
-      if (softDeletes) {
-        const column = softDeletes.column || 'deleted_at'
-        this._setAttribute(column, new Date())
-        await this.save()
-        result = true
+
+    const result = await connection
+      .table<ModelAttributes>(modelCtor.getTable())
+      .insert(this._attributes)
+
+    // Set primary key from result
+    if (Array.isArray(result) && result.length > 0) {
+      const pk = result[0]
+      if (typeof pk === 'object' && pk !== null) {
+        this._attributes[modelCtor.primaryKey] = (pk as Record<string, unknown>)[
+          modelCtor.primaryKey
+        ]
       } else {
-        const connection = DB.connection(modelCtor.connection)
-        const affected = await connection
-          .table(modelCtor.getTable())
-          .where(modelCtor.primaryKey, this.getKey())
-          .delete()
-        result = affected > 0
+        this._attributes[modelCtor.primaryKey] = pk
       }
-      if (result) {
+    }
+
+    this._exists = true
+    this._dirtyTracker.sync(this._attributes)
+
+    // Trigger created event
+    await this.emit('created')
+
+    return this
+  }
+
+  /**
+   * Perform update
+   */
+  protected async _performUpdate(): Promise<this> {
+    const modelCtor = this.constructor as typeof Model
+    const connection = DB.connection(modelCtor.connection)
+
+    // Trigger updating event
+    await this.emit('updating')
+
+    // Handle Timestamps
+    if (modelCtor.timestamps) {
+      this._setAttribute(modelCtor.updatedAtColumn, new Date())
+    }
+
+    // Handle @column(autoUpdate)
+    const columns = (modelCtor as any)[COLUMN_KEY]
+    if (columns) {
+      for (const [prop, options] of Object.entries(columns)) {
+        if ((options as any).autoUpdate) {
+          this._setAttribute(prop, new Date())
+        }
+      }
+    }
+
+    const dirty = this.getDirty()
+    if (Object.keys(dirty).length === 0) {
+      return this // Nothing to update
+    }
+
+    await connection
+      .table(modelCtor.getTable())
+      .where(modelCtor.primaryKey, this.getKey())
+      .update(dirty)
+
+    this._dirtyTracker.sync(this._attributes)
+
+    // Trigger updated event
+    await this.emit('updated')
+
+    return this
+  }
+
+  /**
+   * Delete the model
+   */
+  async delete(): Promise<boolean> {
+    if (!this._exists) {
+      return false
+    }
+
+    await this.emit('deleting')
+
+    const modelCtor = this.constructor as any
+    const softDeletes = modelCtor[SOFT_DELETES_KEY]
+    let result: boolean
+
+    if (softDeletes) {
+      const column = softDeletes.column || 'deleted_at'
+      this._setAttribute(column, new Date())
+      await this.save()
+      result = true
+    } else {
+      const connection = DB.connection(modelCtor.connection)
+      const affected = await connection
+        .table(modelCtor.getTable())
+        .where(modelCtor.primaryKey, this.getKey())
+        .delete()
+      result = affected > 0
+    }
+    if (result) {
       this._exists = !softDeletes
       await this.emit('deleted')
     }
@@ -961,9 +971,7 @@ export abstract class Model {
   /**
    * Get the first record
    */
-  static async first<T extends Model>(
-    this: ModelConstructor<T> & typeof Model
-  ): Promise<T | null> {
+  static async first<T extends Model>(this: ModelConstructor<T> & typeof Model): Promise<T | null> {
     const result = await this.query().first()
     return result as T | null
   }
@@ -1114,7 +1122,7 @@ export abstract class Model {
 
       // Log progress for large streams
       if (offset > 0 && offset % 5000 === 0) {
-          process.stdout.write(` [${offset}...] `)
+        process.stdout.write(` [${offset}...] `)
       }
 
       yield rows.map((row) => this.hydrate<T>(row))
@@ -1142,7 +1150,7 @@ export abstract class Model {
   static query<T extends Model>(this: ModelConstructor<T> & typeof Model) {
     const connection = DB.connection(this.connection)
     const builder = connection.table<ModelAttributes>(this.getTable())
-    
+
     // Attach model context
     ;(builder as any).setModel(this)
 
@@ -1155,54 +1163,52 @@ export abstract class Model {
     }
 
     // Wrap get() to hydrate results and handle eager loading
-        const originalGet = builder.get.bind(builder)
-        ;(builder as unknown as { get: () => Promise<T[]> }).get = async (): Promise<T[]> => {
-          const rows = await originalGet()
-          
-          // Fast Path: Skip hydration if read-only
-          if ((builder as any).getIsReadOnly?.()) {
-              return rows as unknown as T[]
-          }
-    
-          const models = rows.map((row) => this.hydrate<T>(row)) as unknown as T[]
-    
+    const originalGet = builder.get.bind(builder)
+    ;(builder as unknown as { get: () => Promise<T[]> }).get = async (): Promise<T[]> => {
+      const rows = await originalGet()
 
-        // Handle eager loading
-        const eagerLoads = (builder as any).getEagerLoads?.()
-        if (eagerLoads && eagerLoads.size > 0 && models.length > 0) {
-          const { eagerLoadMany } = await import('./relationships')
-          await eagerLoadMany(models, eagerLoads)
-        }
-
-        return models
+      // Fast Path: Skip hydration if read-only
+      if ((builder as any).getIsReadOnly?.()) {
+        return rows as unknown as T[]
       }
 
+      const models = rows.map((row) => this.hydrate<T>(row)) as unknown as T[]
+
+      // Handle eager loading
+      const eagerLoads = (builder as any).getEagerLoads?.()
+      if (eagerLoads && eagerLoads.size > 0 && models.length > 0) {
+        const { eagerLoadMany } = await import('./relationships')
+        await eagerLoadMany(models, eagerLoads)
+      }
+
+      return models
+    }
+
     // Wrap first() to hydrate result and handle eager loading
-        const originalFirst = builder.first.bind(builder)
-        ;(builder as unknown as { first: () => Promise<T | null> }).first =
-          async (): Promise<T | null> => {
-            const row = await originalFirst()
-            if (!row) {
-              return null
-            }
-    
-            // Fast Path: Skip hydration if read-only
-            if ((builder as any).getIsReadOnly?.()) {
-                return row as unknown as T
-            }
-    
-            const model = this.hydrate<T>(row)
-    
-
-          // Handle eager loading for a single model
-          const eagerLoads = (builder as any).getEagerLoads?.()
-          if (eagerLoads && eagerLoads.size > 0) {
-            const { eagerLoadMany } = await import('./relationships')
-            await eagerLoadMany([model], eagerLoads)
-          }
-
-          return model
+    const originalFirst = builder.first.bind(builder)
+    ;(builder as unknown as { first: () => Promise<T | null> }).first =
+      async (): Promise<T | null> => {
+        const row = await originalFirst()
+        if (!row) {
+          return null
         }
+
+        // Fast Path: Skip hydration if read-only
+        if ((builder as any).getIsReadOnly?.()) {
+          return row as unknown as T
+        }
+
+        const model = this.hydrate<T>(row)
+
+        // Handle eager loading for a single model
+        const eagerLoads = (builder as any).getEagerLoads?.()
+        if (eagerLoads && eagerLoads.size > 0) {
+          const { eagerLoadMany } = await import('./relationships')
+          await eagerLoadMany([model], eagerLoads)
+        }
+
+        return model
+      }
 
     // Support Local Scopes via Proxy
     const modelClass = this
@@ -1213,7 +1219,7 @@ export abstract class Model {
           const scopeMethod = `scope${prop.charAt(0).toUpperCase()}${prop.slice(1)}`
           if (typeof (modelClass as any)[scopeMethod] === 'function') {
             return (...args: any[]) => {
-              ; (modelClass as any)[scopeMethod](target, ...args)
+              ;(modelClass as any)[scopeMethod](target, ...args)
               return proxy
             }
           }
@@ -1274,7 +1280,9 @@ export abstract class Model {
 
     // 1. Process attributes (trigger accessors)
     for (const key of Object.keys(attributes)) {
-      if (key.startsWith('_')) continue
+      if (key.startsWith('_')) {
+        continue
+      }
       result[key] = (this as any)[key]
     }
 

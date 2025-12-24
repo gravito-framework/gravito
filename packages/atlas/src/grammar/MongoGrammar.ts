@@ -53,8 +53,12 @@ export class MongoGrammar extends Grammar {
     const filter = this.compileMongoWheres(query)
     const options: Record<string, unknown> = {}
 
-    if (query.limit !== undefined) options.limit = query.limit
-    if (query.offset !== undefined) options.skip = query.offset
+    if (query.limit !== undefined) {
+      options.limit = query.limit
+    }
+    if (query.offset !== undefined) {
+      options.skip = query.offset
+    }
 
     if (query.orders.length > 0) {
       const sort: Record<string, number> = {}
@@ -112,7 +116,10 @@ export class MongoGrammar extends Grammar {
     return JSON.stringify(protocol)
   }
 
-  override compileAggregate(query: CompiledQuery, aggregate: { function: string; column: string }): string {
+  override compileAggregate(
+    query: CompiledQuery,
+    aggregate: { function: string; column: string }
+  ): string {
     if (aggregate.function === 'count') {
       const filter = this.compileMongoWheres(query)
       const protocol: MongoQueryProtocol = {
@@ -139,7 +146,9 @@ export class MongoGrammar extends Grammar {
    * Translate generic WhereClause[] to MongoDB Filter
    */
   private compileMongoWheres(query: CompiledQuery): Record<string, unknown> {
-    if (query.wheres.length === 0) return {}
+    if (query.wheres.length === 0) {
+      return {}
+    }
 
     const filter: Record<string, any> = {}
     // Need to map bindings to placeholders if we were using SQL
@@ -162,11 +171,13 @@ export class MongoGrammar extends Grammar {
         // This is tricky because Mongo uses $or: [...] structure
         // Simplified: support top-level OR
         if (where.boolean === 'or') {
-            if (!filter.$or) filter.$or = []
-            // We'd need to re-parse the nested SQL or store nested structure better.
-            // Current QueryBuilder compiles nested wheres to SQL string.
-            // This is a limitation of the current generic QueryBuilder -> Grammar interface.
-            // For MVP, we might skip complex nested ORs or need to enhance QueryBuilder to expose nested objects.
+          if (!filter.$or) {
+            filter.$or = []
+          }
+          // We'd need to re-parse the nested SQL or store nested structure better.
+          // Current QueryBuilder compiles nested wheres to SQL string.
+          // This is a limitation of the current generic QueryBuilder -> Grammar interface.
+          // For MVP, we might skip complex nested ORs or need to enhance QueryBuilder to expose nested objects.
         }
       }
     }
@@ -175,14 +186,14 @@ export class MongoGrammar extends Grammar {
   }
 
   private normalizeValue(column: string, value: any): any {
-      if ((column === '_id' || column === 'id') && typeof value === 'string' && value.length === 24) {
-          try {
-              return new ObjectId(value)
-          } catch {
-              return value
-          }
+    if ((column === '_id' || column === 'id') && typeof value === 'string' && value.length === 24) {
+      try {
+        return new ObjectId(value)
+      } catch {
+        return value
       }
-      return value
+    }
+    return value
   }
 
   private compileBasicWhere(filter: Record<string, any>, where: WhereClause) {
@@ -214,8 +225,8 @@ export class MongoGrammar extends Grammar {
         // Convert SQL LIKE to Regex
         // %term% -> /term/
         if (typeof val === 'string') {
-            const regex = new RegExp(`^${val.replace(/%/g, '.*')}$`, 'i')
-            filter[col] = regex
+          const regex = new RegExp(`^${val.replace(/%/g, '.*')}$`, 'i')
+          filter[col] = regex
         }
         break
     }
@@ -224,7 +235,7 @@ export class MongoGrammar extends Grammar {
   private compileInWhere(filter: Record<string, any>, where: WhereClause) {
     const col = this.normalizeColumn(where.column!)
     const op = where.not ? '$nin' : '$in'
-    const values = (where.values ?? []).map(v => this.normalizeValue(col, v))
+    const values = (where.values ?? []).map((v) => this.normalizeValue(col, v))
     filter[col] = { ...filter[col], [op]: values }
   }
 
@@ -235,7 +246,9 @@ export class MongoGrammar extends Grammar {
   }
 
   private normalizeColumn(column: string): string {
-    if (column === 'id') return '_id'
+    if (column === 'id') {
+      return '_id'
+    }
     return column
   }
 

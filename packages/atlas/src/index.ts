@@ -86,8 +86,8 @@ export type {
 export {
   BelongsTo,
   BelongsToMany,
-  column,
   ColumnNotFoundError,
+  column,
   DirtyTracker,
   HasMany,
   HasOne,
@@ -105,7 +105,12 @@ export { QueryBuilder, QueryBuilderError, RecordNotFoundError } from './query/Qu
 export type { ColumnType, ForeignKeyAction, ForeignKeyDefinition, IndexDefinition } from './schema'
 // Schema
 export { Blueprint, ColumnDefinition, Schema } from './schema'
-export { MySQLSchemaGrammar, PostgresSchemaGrammar, SchemaGrammar, SQLiteSchemaGrammar } from './schema/grammars'
+export {
+  MySQLSchemaGrammar,
+  PostgresSchemaGrammar,
+  SchemaGrammar,
+  SQLiteSchemaGrammar,
+} from './schema/grammars'
 export type { FactoryDefinition, Seeder, SeederFile, SeederRunnerOptions } from './seed'
 // Seed
 export { Factory, factory, SeederRunner } from './seed'

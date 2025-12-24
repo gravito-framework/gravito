@@ -74,19 +74,21 @@ export class SchemaSniffer {
 
     // Check indexes for UNIQUE
     try {
-        const indexesResult = await connection.raw(`PRAGMA index_list('${table}')`)
-        for (const idx of indexesResult.rows as any[]) {
-            if (idx.unique === 1 && idx.origin === 'u') {
-                const info = await connection.raw(`PRAGMA index_info('${idx.name}')`)
-                if (info.rows.length === 1) {
-                    const colName = (info.rows[0] as any).name
-                    const col = columns.get(colName)
-                    if (col) col.unique = true
-                }
+      const indexesResult = await connection.raw(`PRAGMA index_list('${table}')`)
+      for (const idx of indexesResult.rows as any[]) {
+        if (idx.unique === 1 && idx.origin === 'u') {
+          const info = await connection.raw(`PRAGMA index_info('${idx.name}')`)
+          if (info.rows.length === 1) {
+            const colName = (info.rows[0] as any).name
+            const col = columns.get(colName)
+            if (col) {
+              col.unique = true
             }
+          }
         }
+      }
     } catch {
-        // Ignore index errors
+      // Ignore index errors
     }
 
     return {
@@ -296,11 +298,21 @@ export class SchemaSniffer {
 
   private mapSQLiteType(type: string): ColumnType {
     const t = type.toLowerCase()
-    if (t.includes('int')) return 'integer'
-    if (t.includes('char') || t.includes('clob') || t.includes('text')) return 'string'
-    if (t.includes('blob')) return 'binary'
-    if (t.includes('real') || t.includes('floa') || t.includes('doub')) return 'float'
-    if (t.includes('date') || t.includes('time')) return 'timestamp'
+    if (t.includes('int')) {
+      return 'integer'
+    }
+    if (t.includes('char') || t.includes('clob') || t.includes('text')) {
+      return 'string'
+    }
+    if (t.includes('blob')) {
+      return 'binary'
+    }
+    if (t.includes('real') || t.includes('floa') || t.includes('doub')) {
+      return 'float'
+    }
+    if (t.includes('date') || t.includes('time')) {
+      return 'timestamp'
+    }
     return 'string'
   }
 

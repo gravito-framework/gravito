@@ -1,4 +1,5 @@
-import { MongoClient, type Db } from 'mongodb'
+import { type Db, MongoClient } from 'mongodb'
+import { ConnectionError, DatabaseError } from '../errors'
 import type { MongoQueryProtocol } from '../grammar/MongoGrammar'
 import type {
   ConnectionConfig,
@@ -8,7 +9,6 @@ import type {
   MongoDBConfig,
   QueryResult,
 } from '../types'
-import { ConnectionError, DatabaseError } from '../errors'
 
 /**
  * MongoDB Driver
@@ -36,7 +36,10 @@ export class MongoDBDriver implements DriverContract {
     }
 
     try {
-      this.client = new MongoClient(this.config.uri ?? `mongodb://\${this.config.host}:\${this.config.port}/\${this.config.database}`)
+      this.client = new MongoClient(
+        this.config.uri ??
+          `mongodb://\${this.config.host}:\${this.config.port}/\${this.config.database}`
+      )
       await this.client.connect()
       this.db = this.client.db(this.config.database)
     } catch (error) {
@@ -63,11 +66,13 @@ export class MongoDBDriver implements DriverContract {
     protocolJson: string,
     _bindings: unknown[] = []
   ): Promise<QueryResult<T>> {
-    if (!this.db) await this.connect()
+    if (!this.db) {
+      await this.connect()
+    }
 
     try {
       const protocol = JSON.parse(protocolJson) as MongoQueryProtocol
-      const collection = this.db!.collection(protocol.collection)
+      const collection = this.db?.collection(protocol.collection)
 
       if (protocol.operation === 'find') {
         const rows = await collection.find(protocol.filter || {}, protocol.options).toArray()
@@ -83,16 +88,15 @@ export class MongoDBDriver implements DriverContract {
         const count = await collection.countDocuments(protocol.filter || {})
         // Return in aggregate format expected by QueryBuilder
         return {
-            rows: [{ aggregate: count }] as any,
-            rowCount: 1
+          rows: [{ aggregate: count }] as any,
+          rowCount: 1,
         }
       }
 
       throw new Error(`Unsupported read operation: \${protocol.operation}`)
-
     } catch (error) {
       if (error instanceof SyntaxError) {
-          throw new DatabaseError('Invalid MongoDB Protocol: ' + protocolJson)
+        throw new DatabaseError(`Invalid MongoDB Protocol: ${protocolJson}`)
       }
       throw new DatabaseError('MongoDB Query Failed', error)
     }
@@ -102,41 +106,42 @@ export class MongoDBDriver implements DriverContract {
    * Execute a write operation (Protocol: JSON String)
    */
   async execute(protocolJson: string, _bindings: unknown[] = []): Promise<ExecuteResult> {
-    if (!this.db) await this.connect()
+    if (!this.db) {
+      await this.connect()
+    }
 
     try {
       const protocol = JSON.parse(protocolJson) as MongoQueryProtocol
-      const collection = this.db!.collection(protocol.collection)
+      const collection = this.db?.collection(protocol.collection)
 
       if (protocol.operation === 'insert') {
         // Handle array or single
         const docs = Array.isArray(protocol.document) ? protocol.document : [protocol.document]
         const result = await collection.insertMany(docs as any[])
         return {
-            affectedRows: result.insertedCount,
-            insertId: result.insertedIds[0] as any // Return first ID
+          affectedRows: result.insertedCount,
+          insertId: result.insertedIds[0] as any, // Return first ID
         }
       }
 
       if (protocol.operation === 'update') {
         const result = await collection.updateMany(protocol.filter || {}, protocol.update || {})
         return {
-            affectedRows: result.modifiedCount,
-            changedRows: result.modifiedCount
+          affectedRows: result.modifiedCount,
+          changedRows: result.modifiedCount,
         }
       }
 
       if (protocol.operation === 'delete') {
         const result = await collection.deleteMany(protocol.filter || {})
         return {
-            affectedRows: result.deletedCount
+          affectedRows: result.deletedCount,
         }
       }
 
       throw new Error(`Unsupported write operation: \${protocol.operation}`)
-
     } catch (error) {
-       throw new DatabaseError('MongoDB Execute Failed', error)
+      throw new DatabaseError('MongoDB Execute Failed', error)
     }
   }
 
@@ -156,8 +161,8 @@ export class MongoDBDriver implements DriverContract {
 
   private mapDocument(doc: any): any {
     if (doc._id) {
-        doc.id = doc._id.toString()
-        // Keep _id or remove? Best to keep for native usage
+      doc.id = doc._id.toString()
+      // Keep _id or remove? Best to keep for native usage
     }
     return doc
   }

@@ -67,9 +67,11 @@ export abstract class Grammar implements GrammarContract {
     // 1. Try to get from cache first
     let cacheKey = ''
     if (Grammar.useCache) {
-        cacheKey = this.getStructuralKey(query)
-        const cached = this.compilationCache.get(cacheKey)
-        if (cached) return cached
+      cacheKey = this.getStructuralKey(query)
+      const cached = this.compilationCache.get(cacheKey)
+      if (cached) {
+        return cached
+      }
     }
 
     const parts: string[] = []
@@ -119,7 +121,7 @@ export abstract class Grammar implements GrammarContract {
 
     // 2. Store in cache
     if (Grammar.useCache && cacheKey) {
-        this.compilationCache.set(cacheKey, sql)
+      this.compilationCache.set(cacheKey, sql)
     }
 
     return sql
@@ -129,29 +131,31 @@ export abstract class Grammar implements GrammarContract {
    * Generate a unique structural key for a query (excluding values)
    */
   protected getStructuralKey(query: CompiledQuery): string {
-      const wheres = query.wheres.map(w => 
-          `${w.type}:${w.column}:${w.operator}:${w.boolean}:${w.not}:${w.sql}`
-      ).join('|')
+    const wheres = query.wheres
+      .map((w) => `${w.type}:${w.column}:${w.operator}:${w.boolean}:${w.not}:${w.sql}`)
+      .join('|')
 
-      const joins = query.joins.map(j => 
-          `${j.type}:${j.table}:${j.first}:${j.operator}:${j.second}`
-      ).join('|')
+    const joins = query.joins
+      .map((j) => `${j.type}:${j.table}:${j.first}:${j.operator}:${j.second}`)
+      .join('|')
 
-      const orders = query.orders.map(o => `${o.column}:${o.direction}`).join('|')
-      const havings = query.havings.map(h => `${h.type}:${h.column}:${h.operator}:${h.boolean}`).join('|')
+    const orders = query.orders.map((o) => `${o.column}:${o.direction}`).join('|')
+    const havings = query.havings
+      .map((h) => `${h.type}:${h.column}:${h.operator}:${h.boolean}`)
+      .join('|')
 
-      return [
-          query.table,
-          query.columns.join(','),
-          query.distinct ? '1' : '0',
-          wheres,
-          joins,
-          query.groups.join(','),
-          havings,
-          orders,
-          query.limit !== undefined ? 'L' : 'X',
-          query.offset !== undefined ? 'O' : 'X'
-      ].join('_')
+    return [
+      query.table,
+      query.columns.join(','),
+      query.distinct ? '1' : '0',
+      wheres,
+      joins,
+      query.groups.join(','),
+      havings,
+      orders,
+      query.limit !== undefined ? 'L' : 'X',
+      query.offset !== undefined ? 'O' : 'X',
+    ].join('_')
   }
 
   /**
@@ -699,6 +703,6 @@ export abstract class Grammar implements GrammarContract {
    * Compile a JSON update query
    */
   compileUpdateJson(_query: CompiledQuery, _column: string, _value: unknown): string {
-      throw new Error('Partial JSON updates are not supported by this database driver.')
+    throw new Error('Partial JSON updates are not supported by this database driver.')
   }
 }

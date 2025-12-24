@@ -1,5 +1,5 @@
-import { UserFactory } from '../factories/UserFactory.js'
 import { PostFactory } from '../factories/PostFactory.js'
+import { UserFactory } from '../factories/UserFactory.js'
 
 export async function run() {
   console.log('🌱 Seeding database...')
@@ -10,11 +10,10 @@ export async function run() {
 
   // Create posts for each user
   for (const user of users) {
-     const postCount = Math.floor(Math.random() * 5) + 1
-     await PostFactory
-        .count(postCount)
-        .state({ user_id: (user as any).id })
-        .create()
+    const postCount = Math.floor(Math.random() * 5) + 1
+    await PostFactory.count(postCount)
+      .state({ user_id: (user as any).id })
+      .create()
   }
   console.log('✅ Created posts for users')
 }

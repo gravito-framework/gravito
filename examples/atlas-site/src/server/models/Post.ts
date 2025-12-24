@@ -1,4 +1,4 @@
-import { Model, column, BelongsTo } from '@gravito/atlas'
+import { BelongsTo, column, Model } from '@gravito/atlas'
 import User from './User.js'
 
 export default class Post extends Model {

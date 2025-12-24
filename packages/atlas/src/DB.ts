@@ -4,7 +4,6 @@
  */
 
 import { ConnectionManager } from './connection/ConnectionManager'
-import { raw } from './query/Expression'
 import type {
   CacheInterface,
   ConnectionConfig,

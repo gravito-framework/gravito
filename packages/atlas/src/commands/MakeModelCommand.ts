@@ -10,7 +10,7 @@ export class MakeModelCommand extends Command {
   async handle(args: Record<string, any>): Promise<void> {
     const name = args.name
     const path = args.path || 'src/models'
-    
+
     if (!existsSync(path)) {
       mkdirSync(path, { recursive: true })
     }
@@ -32,8 +32,8 @@ export default class ${name} extends Model {
 `
     const filePath = join(path, `${name}.ts`)
     if (existsSync(filePath)) {
-        console.error(`Model ${name} already exists at ${filePath}`)
-        return
+      console.error(`Model ${name} already exists at ${filePath}`)
+      return
     }
 
     writeFileSync(filePath, content)
@@ -41,12 +41,11 @@ export default class ${name} extends Model {
 
     // Handle --migration flag
     if (args.migration) {
-        console.log(`Generating migration for ${name}...`)
-        await new MakeMigrationCommand().handle({ 
-            name: `create_${name.toLowerCase()}s_table`,
-            path: args.migrationPath // Optional custom path
-        })
+      console.log(`Generating migration for ${name}...`)
+      await new MakeMigrationCommand().handle({
+        name: `create_${name.toLowerCase()}s_table`,
+        path: args.migrationPath, // Optional custom path
+      })
     }
   }
 }
-

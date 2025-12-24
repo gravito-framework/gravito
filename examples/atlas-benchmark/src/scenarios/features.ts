@@ -1,4 +1,4 @@
-import { DB, Schema, Model, column, HasMany } from '@gravito/atlas'
+import { column, DB, HasMany, Model, Schema } from '@gravito/atlas'
 
 // --- Models ---
 class User extends Model {
@@ -19,18 +19,18 @@ class Post extends Model {
 // --- Scenario ---
 export async function runFeaturesScenario() {
   console.log('📦 Setting up Schema...')
-  
+
   await Schema.dropIfExists('posts')
   await Schema.dropIfExists('users')
 
-  await Schema.create('users', t => {
+  await Schema.create('users', (t) => {
     t.id()
     t.string('name')
     t.string('email').unique()
     t.timestamps()
   })
 
-  await Schema.create('posts', t => {
+  await Schema.create('posts', (t) => {
     t.id()
     t.string('title')
     t.foreignId('user_id').constrained()
@@ -46,23 +46,25 @@ export async function runFeaturesScenario() {
   // Relationship Create
   // (Assuming active record style relationship create isn't strictly necessary for test, manual for now)
   await DB.table('posts').insert({
-      title: 'First Post',
-      user_id: user.id,
-      created_at: new Date(),
-      updated_at: new Date()
+    title: 'First Post',
+    user_id: user.id,
+    created_at: new Date(),
+    updated_at: new Date(),
   })
 
   console.log('🔍 Testing Eager Loading...')
   const fetchedUser = await User.with('posts').find(user.id)
-  
+
   if (!fetchedUser?.posts || fetchedUser.posts.length !== 1) {
-      throw new Error('Eager loading failed')
+    throw new Error('Eager loading failed')
   }
   console.log('   ✅ HasMany Relation OK')
 
   console.log('🔍 Testing Scopes & Fluent Query...')
   const count = await User.query().where('email', 'like', '%bench%').count()
-  if (count !== 1) throw new Error('Query builder count failed')
+  if (count !== 1) {
+    throw new Error('Query builder count failed')
+  }
   console.log('   ✅ Query Builder OK')
 
   console.log('✅ Feature Parity Test Passed')

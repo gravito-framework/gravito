@@ -1,4 +1,4 @@
-import { Model, column, HasMany } from '@gravito/atlas'
+import { column, HasMany, Model } from '@gravito/atlas'
 import Post from './Post.js' // Use .js extension for ESM if needed, or ts-node handles it. Bun handles ts.
 
 export default class User extends Model {

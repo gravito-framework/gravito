@@ -134,9 +134,11 @@ export class MySQLDriver implements DriverContract {
   ): Promise<QueryResult<T>> {
     const connection = this.transactionConnection ?? (await this.getConnection())
 
-    const params = bindings.map(b => {
-        if (b === undefined) return null
-        return b instanceof Date ? b.toISOString().slice(0, 19).replace('T', ' ') : b
+    const params = bindings.map((b) => {
+      if (b === undefined) {
+        return null
+      }
+      return b instanceof Date ? b.toISOString().slice(0, 19).replace('T', ' ') : b
     })
 
     try {
@@ -144,15 +146,15 @@ export class MySQLDriver implements DriverContract {
 
       // If it's a write operation (no fields), return the header as a single row
       if (!fields && result && typeof result === 'object' && 'insertId' in (result as any)) {
-          const header = result as any
-          const pseudoRow = { id: header.insertId, ...header }
-          return {
-              rows: [pseudoRow] as any,
-              rowCount: 1
-          }
+        const header = result as any
+        const pseudoRow = { id: header.insertId, ...header }
+        return {
+          rows: [pseudoRow] as any,
+          rowCount: 1,
+        }
       }
 
-      const rows = Array.isArray(result) ? result as T[] : []
+      const rows = Array.isArray(result) ? (result as T[]) : []
       const fieldInfo = fields?.map((f: MySQLFieldInfo) => ({
         name: f.name,
         dataType: f.type?.toString(),
@@ -179,9 +181,11 @@ export class MySQLDriver implements DriverContract {
   async execute(sql: string, bindings: unknown[] = []): Promise<ExecuteResult> {
     const connection = this.transactionConnection ?? (await this.getConnection())
 
-    const params = bindings.map(b => {
-        if (b === undefined) return null
-        return b instanceof Date ? b.toISOString().slice(0, 19).replace('T', ' ') : b
+    const params = bindings.map((b) => {
+      if (b === undefined) {
+        return null
+      }
+      return b instanceof Date ? b.toISOString().slice(0, 19).replace('T', ' ') : b
     })
 
     try {

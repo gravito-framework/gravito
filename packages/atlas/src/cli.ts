@@ -122,10 +122,10 @@ async function main() {
           console.error('Error: Model name required')
           process.exit(1)
         }
-        await new MakeModelCommand().handle({ 
-            name, 
-            path: flags.path as string,
-            migration: flags.migration || flags.m
+        await new MakeModelCommand().handle({
+          name,
+          path: flags.path as string,
+          migration: flags.migration || flags.m,
         })
         break
       }
@@ -141,8 +141,8 @@ async function main() {
       }
 
       case 'tinker': {
-          await new TinkerCommand().handle({})
-          break
+        await new TinkerCommand().handle({})
+        break
       }
 
       default:

@@ -88,8 +88,7 @@ export default {
     driver_protocol_desc:
       '在單一設定中定義您的整個資料宇宙。無需改變思考模式，即可瞬間切換存取上下文。',
     switching_title: '動態連線切換',
-    switching_desc:
-      'atlas.connection("redis").set(...) — 絕對的呼叫自由，零冗餘程式碼。',
+    switching_desc: 'atlas.connection("redis").set(...) — 絕對的呼叫自由，零冗餘程式碼。',
     bun_engine_title: 'Bun 原生引擎',
     bun_engine_desc: '專為 Bun 的高速 I/O 設計。在現代執行環境中體驗亞毫秒級的查詢效能。',
     view_guide: '查看驅動程式指南',
