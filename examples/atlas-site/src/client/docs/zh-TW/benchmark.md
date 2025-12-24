@@ -10,108 +10,107 @@
  
  下表展現了在不同使用模式下所達成的每秒操作次數 (OPS)。
  
- <div class="my-10 space-y-8 not-prose">
-     
-     <!-- 對照組：原始讀取 -->
-     <div class="bg-white/[0.03] border border-white/10 rounded-xl p-6 hover:border-atlas-cyan/30 transition-colors">
-         <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
-             <span class="w-1 h-6 bg-atlas-cyan rounded-full shadow-[0_0_10px_cyan]"></span>
-             Raw Read (基準線)
-         </h3>
-         <div class="space-y-5">
-             <!-- SQLite -->
-             <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">SQLite (In-Memory)</span>
-                     <span class="text-atlas-cyan font-bold">3,523,000 <span class="text-[9px] opacity-60 font-normal">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-atlas-cyan shadow-[0_0_10px_cyan]" style="width: 100%"></div>
-                 </div>
-             </div>
-             <!-- MariaDB -->
-              <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">MariaDB</span>
-                     <span class="text-white">1,111,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-atlas-cyan/60" style="width: 31.5%"></div>
-                 </div>
-             </div>
-             <!-- PostgreSQL -->
-             <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">PostgreSQL</span>
-                     <span class="text-white">1,110,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-atlas-cyan/60" style="width: 31.5%"></div>
-                 </div>
-             </div>
-             <!-- MySQL -->
-              <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">MySQL 8.0</span>
-                     <span class="text-white">521,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-atlas-cyan/30" style="width: 14.7%"></div>
-                 </div>
-             </div>
-         </div>
-     </div>
- 
-     <!-- 對照組：模型水合 -->
-     <div class="bg-white/[0.03] border border-white/10 rounded-xl p-6 hover:border-purple-500/30 transition-colors">
-         <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
-             <span class="w-1 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_purple]"></span>
-             Model Hydration (模型水合)
-         </h3>
-         <div class="space-y-5">
-              <!-- MariaDB -->
-              <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">MariaDB</span>
-                     <span class="text-purple-400 font-bold">253,000 <span class="text-[9px] opacity-60 font-normal">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-purple-500 shadow-[0_0_10px_purple]" style="width: 100%"></div>
-                 </div>
-             </div>
-             <!-- MySQL -->
-              <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">MySQL 8.0</span>
-                     <span class="text-white">240,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-purple-500/80" style="width: 94.8%"></div>
-                 </div>
-             </div>
-             <!-- SQLite -->
-             <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">SQLite</span>
-                     <span class="text-white">223,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-purple-500/70" style="width: 88.1%"></div>
-                 </div>
-             </div>
-              <!-- PostgreSQL -->
-             <div class="relative">
-                 <div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
-                     <span class="text-gray-400">PostgreSQL</span>
-                     <span class="text-white">193,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
-                 </div>
-                 <div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
-                     <div class="h-full bg-purple-500/60" style="width: 76.2%"></div>
-                 </div>
-             </div>
-         </div>
-     </div>
- </div>
+<div class="my-10 space-y-8 not-prose">
+<!-- 對照組：原始讀取 -->
+<div class="bg-white/[0.03] border border-white/10 rounded-xl p-6 hover:border-atlas-cyan/30 transition-colors">
+<h3 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
+<span class="w-1 h-6 bg-atlas-cyan rounded-full shadow-[0_0_10px_cyan]"></span>
+Raw Read (基準線)
+</h3>
+<div class="space-y-5">
+<!-- SQLite -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">SQLite (In-Memory)</span>
+<span class="text-atlas-cyan font-bold">3,523,000 <span class="text-[9px] opacity-60 font-normal">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-atlas-cyan shadow-[0_0_10px_cyan]" style="width: 100%"></div>
+</div>
+</div>
+<!-- MariaDB -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">MariaDB</span>
+<span class="text-white">1,111,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-atlas-cyan/60" style="width: 31.5%"></div>
+</div>
+</div>
+<!-- PostgreSQL -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">PostgreSQL</span>
+<span class="text-white">1,110,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-atlas-cyan/60" style="width: 31.5%"></div>
+</div>
+</div>
+<!-- MySQL -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">MySQL 8.0</span>
+<span class="text-white">521,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-atlas-cyan/30" style="width: 14.7%"></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 對照組：模型水合 -->
+<div class="bg-white/[0.03] border border-white/10 rounded-xl p-6 hover:border-purple-500/30 transition-colors">
+<h3 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
+<span class="w-1 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_purple]"></span>
+Model Hydration (模型水合)
+</h3>
+<div class="space-y-5">
+<!-- MariaDB -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">MariaDB</span>
+<span class="text-purple-400 font-bold">253,000 <span class="text-[9px] opacity-60 font-normal">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-purple-500 shadow-[0_0_10px_purple]" style="width: 100%"></div>
+</div>
+</div>
+<!-- MySQL -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">MySQL 8.0</span>
+<span class="text-white">240,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-purple-500/80" style="width: 94.8%"></div>
+</div>
+</div>
+<!-- SQLite -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">SQLite</span>
+<span class="text-white">223,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-purple-500/70" style="width: 88.1%"></div>
+</div>
+</div>
+<!-- PostgreSQL -->
+<div class="relative">
+<div class="flex justify-between text-xs font-mono mb-1.5 align-bottom">
+<span class="text-gray-400">PostgreSQL</span>
+<span class="text-white">193,000 <span class="text-[9px] opacity-60 font-normal text-gray-500">ops/sec</span></span>
+</div>
+<div class="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+<div class="h-full bg-purple-500/60" style="width: 76.2%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 ---
 
