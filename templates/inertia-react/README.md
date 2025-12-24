@@ -78,7 +78,7 @@ core.hooks.addAction('request:start', (args) => {
 ## Available Orbits
 
 - `@gravito/stasis` - In-memory caching
-- `@gravito/db` - Database integration
+- `@gravito/atlas` - Database integration
 - `@gravito/sentinel` - Authentication
 - `@gravito/nebula` - File storage
 

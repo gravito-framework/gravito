@@ -72,17 +72,22 @@ const core = await PlanetCore.boot({
 
 ```typescript
 import { OrbitStream } from '@gravito/stream'
-import { OrbitDB } from '@gravito/db'
+
+// Create a database service adapter that implements DatabaseService interface
+const dbService = {
+  execute: async (sql, bindings) => yourDbClient.query(sql, bindings),
+  transaction: async (callback) => yourDbClient.transaction(callback),
+}
 
 const core = await PlanetCore.boot({
   orbits: [
-    OrbitDB.configure({ db: drizzleClient }),
     OrbitStream.configure({
       default: 'database',
       connections: {
         database: {
           driver: 'database',
-          table: 'jobs'
+          table: 'jobs',
+          dbService: dbService // Pass your database service
         }
       }
     })

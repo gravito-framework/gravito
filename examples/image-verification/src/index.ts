@@ -10,7 +10,7 @@ let appCore: PlanetCore
 
 // 1. Define Mock Remote Storage Providers (unchanged)
 class S3MockProvider implements StorageProvider {
-  constructor(private bucket: string) { }
+  constructor(private bucket: string) {}
 
   async put(key: string, data: Blob | Buffer | string): Promise<void> {
     console.log(`[S3 MOCK] Uploading to bucket "${this.bucket}": ${key}`)
@@ -36,7 +36,7 @@ class S3MockProvider implements StorageProvider {
 }
 
 class GCSMockProvider implements StorageProvider {
-  constructor(private bucket: string) { }
+  constructor(private bucket: string) {}
 
   async put(key: string, data: Blob | Buffer | string): Promise<void> {
     console.log(`[GCS MOCK] Uploading to bucket "${this.bucket}": ${key}`)

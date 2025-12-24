@@ -105,7 +105,7 @@ bun run --filter '*' publish
 以下套件處於 Alpha 階段，正在積極開發中 (`1.0.0-alpha.*`)：
 
 **資料與儲存**
-- `@gravito/db` - 資料庫核心
+- `@gravito/atlas` - 資料庫適配器
 - `@gravito/dark-matter` - NoSQL/Document 儲存
 - `@gravito/nebula` - 檔案儲存系統
 - `@gravito/plasma` - Redis 快取適配器

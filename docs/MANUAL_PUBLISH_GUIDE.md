@@ -98,8 +98,8 @@ npm publish --access public --tag alpha
 cd packages/plasma
 npm publish --access public --tag alpha
 
-# 例如：@gravito/db (資料庫)
-cd packages/db
+# 例如：@gravito/atlas (資料庫)
+cd packages/atlas
 npm publish --access public --tag alpha
 ```
 
