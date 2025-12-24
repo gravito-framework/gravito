@@ -110,8 +110,11 @@ export default {
   },
   footer: {
     desc: '為創造者打造的高效能框架。基於自主研發核心與 Bun 驅動，追求極致速度與簡約架構。',
+    ecosystem: '生態系統',
     links: '連結',
     home: '首頁',
+    lux: 'Luminosity (Lux)',
+    lux_note: 'Luminosity (Lux) — 基於 Gravito Core 的 Sitemap 引擎。',
     connect: '社群',
     copyright: 'Gravito Framework. 採用 MIT 授權。',
   },

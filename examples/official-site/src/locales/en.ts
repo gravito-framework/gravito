@@ -115,8 +115,11 @@ export default {
   },
   footer: {
     desc: 'The High-Performance Framework for Builders. Powered by Gravito Core & Bun for extreme speed and simplicity.',
+    ecosystem: 'Ecosystem',
     links: 'Links',
     home: 'Home',
+    lux: 'Luminosity (Lux)',
+    lux_note: 'Luminosity (Lux) — The sitemap engine built on Gravito Core.',
     connect: 'Connect',
     copyright: 'Gravito Framework. MIT License.',
   },
