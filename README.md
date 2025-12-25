@@ -50,21 +50,35 @@ Detailed documentation is available in the [docs](./docs) directory.
 
 Note: Some features are only available when running on Gravito core.
 
-## 📦 Ecosystem (Orbits)
-Gravito provides a rich set of official Orbit modules, all designed to be completely pluggable:
+## 📦 Ecosystem (Orbits & Core)
+
+Gravito provides a rich set of official packages, all designed to be completely pluggable:
+
+### Core Layer
 
 | Package | Name | Description | Status |
 |---|---|---|---|
 | `gravito-core` | **PlanetCore** | Ultra-lightweight micro-kernel with Hooks & Lifecycle management. | ✅ Stable |
-| `@gravito/orbit-db` | **Orbit** | Database layer based on Drizzle ORM with Migration/Seeding. | ✅ Stable |
-| `@gravito/sentinel` | **Sentinel** | Modern Authentication Orbit (JWT/Session). | ✅ Alpha |
+| `@gravito/photon` | **Photon** | High-performance HTTP engine powering the framework. | ✅ Stable |
+| `@gravito/beam` | **Beam** | Type-safe RPC client for frontend-backend communication. | ✅ Stable |
+| `@gravito/constellation` | **Constellation** | High-performance Radix Tree Router. | ✅ Stable |
+
+### Orbit Modules
+
+| Package | Name | Description | Status |
+|---|---|---|---|
+| `@gravito/atlas` | **Atlas** | Database ORM with Active Record pattern, migrations, and seeding. | ✅ Stable |
+| `@gravito/sentinel` | **Sentinel** | Modern Authentication Orbit (JWT/Session/Guards). | ✅ Alpha |
+| `@gravito/fortify` | **Fortify** | Complete Auth UI scaffolding (Login/Register/Reset). | ✅ Alpha |
 | `@gravito/nebula` | **Nebula** | File Storage & CDN Integration (Local/S3/R2). | ✅ Beta |
 | `@gravito/stasis` | **Stasis** | Multi-layer Cache System (Memory/Redis). | ✅ Stable |
 | `@gravito/prism` | **Prism** | View Engine with Image Optimization & Edge Templates. | ✅ Stable |
 | `@gravito/luminosity` | **Luminosity** | Enterprise SEO Engine (Sitemaps/Meta/Robots). | ✅ Stable |
 | `@gravito/flare` | **Flare** | Notification & Mail Queue System (SMTP/Resend). | ✅ Alpha |
 | `@gravito/ion` | **Ion** | Inertia.js Protocol Adapter for React/Vue. | ✅ Stable |
-| `@gravito/constellation` | **Constellation** | High-performance Radix Tree Router. | ✅ Stable |
+| `@gravito/mass` | **Mass** | Request validation with TypeBox schemas. | ✅ Stable |
+| `@gravito/stream` | **Stream** | Background job queue with workers. | ✅ Beta |
+| `@gravito/monitor` | **Monitor** | Health checks, metrics, and tracing. | ✅ Beta |
 
 ## 🤝 Contributing
 
