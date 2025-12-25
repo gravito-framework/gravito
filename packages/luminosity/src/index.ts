@@ -10,6 +10,8 @@ export * from './interfaces'
 export * from './Luminosity'
 export * from './meta'
 export * from './robots'
+// Scanner (Route Discovery)
+export * from './scanner'
 export * from './storage/Compactor'
 export * from './storage/JsonlLogger'
 export * from './storage/MemoryCache'
