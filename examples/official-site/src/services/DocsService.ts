@@ -360,6 +360,7 @@ export class DocsService {
           orm_mutators: '修改器與轉換 (Mutators)',
           orm_serialization: '序列化 (Serialization)',
           orm_factories: '模型工廠 (Factories)',
+          orm_collections: '集合 (Collections)',
 
           security: '安全機制',
           image_opt: '圖片優化',
@@ -417,6 +418,7 @@ export class DocsService {
           orm_mutators: 'Mutators & Casting',
           orm_serialization: 'Serialization',
           orm_factories: 'Factories',
+          orm_collections: 'Collections',
 
           security: 'Security',
           image_opt: 'Image Optimization',
@@ -484,7 +486,8 @@ export class DocsService {
           { title: trans.orm_relationships, path: `${prefix}/guide/database/atlas-relationships` },
           { title: trans.orm_mutators, path: `${prefix}/guide/database/atlas-mutators` },
           { title: trans.orm_serialization, path: `${prefix}/guide/database/atlas-serialization` },
-          { title: trans.orm_factories, path: `${prefix}/guide/database/seeding` },
+          { title: trans.orm_factories, path: `${prefix}/guide/database/atlas-factories` },
+          { title: trans.orm_collections, path: `${prefix}/guide/database/atlas-collections` },
         ],
       },
       {

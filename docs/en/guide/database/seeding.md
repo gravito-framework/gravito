@@ -1,10 +1,10 @@
-# Seeding & Factories
+# Database Seeding
 
-Atlas includes the ability to seed your database with test data using seed classes and model factories.
+Atlas includes the ability to seed your database with test data using seed classes.
 
 ## Writing Seeders
 
-Seeders are stored in the `database/seeders` directory. A seeder class contains a `run` method where you can insert data into the database.
+Seeders are stored in the `database/seeders` directory. A seeder class contains a `run` method where you can insert data into your database.
 
 ```typescript
 import { Seeder } from '@gravito/atlas';
@@ -21,41 +21,27 @@ export default class DatabaseSeeder extends Seeder {
 }
 ```
 
-## Model Factories
+## Using Model Factories
 
-When testing your application or seeding your database, you may need to insert a few records into your database. Instead of manually specifying the value of each column, you can use factories to define a set of default attributes for each of your models.
-
-### Defining Factories
-
-Factories are typically stored in `database/factories`. Use the `define` method to define your factory.
+In addition to manual insertion, you can use [Model Factories](./atlas-factories) to quickly generate large amounts of test data.
 
 ```typescript
 import { Factory } from '@gravito/atlas';
 import User from '../src/models/User';
 
-export default Factory.define(User, (faker) => {
-  return {
-    name: faker.name.fullName(),
-    email: faker.internet.email(),
-    password: 'password', // hashed in production
-  };
-});
+export default class UserSeeder extends Seeder {
+  async run() {
+    // Create 10 users using the factory
+    await Factory.model(User).count(10).create();
+  }
+}
 ```
 
-### Using Factories to Seed
+> For detailed factory definition and usage, please refer to the [Model Factories Documentation](./atlas-factories).
 
-Once you have defined your factories, you may use them in your seeders or tests:
+## Calling Additional Seeders
 
-```typescript
-// Create 10 users using the factory
-await User.factory().count(10).create();
-```
-
-## Advanced Seeding
-
-### Calling Additional Seeders
-
-Within the `run` method of a seeder, you may use the `call` method to execute additional seed classes. This allows you to break up your database seeding into multiple files:
+Within the `run` method of a Seeder class, you can use the `call` method to execute other seed classes. This allows you to break up your database seeding into multiple files, preventing a single seeder file from becoming too large:
 
 ```typescript
 export default class DatabaseSeeder extends Seeder {
@@ -69,39 +55,6 @@ export default class DatabaseSeeder extends Seeder {
 }
 ```
 
-## Advanced Factories
-
-### Factory States
-
-States allow you to define discrete variations of your model factories. For example, your `User` model might have a `suspended` state that modifies one of its default attribute values:
-
-```typescript
-// Applying a state override
-await User.factory().count(5).state({ active: false }).create();
-```
-
-### Factory Sequences
-
-Sometimes you may wish to alternate a model attribute's value for each generated model. You may use the `sequence` method to define a transformation for a specific attribute:
-
-```typescript
-const users = await User.factory()
-  .count(10)
-  .sequence('role', (index) => index % 2 === 0 ? 'admin' : 'user')
-  .create();
-```
-
-### Factory Relationships
-
-Atlas allows you to define relationships within your factories, ensuring that related models are created automatically:
-
-```typescript
-// Create a post with 3 associated comments
-await Post.factory()
-  .has(Comment.factory().count(3))
-  .create();
-```
-
 ## Running Seeders
 
 To seed your database, execute the `db:seed` Orbit command:
@@ -110,15 +63,15 @@ To seed your database, execute the `db:seed` Orbit command:
 bun orbit db:seed
 ```
 
-You may also specify a specific seeder class to run:
+You can also specify a specific seeder class to run:
 
 ```bash
 bun orbit db:seed --class=UserSeeder
 ```
 
-## Production Warning
+## Production Environment Warning
 
-By default, the seeder will warn you if you attempt to run it in the `production` environment, as it may overwrite real data:
+By default, if you attempt to run seeders in a `production` environment, the system will issue a warning as this may overwrite real data. To force execution, use the `--force` flag:
 
 ```bash
 bun orbit db:seed --force
