@@ -1,7 +1,7 @@
 {
-  "name": "@gravito/luminosity-adapter-hono",
+  "name": "@gravito/luminosity-adapter-photon",
   "version": "1.0.0-beta.5",
-  "description": "Luminosity adapter for Hono-based environments",
+  "description": "Luminosity adapter for Photon-based environments",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
@@ -25,7 +25,7 @@
     "@gravito/luminosity": "1.0.0-beta.5"
   },
   "peerDependencies": {
-    "hono": "^4.0.0"
+    "@gravito/photon": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest",
@@ -40,6 +40,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gravito-framework/gravito.git",
-    "directory": "packages/luminosity-adapter-hono"
+    "directory": "packages/luminosity-adapter-photon"
   }
 }

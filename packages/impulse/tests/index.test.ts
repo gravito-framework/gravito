@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
+import { Photon } from '@gravito/photon'
 import { AuthorizationException, GravitoException, ValidationException } from 'gravito-core'
-import { Hono } from 'hono'
 import { z } from 'zod'
 import {
   DefaultMessageProvider,
@@ -10,7 +10,7 @@ import {
 } from '../src/FormRequest'
 
 const createApp = () => {
-  const app = new Hono()
+  const app = new Photon()
   app.onError((err, c) => {
     if (err instanceof AuthorizationException) {
       return c.json(

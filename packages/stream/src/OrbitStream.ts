@@ -23,7 +23,7 @@ export interface OrbitStreamOptions extends QueueConfig {
  * Orbit Queue
  *
  * Gravito Orbit implementation providing queue functionality.
- * Integrates with PlanetCore and injects a `queue` service into the Hono Context.
+ * Integrates with PlanetCore and injects a `queue` service into the Photon Context.
  *
  * @example
  * ```typescript

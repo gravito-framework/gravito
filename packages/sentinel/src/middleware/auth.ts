@@ -1,5 +1,5 @@
+import type { MiddlewareHandler } from '@gravito/photon'
 import { AuthenticationException } from 'gravito-core'
-import type { MiddlewareHandler } from 'hono'
 import type { AuthManager } from '../AuthManager'
 
 export const auth = (guard?: string): MiddlewareHandler => {

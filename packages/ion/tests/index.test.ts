@@ -102,7 +102,7 @@ describe('InertiaService', () => {
 
 describe('OrbitIon Integration', () => {
   it('should inject inertia service into context', async () => {
-    // Mock Hono app-like structure
+    // Mock Photon app-like structure
     const app = {
       use: mock((_path: string, handler: any) => {
         // Store the middleware handler to call it later

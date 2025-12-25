@@ -71,7 +71,7 @@ describe('Model Observers', () => {
 
     User.observe(observer)
 
-    const user = User.create<User>({ name: 'Carl' })
+    const user = User.make<User>({ name: 'Carl' })
     await user.save()
 
     expect(createdSpy).toHaveBeenCalled()

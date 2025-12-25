@@ -96,7 +96,7 @@ export interface HttpAdapter<V extends GravitoVariables = GravitoVariables> {
 
   /**
    * Adapter name for identification
-   * @example 'hono', 'bun-native', 'express'
+   * @example 'photon', 'bun-native', 'express'
    */
   readonly name: string
 

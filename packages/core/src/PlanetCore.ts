@@ -15,7 +15,7 @@ import { Container } from './Container'
 import { EventManager } from './EventManager'
 import { GravitoException } from './exceptions/GravitoException'
 // import { Photon } from '@gravito/photon' - Decoupled
-// import { HTTPException } from 'hono/http-exception' - Decoupled
+// import { HTTPException } from '@gravito/photon/http-exception' - Decoupled
 import { HttpException } from './exceptions/HttpException'
 import { ValidationException } from './exceptions/ValidationException'
 import {

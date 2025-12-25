@@ -8,7 +8,7 @@ await build({
   splitting: false,
   minify: false,
   sourcemap: 'external',
-  external: ['hono', '@gravito/luminosity'],
+  external: ['@gravito/photon', '@gravito/luminosity'],
 })
 
 console.log('📝 Generating type declarations...')

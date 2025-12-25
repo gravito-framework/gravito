@@ -1,6 +1,6 @@
+import type { Env, MiddlewareHandler } from '@gravito/photon'
 import { tbValidator } from '@hono/typebox-validator'
 import type { Static, TSchema } from '@sinclair/typebox'
-import type { Env, MiddlewareHandler } from 'hono'
 
 /**
  * Validation source type.
@@ -14,7 +14,7 @@ export type ValidationSource = 'json' | 'query' | 'param' | 'form'
  *
  * @param source - Validation source (json, query, param, form)
  * @param schema - TypeBox Schema
- * @returns Hono middleware handler that validates the request.
+ * @returns Photon middleware handler that validates the request.
  */
 export function validate<
   T extends TSchema,

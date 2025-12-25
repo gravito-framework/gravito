@@ -94,7 +94,7 @@ describe('ModelEvents', () => {
   })
 
   test('it triggers creating and saving events on insert', async () => {
-    const user = EventUser.create<EventUser>({ name: 'Carl' })
+    const user = EventUser.make<EventUser>({ name: 'Carl' })
     await user.save()
 
     expect(user.events).toContain('saving')

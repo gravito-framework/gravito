@@ -1,5 +1,5 @@
+import type { MiddlewareHandler } from '@gravito/photon'
 import { AuthorizationException } from 'gravito-core'
-import type { MiddlewareHandler } from 'hono'
 import type { Gate } from '../Gate'
 
 export const can = (ability: string, ...args: unknown[]): MiddlewareHandler => {

@@ -1,4 +1,4 @@
-import type { MiddlewareHandler } from 'hono'
+import type { MiddlewareHandler } from '@gravito/photon'
 
 export interface I18nConfig {
   defaultLocale: string

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import type { Context } from 'hono'
+import type { Context } from '@gravito/photon'
 import type { Authenticatable } from '../src/contracts/Authenticatable'
 import { TokenGuard } from '../src/guards/TokenGuard'
 import { CallbackUserProvider } from '../src/providers/CallbackUserProvider'

@@ -27,7 +27,7 @@ export interface OrbitPlasmaOptions extends Partial<RedisManagerConfig> {
  * OrbitPlasma - Redis Orbit
  *
  * Gravito Orbit implementation providing Redis functionality.
- * Integrates with PlanetCore and injects a `redis` service into the Hono Context.
+ * Integrates with PlanetCore and injects a `redis` service into the Photon Context.
  *
  * @example
  * ```typescript

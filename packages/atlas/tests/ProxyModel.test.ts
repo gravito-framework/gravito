@@ -115,12 +115,12 @@ describe('Model', () => {
 
   describe('create', () => {
     it('should create model with attributes', () => {
-      const user = TestUser.create({ name: 'Carl', email: 'carl@test.com' })
+      const user = TestUser.make({ name: 'Carl', email: 'carl@test.com' })
       expect(user.getAttributes()).toEqual({ name: 'Carl', email: 'carl@test.com' })
     })
 
     it('should not be marked as exists', () => {
-      const user = TestUser.create({ name: 'Carl' })
+      const user = TestUser.make({ name: 'Carl' })
       expect(user.exists).toBe(false)
     })
   })
@@ -140,12 +140,12 @@ describe('Model', () => {
 
   describe('proxy get/set', () => {
     it('should access attributes through proxy', () => {
-      const user = TestUser.create({ name: 'Carl' })
+      const user = TestUser.make({ name: 'Carl' })
       expect((user as Record<string, unknown>).name).toBe('Carl')
     })
 
     it('should set attributes through proxy', () => {
-      const user = TestUser.create({})
+      const user = TestUser.make({})
       ;(user as Record<string, unknown>).name = 'Carl'
       expect(user.getAttributes().name).toBe('Carl')
     })
@@ -177,7 +177,7 @@ describe('Model', () => {
 
   describe('toJSON', () => {
     it('should return all attributes', () => {
-      const user = TestUser.create({ name: 'Carl', email: 'carl@test.com' })
+      const user = TestUser.make({ name: 'Carl', email: 'carl@test.com' })
       expect(user.toJSON()).toEqual({ name: 'Carl', email: 'carl@test.com' })
     })
   })

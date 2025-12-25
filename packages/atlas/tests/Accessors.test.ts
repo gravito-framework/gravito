@@ -50,7 +50,7 @@ describe('Accessors & Mutators', () => {
   })
 
   test('it uses mutator on set', () => {
-    const user = User.create<User>({})
+    const user = User.make<User>({})
     user.password = 'secret'
 
     // Should be hashed in attributes

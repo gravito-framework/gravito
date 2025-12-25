@@ -1,5 +1,5 @@
+import type { Context } from '@gravito/photon'
 import { AuthenticationException } from 'gravito-core'
-import type { Context } from 'hono'
 import type { Authenticatable } from './contracts/Authenticatable'
 import type { Guard, StatefulGuard } from './contracts/Guard'
 import type { UserProvider } from './contracts/UserProvider'

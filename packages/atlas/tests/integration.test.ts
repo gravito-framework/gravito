@@ -54,7 +54,7 @@ describe('Atlas Exhaustive Integration Test', () => {
 
   test('1. Basic CRUD & Model Logic', async () => {
     // Create via manual save to verify instance logic
-    const user = User.create()
+    const user = User.make()
     user.name = 'Carl'
     user.email = 'carl@gravito.dev'
     user.age = 30

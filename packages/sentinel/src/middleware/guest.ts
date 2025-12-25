@@ -1,4 +1,4 @@
-import type { MiddlewareHandler } from 'hono'
+import type { MiddlewareHandler } from '@gravito/photon'
 import type { AuthManager } from '../AuthManager'
 
 export const guest = (guard?: string, redirectTo = '/'): MiddlewareHandler => {

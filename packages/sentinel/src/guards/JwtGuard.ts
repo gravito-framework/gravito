@@ -1,5 +1,5 @@
-import type { Context } from 'hono'
-import { verify } from 'hono/jwt'
+import type { Context } from '@gravito/photon'
+import { verify } from '@gravito/photon/jwt'
 import type { Authenticatable } from '../contracts/Authenticatable'
 import type { Guard } from '../contracts/Guard'
 import type { UserProvider } from '../contracts/UserProvider'

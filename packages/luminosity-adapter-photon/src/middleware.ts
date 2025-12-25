@@ -1,15 +1,15 @@
 import { type SeoConfig, SeoEngine } from '@gravito/luminosity'
-import type { Context, MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from '@gravito/photon'
 
 /**
- * Create a Gravito SEO middleware for Hono.
+ * Create a Gravito SEO middleware for Photon.
  *
  * This middleware handles requests for `sitemap.xml` and `robots.txt`.
  * It automatically initializes the SEO engine and renders the appropriate content
  * based on the request path.
  *
  * @param config - The SEO configuration object.
- * @returns A Hono middleware handler.
+ * @returns A Photon middleware handler.
  */
 export function gravitoSeo(config: SeoConfig): MiddlewareHandler {
   const engine = new SeoEngine(config)

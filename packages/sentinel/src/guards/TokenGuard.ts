@@ -1,4 +1,4 @@
-import type { Context } from 'hono'
+import type { Context } from '@gravito/photon'
 import type { Authenticatable } from '../contracts/Authenticatable'
 import type { Guard } from '../contracts/Guard'
 import type { UserProvider } from '../contracts/UserProvider'

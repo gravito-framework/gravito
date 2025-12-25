@@ -48,7 +48,7 @@ describe('Attribute Casting', () => {
   })
 
   test('it casts boolean on set', () => {
-    const m = CastModel.create<CastModel>({})
+    const m = CastModel.make<CastModel>({})
 
     m.is_active = true
     expect(m.is_active).toBe(true)
@@ -79,7 +79,7 @@ describe('Attribute Casting', () => {
   })
 
   test('it casts json on set', () => {
-    const m = CastModel.create<CastModel>({})
+    const m = CastModel.make<CastModel>({})
     const data = { foo: 'bar' }
 
     m.meta = data
@@ -96,7 +96,7 @@ describe('Attribute Casting', () => {
   })
 
   test('it casts date on set', () => {
-    const m = CastModel.create<CastModel>({})
+    const m = CastModel.make<CastModel>({})
     const date = new Date('2023-01-01T00:00:00.000Z')
 
     m.birthday = date
@@ -119,7 +119,7 @@ describe('Attribute Casting', () => {
   })
 
   test('it casts number on set', () => {
-    const m = CastModel.create<CastModel>({})
+    const m = CastModel.make<CastModel>({})
 
     // @ts-expect-error
     m.score = '123'
