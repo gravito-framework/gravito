@@ -5,49 +5,49 @@ import pc from 'picocolors'
 export type FortifyStack = 'html' | 'react' | 'vue'
 
 interface FortifyInstallOptions {
-    stack: FortifyStack
-    force?: boolean
+  stack: FortifyStack
+  force?: boolean
 }
 
 /**
  * Install Fortify authentication scaffolding
  */
 export async function installFortify(options: FortifyInstallOptions): Promise<void> {
-    const cwd = process.cwd()
-    const { stack, force = false } = options
+  const cwd = process.cwd()
+  const { stack, force = false } = options
 
-    console.log(pc.cyan('\n🔐 Installing @gravito/fortify authentication scaffolding...\n'))
+  console.log(pc.cyan('\n🔐 Installing @gravito/fortify authentication scaffolding...\n'))
 
-    // 1. Generate config file
-    await generateConfig(cwd, force)
+  // 1. Generate config file
+  await generateConfig(cwd, force)
 
-    // 2. Generate migrations
-    await generateMigrations(cwd, force)
+  // 2. Generate migrations
+  await generateMigrations(cwd, force)
 
-    // 3. Generate views based on stack
-    await generateViews(cwd, stack, force)
+  // 3. Generate views based on stack
+  await generateViews(cwd, stack, force)
 
-    // 4. Generate User model if not exists
-    await generateUserModel(cwd, force)
+  // 4. Generate User model if not exists
+  await generateUserModel(cwd, force)
 
-    console.log(pc.green('\n✅ Fortify authentication installed successfully!\n'))
-    console.log(pc.dim('Next steps:'))
-    console.log(pc.dim('  1. Run `bun gravito db:migrate` to create tables'))
-    console.log(pc.dim('  2. Add FortifyOrbit to your gravito.config.ts'))
-    console.log(pc.dim('  3. Visit /login to test authentication\n'))
+  console.log(pc.green('\n✅ Fortify authentication installed successfully!\n'))
+  console.log(pc.dim('Next steps:'))
+  console.log(pc.dim('  1. Run `bun gravito db:migrate` to create tables'))
+  console.log(pc.dim('  2. Add FortifyOrbit to your gravito.config.ts'))
+  console.log(pc.dim('  3. Visit /login to test authentication\n'))
 }
 
 async function generateConfig(cwd: string, force: boolean): Promise<void> {
-    const configPath = path.join(cwd, 'config', 'fortify.ts')
+  const configPath = path.join(cwd, 'config', 'fortify.ts')
 
-    if (!force && await fileExists(configPath)) {
-        console.log(pc.yellow('  ⚠ config/fortify.ts already exists, skipping...'))
-        return
-    }
+  if (!force && (await fileExists(configPath))) {
+    console.log(pc.yellow('  ⚠ config/fortify.ts already exists, skipping...'))
+    return
+  }
 
-    await ensureDir(path.dirname(configPath))
+  await ensureDir(path.dirname(configPath))
 
-    const content = `import { definefortifyConfig } from '@gravito/fortify'
+  const content = `import { definefortifyConfig } from '@gravito/fortify'
 import { User } from '../src/models/User'
 
 export default definefortifyConfig({
@@ -76,22 +76,25 @@ export default definefortifyConfig({
 })
 `
 
-    await fs.writeFile(configPath, content, 'utf-8')
-    console.log(pc.green('  ✓ Created config/fortify.ts'))
+  await fs.writeFile(configPath, content, 'utf-8')
+  console.log(pc.green('  ✓ Created config/fortify.ts'))
 }
 
 async function generateMigrations(cwd: string, force: boolean): Promise<void> {
-    const migrationsDir = path.join(cwd, 'src', 'database', 'migrations')
-    await ensureDir(migrationsDir)
+  const migrationsDir = path.join(cwd, 'src', 'database', 'migrations')
+  await ensureDir(migrationsDir)
 
-    const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, '').slice(0, 14)
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[-T:.Z]/g, '')
+    .slice(0, 14)
 
-    // Users table migration
-    const usersPath = path.join(migrationsDir, `${timestamp}_create_users_table.ts`)
-    if (!force && await fileExists(usersPath)) {
-        console.log(pc.yellow('  ⚠ Users migration already exists, skipping...'))
-    } else {
-        const usersContent = `import { Migration, Schema, Blueprint } from '@gravito/atlas'
+  // Users table migration
+  const usersPath = path.join(migrationsDir, `${timestamp}_create_users_table.ts`)
+  if (!force && (await fileExists(usersPath))) {
+    console.log(pc.yellow('  ⚠ Users migration already exists, skipping...'))
+  } else {
+    const usersContent = `import { Migration, Schema, Blueprint } from '@gravito/atlas'
 
 export default class CreateUsersTable extends Migration {
   async up(): Promise<void> {
@@ -111,17 +114,17 @@ export default class CreateUsersTable extends Migration {
   }
 }
 `
-        await fs.writeFile(usersPath, usersContent, 'utf-8')
-        console.log(pc.green(`  ✓ Created ${path.relative(cwd, usersPath)}`))
-    }
+    await fs.writeFile(usersPath, usersContent, 'utf-8')
+    console.log(pc.green(`  ✓ Created ${path.relative(cwd, usersPath)}`))
+  }
 
-    // Password reset tokens migration
-    const timestamp2 = String(Number(timestamp) + 1).padStart(14, '0')
-    const resetPath = path.join(migrationsDir, `${timestamp2}_create_password_reset_tokens_table.ts`)
-    if (!force && await fileExists(resetPath)) {
-        console.log(pc.yellow('  ⚠ Password reset tokens migration already exists, skipping...'))
-    } else {
-        const resetContent = `import { Migration, Schema, Blueprint } from '@gravito/atlas'
+  // Password reset tokens migration
+  const timestamp2 = String(Number(timestamp) + 1).padStart(14, '0')
+  const resetPath = path.join(migrationsDir, `${timestamp2}_create_password_reset_tokens_table.ts`)
+  if (!force && (await fileExists(resetPath))) {
+    console.log(pc.yellow('  ⚠ Password reset tokens migration already exists, skipping...'))
+  } else {
+    const resetContent = `import { Migration, Schema, Blueprint } from '@gravito/atlas'
 
 export default class CreatePasswordResetTokensTable extends Migration {
   async up(): Promise<void> {
@@ -137,74 +140,74 @@ export default class CreatePasswordResetTokensTable extends Migration {
   }
 }
 `
-        await fs.writeFile(resetPath, resetContent, 'utf-8')
-        console.log(pc.green(`  ✓ Created ${path.relative(cwd, resetPath)}`))
-    }
+    await fs.writeFile(resetPath, resetContent, 'utf-8')
+    console.log(pc.green(`  ✓ Created ${path.relative(cwd, resetPath)}`))
+  }
 }
 
 async function generateViews(cwd: string, stack: FortifyStack, force: boolean): Promise<void> {
-    if (stack === 'html') {
-        console.log(pc.dim('  ℹ HTML stack uses built-in templates, no view files generated'))
-        return
-    }
+  if (stack === 'html') {
+    console.log(pc.dim('  ℹ HTML stack uses built-in templates, no view files generated'))
+    return
+  }
 
-    const pagesDir = path.join(cwd, 'src', 'pages', 'auth')
-    await ensureDir(pagesDir)
+  const pagesDir = path.join(cwd, 'src', 'pages', 'auth')
+  await ensureDir(pagesDir)
 
-    if (stack === 'react') {
-        await generateReactViews(pagesDir, cwd, force)
-    } else if (stack === 'vue') {
-        await generateVueViews(pagesDir, cwd, force)
-    }
+  if (stack === 'react') {
+    await generateReactViews(pagesDir, cwd, force)
+  } else if (stack === 'vue') {
+    await generateVueViews(pagesDir, cwd, force)
+  }
 }
 
 async function generateReactViews(pagesDir: string, cwd: string, force: boolean): Promise<void> {
-    const views = [
-        { name: 'Login.tsx', content: getReactLoginPage() },
-        { name: 'Register.tsx', content: getReactRegisterPage() },
-        { name: 'ForgotPassword.tsx', content: getReactForgotPasswordPage() },
-    ]
+  const views = [
+    { name: 'Login.tsx', content: getReactLoginPage() },
+    { name: 'Register.tsx', content: getReactRegisterPage() },
+    { name: 'ForgotPassword.tsx', content: getReactForgotPasswordPage() },
+  ]
 
-    for (const view of views) {
-        const viewPath = path.join(pagesDir, view.name)
-        if (!force && await fileExists(viewPath)) {
-            console.log(pc.yellow(`  ⚠ ${view.name} already exists, skipping...`))
-            continue
-        }
-        await fs.writeFile(viewPath, view.content, 'utf-8')
-        console.log(pc.green(`  ✓ Created ${path.relative(cwd, viewPath)}`))
+  for (const view of views) {
+    const viewPath = path.join(pagesDir, view.name)
+    if (!force && (await fileExists(viewPath))) {
+      console.log(pc.yellow(`  ⚠ ${view.name} already exists, skipping...`))
+      continue
     }
+    await fs.writeFile(viewPath, view.content, 'utf-8')
+    console.log(pc.green(`  ✓ Created ${path.relative(cwd, viewPath)}`))
+  }
 }
 
 async function generateVueViews(pagesDir: string, cwd: string, force: boolean): Promise<void> {
-    const views = [
-        { name: 'Login.vue', content: getVueLoginPage() },
-        { name: 'Register.vue', content: getVueRegisterPage() },
-        { name: 'ForgotPassword.vue', content: getVueForgotPasswordPage() },
-    ]
+  const views = [
+    { name: 'Login.vue', content: getVueLoginPage() },
+    { name: 'Register.vue', content: getVueRegisterPage() },
+    { name: 'ForgotPassword.vue', content: getVueForgotPasswordPage() },
+  ]
 
-    for (const view of views) {
-        const viewPath = path.join(pagesDir, view.name)
-        if (!force && await fileExists(viewPath)) {
-            console.log(pc.yellow(`  ⚠ ${view.name} already exists, skipping...`))
-            continue
-        }
-        await fs.writeFile(viewPath, view.content, 'utf-8')
-        console.log(pc.green(`  ✓ Created ${path.relative(cwd, viewPath)}`))
+  for (const view of views) {
+    const viewPath = path.join(pagesDir, view.name)
+    if (!force && (await fileExists(viewPath))) {
+      console.log(pc.yellow(`  ⚠ ${view.name} already exists, skipping...`))
+      continue
     }
+    await fs.writeFile(viewPath, view.content, 'utf-8')
+    console.log(pc.green(`  ✓ Created ${path.relative(cwd, viewPath)}`))
+  }
 }
 
 async function generateUserModel(cwd: string, force: boolean): Promise<void> {
-    const modelPath = path.join(cwd, 'src', 'models', 'User.ts')
+  const modelPath = path.join(cwd, 'src', 'models', 'User.ts')
 
-    if (!force && await fileExists(modelPath)) {
-        console.log(pc.yellow('  ⚠ src/models/User.ts already exists, skipping...'))
-        return
-    }
+  if (!force && (await fileExists(modelPath))) {
+    console.log(pc.yellow('  ⚠ src/models/User.ts already exists, skipping...'))
+    return
+  }
 
-    await ensureDir(path.dirname(modelPath))
+  await ensureDir(path.dirname(modelPath))
 
-    const content = `import { Model, column } from '@gravito/atlas'
+  const content = `import { Model, column } from '@gravito/atlas'
 
 export class User extends Model {
   static table = 'users'
@@ -238,27 +241,27 @@ export class User extends Model {
 }
 `
 
-    await fs.writeFile(modelPath, content, 'utf-8')
-    console.log(pc.green(`  ✓ Created ${path.relative(cwd, modelPath)}`))
+  await fs.writeFile(modelPath, content, 'utf-8')
+  console.log(pc.green(`  ✓ Created ${path.relative(cwd, modelPath)}`))
 }
 
 // Helper functions
 async function fileExists(filepath: string): Promise<boolean> {
-    try {
-        await fs.access(filepath)
-        return true
-    } catch {
-        return false
-    }
+  try {
+    await fs.access(filepath)
+    return true
+  } catch {
+    return false
+  }
 }
 
 async function ensureDir(dir: string): Promise<void> {
-    await fs.mkdir(dir, { recursive: true })
+  await fs.mkdir(dir, { recursive: true })
 }
 
 // React view templates
 function getReactLoginPage(): string {
-    return `import { useForm, Head, Link } from '@inertiajs/react'
+  return `import { useForm, Head, Link } from '@inertiajs/react'
 import { FormEvent } from 'react'
 
 export default function Login() {
@@ -321,7 +324,7 @@ export default function Login() {
 }
 
 function getReactRegisterPage(): string {
-    return `import { useForm, Head, Link } from '@inertiajs/react'
+  return `import { useForm, Head, Link } from '@inertiajs/react'
 import { FormEvent } from 'react'
 
 export default function Register() {
@@ -400,7 +403,7 @@ export default function Register() {
 }
 
 function getReactForgotPasswordPage(): string {
-    return `import { useForm, Head, Link } from '@inertiajs/react'
+  return `import { useForm, Head, Link } from '@inertiajs/react'
 import { FormEvent } from 'react'
 
 export default function ForgotPassword() {
@@ -449,7 +452,7 @@ export default function ForgotPassword() {
 
 // Vue view templates
 function getVueLoginPage(): string {
-    return `<script setup lang="ts">
+  return `<script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3'
 
 const form = useForm({
@@ -505,7 +508,7 @@ const submit = () => {
 }
 
 function getVueRegisterPage(): string {
-    return `<script setup lang="ts">
+  return `<script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3'
 
 const form = useForm({
@@ -556,7 +559,7 @@ const submit = () => {
 }
 
 function getVueForgotPasswordPage(): string {
-    return `<script setup lang="ts">
+  return `<script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3'
 
 const form = useForm({ email: '' })

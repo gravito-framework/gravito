@@ -1,6 +1,6 @@
 /**
  * Default HTML View Templates for Gravito Fortify
- * 
+ *
  * These can be used as a starting point for customization.
  */
 

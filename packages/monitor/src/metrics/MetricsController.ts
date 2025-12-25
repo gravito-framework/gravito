@@ -9,19 +9,19 @@ import type { MetricsRegistry } from './MetricsRegistry'
  * MetricsController handles the /metrics endpoint
  */
 export class MetricsController {
-    constructor(private registry: MetricsRegistry) { }
+  constructor(private registry: MetricsRegistry) {}
 
-    /**
-     * GET /metrics - Prometheus metrics endpoint
-     */
-    async metrics(c: GravitoContext): Promise<Response> {
-        const prometheusFormat = this.registry.toPrometheus()
+  /**
+   * GET /metrics - Prometheus metrics endpoint
+   */
+  async metrics(c: GravitoContext): Promise<Response> {
+    const prometheusFormat = this.registry.toPrometheus()
 
-        return new Response(prometheusFormat, {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
-            },
-        })
-    }
+    return new Response(prometheusFormat, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
+      },
+    })
+  }
 }

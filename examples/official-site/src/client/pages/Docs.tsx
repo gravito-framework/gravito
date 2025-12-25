@@ -107,7 +107,14 @@ export default function Docs() {
       parent.insertBefore(wrapper, pre)
       wrapper.appendChild(pre)
 
-      pre.classList.add('pr-14', '!bg-transparent', '!m-0', '!p-6', 'overflow-x-auto', 'h-scrollbar')
+      pre.classList.add(
+        'pr-14',
+        '!bg-transparent',
+        '!m-0',
+        '!p-6',
+        'overflow-x-auto',
+        'h-scrollbar'
+      )
 
       const button = document.createElement('button')
       button.type = 'button'
@@ -321,10 +328,11 @@ export default function Docs() {
                       <li key={item.path}>
                         <StaticLink
                           href={item.path}
-                          className={`block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent ${isActive
-                            ? 'text-singularity font-bold border-white/5 bg-white/[0.03] shadow-[0_0_20px_rgba(20,241,149,0.05)]'
-                            : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
-                            }`}
+                          className={`block text-sm py-3 px-6 transition-all duration-300 relative group font-medium rounded-xl border border-transparent ${
+                            isActive
+                              ? 'text-singularity font-bold border-white/5 bg-white/[0.03] shadow-[0_0_20px_rgba(20,241,149,0.05)]'
+                              : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
+                          }`}
                         >
                           <div className="flex items-center gap-3">
                             {isActive && (
@@ -451,7 +459,12 @@ export default function Docs() {
                 <nav aria-label="Table of contents" className="mt-6">
                   <ul className="space-y-3">
                     {tocItems.map((item) => {
-                      const indent = item.level === 3 ? 'pl-4 border-l border-white/5 ml-1' : item.level === 4 ? 'pl-8 border-l border-white/5 ml-1' : ''
+                      const indent =
+                        item.level === 3
+                          ? 'pl-4 border-l border-white/5 ml-1'
+                          : item.level === 4
+                            ? 'pl-8 border-l border-white/5 ml-1'
+                            : ''
                       return (
                         <li key={item.id} className={indent}>
                           <a
@@ -580,10 +593,11 @@ export default function Docs() {
                             <a
                               href={`#${item.id}`}
                               onClick={(e) => scrollToAnchor(e, item.id)}
-                              className={`block py-2 text-[13px] transition-all duration-500 rounded-lg px-3 ${isActive
-                                ? 'text-singularity font-black bg-singularity/5'
-                                : 'text-gray-500 hover:text-white hover:bg-white/5'
-                                }`}
+                              className={`block py-2 text-[13px] transition-all duration-500 rounded-lg px-3 ${
+                                isActive
+                                  ? 'text-singularity font-black bg-singularity/5'
+                                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+                              }`}
                             >
                               {item.text}
                             </a>

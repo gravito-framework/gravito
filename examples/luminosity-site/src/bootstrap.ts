@@ -19,10 +19,10 @@ export async function bootstrap(options: { port?: number } = {}) {
   if (process.env.NODE_ENV !== 'production') {
     setupViteProxy(core)
     // Inject isDev for view templates (handlebars)
-    core.adapter.use('*', async (c: GravitoContext, next: () => Promise<void>) => {
+    core.adapter.use('*', (async (c: GravitoContext, next: () => Promise<void>) => {
       c.set('isDev', true)
-      await next()
-    })
+      return await next()
+    }) as any)
   }
 
   // Register Routes
@@ -32,9 +32,9 @@ export async function bootstrap(options: { port?: number } = {}) {
     c.set('locale', locale)
     const inertia = c.get('inertia')
     if (inertia) {
-      inertia.share({ locale })
+      ;(inertia as any).share({ locale })
     }
-    await next()
+    return await next()
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Dynamic import type
@@ -48,7 +48,7 @@ export async function bootstrap(options: { port?: number } = {}) {
       const inertia = c.get('inertia')
       const locale = c.get('locale') || 'en'
       console.log(`[Handler] Rendering Home with locale: ${locale}`)
-      return inertia.render('Home', {
+      return (inertia as any)?.render('Home', {
         message: 'Welcome to Luminosity',
         locale: locale,
       })
@@ -60,7 +60,7 @@ export async function bootstrap(options: { port?: number } = {}) {
     group.get('/features', (c: GravitoContext) => {
       const inertia = c.get('inertia')
       const locale = c.get('locale') || 'en'
-      return inertia.render('Features', {
+      return (inertia as any)?.render('Features', {
         locale,
       })
     })
@@ -74,14 +74,14 @@ export async function bootstrap(options: { port?: number } = {}) {
   }
 
   // Default Routes (English)
-  core.router.middleware(setLocale('en')).group((root) => {
+  core.router.middleware(setLocale('en') as any).group((root) => {
     defineRoutes(root)
   })
 
   // English Explicit (/en)
   core.router
     .prefix('/en')
-    .middleware(setLocale('en'))
+    .middleware(setLocale('en') as any)
     .group((en) => {
       defineRoutes(en)
     })
@@ -89,7 +89,7 @@ export async function bootstrap(options: { port?: number } = {}) {
   // Chinese Routes (/zh)
   core.router
     .prefix('/zh')
-    .middleware(setLocale('zh'))
+    .middleware(setLocale('zh') as any)
     .group((zh) => {
       defineRoutes(zh)
     })

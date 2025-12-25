@@ -1,2 +1,2 @@
-export * from './TestResponse'
 export * from './HttpTester'
+export * from './TestResponse'

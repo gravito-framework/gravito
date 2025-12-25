@@ -1,5 +1,9 @@
+import {
+  HashManager,
+  InMemoryPasswordResetTokenRepository,
+  PasswordBroker,
+} from '@gravito/sentinel'
 import type { GravitoContext } from 'gravito-core'
-import { PasswordBroker, HashManager, InMemoryPasswordResetTokenRepository } from '@gravito/sentinel'
 import type { FortifyConfig } from '../config'
 import type { ViewService } from '../types'
 
@@ -7,82 +11,81 @@ import type { ViewService } from '../types'
  * ForgotPasswordController handles password reset requests
  */
 export class ForgotPasswordController {
-    private broker: PasswordBroker
+  private broker: PasswordBroker
 
-    constructor(private config: FortifyConfig) {
-        // In production, use a database-backed repository
-        this.broker = new PasswordBroker(
-            new InMemoryPasswordResetTokenRepository(),
-            new HashManager()
+  constructor(private config: FortifyConfig) {
+    // In production, use a database-backed repository
+    this.broker = new PasswordBroker(new InMemoryPasswordResetTokenRepository(), new HashManager())
+  }
+
+  /**
+   * Show forgot password form
+   * GET /forgot-password
+   */
+  async show(c: GravitoContext): Promise<Response> {
+    if (this.config.jsonMode) {
+      return c.json({ view: 'forgot-password' })
+    }
+
+    const view = c.get('view') as ViewService | undefined
+    if (view?.render && this.config.views?.forgotPassword) {
+      return c.html(view.render(this.config.views.forgotPassword))
+    }
+
+    return c.html(this.defaultForgotPasswordHtml())
+  }
+
+  /**
+   * Handle password reset request
+   * POST /forgot-password
+   */
+  async store(c: GravitoContext): Promise<Response> {
+    const body = await c.req.json<{ email?: string }>()
+
+    if (!body.email) {
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Email is required' }, 422)
+      }
+      return c.redirect('/forgot-password?error=validation')
+    }
+
+    try {
+      // Get User model from config
+      const UserModel = this.config.userModel()
+
+      // Check if user exists
+      const user = await (UserModel as any).query().where('email', body.email).first()
+
+      // Always return success to prevent email enumeration
+      if (user) {
+        const token = await this.broker.createToken(body.email)
+
+        // TODO: Send email with reset link
+        // In production, integrate with @gravito/orbit-mail
+        console.log(`[Fortify] Password reset token for ${body.email}: ${token}`)
+        console.log(
+          `[Fortify] Reset URL: /reset-password/${token}?email=${encodeURIComponent(body.email)}`
         )
+      }
+
+      if (this.config.jsonMode) {
+        return c.json({
+          message: 'If the email exists, a password reset link has been sent.',
+        })
+      }
+
+      return c.redirect('/forgot-password?status=sent')
+    } catch (error) {
+      console.error('[Fortify] Forgot password error:', error)
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Failed to process request' }, 500)
+      }
+      return c.redirect('/forgot-password?error=server_error')
     }
+  }
 
-    /**
-     * Show forgot password form
-     * GET /forgot-password
-     */
-    async show(c: GravitoContext): Promise<Response> {
-        if (this.config.jsonMode) {
-            return c.json({ view: 'forgot-password' })
-        }
-
-        const view = c.get('view') as ViewService | undefined
-        if (view?.render && this.config.views?.forgotPassword) {
-            return c.html(view.render(this.config.views.forgotPassword))
-        }
-
-        return c.html(this.defaultForgotPasswordHtml())
-    }
-
-    /**
-     * Handle password reset request
-     * POST /forgot-password
-     */
-    async store(c: GravitoContext): Promise<Response> {
-        const body = await c.req.json<{ email?: string }>()
-
-        if (!body.email) {
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Email is required' }, 422)
-            }
-            return c.redirect('/forgot-password?error=validation')
-        }
-
-        try {
-            // Get User model from config
-            const UserModel = this.config.userModel()
-
-            // Check if user exists
-            const user = await (UserModel as any).query().where('email', body.email).first()
-
-            // Always return success to prevent email enumeration
-            if (user) {
-                const token = await this.broker.createToken(body.email)
-
-                // TODO: Send email with reset link
-                // In production, integrate with @gravito/orbit-mail
-                console.log(`[Fortify] Password reset token for ${body.email}: ${token}`)
-                console.log(`[Fortify] Reset URL: /reset-password/${token}?email=${encodeURIComponent(body.email)}`)
-            }
-
-            if (this.config.jsonMode) {
-                return c.json({
-                    message: 'If the email exists, a password reset link has been sent.'
-                })
-            }
-
-            return c.redirect('/forgot-password?status=sent')
-        } catch (error) {
-            console.error('[Fortify] Forgot password error:', error)
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Failed to process request' }, 500)
-            }
-            return c.redirect('/forgot-password?error=server_error')
-        }
-    }
-
-    private defaultForgotPasswordHtml(): string {
-        return `
+  private defaultForgotPasswordHtml(): string {
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,5 +127,5 @@ export class ForgotPasswordController {
 </body>
 </html>
     `.trim()
-    }
+  }
 }

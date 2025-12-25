@@ -1,5 +1,9 @@
+import {
+  HashManager,
+  InMemoryPasswordResetTokenRepository,
+  PasswordBroker,
+} from '@gravito/sentinel'
 import type { GravitoContext } from 'gravito-core'
-import { PasswordBroker, HashManager, InMemoryPasswordResetTokenRepository } from '@gravito/sentinel'
 import type { FortifyConfig } from '../config'
 import type { ViewService } from '../types'
 
@@ -7,113 +11,110 @@ import type { ViewService } from '../types'
  * ResetPasswordController handles password reset
  */
 export class ResetPasswordController {
-    private broker: PasswordBroker
-    private hasher: HashManager
+  private broker: PasswordBroker
+  private hasher: HashManager
 
-    constructor(private config: FortifyConfig) {
-        this.hasher = new HashManager()
-        // In production, use a database-backed repository (shared with ForgotPasswordController)
-        this.broker = new PasswordBroker(
-            new InMemoryPasswordResetTokenRepository(),
-            this.hasher
-        )
+  constructor(private config: FortifyConfig) {
+    this.hasher = new HashManager()
+    // In production, use a database-backed repository (shared with ForgotPasswordController)
+    this.broker = new PasswordBroker(new InMemoryPasswordResetTokenRepository(), this.hasher)
+  }
+
+  /**
+   * Show reset password form
+   * GET /reset-password/:token
+   */
+  async show(c: GravitoContext): Promise<Response> {
+    const token = c.req.param('token')
+    const email = c.req.query('email')
+
+    if (this.config.jsonMode) {
+      return c.json({ view: 'reset-password', token, email })
     }
 
-    /**
-     * Show reset password form
-     * GET /reset-password/:token
-     */
-    async show(c: GravitoContext): Promise<Response> {
-        const token = c.req.param('token')
-        const email = c.req.query('email')
+    const view = c.get('view') as ViewService | undefined
+    if (view?.render && this.config.views?.resetPassword) {
+      return c.html(view.render(this.config.views.resetPassword, { token, email }))
+    }
 
+    return c.html(this.defaultResetPasswordHtml(token ?? '', email ?? ''))
+  }
+
+  /**
+   * Handle password reset
+   * POST /reset-password
+   */
+  async store(c: GravitoContext): Promise<Response> {
+    const body = await c.req.json<{
+      token?: string
+      email?: string
+      password?: string
+      password_confirmation?: string
+    }>()
+
+    // Validation
+    if (!body.token || !body.email || !body.password) {
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Token, email and password are required' }, 422)
+      }
+      return c.redirect(`/reset-password/${body.token}?email=${body.email}&error=validation`)
+    }
+
+    if (body.password !== body.password_confirmation) {
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Passwords do not match' }, 422)
+      }
+      return c.redirect(`/reset-password/${body.token}?email=${body.email}&error=password_mismatch`)
+    }
+
+    try {
+      // Verify token
+      const valid = await this.broker.verifyToken(body.email, body.token)
+      if (!valid) {
         if (this.config.jsonMode) {
-            return c.json({ view: 'reset-password', token, email })
+          return c.json({ error: 'Invalid or expired reset token' }, 422)
         }
+        return c.redirect('/forgot-password?error=invalid_token')
+      }
 
-        const view = c.get('view') as ViewService | undefined
-        if (view?.render && this.config.views?.resetPassword) {
-            return c.html(view.render(this.config.views.resetPassword, { token, email }))
+      // Get User model and update password
+      const UserModel = this.config.userModel()
+      const user = await (UserModel as any).query().where('email', body.email).first()
+
+      if (!user) {
+        if (this.config.jsonMode) {
+          return c.json({ error: 'User not found' }, 404)
         }
+        return c.redirect('/forgot-password?error=user_not_found')
+      }
 
-        return c.html(this.defaultResetPasswordHtml(token ?? '', email ?? ''))
+      // Hash new password and update
+      const hashedPassword = await this.hasher.make(body.password)
+      user.password = hashedPassword
+      await user.save()
+
+      // Invalidate the token
+      await this.broker.invalidate(body.email)
+
+      if (this.config.jsonMode) {
+        return c.json({
+          message: 'Password reset successful',
+          redirect: this.config.redirects.passwordReset ?? '/login',
+        })
+      }
+
+      return c.redirect(this.config.redirects.passwordReset ?? '/login?status=password_reset')
+    } catch (error) {
+      console.error('[Fortify] Reset password error:', error)
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Failed to reset password' }, 500)
+      }
+      return c.redirect('/forgot-password?error=server_error')
     }
+  }
 
-    /**
-     * Handle password reset
-     * POST /reset-password
-     */
-    async store(c: GravitoContext): Promise<Response> {
-        const body = await c.req.json<{
-            token?: string
-            email?: string
-            password?: string
-            password_confirmation?: string
-        }>()
-
-        // Validation
-        if (!body.token || !body.email || !body.password) {
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Token, email and password are required' }, 422)
-            }
-            return c.redirect(`/reset-password/${body.token}?email=${body.email}&error=validation`)
-        }
-
-        if (body.password !== body.password_confirmation) {
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Passwords do not match' }, 422)
-            }
-            return c.redirect(`/reset-password/${body.token}?email=${body.email}&error=password_mismatch`)
-        }
-
-        try {
-            // Verify token
-            const valid = await this.broker.verifyToken(body.email, body.token)
-            if (!valid) {
-                if (this.config.jsonMode) {
-                    return c.json({ error: 'Invalid or expired reset token' }, 422)
-                }
-                return c.redirect('/forgot-password?error=invalid_token')
-            }
-
-            // Get User model and update password
-            const UserModel = this.config.userModel()
-            const user = await (UserModel as any).query().where('email', body.email).first()
-
-            if (!user) {
-                if (this.config.jsonMode) {
-                    return c.json({ error: 'User not found' }, 404)
-                }
-                return c.redirect('/forgot-password?error=user_not_found')
-            }
-
-            // Hash new password and update
-            const hashedPassword = await this.hasher.make(body.password)
-            user.password = hashedPassword
-            await user.save()
-
-            // Invalidate the token
-            await this.broker.invalidate(body.email)
-
-            if (this.config.jsonMode) {
-                return c.json({
-                    message: 'Password reset successful',
-                    redirect: this.config.redirects.passwordReset ?? '/login'
-                })
-            }
-
-            return c.redirect(this.config.redirects.passwordReset ?? '/login?status=password_reset')
-        } catch (error) {
-            console.error('[Fortify] Reset password error:', error)
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Failed to reset password' }, 500)
-            }
-            return c.redirect('/forgot-password?error=server_error')
-        }
-    }
-
-    private defaultResetPasswordHtml(token: string, email: string): string {
-        return `
+  private defaultResetPasswordHtml(token: string, email: string): string {
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -157,5 +158,5 @@ export class ResetPasswordController {
 </body>
 </html>
     `.trim()
-    }
+  }
 }

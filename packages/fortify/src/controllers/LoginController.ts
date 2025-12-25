@@ -1,5 +1,5 @@
+import type { AuthManager } from '@gravito/sentinel'
 import type { GravitoContext } from 'gravito-core'
-import { AuthManager } from '@gravito/sentinel'
 import type { FortifyConfig } from '../config'
 import type { ViewService } from '../types'
 
@@ -7,92 +7,92 @@ import type { ViewService } from '../types'
  * LoginController handles user authentication
  */
 export class LoginController {
-    constructor(private config: FortifyConfig) { }
+  constructor(private config: FortifyConfig) {}
 
-    /**
-     * Show login form
-     * GET /login
-     */
-    async show(c: GravitoContext): Promise<Response> {
-        // Check if already authenticated
-        const auth = c.get('auth') as AuthManager
-        if (auth && await auth.check()) {
-            return c.redirect(this.config.redirects.login ?? '/dashboard')
-        }
+  /**
+   * Show login form
+   * GET /login
+   */
+  async show(c: GravitoContext): Promise<Response> {
+    // Check if already authenticated
+    const auth = c.get('auth') as AuthManager
+    if (auth && (await auth.check())) {
+      return c.redirect(this.config.redirects.login ?? '/dashboard')
+    }
 
-        // For JSON mode (SPA), return a simple response
+    // For JSON mode (SPA), return a simple response
+    if (this.config.jsonMode) {
+      return c.json({ view: 'login' })
+    }
+
+    // Render view if view service is available
+    const view = c.get('view') as ViewService | undefined
+    if (view?.render && this.config.views?.login) {
+      return c.html(view.render(this.config.views.login))
+    }
+
+    // Default: return basic HTML form
+    return c.html(this.defaultLoginHtml())
+  }
+
+  /**
+   * Handle login attempt
+   * POST /login
+   */
+  async store(c: GravitoContext): Promise<Response> {
+    const auth = c.get('auth') as AuthManager
+    if (!auth) {
+      return c.json({ error: 'Authentication service not available' }, 500)
+    }
+
+    const body = await c.req.json<{
+      email?: string
+      password?: string
+      remember?: boolean
+    }>()
+
+    const username = this.config.username ?? 'email'
+    const passwordField = this.config.password ?? 'password'
+
+    const credentials = {
+      [username]: body.email ?? body[username as keyof typeof body],
+      [passwordField]: body.password ?? body[passwordField as keyof typeof body],
+    }
+
+    const remember = body.remember ?? false
+
+    try {
+      const success = await auth.attempt(credentials, remember)
+
+      if (!success) {
         if (this.config.jsonMode) {
-            return c.json({ view: 'login' })
+          return c.json({ error: 'Invalid credentials' }, 401)
         }
+        // Redirect back with error (in real app, use session flash)
+        return c.redirect('/login?error=invalid_credentials')
+      }
 
-        // Render view if view service is available
-        const view = c.get('view') as ViewService | undefined
-        if (view?.render && this.config.views?.login) {
-            return c.html(view.render(this.config.views.login))
-        }
+      if (this.config.jsonMode) {
+        const user = await auth.user()
+        return c.json({
+          message: 'Login successful',
+          user,
+          redirect: this.config.redirects.login ?? '/dashboard',
+        })
+      }
 
-        // Default: return basic HTML form
-        return c.html(this.defaultLoginHtml())
+      return c.redirect(this.config.redirects.login ?? '/dashboard')
+    } catch (error) {
+      console.error('[Fortify] Login error:', error)
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Authentication failed' }, 500)
+      }
+      return c.redirect('/login?error=server_error')
     }
+  }
 
-    /**
-     * Handle login attempt
-     * POST /login
-     */
-    async store(c: GravitoContext): Promise<Response> {
-        const auth = c.get('auth') as AuthManager
-        if (!auth) {
-            return c.json({ error: 'Authentication service not available' }, 500)
-        }
-
-        const body = await c.req.json<{
-            email?: string
-            password?: string
-            remember?: boolean
-        }>()
-
-        const username = this.config.username ?? 'email'
-        const passwordField = this.config.password ?? 'password'
-
-        const credentials = {
-            [username]: body.email ?? body[username as keyof typeof body],
-            [passwordField]: body.password ?? body[passwordField as keyof typeof body],
-        }
-
-        const remember = body.remember ?? false
-
-        try {
-            const success = await auth.attempt(credentials, remember)
-
-            if (!success) {
-                if (this.config.jsonMode) {
-                    return c.json({ error: 'Invalid credentials' }, 401)
-                }
-                // Redirect back with error (in real app, use session flash)
-                return c.redirect('/login?error=invalid_credentials')
-            }
-
-            if (this.config.jsonMode) {
-                const user = await auth.user()
-                return c.json({
-                    message: 'Login successful',
-                    user,
-                    redirect: this.config.redirects.login ?? '/dashboard'
-                })
-            }
-
-            return c.redirect(this.config.redirects.login ?? '/dashboard')
-        } catch (error) {
-            console.error('[Fortify] Login error:', error)
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Authentication failed' }, 500)
-            }
-            return c.redirect('/login?error=server_error')
-        }
-    }
-
-    private defaultLoginHtml(): string {
-        return `<!DOCTYPE html>
+  private defaultLoginHtml(): string {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -134,5 +134,5 @@ export class LoginController {
   </div>
 </body>
 </html>`
-    }
+  }
 }

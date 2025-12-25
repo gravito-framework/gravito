@@ -422,9 +422,9 @@ export async function eagerLoad<T extends Model>(
           relatedByFk.get(pk) ?? (typeof pk === 'string' ? relatedByFk.get(pk) : undefined) ?? []
 
         if (type === 'hasOne') {
-          ; (parent as any)[currentRelation] = items[0] ?? null
+          ;(parent as any)[currentRelation] = items[0] ?? null
         } else {
-          ; (parent as any)[currentRelation] = items
+          ;(parent as any)[currentRelation] = items
         }
       }
       break
@@ -432,7 +432,8 @@ export async function eagerLoad<T extends Model>(
 
     case 'morphOne':
     case 'morphMany': {
-      const query = Related!.query()
+      const query = Related!
+        .query()
         .whereIn(foreignKey!, validParentKeys)
         .where(morphTypeField!, parentModel.name)
 
@@ -462,9 +463,9 @@ export async function eagerLoad<T extends Model>(
         const items = relatedByFk.get(pk) ?? []
 
         if (type === 'morphOne') {
-          ; (parent as any)[currentRelation] = items[0] ?? null
+          ;(parent as any)[currentRelation] = items[0] ?? null
         } else {
-          ; (parent as any)[currentRelation] = items
+          ;(parent as any)[currentRelation] = items
         }
       }
       break
@@ -514,7 +515,7 @@ export async function eagerLoad<T extends Model>(
 
         for (const parent of typeParents) {
           const id = (parent as any)[morphIdField!]
-            ; (parent as any)[currentRelation] = relatedByPk.get(id) ?? null
+          ;(parent as any)[currentRelation] = relatedByPk.get(id) ?? null
         }
       }
       break
@@ -552,7 +553,7 @@ export async function eagerLoad<T extends Model>(
       for (const parent of parents) {
         const fk = (parent as any)[foreignKey!]
         const row = relatedByPk.get(fk)
-          ; (parent as any)[currentRelation] = row ?? null
+        ;(parent as any)[currentRelation] = row ?? null
       }
       break
     }
@@ -626,7 +627,7 @@ export async function eagerLoad<T extends Model>(
           .map((rpk) => relatedByPk.get(rpk))
           .filter((r): r is any => r !== undefined)
 
-          ; (parent as any)[currentRelation] = relatedModels
+        ;(parent as any)[currentRelation] = relatedModels
       }
       break
     }

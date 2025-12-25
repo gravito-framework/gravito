@@ -64,6 +64,6 @@ export function column(options: ColumnOptions = {}): PropertyDecorator {
   }
 }
 // Add type-specific helpers (chaining/static methods style)
-; (column as any).dateTime = (options: ColumnOptions = {}) => {
+;(column as any).dateTime = (options: ColumnOptions = {}) => {
   return column(options)
 }

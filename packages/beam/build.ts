@@ -15,6 +15,7 @@ console.log('📝 Generating type declarations...')
 const tsc = Bun.spawn(['bunx', 'tsc', '-p', 'tsconfig.build.json'], {
   stdout: 'inherit',
   stderr: 'inherit',
+  cwd: import.meta.dirname,
 })
 const exitCode = await tsc.exited
 if (exitCode !== 0) {

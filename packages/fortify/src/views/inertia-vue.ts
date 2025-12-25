@@ -1,6 +1,6 @@
 /**
  * Inertia Vue View Templates for Gravito Fortify
- * 
+ *
  * These are stub files that can be copied to your project.
  * Install with: bun gravito fortify:install --stack=vue
  */

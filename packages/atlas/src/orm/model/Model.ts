@@ -4,10 +4,10 @@
  */
 
 import { DB } from '../../DB'
+import { Factory } from '../../seed/Factory'
 import type { QueryBuilderContract } from '../../types'
 import { SchemaRegistry } from '../schema/SchemaRegistry'
 import type { ColumnType, TableSchema } from '../schema/types'
-import { Factory } from '../../seed/Factory'
 import { DirtyTracker } from './DirtyTracker'
 import { COLUMN_KEY, SOFT_DELETES_KEY } from './decorators'
 import {
@@ -16,8 +16,8 @@ import {
   NullableConstraintError,
   TypeMismatchError,
 } from './errors'
-import { getRelationships } from './relationships'
 import { ModelRegistry } from './ModelRegistry'
+import { getRelationships } from './relationships'
 
 /**
  * Model attributes type
@@ -33,7 +33,7 @@ export type ModelConstructor<T extends Model> = new () => T
  * Model static interface
  */
 export interface ModelStatic<T extends Model> {
-  new(): T
+  new (): T
   table: string
   primaryKey: string
   connection?: string
@@ -261,15 +261,16 @@ export abstract class Model {
             return (receiver as any)[type](Related, meta.foreignKey, meta.localKey)
           }
 
-            // Make it thenable for property-style lazy loading: await user.posts
-            ; (builderFn as any).then = async (resolve: any, reject: any) => {
-              try {
-                await (receiver as any).load(prop)
-                resolve((receiver as any)._attributes[prop])
-              } catch (err) {
-                reject(err)
-              }
+          // Make it thenable for property-style lazy loading: await user.posts
+          // biome-ignore lint/suspicious/noThenProperty: Intentional thenable for property-style lazy loading
+          ;(builderFn as any).then = async (resolve: any, reject: any) => {
+            try {
+              await (receiver as any).load(prop)
+              resolve((receiver as any)._attributes[prop])
+            } catch (err) {
+              reject(err)
             }
+          }
 
           return builderFn
         }
@@ -306,7 +307,7 @@ export abstract class Model {
           const studly = prop.replace(/(?:^|_|(?=[A-Z]))(.)/g, (_, c) => c.toUpperCase())
           const mutator = `set${studly}Attribute`
           if (typeof (target as any)[mutator] === 'function') {
-            ; (target as any)[mutator].call(receiver, value)
+            ;(target as any)[mutator].call(receiver, value)
             return true
           }
         }
@@ -627,10 +628,10 @@ export abstract class Model {
 
     // Wrap get to hydrate
     const originalGet = builder.get.bind(builder)
-      ; (builder as unknown as { get: () => Promise<R[]> }).get = async (): Promise<R[]> => {
-        const rows = await originalGet()
-        return rows.map((row) => related.hydrate<R>(row)) as R[]
-      }
+    ;(builder as unknown as { get: () => Promise<R[]> }).get = async (): Promise<R[]> => {
+      const rows = await originalGet()
+      return rows.map((row) => related.hydrate<R>(row)) as R[]
+    }
 
     return builder
   }
@@ -770,7 +771,7 @@ export abstract class Model {
 
   /**
    * Define a polymorphic hasOne relationship
-     */
+   */
   morphOne<R extends Model>(
     related: ModelConstructor<R> & typeof Model,
     name: string,
@@ -1281,8 +1282,8 @@ export abstract class Model {
     const connection = DB.connection(this.connection)
     const builder = connection.table<ModelAttributes>(this.getTable())
 
-      // Attach model context
-      ; (builder as any).setModel(this)
+    // Attach model context
+    ;(builder as any).setModel(this)
 
     // Check for Soft Deletes
     const softDeletes = (this as any)[SOFT_DELETES_KEY]
@@ -1294,51 +1295,51 @@ export abstract class Model {
 
     // Wrap get() to hydrate results and handle eager loading
     const originalGet = builder.get.bind(builder)
-      ; (builder as unknown as { get: () => Promise<T[]> }).get = async (): Promise<T[]> => {
-        const rows = await originalGet()
+    ;(builder as unknown as { get: () => Promise<T[]> }).get = async (): Promise<T[]> => {
+      const rows = await originalGet()
 
-        // Fast Path: Skip hydration if read-only
-        if ((builder as any).getIsReadOnly?.()) {
-          return rows as unknown as T[]
-        }
-
-        const models = rows.map((row) => this.hydrate<T>(row)) as unknown as T[]
-
-        // Handle eager loading
-        const eagerLoads = (builder as any).getEagerLoads?.()
-        if (eagerLoads && eagerLoads.size > 0 && models.length > 0) {
-          const { eagerLoadMany } = await import('./relationships')
-          await eagerLoadMany(models, eagerLoads)
-        }
-
-        return models
+      // Fast Path: Skip hydration if read-only
+      if ((builder as any).getIsReadOnly?.()) {
+        return rows as unknown as T[]
       }
+
+      const models = rows.map((row) => this.hydrate<T>(row)) as unknown as T[]
+
+      // Handle eager loading
+      const eagerLoads = (builder as any).getEagerLoads?.()
+      if (eagerLoads && eagerLoads.size > 0 && models.length > 0) {
+        const { eagerLoadMany } = await import('./relationships')
+        await eagerLoadMany(models, eagerLoads)
+      }
+
+      return models
+    }
 
     // Wrap first() to hydrate result and handle eager loading
     const originalFirst = builder.first.bind(builder)
-      ; (builder as unknown as { first: () => Promise<T | null> }).first =
-        async (): Promise<T | null> => {
-          const row = await originalFirst()
-          if (!row) {
-            return null
-          }
-
-          // Fast Path: Skip hydration if read-only
-          if ((builder as any).getIsReadOnly?.()) {
-            return row as unknown as T
-          }
-
-          const model = this.hydrate<T>(row)
-
-          // Handle eager loading for a single model
-          const eagerLoads = (builder as any).getEagerLoads?.()
-          if (eagerLoads && eagerLoads.size > 0) {
-            const { eagerLoadMany } = await import('./relationships')
-            await eagerLoadMany([model], eagerLoads)
-          }
-
-          return model
+    ;(builder as unknown as { first: () => Promise<T | null> }).first =
+      async (): Promise<T | null> => {
+        const row = await originalFirst()
+        if (!row) {
+          return null
         }
+
+        // Fast Path: Skip hydration if read-only
+        if ((builder as any).getIsReadOnly?.()) {
+          return row as unknown as T
+        }
+
+        const model = this.hydrate<T>(row)
+
+        // Handle eager loading for a single model
+        const eagerLoads = (builder as any).getEagerLoads?.()
+        if (eagerLoads && eagerLoads.size > 0) {
+          const { eagerLoadMany } = await import('./relationships')
+          await eagerLoadMany([model], eagerLoads)
+        }
+
+        return model
+      }
 
     // Support Local Scopes via Proxy
     const modelClass = this
@@ -1349,7 +1350,7 @@ export abstract class Model {
           const scopeMethod = `scope${prop.charAt(0).toUpperCase()}${prop.slice(1)}`
           if (typeof (modelClass as any)[scopeMethod] === 'function') {
             return (...args: any[]) => {
-              ; (modelClass as any)[scopeMethod](target, ...args)
+              ;(modelClass as any)[scopeMethod](target, ...args)
               return proxy
             }
           }
@@ -1375,7 +1376,11 @@ export abstract class Model {
     operatorOrValue?: any,
     value?: unknown
   ): QueryBuilderContract<T> {
-    return (this.query() as any).where(column, operatorOrValue, value) as unknown as QueryBuilderContract<T>
+    return (this.query() as any).where(
+      column,
+      operatorOrValue,
+      value
+    ) as unknown as QueryBuilderContract<T>
   }
 
   /**

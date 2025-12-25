@@ -13,7 +13,8 @@
     "preview": "bun run preview.ts",
     "lux:stats": "bun src/cli.ts stats",
     "lux:warm": "bun src/cli.ts warm",
-    "lux:compact": "bun src/cli.ts compact"
+    "lux:compact": "bun src/cli.ts compact",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@gravito/freeze-vue": "workspace:*",

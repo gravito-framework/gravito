@@ -509,7 +509,7 @@ cli
   .action((options) => schemaRefresh(options))
 
 // --- Fortify Commands ---
-import { installFortify, type FortifyStack } from './commands/fortify'
+import { type FortifyStack, installFortify } from './commands/fortify'
 
 cli
   .command('fortify:install', 'Install Fortify authentication scaffolding')
@@ -518,7 +518,9 @@ cli
   .action(async (options) => {
     const validStacks = ['html', 'react', 'vue']
     if (!validStacks.includes(options.stack)) {
-      console.error(pc.red(`Invalid stack: ${options.stack}. Valid options: ${validStacks.join(', ')}`))
+      console.error(
+        pc.red(`Invalid stack: ${options.stack}. Valid options: ${validStacks.join(', ')}`)
+      )
       process.exit(1)
     }
     await installFortify({

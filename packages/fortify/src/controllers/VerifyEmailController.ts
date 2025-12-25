@@ -1,5 +1,5 @@
+import { type AuthManager, EmailVerificationService } from '@gravito/sentinel'
 import type { GravitoContext } from 'gravito-core'
-import { AuthManager, EmailVerificationService } from '@gravito/sentinel'
 import type { FortifyConfig } from '../config'
 import type { ViewService } from '../types'
 
@@ -7,151 +7,151 @@ import type { ViewService } from '../types'
  * VerifyEmailController handles email verification
  */
 export class VerifyEmailController {
-    private verificationService: EmailVerificationService
+  private verificationService: EmailVerificationService
 
-    constructor(private config: FortifyConfig) {
-        // In production, use a proper secret from config
-        const secret = process.env.APP_KEY ?? 'gravito-fortify-secret-key'
-        this.verificationService = new EmailVerificationService(secret)
+  constructor(private config: FortifyConfig) {
+    // In production, use a proper secret from config
+    const secret = process.env.APP_KEY ?? 'gravito-fortify-secret-key'
+    this.verificationService = new EmailVerificationService(secret)
+  }
+
+  /**
+   * Show verification notice
+   * GET /verify-email
+   */
+  async show(c: GravitoContext): Promise<Response> {
+    const auth = c.get('auth') as AuthManager
+
+    if (!auth || !(await auth.check())) {
+      return c.redirect('/login')
     }
 
-    /**
-     * Show verification notice
-     * GET /verify-email
-     */
-    async show(c: GravitoContext): Promise<Response> {
-        const auth = c.get('auth') as AuthManager
+    const user = await auth.user()
 
-        if (!auth || !await auth.check()) {
-            return c.redirect('/login')
-        }
+    if (this.config.jsonMode) {
+      return c.json({
+        view: 'verify-email',
+        verified: !!(user as any)?.email_verified_at,
+      })
+    }
 
-        const user = await auth.user()
+    const view = c.get('view') as ViewService | undefined
+    if (view?.render && this.config.views?.verifyEmail) {
+      return c.html(view.render(this.config.views.verifyEmail, { user }))
+    }
 
+    return c.html(this.defaultVerifyEmailHtml())
+  }
+
+  /**
+   * Verify email with signed URL
+   * GET /verify-email/:id/:hash
+   */
+  async verify(c: GravitoContext): Promise<Response> {
+    const id = c.req.param('id')
+    const hash = c.req.param('hash')
+
+    if (!id || !hash) {
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Invalid verification link' }, 422)
+      }
+      return c.redirect('/verify-email?error=invalid_link')
+    }
+
+    try {
+      // Verify the token
+      const payload = this.verificationService.verifyToken(hash)
+
+      if (!payload || String(payload.id) !== id) {
         if (this.config.jsonMode) {
-            return c.json({
-                view: 'verify-email',
-                verified: !!(user as any)?.email_verified_at
-            })
+          return c.json({ error: 'Invalid or expired verification link' }, 422)
         }
+        return c.redirect('/verify-email?error=invalid_link')
+      }
 
-        const view = c.get('view') as ViewService | undefined
-        if (view?.render && this.config.views?.verifyEmail) {
-            return c.html(view.render(this.config.views.verifyEmail, { user }))
+      // Get User model and update verified status
+      const UserModel = this.config.userModel()
+      const user = await (UserModel as any).find(id)
+
+      if (!user) {
+        if (this.config.jsonMode) {
+          return c.json({ error: 'User not found' }, 404)
         }
+        return c.redirect('/verify-email?error=user_not_found')
+      }
 
-        return c.html(this.defaultVerifyEmailHtml())
+      // Mark email as verified
+      user.email_verified_at = new Date()
+      await user.save()
+
+      if (this.config.jsonMode) {
+        return c.json({
+          message: 'Email verified successfully',
+          redirect: this.config.redirects.emailVerification ?? '/dashboard',
+        })
+      }
+
+      return c.redirect(this.config.redirects.emailVerification ?? '/dashboard?verified=1')
+    } catch (error) {
+      console.error('[Fortify] Email verification error:', error)
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Verification failed' }, 500)
+      }
+      return c.redirect('/verify-email?error=server_error')
+    }
+  }
+
+  /**
+   * Resend verification email
+   * POST /email/verification-notification
+   */
+  async send(c: GravitoContext): Promise<Response> {
+    const auth = c.get('auth') as AuthManager
+
+    if (!auth || !(await auth.check())) {
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Unauthenticated' }, 401)
+      }
+      return c.redirect('/login')
     }
 
-    /**
-     * Verify email with signed URL
-     * GET /verify-email/:id/:hash
-     */
-    async verify(c: GravitoContext): Promise<Response> {
-        const id = c.req.param('id')
-        const hash = c.req.param('hash')
+    try {
+      const user = (await auth.user()) as any
 
-        if (!id || !hash) {
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Invalid verification link' }, 422)
-            }
-            return c.redirect('/verify-email?error=invalid_link')
+      if (user?.email_verified_at) {
+        if (this.config.jsonMode) {
+          return c.json({ message: 'Email already verified' })
         }
+        return c.redirect(this.config.redirects.emailVerification ?? '/dashboard')
+      }
 
-        try {
-            // Verify the token
-            const payload = this.verificationService.verifyToken(hash)
+      // Create verification token
+      const token = this.verificationService.createToken({
+        id: user.id,
+        email: user.email,
+      })
 
-            if (!payload || String(payload.id) !== id) {
-                if (this.config.jsonMode) {
-                    return c.json({ error: 'Invalid or expired verification link' }, 422)
-                }
-                return c.redirect('/verify-email?error=invalid_link')
-            }
+      // TODO: Send email with verification link
+      // In production, integrate with @gravito/orbit-mail
+      console.log(`[Fortify] Verification token for ${user.email}: ${token}`)
+      console.log(`[Fortify] Verification URL: /verify-email/${user.id}/${token}`)
 
-            // Get User model and update verified status
-            const UserModel = this.config.userModel()
-            const user = await (UserModel as any).find(id)
+      if (this.config.jsonMode) {
+        return c.json({ message: 'Verification email sent' })
+      }
 
-            if (!user) {
-                if (this.config.jsonMode) {
-                    return c.json({ error: 'User not found' }, 404)
-                }
-                return c.redirect('/verify-email?error=user_not_found')
-            }
-
-            // Mark email as verified
-            user.email_verified_at = new Date()
-            await user.save()
-
-            if (this.config.jsonMode) {
-                return c.json({
-                    message: 'Email verified successfully',
-                    redirect: this.config.redirects.emailVerification ?? '/dashboard'
-                })
-            }
-
-            return c.redirect(this.config.redirects.emailVerification ?? '/dashboard?verified=1')
-        } catch (error) {
-            console.error('[Fortify] Email verification error:', error)
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Verification failed' }, 500)
-            }
-            return c.redirect('/verify-email?error=server_error')
-        }
+      return c.redirect('/verify-email?status=sent')
+    } catch (error) {
+      console.error('[Fortify] Send verification error:', error)
+      if (this.config.jsonMode) {
+        return c.json({ error: 'Failed to send verification email' }, 500)
+      }
+      return c.redirect('/verify-email?error=server_error')
     }
+  }
 
-    /**
-     * Resend verification email
-     * POST /email/verification-notification
-     */
-    async send(c: GravitoContext): Promise<Response> {
-        const auth = c.get('auth') as AuthManager
-
-        if (!auth || !await auth.check()) {
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Unauthenticated' }, 401)
-            }
-            return c.redirect('/login')
-        }
-
-        try {
-            const user = await auth.user() as any
-
-            if (user?.email_verified_at) {
-                if (this.config.jsonMode) {
-                    return c.json({ message: 'Email already verified' })
-                }
-                return c.redirect(this.config.redirects.emailVerification ?? '/dashboard')
-            }
-
-            // Create verification token
-            const token = this.verificationService.createToken({
-                id: user.id,
-                email: user.email,
-            })
-
-            // TODO: Send email with verification link
-            // In production, integrate with @gravito/orbit-mail
-            console.log(`[Fortify] Verification token for ${user.email}: ${token}`)
-            console.log(`[Fortify] Verification URL: /verify-email/${user.id}/${token}`)
-
-            if (this.config.jsonMode) {
-                return c.json({ message: 'Verification email sent' })
-            }
-
-            return c.redirect('/verify-email?status=sent')
-        } catch (error) {
-            console.error('[Fortify] Send verification error:', error)
-            if (this.config.jsonMode) {
-                return c.json({ error: 'Failed to send verification email' }, 500)
-            }
-            return c.redirect('/verify-email?error=server_error')
-        }
-    }
-
-    private defaultVerifyEmailHtml(): string {
-        return `
+  private defaultVerifyEmailHtml(): string {
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,5 +179,5 @@ export class VerifyEmailController {
 </body>
 </html>
     `.trim()
-    }
+  }
 }

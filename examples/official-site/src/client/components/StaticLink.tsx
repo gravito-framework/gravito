@@ -88,7 +88,7 @@ export function StaticLink({ href, children, className, onClick, ...props }: Sta
 
   return (
     <Link href={finalHref || ''} className={className} onClick={onClick as any} {...props}>
-      {children}
+      {children as any}
     </Link>
   )
 }

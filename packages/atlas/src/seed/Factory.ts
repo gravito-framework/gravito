@@ -74,7 +74,9 @@ export class Factory<T extends Record<string, unknown>> {
   static model<T extends Record<string, unknown>>(model: typeof Model): Factory<T> {
     const instance = this.registry.get(model)
     if (!instance) {
-      throw new Error(`No factory defined for model ${model.name}. Use Factory.define(${model.name}, ...) first.`)
+      throw new Error(
+        `No factory defined for model ${model.name}. Use Factory.define(${model.name}, ...) first.`
+      )
     }
     // Return a clone to avoid polluting the registered template
     return new Factory<T>(instance.definition, { model: instance.model, table: instance.tableName })

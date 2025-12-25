@@ -5,7 +5,21 @@
         "emitDeclarationOnly": true,
         "declaration": true,
         "outDir": "./dist",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "paths": {
+            "gravito-core": [
+                "../../packages/core/dist/index.d.ts"
+            ],
+            "@gravito/photon/client": [
+                "../../packages/photon/dist/client.d.ts"
+            ],
+            "@gravito/photon": [
+                "../../packages/photon/dist/index.d.ts"
+            ],
+            "@gravito/*": [
+                "../../packages/*/dist/index.d.ts"
+            ]
+        }
     },
     "exclude": [
         "node_modules",
