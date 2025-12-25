@@ -319,8 +319,8 @@ export class DocsService {
    * Generate sidebar structure (Simplistic hardcoded version for v1)
    * In a real app, this would walk the directory.
    */
-  static getSidebar(locale: string): SidebarItem[] {
-    const prefix = locale === 'zh' ? '/zh/docs' : '/en/docs'
+  static getSidebar(locale: string, customPrefix?: string): SidebarItem[] {
+    const prefix = customPrefix || (locale === 'zh' ? '/zh/docs' : '/en/docs')
     const trans =
       locale === 'zh'
         ? {
@@ -380,12 +380,13 @@ export class DocsService {
             security: '安全機制',
             image_opt: '圖片優化',
             seo_engine: 'Luminosity 引擎',
-            sitemap: 'Sitemap 生成',
+            sitemap: 'Sitemap 系統指南',
             inertia_react: 'Inertia (React)',
             inertia_vue: 'Inertia (Vue)',
             view_engine: 'Orbit View 引擎',
             i18n: '國際化 (I18n)',
-            deployment: '部署指南',
+            deployment: '正式環境部署',
+            enterprise_integration: '企業級整合',
             cli: 'CLI 指令',
             plugins: '插件開發',
           }
@@ -446,12 +447,13 @@ export class DocsService {
             security: 'Security',
             image_opt: 'Image Optimization',
             seo_engine: 'Luminosity Engine',
-            sitemap: 'Sitemap Generation',
+            sitemap: 'Sitemap System Guide',
             inertia_react: 'Inertia (React)',
             inertia_vue: 'Inertia (Vue)',
             view_engine: 'Orbit View Engine',
             i18n: 'Internationalization',
-            deployment: 'Deployment',
+            deployment: 'Production Deployment',
+            enterprise_integration: 'Enterprise Integration',
             cli: 'CLI Commands',
             plugins: 'Plugin Development',
           }
@@ -554,7 +556,10 @@ export class DocsService {
       {
         title: trans.advanced,
         path: '#',
-        children: [{ title: trans.deployment, path: `${prefix}/guide/deployment` }],
+        children: [
+          { title: trans.deployment, path: `${prefix}/guide/deployment` },
+          { title: trans.enterprise_integration, path: `${prefix}/guide/enterprise-integration` },
+        ],
       },
       {
         title: trans.testing,

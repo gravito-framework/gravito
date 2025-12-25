@@ -315,7 +315,8 @@ export default function Docs() {
                 </h3>
                 <ul className="space-y-1 ml-1">
                   {section.children?.map((item) => {
-                    const isActive = currentPath === item.path
+                    const normalizePath = (p: string) => p.replace(/^\/zh-TW\//, '/zh/')
+                    const isActive = normalizePath(currentPath) === normalizePath(item.path)
                     return (
                       <li key={item.path}>
                         <StaticLink

@@ -19,7 +19,7 @@ export class DocsController {
     let slug = c.req.path
 
     if (locale === 'zh') {
-      slug = slug.replace(/^\/zh\/docs\//, '')
+      slug = slug.replace(/^\/(zh|zh-TW)\/docs\//, '')
     } else if (locale === 'en' && slug.startsWith('/en/')) {
       slug = slug.replace(/^\/en\/docs\//, '')
     } else {
@@ -28,7 +28,12 @@ export class DocsController {
 
     const t = getTranslation(locale)
     const page = await DocsService.getPage(locale, slug)
-    const sidebar = DocsService.getSidebar(locale)
+    const sidebarPrefix = c.req.path.startsWith('/zh-TW/')
+      ? '/zh-TW/docs'
+      : locale === 'zh'
+        ? '/zh/docs'
+        : '/en/docs'
+    const sidebar = DocsService.getSidebar(locale, sidebarPrefix)
     const fsLocale = locale === 'zh' ? 'zh-TW' : 'en'
     const editUrl = `https://github.com/gravito-framework/gravito/blob/main/docs/${fsLocale}/${slug}.md`
 

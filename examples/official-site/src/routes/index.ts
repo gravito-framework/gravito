@@ -9,13 +9,13 @@ export function registerRoutes(core: PlanetCore): void {
   // Middleware to set locale
   const setLocale = (locale: string) => async (c: GravitoContext, next: GravitoNext) => {
     c.set('locale', locale)
-    return await next()
+    return (await next()) as any
   }
 
   // ─────────────────────────────────────────────
   // Default Routes (English)
   // ─────────────────────────────────────────────
-  router.middleware(setLocale('en')).group((root) => {
+  router.middleware(setLocale('en')).group((root: any) => {
     root.get('/', [HomeController, 'index'])
     // Specific route for docs index
     root.get('/docs', [DocsController, 'index'])
@@ -32,7 +32,7 @@ export function registerRoutes(core: PlanetCore): void {
   router
     .prefix('/en')
     .middleware(setLocale('en'))
-    .group((en) => {
+    .group((en: any) => {
       en.get('', [HomeController, 'index'])
       en.get('/', [HomeController, 'index'])
       en.get('/docs', [DocsController, 'index'])
@@ -43,20 +43,21 @@ export function registerRoutes(core: PlanetCore): void {
     })
 
   // ─────────────────────────────────────────────
-  // Chinese Routes
+  // Chinese Routes (/zh and /zh-TW)
   // ─────────────────────────────────────────────
-  router
-    .prefix('/zh')
-    .middleware(setLocale('zh'))
-    .group((zh) => {
-      zh.get('', [HomeController, 'index'])
-      zh.get('/', [HomeController, 'index'])
-      zh.get('/docs', [DocsController, 'index'])
-      zh.get('/docs/*', [DocsController, 'show'])
-      zh.get('/about', [HomeController, 'about'])
-      zh.get('/features', [HomeController, 'features'])
-      zh.get('/releases', [HomeController, 'releases'])
-    })
+  const registerChineseRoutes = (group: any) => {
+    group.get('', [HomeController, 'index'])
+    group.get('/', [HomeController, 'index'])
+    group.get('/docs', [DocsController, 'index'])
+    group.get('/docs/*', [DocsController, 'show'])
+    group.get('/about', [HomeController, 'about'])
+    group.get('/features', [HomeController, 'features'])
+    group.get('/releases', [HomeController, 'releases'])
+  }
+
+  router.prefix('/zh').middleware(setLocale('zh')).group(registerChineseRoutes)
+
+  router.prefix('/zh-TW').middleware(setLocale('zh')).group(registerChineseRoutes)
 
   // Newsletter
   router.post('/newsletter', [HomeController, 'subscribe'])
@@ -66,13 +67,13 @@ export function registerRoutes(core: PlanetCore): void {
   // ─────────────────────────────────────────────
   const apiLogger = async (c: GravitoContext, next: GravitoNext) => {
     console.log(`[API] ${c.req.method} ${c.req.url}`)
-    return await next()
+    return (await next()) as any
   }
 
   router
     .prefix('/api')
     .middleware(apiLogger)
-    .group((api) => {
+    .group((api: any) => {
       api.get('/health', [ApiController, 'health'])
     })
 }
