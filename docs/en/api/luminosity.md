@@ -61,3 +61,80 @@ The engine generates professional, non-blocking script tags for:
 - **Baidu Tongji** (`baidu`)
 
 These are injected via the `SeoMetadata` utility used in your controllers.
+
+## RouteScanner (Cross-Framework Support)
+
+Luminosity includes a powerful **RouteScanner** system that automatically discovers routes from various frameworks. This means you can use Luminosity even if you're not using Gravito!
+
+### Supported Frameworks
+
+| Framework | Scanner | Route Discovery |
+|-----------|---------|-----------------|
+| **Gravito** | `GravitoScanner` | `core.router.routes` |
+| **Hono** | `HonoScanner` | `app.routes` |
+| **Express** | `ExpressScanner` | `app._router.stack` |
+| **Next.js** | `NextScanner` | File system (`app/`, `pages/`) |
+| **Nuxt** | `NuxtScanner` | File system (`pages/`) |
+
+### Usage with Hono
+
+```typescript
+import { Hono } from 'hono'
+import { SitemapBuilder, HonoScanner } from '@gravito/luminosity'
+
+const app = new Hono()
+app.get('/hello', (c) => c.text('Hello'))
+app.get('/blog/:slug', (c) => c.text('Blog'))
+
+const builder = new SitemapBuilder({
+  scanner: new HonoScanner(app),
+  hostname: 'https://example.com',
+  dynamicResolvers: [
+    {
+      pattern: '/blog/:slug',
+      resolve: async () => {
+        const posts = await getPosts()
+        return posts.map(p => ({ slug: p.slug }))
+      }
+    }
+  ]
+})
+
+const entries = await builder.build()
+```
+
+### Usage with Next.js
+
+```typescript
+// app/sitemap.ts
+import { SitemapBuilder, NextScanner } from '@gravito/luminosity'
+
+export default async function sitemap() {
+  const builder = new SitemapBuilder({
+    scanner: new NextScanner({ appDir: './app' }),
+    hostname: 'https://example.com'
+  })
+
+  return builder.build()
+}
+```
+
+### Creating Custom Scanners
+
+You can create scanners for any framework by implementing the `RouteScanner` interface:
+
+```typescript
+import type { RouteScanner, ScannedRoute } from '@gravito/luminosity'
+
+class MyFrameworkScanner implements RouteScanner {
+  readonly framework = 'my-framework'
+
+  async scan(): Promise<ScannedRoute[]> {
+    // Your route discovery logic here
+    return [
+      { path: '/', method: 'GET', isDynamic: false },
+      { path: '/blog/:slug', method: 'GET', isDynamic: true, params: ['slug'] }
+    ]
+  }
+}
+```

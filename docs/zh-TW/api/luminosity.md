@@ -61,3 +61,80 @@ const postsResolver = {
 - **百度統計** (`baidu`)
 
 這些內容會透過您在控制器中使用的 `SeoMetadata` 工具自動注入。
+
+## 路由掃描器 (跨框架支援)
+
+Luminosity 內建強大的 **RouteScanner** 系統，能自動發現來自各種框架的路由。這意味著即使您不使用 Gravito，也能使用 Luminosity！
+
+### 支援的框架
+
+| 框架 | 掃描器 | 路由發現方式 |
+|------|--------|-------------|
+| **Gravito** | `GravitoScanner` | `core.router.routes` |
+| **Hono** | `HonoScanner` | `app.routes` |
+| **Express** | `ExpressScanner` | `app._router.stack` |
+| **Next.js** | `NextScanner` | 檔案系統 (`app/`, `pages/`) |
+| **Nuxt** | `NuxtScanner` | 檔案系統 (`pages/`) |
+
+### 搭配 Hono 使用
+
+```typescript
+import { Hono } from 'hono'
+import { SitemapBuilder, HonoScanner } from '@gravito/luminosity'
+
+const app = new Hono()
+app.get('/hello', (c) => c.text('Hello'))
+app.get('/blog/:slug', (c) => c.text('Blog'))
+
+const builder = new SitemapBuilder({
+  scanner: new HonoScanner(app),
+  hostname: 'https://example.com',
+  dynamicResolvers: [
+    {
+      pattern: '/blog/:slug',
+      resolve: async () => {
+        const posts = await getPosts()
+        return posts.map(p => ({ slug: p.slug }))
+      }
+    }
+  ]
+})
+
+const entries = await builder.build()
+```
+
+### 搭配 Next.js 使用
+
+```typescript
+// app/sitemap.ts
+import { SitemapBuilder, NextScanner } from '@gravito/luminosity'
+
+export default async function sitemap() {
+  const builder = new SitemapBuilder({
+    scanner: new NextScanner({ appDir: './app' }),
+    hostname: 'https://example.com'
+  })
+
+  return builder.build()
+}
+```
+
+### 建立自訂掃描器
+
+您可以透過實作 `RouteScanner` 介面，為任何框架建立掃描器：
+
+```typescript
+import type { RouteScanner, ScannedRoute } from '@gravito/luminosity'
+
+class MyFrameworkScanner implements RouteScanner {
+  readonly framework = 'my-framework'
+
+  async scan(): Promise<ScannedRoute[]> {
+    // 您的路由發現邏輯
+    return [
+      { path: '/', method: 'GET', isDynamic: false },
+      { path: '/blog/:slug', method: 'GET', isDynamic: true, params: ['slug'] }
+    ]
+  }
+}
+```
