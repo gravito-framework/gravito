@@ -49,13 +49,15 @@
     }
 
     .prose pre code {
-        @apply !bg-transparent !p-0 !text-inherit !font-normal;
+        @apply !bg-transparent !p-0 !font-normal;
         display: block;
         min-width: 100%;
         line-height: 1.7;
         min-height: 0 !important;
         height: auto !important;
         max-height: none !important;
+        font-family: 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', 'Consolas', monospace;
+        -webkit-font-smoothing: initial;
     }
 
     /* Fix shiki-generated div height issue inside code blocks */
@@ -105,11 +107,10 @@
         content: none !important;
     }
 
-    /* Prevents font-size leaks from prose into code blocks */
+    /* Prevents font-size leaks from prose into code blocks while preserving colors */
     .prose pre * {
         font-size: inherit !important;
         font-weight: inherit !important;
-        font-style: inherit !important;
         font-family: inherit !important;
         text-transform: none !important;
     }
@@ -122,10 +123,105 @@
     .prose pre em,
     .prose pre b,
     .prose pre i {
-        @apply !text-inherit !tracking-normal;
+        @apply !tracking-normal;
         font-size: inherit !important;
         font-weight: inherit !important;
         font-style: inherit !important;
+    }
+
+    /* 
+     * Ecosystem Galaxy Cards 
+     * Premium presentation for Kinetic Modules
+     */
+    .ecosystem-grid {
+        @apply grid grid-cols-1 md:grid-cols-2 gap-8 my-16;
+    }
+
+    .module-card {
+        @apply relative overflow-hidden rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 backdrop-blur-md transition-all duration-500 hover:border-singularity/30 hover:bg-white/[0.05];
+        box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+    }
+
+    .module-card::before {
+        content: '';
+        @apply absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent opacity-0 transition-opacity duration-500;
+    }
+
+    .module-card:hover::before {
+        @apply opacity-100;
+    }
+
+    .module-card .card-accent {
+        @apply absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-singularity to-transparent opacity-30 transition-all duration-500;
+    }
+
+    .module-card:hover .card-accent {
+        @apply opacity-100 w-2;
+    }
+
+    .module-card .module-code {
+        @apply text-[10px] font-black uppercase tracking-[0.3em] text-singularity mb-2 block;
+    }
+
+    .module-card .module-title {
+        @apply text-2xl font-bold text-white mb-4 flex items-center gap-3;
+    }
+
+    .module-card .module-pkg {
+        @apply font-mono text-[11px] text-gray-500 bg-black/40 px-3 py-1 rounded-full border border-white/5 mb-6 inline-block transition-colors;
+    }
+
+    .module-card:hover .module-pkg {
+        @apply text-gray-300 border-white/10;
+    }
+
+    .module-card .module-desc {
+        @apply text-sm text-gray-400 leading-relaxed transition-colors;
+    }
+
+    .module-card:hover .module-desc {
+        @apply text-gray-300;
+    }
+
+    /* Modifiers for different module types */
+    .module-card.data .card-accent {
+        @apply from-amber-400;
+    }
+
+    .module-card.data .module-code {
+        @apply text-amber-400;
+    }
+
+    .module-card.frontend .card-accent {
+        @apply from-purple-500;
+    }
+
+    .module-card.frontend .module-code {
+        @apply text-purple-500;
+    }
+
+    .module-card.security .card-accent {
+        @apply from-emerald-400;
+    }
+
+    .module-card.security .module-code {
+        @apply text-emerald-400;
+    }
+
+    .module-card.comm .card-accent {
+        @apply from-orange-500;
+    }
+
+    .module-card.comm .module-code {
+        @apply text-orange-500;
+    }
+
+    .module-card.env .card-accent {
+        @apply from-pink-500;
+    }
+
+    .module-card.env .module-code {
+        @apply text-pink-500;
     }
 }
 

@@ -251,7 +251,7 @@ export class DocsService {
 
       renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
         if (lang === 'mermaid') {
-          // Wrap in custom Singularity theme config
+          // ... mermaid logic remains same
           const configHeader = `%%{init: { 
             'theme': 'base', 
             'themeVariables': {
@@ -285,11 +285,18 @@ export class DocsService {
           </div>`
         }
 
-        // Use simple pre/code structure without external wrapper
-        const escapedText = escapeHtml(text)
-        const langClass = lang ? `language-${lang}` : ''
-
-        return `<pre class="${langClass}"><code class="${langClass}">${escapedText}</code></pre>`
+        try {
+          // Use Shiki for actual syntax highlighting
+          return highlighter.codeToHtml(text, {
+            lang: lang || 'text',
+            theme: 'rose-pine-moon',
+          })
+        } catch (e) {
+          // Fallback if language is not supported
+          const escapedText = escapeHtml(text)
+          const langClass = lang ? `language-${lang}` : ''
+          return `<pre class="${langClass}"><code class="${langClass}">${escapedText}</code></pre>`
+        }
       }
 
       const html = (await marked.parse(content, { renderer })) as string
@@ -317,123 +324,137 @@ export class DocsService {
     const trans =
       locale === 'zh'
         ? {
-          // Sections
-          getting_started: '入門指南',
-          core_concepts: '核心概念',
-          first_build: '第一個專案',
-          modules: '模組總覽',
-          database: '資料庫基礎 (Database)',
-          orm: 'Atlas ORM',
-          auth: '驗證與安全',
-          auth_fortify: '認證 (Fortify)',
-          storage: '儲存與檔案',
-          cache_queue: '快取與排程',
-          seo: 'SEO 與 Sitemap',
-          frontend: '前端整合',
-          advanced: '進階與維運',
-          testing: '測試指南',
-          reference: '參考資料',
+            // Sections
+            getting_started: '入門指南',
+            core_concepts: '核心概念',
+            first_build: '第一個專案',
+            modules: '模組總覽',
+            database: '資料庫基礎 (Database)',
+            orm: 'Atlas ORM',
+            auth: '驗證與安全',
+            auth_fortify: '認證 (Fortify)',
+            storage: '儲存與檔案',
+            cache_queue: '快取與排程',
+            seo: 'SEO 與 Sitemap',
+            frontend: '前端整合',
+            advanced: '進階與維運',
+            testing: '測試指南',
+            reference: '參考資料',
 
-          // Pages
-          intro: '簡介',
-          quick_start: '快速上手',
-          structure: '專案結構',
-          architecture: 'Galaxy 架構',
-          lifecycle: '生命週期',
-          routing: '基礎路由',
-          testing_harness: 'HTTP 測試',
-          static_site: '靜態網站生成',
+            // Pages
+            intro: '簡介',
+            quick_start: '快速上手',
+            structure: '專案結構',
+            architecture: '銀河架構',
+            lifecycle: '生命週期',
+            ecosystem: '動力生態系',
+            routing: '基礎路由',
+            testing_harness: 'HTTP 測試',
+            static_site: '靜態網站生成',
 
-          // Database Pages
-          db_overview: '概覽',
-          db_quickstart: '快速入門 (Getting Started)',
-          db_query: '查詢建構器 (Query Builder)',
-          db_pagination: '資料分頁 (Pagination)',
-          db_migrations: '資料庫遷移 (Migrations)',
-          db_seeding: '數據填充 (Seeding)',
-          db_redis: 'Redis 整合',
-          db_mongodb: 'MongoDB 整合',
+            middleware: '中間件 (Middleware)',
+            controllers: '控制器 (Controllers)',
+            requests: '請求 (Requests)',
+            responses: '回應 (Responses)',
+            validation: '驗證 (Validation)',
 
-          // ORM Pages
-          orm_getting_started: '快速上手',
-          orm_relationships: '模型關聯 (Relationships)',
-          orm_mutators: '修改器與轉換 (Mutators)',
-          orm_serialization: '序列化 (Serialization)',
-          orm_factories: '模型工廠 (Factories)',
-          orm_collections: '集合 (Collections)',
-          orm_resources: 'API 資源 (Resources)',
+            // Database Pages
+            db_overview: '概覽',
+            db_quickstart: '快速入門 (Getting Started)',
+            db_query: '查詢建構器 (Query Builder)',
+            db_pagination: '資料分頁 (Pagination)',
+            db_migrations: '資料庫遷移 (Migrations)',
+            db_seeding: '數據填充 (Seeding)',
+            db_redis: 'Redis 整合',
+            db_mongodb: 'MongoDB 整合',
 
-          security: '安全機制',
-          image_opt: '圖片優化',
-          seo_engine: 'Luminosity 引擎',
-          sitemap: 'Sitemap 生成',
-          inertia_react: 'Inertia (React)',
-          inertia_vue: 'Inertia (Vue)',
-          view_engine: 'Orbit View 引擎',
-          i18n: '國際化 (I18n)',
-          deployment: '部署指南',
-          cli: 'CLI 指令',
-          plugins: '插件開發',
-        }
+            // ORM Pages
+            orm_getting_started: '快速上手',
+            orm_relationships: '模型關聯 (Relationships)',
+            orm_mutators: '修改器與轉換 (Mutators)',
+            orm_serialization: '序列化 (Serialization)',
+            orm_factories: '模型工廠 (Factories)',
+            orm_collections: '集合 (Collections)',
+            orm_resources: 'API 資源 (Resources)',
+
+            security: '安全機制',
+            image_opt: '圖片優化',
+            seo_engine: 'Luminosity 引擎',
+            sitemap: 'Sitemap 生成',
+            inertia_react: 'Inertia (React)',
+            inertia_vue: 'Inertia (Vue)',
+            view_engine: 'Orbit View 引擎',
+            i18n: '國際化 (I18n)',
+            deployment: '部署指南',
+            cli: 'CLI 指令',
+            plugins: '插件開發',
+          }
         : {
-          // Sections
-          getting_started: 'Getting Started',
-          core_concepts: 'Core Concepts',
-          first_build: 'First Build',
-          modules: 'Modules',
-          database: 'Database',
-          orm: 'Atlas ORM',
-          auth: 'Auth & Security',
-          auth_fortify: 'Authentication (Fortify)',
-          storage: 'Storage & Files',
-          cache_queue: 'Cache & Queue',
-          seo: 'SEO & Sitemap',
-          frontend: 'Frontend Integration',
-          advanced: 'Advanced / Operations',
-          testing: 'Testing',
-          reference: 'Reference',
+            // Sections
+            getting_started: 'Getting Started',
+            core_concepts: 'Core Concepts',
+            first_build: 'First Build',
+            modules: 'Modules',
+            database: 'Database',
+            orm: 'Atlas ORM',
+            auth: 'Auth & Security',
+            auth_fortify: 'Authentication (Fortify)',
+            storage: 'Storage & Files',
+            cache_queue: 'Cache & Queue',
+            seo: 'SEO & Sitemap',
+            frontend: 'Frontend Integration',
+            advanced: 'Advanced / Operations',
+            testing: 'Testing',
+            reference: 'Reference',
 
-          // Pages
-          intro: 'Introduction',
-          quick_start: 'Quick Start',
-          structure: 'Project Structure',
-          architecture: 'Galaxy Architecture',
-          lifecycle: 'Lifecycle',
-          routing: 'Routing Basics',
-          testing_harness: 'HTTP Testing',
-          static_site: 'Static Site Gen',
+            // Pages
+            intro: 'Introduction',
+            quick_start: 'Quick Start',
+            structure: 'Project Structure',
+            architecture: 'Galaxy Architecture',
+            lifecycle: 'Lifecycle',
+            ecosystem: 'Kinetic Ecosystem',
+            routing: 'Routing Basics',
+            testing_harness: 'HTTP Testing',
+            static_site: 'Static Site Gen',
 
-          // Database Pages
-          db_overview: 'Overview',
-          db_quickstart: 'Getting Started',
-          db_query: 'Query Builder',
-          db_pagination: 'Pagination',
-          db_migrations: 'Migrations',
-          db_seeding: 'Seeding & Factories',
-          db_redis: 'Redis',
-          db_mongodb: 'MongoDB',
+            middleware: 'Middleware',
+            controllers: 'Controllers',
+            requests: 'Requests',
+            responses: 'Responses',
+            validation: 'Validation',
 
-          // ORM Pages
-          orm_getting_started: 'Getting Started',
-          orm_relationships: 'Relationships',
-          orm_mutators: 'Mutators & Casting',
-          orm_serialization: 'Serialization',
-          orm_factories: 'Factories',
-          orm_collections: 'Collections',
-          orm_resources: 'API Resources',
+            // Database Pages
+            db_overview: 'Overview',
+            db_quickstart: 'Getting Started',
+            db_query: 'Query Builder',
+            db_pagination: 'Pagination',
+            db_migrations: 'Migrations',
+            db_seeding: 'Seeding & Factories',
+            db_redis: 'Redis',
+            db_mongodb: 'MongoDB',
 
-          security: 'Security',
-          image_opt: 'Image Optimization',
-          seo_engine: 'Luminosity Engine',
-          sitemap: 'Sitemap Generation',
-          inertia_react: 'Inertia (React)',
-          inertia_vue: 'Inertia (Vue)',
-          view_engine: 'Orbit View Engine',
-          i18n: 'Internationalization',
-          deployment: 'Deployment',
-          cli: 'CLI Commands',
-          plugins: 'Plugin Development',
-        }
+            // ORM Pages
+            orm_getting_started: 'Getting Started',
+            orm_relationships: 'Relationships',
+            orm_mutators: 'Mutators & Casting',
+            orm_serialization: 'Serialization',
+            orm_factories: 'Factories',
+            orm_collections: 'Collections',
+            orm_resources: 'API Resources',
+
+            security: 'Security',
+            image_opt: 'Image Optimization',
+            seo_engine: 'Luminosity Engine',
+            sitemap: 'Sitemap Generation',
+            inertia_react: 'Inertia (React)',
+            inertia_vue: 'Inertia (Vue)',
+            view_engine: 'Orbit View Engine',
+            i18n: 'Internationalization',
+            deployment: 'Deployment',
+            cli: 'CLI Commands',
+            plugins: 'Plugin Development',
+          }
 
     return [
       {
@@ -449,6 +470,7 @@ export class DocsService {
         path: '#',
         children: [
           { title: trans.architecture, path: `${prefix}/guide/core-concepts` },
+          { title: trans.ecosystem, path: `${prefix}/guide/ecosystem` },
           // Placeholder for now
           // { title: trans.lifecycle, path: `${prefix}/guide/lifecycle` },
         ],
@@ -458,6 +480,11 @@ export class DocsService {
         path: '#',
         children: [
           { title: trans.routing, path: `${prefix}/guide/routing` },
+          { title: trans.middleware, path: `${prefix}/guide/middleware` },
+          { title: trans.controllers, path: `${prefix}/guide/controllers` },
+          { title: trans.requests, path: `${prefix}/guide/requests` },
+          { title: trans.responses, path: `${prefix}/guide/responses` },
+          { title: trans.validation, path: `${prefix}/guide/validation` },
           { title: trans.static_site, path: `${prefix}/guide/static-site-development` },
         ],
       },
