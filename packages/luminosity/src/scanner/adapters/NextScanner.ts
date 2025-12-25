@@ -1,7 +1,7 @@
 import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import type { RouteScanner, ScannedRoute } from '../types'
-import { extractParams, isDynamicRoute, normalizePath } from '../utils'
+import { extractParams, isDynamicRoute, matchesPatterns, normalizePath } from '../utils'
 
 /**
  * Options for NextScanner
@@ -51,15 +51,33 @@ export class NextScanner implements RouteScanner {
     const cwd = this.options.cwd ?? process.cwd()
 
     // Scan App Router (Next.js 13+)
-    const appDir = join(cwd, this.options.appDir ?? 'app')
-    if (this.dirExists(appDir)) {
-      routes.push(...this.scanAppDir(appDir))
+    if (this.options.appDir) {
+      const appDir = this.options.appDir.startsWith('/')
+        ? this.options.appDir
+        : join(cwd, this.options.appDir)
+      if (this.dirExists(appDir)) {
+        routes.push(...this.scanAppDir(appDir))
+      }
+    } else {
+      const defaultAppDir = join(cwd, 'app')
+      if (this.dirExists(defaultAppDir)) {
+        routes.push(...this.scanAppDir(defaultAppDir))
+      }
     }
 
     // Scan Pages Router (legacy)
-    const pagesDir = join(cwd, this.options.pagesDir ?? 'pages')
-    if (this.dirExists(pagesDir)) {
-      routes.push(...this.scanPagesDir(pagesDir))
+    if (this.options.pagesDir) {
+      const pagesDir = this.options.pagesDir.startsWith('/')
+        ? this.options.pagesDir
+        : join(cwd, this.options.pagesDir)
+      if (this.dirExists(pagesDir)) {
+        routes.push(...this.scanPagesDir(pagesDir))
+      }
+    } else {
+      const defaultPagesDir = join(cwd, 'pages')
+      if (this.dirExists(defaultPagesDir)) {
+        routes.push(...this.scanPagesDir(defaultPagesDir))
+      }
     }
 
     // Apply filters
@@ -104,7 +122,7 @@ export class NextScanner implements RouteScanner {
           }
 
           routes.push(...this.scanAppDir(fullPath, `${basePath}/${segment}`))
-        } else if (this.isPageFile(entry)) {
+        } else if (this.isAppRouterPageFile(entry)) {
           // page.tsx, page.ts, page.jsx, page.js
           const path = normalizePath(basePath || '/')
           routes.push({
@@ -153,7 +171,7 @@ export class NextScanner implements RouteScanner {
           }
 
           routes.push(...this.scanPagesDir(fullPath, `${basePath}/${segment}`))
-        } else if (this.isPageFile(entry)) {
+        } else if (this.isPagesRouterPageFile(entry)) {
           const name = entry.replace(/\.(tsx|ts|jsx|js)$/, '')
           let path: string
 
@@ -182,8 +200,12 @@ export class NextScanner implements RouteScanner {
     return routes
   }
 
-  private isPageFile(filename: string): boolean {
-    return /^page\.(tsx|ts|jsx|js)$/.test(filename) || /\.(tsx|ts|jsx|js)$/.test(filename)
+  private isAppRouterPageFile(filename: string): boolean {
+    return /^page\.(tsx|ts|jsx|js)$/.test(filename)
+  }
+
+  private isPagesRouterPageFile(filename: string): boolean {
+    return /\.(tsx|ts|jsx|js)$/.test(filename) && !filename.startsWith('_')
   }
 
   private dirExists(path: string): boolean {
@@ -195,32 +217,16 @@ export class NextScanner implements RouteScanner {
   }
 
   private shouldExclude(path: string): boolean {
-    // Check exclude patterns
+    // Check exclude patterns using glob matching
     if (this.options.excludePatterns?.length) {
-      for (const pattern of this.options.excludePatterns) {
-        if (typeof pattern === 'string' && path.includes(pattern)) {
-          return true
-        }
-        if (pattern instanceof RegExp && pattern.test(path)) {
-          return true
-        }
+      if (matchesPatterns(path, this.options.excludePatterns)) {
+        return true
       }
     }
 
     // Check include patterns (if specified, must match at least one)
     if (this.options.includePatterns?.length) {
-      let matched = false
-      for (const pattern of this.options.includePatterns) {
-        if (typeof pattern === 'string' && path.includes(pattern)) {
-          matched = true
-          break
-        }
-        if (pattern instanceof RegExp && pattern.test(path)) {
-          matched = true
-          break
-        }
-      }
-      return !matched
+      return !matchesPatterns(path, this.options.includePatterns)
     }
 
     return false

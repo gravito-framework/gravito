@@ -1,5 +1,5 @@
 import type { RouteScanner, ScannedRoute } from '../types'
-import { extractParams, isDynamicRoute } from '../utils'
+import { extractParams, isDynamicRoute, matchesPatterns } from '../utils'
 
 /**
  * Options for HonoScanner
@@ -97,32 +97,16 @@ export class HonoScanner implements RouteScanner {
   }
 
   private shouldExclude(path: string): boolean {
-    // Check exclude patterns
+    // Check exclude patterns using glob matching
     if (this.options.excludePatterns?.length) {
-      for (const pattern of this.options.excludePatterns) {
-        if (typeof pattern === 'string' && path.includes(pattern)) {
-          return true
-        }
-        if (pattern instanceof RegExp && pattern.test(path)) {
-          return true
-        }
+      if (matchesPatterns(path, this.options.excludePatterns)) {
+        return true
       }
     }
 
     // Check include patterns (if specified, must match at least one)
     if (this.options.includePatterns?.length) {
-      let matched = false
-      for (const pattern of this.options.includePatterns) {
-        if (typeof pattern === 'string' && path.includes(pattern)) {
-          matched = true
-          break
-        }
-        if (pattern instanceof RegExp && pattern.test(path)) {
-          matched = true
-          break
-        }
-      }
-      return !matched
+      return !matchesPatterns(path, this.options.includePatterns)
     }
 
     return false
