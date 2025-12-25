@@ -121,6 +121,42 @@ await DB.table('users')
   .delete();
 ```
 
+## 4. 原生 SQL 表達式 (Raw Expressions)
+
+有時您可能需要將原生 SQL 片段注入到查詢中。您可以使用 `DB.raw` 來建立原生表達式：
+
+```typescript
+import { DB } from '@gravito/atlas';
+
+const users = await DB.table('users')
+  .select(DB.raw('count(*) as user_count, status'))
+  .where('status', '<>', 1)
+  .groupBy('status')
+  .get();
+```
+
+> **注意**：原生表達式會直接注入到查詢中，請確保您沒有引入 SQL 注入漏洞。
+
+您也可以執行完全原生的查詢：
+
+```typescript
+const result = await DB.raw('SELECT * FROM users WHERE id = ?', [1]);
+```
+
+## 5. 資料庫交易 (Transactions)
+
+您可以使用 `DB.transaction` 方法在一組操作中執行資料庫交易。如果在交易閉包中拋出異常，交易將自動回滾；如果閉包執行成功，交易將自動提交。
+
+```typescript
+await DB.transaction(async (trx) => {
+  await trx.table('users').update({ votes: 1 });
+
+  await trx.table('posts').delete();
+});
+```
+
+`trx` 參數是一個交易範圍內的連接實例，請確保在交易內使用它而不是全域的 `DB`。
+
 ## 下一步
 
 - 深入探索 [查詢建構器 (Query Builder)](./query-builder) 的強大功能。

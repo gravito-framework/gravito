@@ -486,11 +486,11 @@ export class DocsService {
         children: [
           { title: trans.orm_getting_started, path: `${prefix}/guide/database/orm-quick-start` },
           { title: trans.orm_relationships, path: `${prefix}/guide/database/atlas-relationships` },
+          { title: trans.orm_collections, path: `${prefix}/guide/database/atlas-collections` },
           { title: trans.orm_mutators, path: `${prefix}/guide/database/atlas-mutators` },
+          { title: trans.orm_resources, path: `${prefix}/guide/database/atlas-resources` },
           { title: trans.orm_serialization, path: `${prefix}/guide/database/atlas-serialization` },
           { title: trans.orm_factories, path: `${prefix}/guide/database/atlas-factories` },
-          { title: trans.orm_collections, path: `${prefix}/guide/database/atlas-collections` },
-          { title: trans.orm_resources, path: `${prefix}/guide/database/atlas-resources` },
         ],
       },
       {

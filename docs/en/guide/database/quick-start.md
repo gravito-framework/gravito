@@ -121,6 +121,42 @@ await DB.table('users')
   .delete();
 ```
 
+## 4. Raw SQL Expressions
+
+Sometimes you may need to inject raw SQL fragments into your queries. You can use `DB.raw` to create raw expressions:
+
+```typescript
+import { DB } from '@gravito/atlas';
+
+const users = await DB.table('users')
+  .select(DB.raw('count(*) as user_count, status'))
+  .where('status', '<>', 1)
+  .groupBy('status')
+  .get();
+```
+
+> **Warning**: Raw expressions are injected directly into the query. Ensure you do not introduce SQL injection vulnerabilities.
+
+You can also execute completely raw queries:
+
+```typescript
+const result = await DB.raw('SELECT * FROM users WHERE id = ?', [1]);
+```
+
+## 5. Database Transactions
+
+You can use the `DB.transaction` method to run a set of operations within a database transaction. If an exception is thrown within the transaction closure, the transaction will automatically be rolled back. If the closure executes successfully, the transaction will automatically be committed.
+
+```typescript
+await DB.transaction(async (trx) => {
+  await trx.table('users').update({ votes: 1 });
+
+  await trx.table('posts').delete();
+});
+```
+
+The `trx` argument is a transaction-scoped connection instance. Be sure to use it instead of the global `DB` within the transaction.
+
 ## Next Steps
 
 - Explore the powerful [Query Builder](./query-builder).

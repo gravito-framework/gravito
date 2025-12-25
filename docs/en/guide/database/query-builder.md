@@ -1,6 +1,6 @@
 # Query Builder
 
-Atlas provides a fluent, driver-agnostic query builder that allows you to construct complex database queries with ease. It supports SQL (PostgreSQL, MySQL, SQLite) and NoSQL (MongoDB) through a unified interface.
+Atlas provides a fluent, driver-agnostic query builder that allows you to easily construct complex database queries. It supports both SQL (PostgreSQL, MySQL, SQLite) and NoSQL (MongoDB) through a unified interface.
 
 ## Retrieving Results
 
@@ -21,7 +21,7 @@ const user = await User
 ```
 
 ### `pluck()`
-If you want to retrieve an array containing the values of a single column:
+If you want to retrieve an array containing values for a single column:
 ```typescript
 const titles = await Post.pluck('title'); // ['Hello World', 'Atlas Guide', ...]
 ```
@@ -32,10 +32,10 @@ const count = await User.count();
 const maxPrice = await Product.max('price');
 ```
 
-## Select Clauses
+## Select Statements
 
 ### `select()`
-Specify which columns to retrieve:
+Specify the columns to retrieve:
 ```typescript
 const users = await User
   .select('name', 'email as user_email')
@@ -47,7 +47,7 @@ const users = await User
 const roles = await User.distinct().pluck('role');
 ```
 
-## Joins (SQL Drivers)
+## Joins (SQL Only)
 
 Atlas supports various join types for SQL databases.
 
@@ -68,7 +68,7 @@ const users = await User
 
 ## Advanced Where Clauses
 
-### Basic Wheres
+### Basic Queries
 ```typescript
 // Implicit '='
 const users = await User.where('votes', 100).get();
@@ -77,7 +77,7 @@ const users = await User.where('votes', 100).get();
 const users = await User.where('votes', '>=', 100).get();
 ```
 
-### Logical Groups (Or Statements)
+### Logical Grouping (Or Statements)
 ```typescript
 const users = await User
   .where('votes', '>', 100)
@@ -86,7 +86,7 @@ const users = await User
 ```
 
 ### JSON Where Clauses
-If your database supports JSON (PostgreSQL, MySQL, MongoDB), you can query nested properties:
+If your database supports JSON (PostgreSQL, MySQL, MongoDB), you can query nested attributes:
 ```typescript
 const users = await User.where('options.language', 'en').get();
 ```
@@ -143,19 +143,22 @@ const average = await DB.table('users').avg('age');
 
 ## Raw Expressions
 
-Sometimes you may need to use a raw expression in a query. These expressions will be injected into the query as strings, so be careful not to create any SQL injection vulnerabilities:
+Sometimes you may need to use raw expressions in a query. These expressions will be injected directly into the query as strings, so be careful not to create SQL injection vulnerabilities.
+
+You can use `selectRaw`, `whereRaw`, `orWhereRaw`, `havingRaw`, `orderByRaw` methods:
 
 ```typescript
 const users = await User
     .select(DB.raw('count(*) as user_count, status'))
     .where('status', '<>', 1)
     .groupBy('status')
+    .havingRaw('count(*) > ?', [2500])
     .get();
 ```
 
 ## Chunking Results
 
-If you need to work with thousands of database records, consider using the `chunk` method. This method retrieves a small chunk of results at a time and feeds each chunk into a closure for processing:
+If you need to process thousands of database records, consider using the `chunk` method. This method retrieves a small chunk of results at a time and passes each chunk to a closure for processing:
 
 ```typescript
 await User.query().chunk(100, async (users) => {
@@ -165,7 +168,7 @@ await User.query().chunk(100, async (users) => {
 });
 ```
 
-You may stop further chunks from being processed by returning `false` from the closure:
+You can stop further chunks from being processed by returning `false` from the closure:
 
 ```typescript
 await User.query().chunk(100, async (users) => {
@@ -198,4 +201,22 @@ await User.where('id', 1).decrement('votes', 5);
 ### `delete()`
 ```typescript
 await User.where('votes', '<', 50).delete();
+```
+
+## Debugging
+
+You can use the `dump` and `dd` (Dump and Die) methods to inspect the query and bindings:
+
+```typescript
+await User.where('votes', '>', 100).dump().get();
+
+// Output:
+// SQL: select * from "users" where "votes" > ?
+// Bindings: [100]
+```
+
+The `dd` method will display the debug information and then stop script execution:
+
+```typescript
+await User.where('name', 'John').dd();
 ```

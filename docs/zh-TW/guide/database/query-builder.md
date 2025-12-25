@@ -143,13 +143,16 @@ const average = await DB.table('users').avg('age');
 
 ## 原始表達式 (Raw Expressions)
 
-有時您可能需要在查詢中使用原始表達式。這些表達式將作為字串直接注入查詢中，因此請務必小心，避免造成 SQL 注入漏洞：
+有時您可能需要在查詢中使用原始表達式。這些表達式將作為字串直接注入查詢中，因此請務必小心，避免造成 SQL 注入漏洞。
+
+您可以使用 `selectRaw`, `whereRaw`, `orWhereRaw`, `havingRaw`, `orderByRaw` 等方法：
 
 ```typescript
 const users = await User
     .select(DB.raw('count(*) as user_count, status'))
     .where('status', '<>', 1)
     .groupBy('status')
+    .havingRaw('count(*) > ?', [2500])
     .get();
 ```
 
@@ -198,4 +201,22 @@ await User.where('id', 1).decrement('votes', 5);
 ### `delete()`
 ```typescript
 await User.where('votes', '<', 50).delete();
+```
+
+## 除錯 (Debugging)
+
+您可以使用 `dump` 與 `dd` (Dump and Die) 方法來檢查查詢與綁定參數：
+
+```typescript
+await User.where('votes', '>', 100).dump().get();
+
+// 輸出:
+// SQL: select * from "users" where "votes" > ?
+// Bindings: [100]
+```
+
+`dd` 方法會顯示除錯資訊並終止腳本執行：
+
+```typescript
+await User.where('name', 'John').dd();
 ```
