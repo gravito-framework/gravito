@@ -1,6 +1,6 @@
+import { FreezeProvider } from '@gravito/freeze-react'
 import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
-import { FreezeProvider } from '@gravito/freeze-react'
 import './styles.css'
 import { freezeConfig } from './freeze.config'
 
