@@ -413,6 +413,16 @@ export class DocsService {
             enterprise_integration: '企業級整合',
             cli: 'CLI 指令',
             plugins: '插件開發',
+            beam_client: 'Beam 客戶端',
+            flux_workflow: 'Flux 工作流程',
+            forge_media: 'Forge 媒體處理',
+            monolith_cms: 'Monolith CMS',
+            scaffold_generator: 'Scaffold 專案生成器',
+            site_toolkit: 'Site Toolkit',
+            freeze_react: 'Freeze React',
+            freeze_vue: 'Freeze Vue',
+            luminosity_cli: 'Luminosity CLI',
+            create_app: 'Create Gravito App',
           }
         : {
             // Sections
@@ -482,6 +492,16 @@ export class DocsService {
             enterprise_integration: 'Enterprise Integration',
             cli: 'CLI Commands',
             plugins: 'Plugin Development',
+            beam_client: 'Beam Client',
+            flux_workflow: 'Flux Workflow',
+            forge_media: 'Forge Media',
+            monolith_cms: 'Monolith CMS',
+            scaffold_generator: 'Scaffold Generator',
+            site_toolkit: 'Site Toolkit',
+            freeze_react: 'Freeze React',
+            freeze_vue: 'Freeze Vue',
+            luminosity_cli: 'Luminosity CLI',
+            create_app: 'Create Gravito App',
           }
 
     return [
@@ -520,7 +540,19 @@ export class DocsService {
       {
         title: trans.modules,
         path: '#',
-        children: [{ title: trans.plugins, path: `${prefix}/guide/plugin-development` }],
+        children: [
+          { title: trans.plugins, path: `${prefix}/guide/plugin-development` },
+          { title: trans.beam_client, path: `${prefix}/guide/beam-client` },
+          { title: trans.flux_workflow, path: `${prefix}/guide/flux-workflow` },
+          { title: trans.forge_media, path: `${prefix}/guide/forge-media` },
+          { title: trans.monolith_cms, path: `${prefix}/guide/monolith-cms` },
+          { title: trans.scaffold_generator, path: `${prefix}/guide/scaffold-generator` },
+          { title: trans.site_toolkit, path: `${prefix}/guide/site-toolkit` },
+          { title: trans.freeze_react, path: `${prefix}/guide/freeze-react` },
+          { title: trans.freeze_vue, path: `${prefix}/guide/freeze-vue` },
+          { title: trans.luminosity_cli, path: `${prefix}/guide/luminosity-cli` },
+          { title: trans.create_app, path: `${prefix}/guide/create-gravito-app` },
+        ],
       },
       {
         title: trans.database,
