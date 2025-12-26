@@ -1,3 +1,8 @@
+---
+title: Getting Started
+order: 2
+---
+
 # Getting Started
 
 Ready to experience the speed of Luminosity? This guide will help you set up your first instance and start performing basic operations.

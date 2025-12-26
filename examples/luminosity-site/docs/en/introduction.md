@@ -1,3 +1,8 @@
+---
+title: Introduction
+order: 1
+---
+
 # Introduction
 
 Luminosity is the intelligent **SmartMap Engine** for modern, data-intensive web applications. It automates your SEO strategy by managing sitemaps, robots.txt, and search engine pings with unparalleled precision.
