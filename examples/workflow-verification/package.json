@@ -1,0 +1,20 @@
+{
+  "name": "example-workflow-verification",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "worker": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "gravito-core": "workspace:*",
+    "@gravito/photon": "workspace:*",
+    "@gravito/flux": "workspace:*",
+    "@gravito/impulse": "workspace:*",
+    "@gravito/mass": "workspace:*",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

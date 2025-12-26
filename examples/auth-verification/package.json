@@ -1,0 +1,20 @@
+{
+  "name": "example-auth-verification",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "worker": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "gravito-core": "workspace:*",
+    "@gravito/sentinel": "workspace:*",
+    "@gravito/fortify": "workspace:*",
+    "@gravito/pulsar": "workspace:*",
+    "@gravito/plasma": "workspace:*",
+    "@gravito/mass": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

@@ -1,9 +1,8 @@
-import type { MiddlewareHandler } from '@gravito/photon'
 import { AuthenticationException } from 'gravito-core'
 import type { AuthManager } from '../AuthManager'
 
-export const auth = (guard?: string): MiddlewareHandler => {
-  return async (c, next) => {
+export function auth(guard?: string) {
+  return async (c: any, next: any) => {
     const manager = c.get('auth') as AuthManager
 
     if (guard) {
@@ -17,3 +16,5 @@ export const auth = (guard?: string): MiddlewareHandler => {
     await next()
   }
 }
+
+export default auth

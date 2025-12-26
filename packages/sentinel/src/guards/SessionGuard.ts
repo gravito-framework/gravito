@@ -24,23 +24,26 @@ export class SessionGuard<User extends Authenticatable = Authenticatable>
     return !(await this.check())
   }
 
-  async user(): Promise<User | null> {
+  public async user(): Promise<User | null> {
     if (this.loggedOut) {
       return null
     }
+
     if (this.userInstance) {
       return this.userInstance
     }
 
-    const id = this.ctx.get('session').get(this.getName())
+    const session = this.ctx.get('session' as any) as any
+    const id = session?.get(this.getName())
 
-    if (id) {
-      this.userInstance = await this.provider.retrieveById(id)
+    if (!id) {
+      return null
     }
 
-    // TODO: Remember me implementation here
+    const user = (await this.provider.retrieveById(id)) as User | null
+    this.userInstance = user
 
-    return this.userInstance
+    return user
   }
 
   async id(): Promise<string | number | null> {
@@ -72,14 +75,19 @@ export class SessionGuard<User extends Authenticatable = Authenticatable>
     return true
   }
 
-  async login(user: User, remember = false): Promise<void> {
-    this.ctx.get('session').regenerate()
-    this.ctx.get('session').put(this.getName(), user.getAuthIdentifier())
-    this.setUser(user)
+  public async login(user: User, remember = false): Promise<void> {
+    const id =
+      typeof user.getAuthIdentifier === 'function' ? user.getAuthIdentifier() : (user as any).id
 
-    if (remember) {
-      // TODO: Implement remember me
+    this.ctx.set('auth', user)
+    this.userInstance = user
+
+    const session = this.ctx.get('session' as any) as any
+    if (session) {
+      session.put(this.getName(), id)
     }
+
+    this.loggedOut = false
   }
 
   async logout(): Promise<void> {
