@@ -78,13 +78,13 @@ const { t, locale } = useI18n()
         
         <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <StaticLink 
-            :href="locale === 'zh' ? '/zh/features' : '/features'"
+            href="/features"
             class="w-full sm:w-auto px-10 py-5 bg-white text-black font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2"
           >
             {{ t?.hero?.ctaPro }} <ChevronRight :size="20" />
           </StaticLink>
           <StaticLink 
-            :href="locale === 'zh' ? '/zh/docs' : '/docs'"
+            href="/docs"
             class="w-full sm:w-auto px-10 py-5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/5 transition-all backdrop-blur-sm"
           >
             {{ t?.hero?.ctaDocs }}
@@ -110,9 +110,15 @@ const { t, locale } = useI18n()
             <div class="relative z-10">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 font-bold">01</div>
               <h3 class="text-3xl font-bold mb-4">{{ t?.features?.lsm?.title }}</h3>
-              <p class="text-gray-400 text-lg max-w-lg">
+              <p class="text-gray-400 text-lg max-w-lg mb-6">
                 {{ t?.features?.lsm?.desc }}
               </p>
+              <StaticLink 
+                href="/docs/benchmark"
+                class="inline-flex items-center gap-2 text-emerald-400 font-bold hover:text-emerald-300 transition-colors uppercase tracking-widest text-xs"
+              >
+                View Docs <ChevronRight :size="16" />
+              </StaticLink>
             </div>
           </div>
           
@@ -121,9 +127,15 @@ const { t, locale } = useI18n()
               <div>
                 <Shield class="text-white/80 mb-6" :size="40" />
                 <h3 class="text-2xl font-bold text-white mb-4">{{ t?.features?.enterprise?.title }}</h3>
-                <p class="text-emerald-100/70">
+                <p class="text-emerald-100/70 mb-6">
                   {{ t?.features?.enterprise?.desc }}
                 </p>
+                <StaticLink 
+                  href="/docs/introduction"
+                  class="inline-flex items-center gap-2 text-white font-bold hover:text-emerald-100 transition-colors uppercase tracking-widest text-xs"
+                >
+                  Learn More <ChevronRight :size="16" />
+                </StaticLink>
               </div>
               <div class="pt-8 flex justify-end">
                 <Logo size="lg" class="opacity-20 translate-x-12 translate-y-12 rotate-[-15deg] grayscale brightness-200" />
@@ -131,28 +143,46 @@ const { t, locale } = useI18n()
             </div>
           </div>
           
-          <div class="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md">
+          <div class="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md group">
             <Search class="text-emerald-500 mb-6" :size="32" />
             <h3 class="text-xl font-bold mb-2">{{ t?.features?.index?.title }}</h3>
-            <p class="text-gray-500 text-sm">
+            <p class="text-gray-500 text-sm mb-4">
               {{ t?.features?.index?.desc }}
             </p>
+            <StaticLink 
+              href="/docs/getting-started"
+              class="inline-flex items-center gap-2 text-emerald-500 font-bold hover:text-emerald-400 transition-colors text-xs uppercase tracking-widest mt-4"
+            >
+              Docs <ChevronRight :size="14" />
+            </StaticLink>
           </div>
 
-          <div class="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md">
+          <div class="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md group">
             <Shield class="text-emerald-500 mb-6" :size="32" />
             <h3 class="text-xl font-bold mb-2">{{ t?.features?.proxy?.title }}</h3>
-            <p class="text-gray-500 text-sm">
+            <p class="text-gray-500 text-sm mb-4">
                {{ t?.features?.proxy?.desc }}
             </p>
+             <StaticLink 
+              href="/docs/frameworks"
+              class="inline-flex items-center gap-2 text-emerald-500 font-bold hover:text-emerald-400 transition-colors text-xs uppercase tracking-widest mt-4"
+            >
+              Docs <ChevronRight :size="14" />
+            </StaticLink>
           </div>
 
-          <div class="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md">
+          <div class="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md group">
             <FileText class="text-emerald-500 mb-6" :size="32" />
             <h3 class="text-xl font-bold mb-2">{{ t?.features?.meta?.title }}</h3>
-            <p class="text-gray-500 text-sm">
+            <p class="text-gray-500 text-sm mb-4">
               {{ t?.features?.meta?.desc }}
             </p>
+             <StaticLink 
+              href="/docs/cli"
+              class="inline-flex items-center gap-2 text-emerald-500 font-bold hover:text-emerald-400 transition-colors text-xs uppercase tracking-widest mt-4"
+            >
+              Docs <ChevronRight :size="14" />
+            </StaticLink>
           </div>
         </div>
       </div>
@@ -252,7 +282,7 @@ const { t, locale } = useI18n()
         <!-- Full Report Link -->
         <div class="mt-12 text-center animate-fade-in" style="animation-delay: 0.5s">
           <StaticLink 
-            :href="locale === 'zh' ? '/zh/docs/benchmark' : '/docs/benchmark'"
+            href="/docs/benchmark"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all font-mono text-sm group"
           >
             <FileText :size="16" />

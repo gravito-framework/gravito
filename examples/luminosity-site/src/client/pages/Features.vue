@@ -8,36 +8,34 @@ import { computed } from 'vue'
 
 const { t, locale } = useI18n()
 
-// Helper to get locale-aware paths
-const getPath = (path: string) => {
-  if (locale.value === 'zh') return `/zh${path}`
-  return path
-}
-
 const points = computed(() => [
   {
     icon: Zap,
     title: t.value?.features_page?.points?.atomic?.title,
     desc: t.value?.features_page?.points?.atomic?.desc,
     color: 'bg-emerald-500/20 text-emerald-400',
+    docsLink: '/docs/architecture#atomic-sequential-writes',
   },
   {
     icon: Share2,
     title: t.value?.features_page?.points?.compaction?.title,
     desc: t.value?.features_page?.points?.compaction?.desc,
     color: 'bg-green-500/20 text-green-400',
+    docsLink: '/docs/architecture#dynamic-compaction',
   },
   {
     icon: Activity,
     title: t.value?.features_page?.points?.zerocopy?.title,
     desc: t.value?.features_page?.points?.zerocopy?.desc,
     color: 'bg-teal-500/20 text-teal-400',
+    docsLink: '/docs/architecture#zero-copy-serialization',
   },
   {
     icon: Layers,
     title: t.value?.features_page?.points?.tiered?.title,
     desc: t.value?.features_page?.points?.tiered?.desc,
     color: 'bg-emerald-600/20 text-emerald-300',
+    docsLink: '/docs/architecture#tiered-storage',
   },
 ])
 </script>
@@ -127,7 +125,14 @@ const points = computed(() => [
                 </div>
                 <div>
                   <h3 class="text-xl font-bold text-white mb-2">{{ point.title }}</h3>
-                  <p class="text-gray-400 text-sm leading-relaxed">{{ point.desc }}</p>
+                  <p class="text-gray-400 text-sm leading-relaxed mb-4">{{ point.desc }}</p>
+                  <StaticLink 
+                    :href="point.docsLink"
+                    class="text-xs font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 flex items-center gap-1 group/btn"
+                  >
+                    {{ locale === 'zh' ? '了解更多' : 'Learn More' }}
+                    <ChevronRight :size="14" class="group-hover/btn:translate-x-1 transition-transform" />
+                  </StaticLink>
                 </div>
               </div>
             </div>
@@ -275,7 +280,7 @@ const points = computed(() => [
     <section class="py-32 px-6 text-center bg-black border-t border-white/5">
       <h2 class="text-3xl font-bold text-white mb-8">{{ t?.features_page?.cta?.title }}</h2>
       <StaticLink
-        :href="getPath('/docs')"
+        href="/docs/getting-started"
         class="px-10 py-4 bg-emerald-500 text-black font-black italic rounded-full hover:scale-105 active:scale-95 transition-all inline-block"
       >
         {{ t?.features_page?.cta?.btn }}

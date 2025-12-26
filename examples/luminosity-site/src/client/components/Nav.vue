@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import Logo from './Logo.vue'
-import { StaticLink } from '@gravito/freeze-vue'
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
-import { Globe, ChevronDown } from 'lucide-vue-next'
+import { StaticLink, useFreeze } from '@gravito/freeze-vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { Globe, ChevronDown, Menu, X } from 'lucide-vue-next'
+
+const isMobileMenuOpen = ref(false)
 
 const isScrolled = ref(false)
 const showLangMenu = ref(false)
@@ -20,14 +21,8 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-const page = usePage()
-const locale = computed(() => page.props.locale || 'en')
-
-const getPath = (path: string) => {
-  if (path.startsWith('http')) return path
-  if (locale.value === 'zh') return `/zh${path}`
-  return path
-}
+// Use @gravito/freeze-vue for locale management
+const { locale, navigateToLocale } = useFreeze()
 
 const navLinks = [
   { label: 'Features', path: '/features' },
@@ -37,22 +32,12 @@ const navLinks = [
   { label: 'GitHub', path: 'https://github.com/gravito-framework/gravito/tree/main/packages/luminosity' },
 ]
 
-// ... existing switchLang logic ...
 const toggleLang = () => {
   showLangMenu.value = !showLangMenu.value
 }
 
 const switchLang = (lang: string) => {
-  const currentPath = window.location.pathname
-  let newPath = currentPath
-  
-  if (lang === 'zh' && !currentPath.startsWith('/zh')) {
-    newPath = `/zh${currentPath === '/' ? '' : currentPath}`
-  } else if (lang === 'en' && currentPath.startsWith('/zh')) {
-    newPath = currentPath.replace('/zh', '') || '/'
-  }
-  
-  window.location.href = newPath
+  navigateToLocale(lang)
 }
 </script>
 
@@ -62,9 +47,11 @@ const switchLang = (lang: string) => {
     :class="{ 'py-4 backdrop-blur-xl bg-void/80 border-b border-white/5 shadow-2xl shadow-singularity/5': isScrolled }"
   >
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
-      <StaticLink :href="getPath('/')">
-        <Logo size="sm" />
-      </StaticLink>
+      <div class="flex items-center gap-4">
+        <StaticLink href="/" @click="isMobileMenuOpen = false">
+          <Logo size="sm" />
+        </StaticLink>
+      </div>
       
       <nav class="hidden md:flex items-center gap-2 p-1.5 backdrop-blur-md bg-white/5 rounded-2xl border border-white/5">
         <template v-for="link in navLinks" :key="link.path">
@@ -78,7 +65,7 @@ const switchLang = (lang: string) => {
             </a>
             <StaticLink 
               v-else
-              :href="getPath(link.path)"
+              :href="link.path"
               class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-singularity hover:bg-white/5 rounded-xl transition-all"
             >
               {{ link.label }}
@@ -114,7 +101,61 @@ const switchLang = (lang: string) => {
         >
           Get Started
         </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button 
+          @click="isMobileMenuOpen = !isMobileMenuOpen"
+          class="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <Menu v-if="!isMobileMenuOpen" :size="24" />
+          <X v-else :size="24" />
+        </button>
       </div>
     </div>
+
+    <!-- Mobile Menu Overlay -->
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 -translate-y-4"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-4"
+    >
+      <div 
+        v-if="isMobileMenuOpen"
+        class="md:hidden absolute top-full left-0 right-0 bg-void/95 backdrop-blur-2xl border-b border-white/5 py-8 px-6 shadow-2xl space-y-6 flex flex-col items-center text-center"
+      >
+        <template v-for="link in navLinks" :key="link.path">
+            <a 
+              v-if="link.path.startsWith('http')"
+              :href="link.path"
+              target="_blank"
+              class="text-xl font-bold text-gray-400 hover:text-singularity transition-colors"
+              @click="isMobileMenuOpen = false"
+            >
+              {{ link.label }}
+            </a>
+            <StaticLink 
+              v-else
+              :href="link.path"
+              class="text-xl font-bold text-gray-400 hover:text-singularity transition-colors"
+              @click="isMobileMenuOpen = false"
+            >
+              {{ link.label }}
+            </StaticLink>
+        </template>
+        
+        <div class="w-full h-px bg-white/5 my-4"></div>
+        
+        <a 
+          href="https://github.com/gravito-framework/gravito" 
+          class="w-full py-4 bg-singularity text-void font-bold rounded-2xl flex items-center justify-center gap-2"
+          @click="isMobileMenuOpen = false"
+        >
+          Get Started
+        </a>
+      </div>
+    </transition>
   </header>
 </template>
