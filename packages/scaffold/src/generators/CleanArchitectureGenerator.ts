@@ -538,9 +538,9 @@ export class InvalidValueException extends DomainException {
  * Application service for creating new users.
  */
 
-import { User } from '../../Domain/Entities/User'
-import type { IUserRepository } from '../../Domain/Interfaces/IUserRepository'
-import type { UserDTO } from '../DTOs/UserDTO'
+import { User } from '../../../Domain/Entities/User'
+import type { IUserRepository } from '../../../Domain/Interfaces/IUserRepository'
+import type { UserDTO } from '../../DTOs/UserDTO'
 
 export interface CreateUserInput {
   name: string
@@ -590,9 +590,9 @@ export class CreateUserUseCase {
  * Get User Use Case
  */
 
-import type { IUserRepository } from '../../Domain/Interfaces/IUserRepository'
-import { EntityNotFoundException } from '../../Domain/Exceptions/DomainException'
-import type { UserDTO } from '../DTOs/UserDTO'
+import type { IUserRepository } from '../../../Domain/Interfaces/IUserRepository'
+import { EntityNotFoundException } from '../../../Domain/Exceptions/DomainException'
+import type { UserDTO } from '../../DTOs/UserDTO'
 
 export interface GetUserInput {
   id: string
@@ -683,8 +683,8 @@ export interface IMailService {
  * Concrete implementation of IUserRepository.
  */
 
-import type { User } from '../../Domain/Entities/User'
-import type { IUserRepository } from '../../Domain/Interfaces/IUserRepository'
+import type { User } from '../../../Domain/Entities/User'
+import type { IUserRepository } from '../../../Domain/Interfaces/IUserRepository'
 
 // In-memory store for demo purposes
 const users = new Map<string, User>()
@@ -739,7 +739,7 @@ export class MailService implements IMailService {
  * App Service Provider
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
+import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
 
 export class AppServiceProvider extends ServiceProvider {
   register(_container: Container): void {
@@ -760,7 +760,7 @@ export class AppServiceProvider extends ServiceProvider {
  * Binds repository interfaces to implementations.
  */
 
-import { ServiceProvider, type Container } from '@gravito/core'
+import { ServiceProvider, type Container } from 'gravito-core'
 import { UserRepository } from '../Persistence/Repositories/UserRepository'
 import { MailService } from '../ExternalServices/MailService'
 
@@ -785,16 +785,16 @@ export class RepositoryServiceProvider extends ServiceProvider {
  * User Controller
  */
 
-import type { GravitoContext } from '@gravito/core'
-import { CreateUserUseCase } from '../../Application/UseCases/User/CreateUser'
-import { GetUserUseCase } from '../../Application/UseCases/User/GetUser'
-import { UserRepository } from '../../Infrastructure/Persistence/Repositories/UserRepository'
+import type { GravitoContext } from 'gravito-core'
+import { CreateUserUseCase } from '../../../Application/UseCases/User/CreateUser'
+import { GetUserUseCase } from '../../../Application/UseCases/User/GetUser'
+import { UserRepository } from '../../../Infrastructure/Persistence/Repositories/UserRepository'
 
 const userRepository = new UserRepository()
 
 export class UserController {
   async create(c: GravitoContext) {
-    const body = await c.req.json()
+    const body = await c.req.json() as { name: string; email: string }
     const useCase = new CreateUserUseCase(userRepository)
 
     const result = await useCase.execute({
@@ -806,7 +806,7 @@ export class UserController {
   }
 
   async show(c: GravitoContext) {
-    const id = c.req.param('id')
+    const id = c.req.param('id') ?? ''
     const useCase = new GetUserUseCase(userRepository)
 
     const result = await useCase.execute({ id })
@@ -822,16 +822,13 @@ export class UserController {
  * API Routes
  */
 
-import type { Router } from '@gravito/core'
 import { UserController } from '../Controllers/UserController'
 
-export function registerApiRoutes(router: Router): void {
+export function registerApiRoutes(router: any): void {
   const users = new UserController()
 
-  router.group({ prefix: '/api' }, () => {
-    router.post('/users', (c) => users.create(c))
-    router.get('/users/:id', (c) => users.show(c))
-  })
+  router.post('/api/users', (c: any) => users.create(c))
+  router.get('/api/users/:id', (c: any) => users.show(c))
 }
 `
   }
@@ -870,7 +867,7 @@ export class UserPresenter {
  * Application Bootstrap
  */
 
-import { PlanetCore } from '@gravito/core'
+import { PlanetCore } from 'gravito-core'
 import { AppServiceProvider } from './Infrastructure/Providers/AppServiceProvider'
 import { RepositoryServiceProvider } from './Infrastructure/Providers/RepositoryServiceProvider'
 import { registerApiRoutes } from './Interface/Http/Routes/api'

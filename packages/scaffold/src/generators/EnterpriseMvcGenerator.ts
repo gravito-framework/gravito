@@ -383,7 +383,7 @@ export default {
  * can be assigned to specific routes.
  */
 
-import type { GravitoMiddleware } from '@gravito/core'
+import type { GravitoMiddleware } from 'gravito-core'
 
 /**
  * Global middleware stack.
@@ -474,7 +474,7 @@ export abstract class Controller {
  * Home Controller
  */
 
-import type { GravitoContext } from '@gravito/core'
+import type { GravitoContext } from 'gravito-core'
 import { Controller } from './Controller'
 
 export class HomeController extends Controller {
@@ -509,14 +509,13 @@ export class HomeController extends Controller {
  * Protects routes that require authentication.
  */
 
-import type { GravitoContext, GravitoNext } from '@gravito/core'
-import { UnauthorizedException } from '@gravito/core'
+import type { GravitoContext, GravitoNext } from 'gravito-core'
 
 export async function Authenticate(c: GravitoContext, next: GravitoNext) {
   // TODO: Implement authentication check
   // const session = c.get('session')
   // if (!session?.user) {
-  //   throw new UnauthorizedException('Authentication required')
+  //   return c.json({ error: 'Authentication required' }, 401)
   // }
 
   await next()
@@ -532,7 +531,7 @@ export async function Authenticate(c: GravitoContext, next: GravitoNext) {
  * Register and bootstrap application services here.
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
+import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
 
 export class AppServiceProvider extends ServiceProvider {
   /**
@@ -561,7 +560,7 @@ export class AppServiceProvider extends ServiceProvider {
  * Configures and registers application routes.
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
+import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
 import { registerRoutes } from '../routes'
 
 export class RouteServiceProvider extends ServiceProvider {
@@ -590,7 +589,7 @@ export class RouteServiceProvider extends ServiceProvider {
  * Customize error responses and logging here.
  */
 
-import type { ErrorHandlerContext } from '@gravito/core'
+import type { ErrorHandlerContext } from 'gravito-core'
 
 /**
  * Report an exception (logging, monitoring, etc.)
@@ -635,7 +634,7 @@ export const dontReport: string[] = [
  * It initializes the core and registers all providers.
  */
 
-import { PlanetCore } from '@gravito/core'
+import { PlanetCore } from 'gravito-core'
 import { AppServiceProvider } from './Providers/AppServiceProvider'
 import { RouteServiceProvider } from './Providers/RouteServiceProvider'
 
@@ -668,20 +667,17 @@ export default core.liftoff()
  * Define your application routes here.
  */
 
-import type { Router } from '@gravito/core'
 import { HomeController } from './Http/Controllers/HomeController'
 
-export function registerRoutes(router: Router): void {
+export function registerRoutes(router: any): void {
   const home = new HomeController()
 
   // API Routes
-  router.group({ prefix: '/api' }, () => {
-    router.get('/', (c) => home.index(c)).name('api.home')
-    router.get('/health', (c) => home.health(c)).name('api.health')
-  })
+  router.get('/api', (c: any) => home.index(c))
+  router.get('/api/health', (c: any) => home.health(c))
 
-  // Web Routes (if needed)
-  router.get('/', (c) => home.index(c)).name('home')
+  // Web Routes
+  router.get('/', (c: any) => home.index(c))
 }
 `
   }
