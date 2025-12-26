@@ -1,0 +1,17 @@
+{
+  "name": "example-i18n-verification",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "worker": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "gravito-core": "workspace:*",
+    "@gravito/photon": "workspace:*",
+    "@gravito/cosmos": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

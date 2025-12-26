@@ -1,0 +1,19 @@
+{
+  "name": "example-mesh-verification",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "worker": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "gravito-core": "workspace:*",
+    "@gravito/photon": "workspace:*",
+    "@gravito/beam": "workspace:*",
+    "@gravito/monitor": "workspace:*",
+    "@gravito/flare": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

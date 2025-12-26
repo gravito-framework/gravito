@@ -30,7 +30,7 @@ interface ServiceProvider {
  */
 interface PlanetCore {
   container: {
-    bindSingleton<T>(key: string, value: T): void
+    instance<T>(key: string, value: T): void
   }
   hooks: {
     addAction(hook: string, callback: () => void | Promise<void>): void
@@ -110,10 +110,10 @@ export class OrbitEcho {
    */
   install(core: PlanetCore): void {
     // Bind instances
-    core.container.bindSingleton('echo', this)
-    core.container.bindSingleton('echo.receiver', this.receiver)
+    core.container.instance('echo', this)
+    core.container.instance('echo.receiver', this.receiver)
     if (this.dispatcher) {
-      core.container.bindSingleton('echo.dispatcher', this.dispatcher)
+      core.container.instance('echo.dispatcher', this.dispatcher)
     }
   }
 
