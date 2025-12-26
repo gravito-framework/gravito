@@ -59,3 +59,10 @@ jobs:
           user-email: 'carllee0520@gmail.com'
           target-branch: 'main'
           commit-message: 'deploy: update lux site from gravito-core'
+
+      - name: Purge Cloudflare Cache
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
