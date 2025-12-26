@@ -136,6 +136,8 @@ export class PlanetCore {
   public hasher: BunHasher
 
   private providers: ServiceProvider[] = []
+  private deferredProviders: Map<string, ServiceProvider> = new Map()
+  private bootedProviders: Set<ServiceProvider> = new Set()
 
   /**
    * Register a service provider.
@@ -149,7 +151,19 @@ export class PlanetCore {
    * ```
    */
   register(provider: ServiceProvider): this {
-    this.providers.push(provider)
+    // Set core reference
+    provider.setCore(this)
+
+    // Handle deferred providers
+    if (provider.deferred) {
+      const services = provider.provides()
+      for (const service of services) {
+        this.deferredProviders.set(service, provider)
+      }
+    } else {
+      this.providers.push(provider)
+    }
+
     return this
   }
 
@@ -159,19 +173,83 @@ export class PlanetCore {
    * This method must be called before the application starts handling requests.
    * It calls `register()` on all providers first, then `boot()` on all providers.
    *
+   * Supports async register() methods.
+   *
    * @returns Promise that resolves when bootstrapping is complete.
    */
   async bootstrap(): Promise<void> {
-    // Phase 1: Register all bindings
+    // Phase 1: Register all bindings (supports async)
     for (const provider of this.providers) {
-      provider.register(this.container)
+      await provider.register(this.container)
     }
 
-    // Phase 2: Boot all providers
+    // Phase 2: Setup deferred provider resolution
+    this.setupDeferredProviderResolution()
+
+    // Phase 3: Boot all providers
     for (const provider of this.providers) {
-      if (provider.boot) {
-        await provider.boot(this)
+      await this.bootProvider(provider)
+    }
+  }
+
+  /**
+   * Setup deferred provider resolution.
+   * Wraps container.make to auto-register deferred providers on first request.
+   *
+   * @internal
+   */
+  private setupDeferredProviderResolution(): void {
+    const originalMake = this.container.make.bind(this.container)
+
+    this.container.make = <T>(key: string): T => {
+      // Check if we need to register a deferred provider
+      if (this.deferredProviders.has(key)) {
+        const provider = this.deferredProviders.get(key)!
+        this.registerDeferredProvider(provider)
       }
+
+      return originalMake<T>(key)
+    }
+  }
+
+  /**
+   * Register a deferred provider on-demand.
+   *
+   * @internal
+   */
+  private registerDeferredProvider(provider: ServiceProvider): void {
+    // Remove from deferred map (for all services it provides)
+    for (const service of provider.provides()) {
+      this.deferredProviders.delete(service)
+    }
+
+    // Register synchronously (deferred providers should have sync register)
+    const result = provider.register(this.container)
+    if (result instanceof Promise) {
+      throw new Error(
+        `Deferred provider ${provider.constructor.name} has async register(). ` +
+          'Deferred providers must have synchronous register() methods.'
+      )
+    }
+
+    // Boot the provider
+    this.bootProvider(provider)
+  }
+
+  /**
+   * Boot a single provider if not already booted.
+   *
+   * @internal
+   */
+  private async bootProvider(provider: ServiceProvider): Promise<void> {
+    if (this.bootedProviders.has(provider)) {
+      return
+    }
+
+    this.bootedProviders.add(provider)
+
+    if (provider.boot) {
+      await provider.boot(this)
     }
   }
 

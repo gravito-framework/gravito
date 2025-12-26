@@ -49,15 +49,14 @@ export type {
 // Core Exports
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Application (Enterprise Container)
+export { Application, type ApplicationConfig } from './Application'
 export { ConfigManager } from './ConfigManager'
 export { Container, type Factory } from './Container'
-
 // Events
 export { EventManager } from './EventManager'
-
 // Exceptions
 export * from './exceptions'
-
 // Global Error Handlers
 export {
   type GlobalErrorHandlersMode,
@@ -66,25 +65,19 @@ export {
   type RegisterGlobalErrorHandlersOptions,
   registerGlobalErrorHandlers,
 } from './GlobalErrorHandlers'
-
 // Hooks
 export type { ActionCallback, FilterCallback } from './HookManager'
 export { HookManager } from './HookManager'
-
 // Helpers
 export * from './helpers'
-
 // HTTP / Security utilities
 export { CookieJar, type CookieOptions } from './http/CookieJar'
 export { ThrottleRequests } from './http/middleware/ThrottleRequests'
-
 // Listeners
 export type { Listener, ShouldQueue } from './Listener'
-
 // Logger
 export type { Logger } from './Logger'
 export { ConsoleLogger } from './Logger'
-
 // PlanetCore (Main Application Class)
 export {
   type CacheService,
@@ -94,7 +87,6 @@ export {
   PlanetCore,
   type ViewService,
 } from './PlanetCore'
-
 // Routing
 export { Route } from './Route'
 export {
@@ -105,7 +97,6 @@ export {
   type RouteOptions,
   Router,
 } from './Router'
-
 // Service Provider
 export { ServiceProvider } from './ServiceProvider'
 

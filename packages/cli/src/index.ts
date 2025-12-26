@@ -422,12 +422,16 @@ async function group<T extends Record<string, unknown>>(
   return results as T
 }
 
+import { registerInitCommand } from './commands/init'
 import { MakeCommand } from './commands/MakeCommand'
 import { routeCache, routeClear } from './commands/routeCache'
 import { routeList } from './commands/routeList'
 import { tinker } from './commands/tinker'
 
 // ... (existing imports)
+
+// --- Init Command (Enterprise Framework) ---
+registerInitCommand(cli)
 
 // --- Make Commands ---
 const make = new MakeCommand()
