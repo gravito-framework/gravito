@@ -4,69 +4,149 @@ title: Models
 
 # Models
 
-> An Eloquent-like `Model` API built on top of Atlas + Drizzle.
+> Based on Atlas’s Active Record pattern implementation, providing a Laravel Eloquent-like experience.
 
 ## Defining a Model
+
+Inherit from the `Model` class and specify the `table` name.
 
 ```ts
 import { Model } from '@gravito/atlas'
 
 export class User extends Model {
-  static table = { _: { name: 'users' } }
-  static tableName = 'users'
+  // Set table name
+  static table = 'users'
+  
+  // Primary key (default is 'id')
+  static primaryKey = 'id'
 
-  declare attributes: {
-    id?: number
-    name: string
-    email: string
+  // Attribute type annotations (for IntelliSense)
+  declare id: number
+  declare name: string
+  declare email: string
+  declare active: boolean
+}
+```
+
+## Basic Operations
+
+### Querying Records
+
+```ts
+// Find by ID
+const user = await User.find(1)
+
+// Using the Query Builder
+const users = await User.query()
+  .where('active', true)
+  .orderBy('created_at', 'desc')
+  .get()
+
+// Get first matching record
+const user = await User.where('email', 'john@example.com').first()
+```
+
+### Create & Update
+
+```ts
+// Create a new instance
+const user = new User()
+user.name = 'John Doe'
+await user.save()
+
+// Using static shorthand
+const user = await User.create({
+  name: 'Jane Doe',
+  email: 'jane@example.com'
+})
+
+// Update attributes
+user.name = 'Updated Name'
+await user.save()
+
+// Or update directly
+await user.update({ name: 'New Name' })
+```
+
+### Deleting Records
+
+```ts
+const user = await User.find(1)
+await user.delete()
+
+// If soft deletes are enabled, use forceDelete to truly remove it
+await user.forceDelete()
+```
+
+## Advanced Features
+
+### Attribute Casting
+
+Automatically convert raw database values into specified types.
+
+```ts
+export class User extends Model {
+  static casts = {
+    age: 'number',
+    is_active: 'boolean',
+    metadata: 'json',
+    tags: 'array',
+    birthday: 'date'
   }
 }
 ```
 
-## Bootstrapping Models
+### Fillable / Guarded
 
-Atlas initializes models registered in `ModelRegistry` during installation.
+Prevent malicious users from modifying sensitive attributes via mass assignment.
 
 ```ts
-import { ModelRegistry } from '@gravito/atlas'
-import { users } from './schema'
+export class User extends Model {
+  // Whitelist: fields allowed for mass assignment
+  static fillable = ['name', 'email']
 
-ModelRegistry.register(User, users, 'users')
+  // Or Blacklist: fields forbidden from mass assignment
+  // static guarded = ['is_admin']
+}
 ```
 
-## Common Static APIs
+### Timestamps
 
-- `find(id)`
-- `where(column, value)` / `whereMany(where)`
-- `all(options?)` / `findAll(where?, options?)`
-- `paginate({ page, limit, orderBy?, orderDirection? })`
-- `create(data)` / `upsert(data, options?)`
-- `firstOrCreate(where, data)` / `firstOrNew(where, data)` / `updateOrCreate(where, data)`
-- `count(where?)` / `exists(where)`
+Atlas automatically manages `created_at` and `updated_at` columns by default.
 
-## Instance APIs
+```ts
+export class User extends Model {
+  static timestamps = true // Default is true
+  static createdAtColumn = 'created_at'
+  static updatedAtColumn = 'updated_at'
+}
+```
 
-- `get(key)` / `set(key, value)`
-- `save()` / `update(data)`
-- `delete()` / `forceDelete()` / `restore()` / `trashed()`
-- Relations: `await model.relation('posts')`, `await model.load(['posts'])`
+### Soft Deletes
 
-## Mass Assignment, Casts, and Timestamps
+```ts
+export class User extends Model {
+  static usesSoftDeletes = true
+  static deletedAtColumn = 'deleted_at'
+}
 
-- `static fillable` / `static guarded`
-- `static casts`
-- `static timestamps`, `static createdAtColumn`, `static updatedAtColumn`
-- Soft deletes: `static usesSoftDeletes`, `static deletedAtColumn`
+// Query including trashed records
+const users = await User.withTrashed().get()
 
-## Serialization
+// Only query trashed records
+const users = await User.onlyTrashed().get()
 
-- `static hidden` / `static visible`
-- `static appends`
-- `toJSON()` includes loaded relations and appended attributes
+// Restore a trashed record
+await user.restore()
+```
 
-## Hooks
+## Model Events
+
+You can listen to model lifecycle events via Gravito’s Hooks system:
 
 - `model:creating` / `model:created`
 - `model:updating` / `model:updated`
-- `model:saved`
+- `model:saving` / `model:saved`
 - `model:deleting` / `model:deleted`
+
+See the [ORM Usage Guide](../../guide/orm-usage.md#model-events) for details.

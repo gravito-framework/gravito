@@ -4,72 +4,100 @@ title: 快速上手
 
 # 快速上手
 
-> 安裝 Atlas、建立 Drizzle 實例，並在請求 Context 中注入 `DBService`。
+> 安裝 Atlas 並配置資料庫連接。Atlas 提供了一個與 Laravel 相似且流暢的查詢構造器（Query Builder）。
 
 ## 安裝
 
 ```bash
-bun add @gravito/atlas drizzle-orm
+bun add @gravito/atlas
 ```
 
-## PostgreSQL 範例
+## 配置與初始化
+
+您可以使用 `DB.configure` 或 `DB.addConnection` 來初始化資料庫連接。通常在應用程式啟動時（例如 `bootstrap.ts`）進行配置。
+
+### 基本配置
 
 ```ts
-import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/atlas'
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { DB } from '@gravito/atlas'
 
-const core = new PlanetCore()
-const client = postgres(process.env.DATABASE_URL!)
-const db = drizzle(client)
-
-orbitDB(core, {
-  db,
-  databaseType: 'postgresql',
-  exposeAs: 'db',
-  enableQueryLogging: false,
+DB.configure({
+  default: 'postgres',
+  connections: {
+    postgres: {
+      driver: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      database: 'gravito_app',
+      username: 'postgres',
+      password: 'password',
+    }
+  }
 })
 ```
 
-## SQLite 範例
+### 資料庫類型支援
+
+Atlas 目前支援以下驅動程式：
+- `postgres` (基於 `pg`)
+- `mysql` (基於 `mysql2`)
+- `sqlite` (基於 `better-sqlite3`)
+- `mongodb` (基於 `mongodb`)
+- `redis` (基於 `ioredis`)
+
+## 多資料庫連接 (Multi-database)
+
+Atlas 支援同時管理多個資料庫連接，甚至是不同類型的資料庫。
 
 ```ts
-import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/atlas'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { Database } from 'bun:sqlite'
+DB.configure({
+  default: 'main',
+  connections: {
+    main: {
+      driver: 'postgres',
+      host: 'localhost',
+      database: 'main_db'
+    },
+    analytics: {
+      driver: 'mysql',
+      host: 'remote-host',
+      database: 'logs'
+    },
+    local_cache: {
+      driver: 'sqlite',
+      database: 'cache.sqlite'
+    }
+  }
+})
 
-const core = new PlanetCore()
-const sqlite = new Database('sqlite.db')
-const db = drizzle(sqlite)
+// 使用預設連接 (main)
+const users = await DB.table('users').get()
 
-orbitDB(core, { db, databaseType: 'sqlite', exposeAs: 'db' })
+// 指定使用 analytics 連接
+const logs = await DB.connection('analytics').table('logs').get()
 ```
 
-## 在路由中使用 `DBService`
+## 基本使用
+
+配置完成後，即可在應用的任何地方透過 `DB` 門面存取資料庫。
 
 ```ts
-core.app.get('/health/db', async (c) => {
-  const db = c.get('db')
-  const result = await db.healthCheck()
-  return c.json(result)
+import { DB } from '@gravito/atlas'
+
+// 查詢
+const activeUsers = await DB.table('users')
+  .where('status', 'active')
+  .get()
+
+// 插入
+await DB.table('users').insert({
+  name: 'John Doe',
+  email: 'john@example.com'
+})
+
+// 交易
+await DB.transaction(async (trx) => {
+  await trx.table('accounts').where('id', 1).decrement('balance', 100)
+  await trx.table('accounts').where('id', 2).increment('balance', 100)
 })
 ```
-
-## 選項（`GravitoDBOptions`）
-
-- `db`：Drizzle 實例（必填）
-- `exposeAs`：注入到 Context 的 key（預設：`db`）
-- `databaseType`：`postgresql | sqlite | mysql | auto`
-- `enableQueryLogging`：啟用後會透過 hooks 觸發 `db:query`
-- `queryLogLevel`：`debug | info | warn | error`
-- `enableHealthCheck`：啟用/停用 `DBService.healthCheck()`
-- `healthCheckQuery`：自訂健康檢查查詢字串
-
-## Hooks
-
-- `db:connected`
-- `db:query`（當啟用查詢日誌時）
-
-> **Note**：`DBService` 也會觸發交易、遷移、Seed 與部署相關 hooks，請見 [DBService](./dbservice.md)。

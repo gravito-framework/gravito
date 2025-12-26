@@ -70,3 +70,47 @@ export function restrictTo(role: string): GravitoMiddleware {
 // 使用方式
 routes.get('/admin', restrictTo('admin'), [AdminController, 'index']);
 ```
+## 中間件群組 (Middleware Groups)
+
+為了管理方便，您可以在設定中將多個中間件組合成一個「群組」：
+
+```typescript
+// gravito.config.ts
+export default defineConfig({
+  middleware: {
+    groups: {
+      web: [
+        cookieMiddleware,
+        sessionMiddleware,
+        csrfMiddleware,
+      ],
+      api: [
+        'throttle:60,1',
+        'auth:api',
+      ],
+    }
+  }
+});
+
+// 在路由中使用群組
+routes.middleware('web').group((group) => {
+  // ...
+});
+```
+
+## 中間件優先權 (Middleware Priority)
+
+當多個中間件分配給同一個路由時，執行順序非常重要。Gravito 會按照註冊順序執行，但您也可以在配置中指定優先順序：
+
+```typescript
+// gravito.config.ts
+export default defineConfig({
+  middleware: {
+    priority: [
+      'session',
+      'auth',
+      'role-check',
+    ]
+  }
+});
+```

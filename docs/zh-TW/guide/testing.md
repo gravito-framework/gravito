@@ -101,3 +101,45 @@ describe('User API 測試', () => {
   });
 });
 ```
+
+---
+
+## 模擬與偽造 (Mocking & Swapping)
+
+Gravito 內建的 IoC 容器讓你在測試中替換服務變得非常簡單。
+
+### 替換服務 (Swapping)
+
+你可以使用 `core.container.instance` 來覆蓋已註冊的服務：
+
+```typescript
+it('可以模擬郵件發送', async () => {
+  const mockMail = {
+    send: (mailable) => {
+      console.log('郵件已模擬發送');
+    }
+  };
+
+  // 替換真實的郵件服務
+  core.container.instance('mail', mockMail);
+
+  const response = await tester.post('/register', { email: 'test@example.com' });
+  await response.assertOk();
+});
+```
+
+### 使用 Bun 的 Mock 功能
+
+由於 Gravito 運行在 Bun 之上，你可以直接使用 `mock()`：
+
+```typescript
+import { mock } from 'bun:test';
+
+const sendMock = mock(() => Promise.resolve());
+core.container.instance('mail', { send: sendMock });
+
+// 執行邏輯...
+
+expect(sendMock).toHaveBeenCalled();
+```
+

@@ -98,4 +98,45 @@ describe('User API', () => {
       .assertJsonStructure({ id: 0 });
   });
 });
+
+---
+
+## Mocking & Swapping
+
+Gravito's built-in IoC container makes it extremely easy to swap services during testing.
+
+### Swapping Services
+
+You can use `core.container.instance` to override registered services:
+
+```typescript
+it('can mock email sending', async () => {
+  const mockMail = {
+    send: (mailable) => {
+      console.log('Email sending mocked');
+    }
+  };
+
+  // Swap the real mail service
+  core.container.instance('mail', mockMail);
+
+  const response = await tester.post('/register', { email: 'test@example.com' });
+  await response.assertOk();
+});
+```
+
+### Using Bun Mocks
+
+Since Gravito runs on Bun, you can use the built-in `mock()` function directly:
+
+```typescript
+import { mock } from 'bun:test';
+
+const sendMock = mock(() => Promise.resolve());
+core.container.instance('mail', { send: sendMock });
+
+// Execute logic...
+
+expect(sendMock).toHaveBeenCalled();
+```
 ```

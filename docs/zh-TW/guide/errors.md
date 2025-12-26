@@ -1,48 +1,80 @@
-# 錯誤處理 (Error Handling)
+---
+title: 錯誤處理 (Error Handling)
+description: 了解如何在 Gravito 中捕捉、處理與回傳優雅的錯誤回應。
+---
 
-當您開始一個新的 Gravito 專案時，錯誤與異常處理已經為您配置好了。
+# 錯誤處理
 
-## 異常處理器
+Gravito 內建了一套完整的錯誤處理機制，會自動捕捉執行過程中的例外，並根據內容協商（HTML 或 JSON）回傳對應的結果。
 
-所有的異常都是由核心的異常處理器處理的。
+## 配置
 
-### 報告異常 (Reporting)
-
-當異常發生時，Gravito 會自動記錄它。如果您想自定義報告邏輯 (例如發送到 Sentry)，可以使用 Hooks (需查閱進階文檔)。
-
-### 渲染異常 (Rendering)
-
-Gravito 會將異常轉換為 HTTP 回應。
-
-- **對於 API 請求**：會自動轉換為 JSON 格式，包含 `error` 欄位。
-- **對於網頁請求**：會嘗試渲染 `src/views/errors` 目錄下的視圖。
-
-## HTTP 異常
-
-有些異常描述了來自伺服器的 HTTP 錯誤代碼。例如這可能是一個「頁面未找到」錯誤 (404)，「未授權」錯誤 (401) 或甚至是開發者造成的 500 錯誤。
-
-您可以在應用程式的任何地方使用輔助方法來拋出這些異常：
+錯誤處理的細項通常在 `src/bootstrap.ts` 的核心初始化中配置：
 
 ```typescript
-// 404 Not Found
-return c.notFound('User not found');
-
-// 403 Forbidden
-return c.forbidden();
+const core = new PlanetCore({
+  // 可以自定義 Logger 來捕捉錯誤日誌
+  logger: myCustomLogger,
+});
 ```
 
-## 自定義 HTTP 錯誤頁面
+## 丟出錯誤
 
-Gravito 讓您可以輕鬆地為各種 HTTP 狀態碼顯示自定義錯誤頁面。例如，如果您想自定義 404 錯誤頁面，請建立 `src/views/errors/404.html`：
+您可以在代碼的任何地方拋出 `HttpException` 或一般的 `Error`，Gravito 會負責後續的流程：
 
-```html
-<!-- src/views/errors/404.html -->
-@extends('layouts/app')
+```typescript
+import { HttpException } from 'gravito-core';
 
-@section('content')
-  <h1>404 - 找不到頁面</h1>
-  <p>抱歉，您要找的頁面不存在。</p>
-@endsection
+export class PostController {
+  async show(c: Context) {
+    const post = await Post.find(c.req.param('id'));
+
+    if (!post) {
+      // 快速丟出 404
+      throw new HttpException(404, '文章不存在');
+    }
+
+    return c.json(post);
+  }
+}
 ```
 
-當應用程式拋出 404 異常時，此視圖將被渲染。支援的預設頁面包括：`404.html` 和 `500.html`。
+## 自定義錯誤處理
+
+如果您想針對特定類型的錯誤進行特殊處理，可以使用 **Hook 系統**：
+
+```typescript
+core.hooks.addFilter('error:context', (context) => {
+  if (context.error instanceof DatabaseError) {
+    context.status = 503;
+    context.payload.message = '資料庫暫時維護中';
+  }
+  return context;
+});
+```
+
+### 錯誤回應過濾器
+
+| Hook | 說明 |
+| --- | --- |
+| `error:context` | 在回傳前修改錯誤內容、狀態碼或 log 等級 |
+| `error:report` | 用於將錯誤報告給 Sentry 或其他監控服務 |
+| `error:render` | 覆蓋預設的渲染邏輯（例如回傳自定義的 HTML） |
+
+## 錯誤頁面 (Error Pages)
+
+對於 HTML 請求，Gravito 會尋找對應狀態碼的樣板。您可以在 `src/views/errors/` 目錄下建立以下檔案：
+
+- `404.hbs`：找不到頁面時顯示。
+- `500.hbs`：系統崩潰時顯示。
+- `default.hbs`：其他未定義錯誤的備用頁。
+
+## 例外處理原則
+
+1.  **區分環境**：在開發環境 (`NODE_ENV=development`)，Gravito 會顯示詳細的 Stack Trace；在生產環境則會隱藏敏感資訊，僅顯示通用的錯誤訊息。
+2.  **型別安全**：建議使用 `GravitoException` 及其子類別，以獲得更好的 i18n 支援。
+
+---
+
+## 接下來
+閱讀 [日誌系統](./logging.md) 了解如何紀錄應用程式的執行過程。

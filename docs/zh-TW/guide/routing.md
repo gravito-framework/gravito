@@ -108,6 +108,17 @@ routes.middleware(auth()).group((group) => {
 });
 ```
 
+### 控制器群組 (Controller Groups)
+
+如果你有一系列路由都指向同一個控制器，可以使用 `controller` 方法來簡化：
+
+```typescript
+routes.controller(UserController).group((group) => {
+  group.get('/profile', 'show'); // 對應 UserController.show
+  group.post('/profile', 'update'); // 對應 UserController.update
+});
+```
+
 ### 子網域路由 (Domain Routing)
 
 Gravito 路由也可以處理子網域：
@@ -148,6 +159,22 @@ routes.resource('photos', PhotoController);
 routes.resource('photos', PhotoController, {
   only: ['index', 'show']
 });
+```
+
+## 簽名路由 (Signed URLs)
+
+簽名 URL 可讓您為特定路由產生帶有簽名的連結，常用於密碼重設或驗證信：
+
+```typescript
+// 產生簽名 URL
+const url = c.route('unsubscribe', { user: 1 }).signed();
+
+// 驗證簽名
+routes.get('/unsubscribe/:user', (c) => {
+  if (!c.req.hasValidSignature()) {
+    return c.forbidden();
+  }
+}).name('unsubscribe');
 ```
 
 ## 路由模型綁定 (Route Model Binding)

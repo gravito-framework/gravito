@@ -4,72 +4,81 @@ title: Getting Started
 
 # Getting Started
 
-> Install Atlas, create a Drizzle instance, and inject `DBService` into the request context.
+> Atlas is a database toolkit for Gravito that provides a Laravel-style Query Builder and ORM.
 
 ## Installation
 
 ```bash
-bun add @gravito/atlas drizzle-orm
+bun add @gravito/atlas
 ```
 
-## PostgreSQL Example
+## Basic Configuration
+
+You should configure Atlas during your application's bootstrap phase (e.g., `bootstrap.ts`). Use `DB.configure` to set up your database connections.
 
 ```ts
-import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/atlas'
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { DB } from '@gravito/atlas'
 
-const core = new PlanetCore()
-const client = postgres(process.env.DATABASE_URL!)
-const db = drizzle(client)
-
-orbitDB(core, {
-  db,
-  databaseType: 'postgresql',
-  exposeAs: 'db',
-  enableQueryLogging: false,
+DB.configure({
+  default: 'postgres',
+  connections: {
+    postgres: {
+      driver: 'postgres',
+      host: 'localhost',
+      database: 'gravito',
+      username: 'user',
+      password: 'password'
+    },
+    sqlite: {
+      driver: 'sqlite',
+      database: 'database.sqlite'
+    }
+  }
 })
 ```
 
-## SQLite Example
+## Basic Usage
+
+You can use the `DB` facade to start building queries from any table.
 
 ```ts
-import { PlanetCore } from 'gravito-core'
-import orbitDB from '@gravito/atlas'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { Database } from 'bun:sqlite'
+// Fetching all records
+const users = await DB.table('users').get()
 
-const core = new PlanetCore()
-const sqlite = new Database('sqlite.db')
-const db = drizzle(sqlite)
+// Fetching a single record
+const user = await DB.table('users').where('id', 1).first()
 
-orbitDB(core, { db, databaseType: 'sqlite', exposeAs: 'db' })
+// Advanced query
+const activeAdmins = await DB.table('users')
+  .where('active', true)
+  .where('role', 'admin')
+  .orderBy('created_at', 'desc')
+  .get()
 ```
 
-## Using `DBService` in Routes
+## Multi-Database Support
+
+If you have configured multiple connections, you can switch between them using `DB.connection()`.
 
 ```ts
-core.app.get('/health/db', async (c) => {
-  const db = c.get('db')
-  const result = await db.healthCheck()
-  return c.json(result)
+// Use the 'sqlite' connection
+const logs = await DB.connection('sqlite').table('logs').get()
+```
+
+## Using in Routes
+
+Since `DB` is a static facade, you don't need to inject it into the context to use it, though you can still do so if preferred.
+
+```ts
+core.app.get('/users', async (c) => {
+  const users = await DB.table('users').get()
+  return c.json({ users })
 })
 ```
 
-## Options (`GravitoDBOptions`)
+## Next Steps
 
-- `db`: Drizzle instance (required)
-- `exposeAs`: context key (default: `db`)
-- `databaseType`: `postgresql | sqlite | mysql | auto`
-- `enableQueryLogging`: emits `db:query` via hooks
-- `queryLogLevel`: `debug | info | warn | error`
-- `enableHealthCheck`: enable/disable `DBService.healthCheck()`
-- `healthCheckQuery`: custom query string for health checks
+- Explore the [Query Builder](./query-builder.md) for more complex query features.
+- Learn about [Models](./models.md) for an Active Record experience.
+- Set up [Migrations & Seeding](./migrations-seeding.md) for database maintenance.
 
-## Hooks
-
-- `db:connected`
-- `db:query` (when query logging is enabled)
-
-> **Note**: `DBService` also emits lifecycle hooks for transactions, migrations, seeding, and deployment. See [DBService](./dbservice.md).

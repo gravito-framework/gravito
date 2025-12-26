@@ -4,47 +4,91 @@ title: Migrations & Seeding
 
 # Migrations & Seeding
 
-> Operational helpers for migrations, seeding, and deployment.
+> Provides a fluent schema definition (Blueprint) and data seeding (Factories/Seeders) toolkit.
 
-## Migrations
+## Database Migrations
 
-```ts
-const result = await db.migrate()
-if (!result.success) throw new Error(result.error)
-```
+Atlas provides `Schema` and `Blueprint` APIs, allowing you to define database table structures in code.
 
-```ts
-await db.migrateTo('2024_01_01_000001_init')
-```
-
-## Seeding
+### Creating Tables
 
 ```ts
-await db.seed(async (raw) => {
-  // Use the raw Drizzle instance for seeding.
-}, 'users')
-```
+import { Blueprint, Schema } from '@gravito/atlas'
 
-```ts
-await db.seedMany([
-  { name: 'users', seed: usersSeed },
-  { name: 'posts', seed: postsSeed },
-])
-```
-
-## Deployment Helper
-
-```ts
-const result = await db.deploy({
-  runMigrations: true,
-  runSeeds: false,
-  skipHealthCheck: false,
-  validateBeforeDeploy: true,
+await Schema.create('users', (table: Blueprint) => {
+  table.id() // Auto-incrementing ID
+  table.string('name')
+  table.string('email').unique()
+  table.string('password').nullable()
+  table.boolean('active').default(true)
+  table.timestamps() // Automatically creates created_at and updated_at
 })
 ```
 
-## Hooks
+### Modifying Tables
 
-- `db:migrate:start | complete | error`
-- `db:seed:start | complete | error`
-- `db:deploy:start | complete | error`
+```ts
+await Schema.table('users', (table: Blueprint) => {
+  table.string('avatar').after('email')
+  table.index(['name', 'email'], 'idx_name_email')
+})
+```
+
+### Supported Column Types
+
+- `id()`, `bigIncrements()`
+- `string(name, length?)`, `text(name)`
+- `integer(name)`, `bigInteger(name)`, `decimal(name, precision?, scale?)`
+- `boolean(name)`
+- `date(name)`, `dateTime(name)`, `timestamp(name)`
+- `json(name)`, `jsonb(name)`
+- `uuid(name)`
+
+## Data Seeding
+
+### Using Seeders
+
+Seeders are used to populate the database with initial data.
+
+```ts
+import { Seeder } from '@gravito/atlas'
+
+export default class UserSeeder extends Seeder {
+  async run() {
+    await DB.table('users').insert([
+      { name: 'Admin', email: 'admin@example.com' }
+    ])
+  }
+}
+```
+
+### Using Factories
+
+Factories help you quickly generate test data.
+
+```ts
+import { Factory } from '@gravito/atlas'
+
+// Define a Factory
+const UserFactory = Factory.define(User, ({ faker }) => ({
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  active: true
+}))
+
+// Use Factory to create data
+await UserFactory.create() // Create one and save to DB
+await UserFactory.count(10).create() // Create 10 records
+```
+
+## Running Migrations & Seeding
+
+You can execute them via CLI or code:
+
+```ts
+// Run all pending migrations
+await DB.migrate()
+
+// Run a specific Seeder
+await DB.seed(UserSeeder)
+```

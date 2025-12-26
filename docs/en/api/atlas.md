@@ -1,65 +1,64 @@
----
-title: Atlas
----
-
 # Atlas
 
-> Database integration as a Gravito Orbit with **full PostgreSQL support and performance optimizations**.
+> Standardized Database Orbit for Gravito —— Featuring a Laravel-style Query Builder & ORM.
 
 Package: `@gravito/atlas`
 
-This Orbit integrates **Drizzle ORM**, providing standardized database connection, request-context injection, transactions, query helpers, health checks, migrations/seeding, and hooks.
+This module provides standardized database connection management, a fluent Query Builder, transaction support, model relationships, migrations, and data seeding.
 
 ## Reading Guide
 
-This page is an overview. Detailed docs are grouped by topic:
+This page is an overview. Detailed documentation is grouped by topic:
 
 | Topic | Page |
 |------|------|
-| Getting started | [Getting Started](./atlas/getting-started.md) |
-| DBService (query helpers) | [DBService](./atlas/dbservice.md) |
-| Models (Eloquent-like API) | [Models](./atlas/models.md) |
+| Getting Started | [Getting Started](./atlas/getting-started.md) |
+| Query Builder | [Query Builder](./atlas/query-builder.md) |
+| Models (ORM) | [Models](./atlas/models.md) |
 | Relations | [Relations](./atlas/relations.md) |
-| Migrations & seeding | [Migrations & Seeding](./atlas/migrations-seeding.md) |
+| Serialization | [Serialization](./atlas/serialization.md) |
+| Pagination | [Pagination](./atlas/pagination.md) |
+| Migrations & Seeding | [Migrations & Seeding](./atlas/migrations-seeding.md) |
 
-## What You Get
+## Features Overview
 
-- A `DBService` injected into the Gravito `Context`
-- `db.raw` access to the underlying Drizzle instance
-- Transactions, CRUD helpers, pagination, bulk operations, aggregates
-- Relation queries backed by Drizzle `db.raw.query.*`
-- Optional query logging + hooks (`db:query`, `db:transaction:*`, `db:migrate:*`, etc.)
+- **Multi-driver Support**: Full support for PostgreSQL, MySQL, SQLite, MongoDB, and Redis.
+- **Fluent Queries**: Laravel-like API for building complex `where`, `join`, and JSON queries.
+- **Connection Management**: Easily switch and manage multiple database connections.
+- **Eloquent-style Models**: Define Model classes and use relationships (HasMany, BelongsTo, etc.).
+- **Maintenance Tools**: Built-in Migrations, Factories, and Seeders.
 
 ## Installation
 
 ```bash
-bun add @gravito/atlas drizzle-orm
+bun add @gravito/atlas
 ```
 
 ## Quick Start
 
-See [Getting Started](./atlas/getting-started.md) for full examples (PostgreSQL/SQLite, injection, config).
+See [Getting Started](./atlas/getting-started.md) for full examples.
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import { OrbitAtlas } from '@gravito/atlas'
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { DB } from '@gravito/atlas'
 
-const core = new PlanetCore()
-const client = postgres(process.env.DATABASE_URL!)
-const db = drizzle(client)
-
-core.orbit(OrbitAtlas, { db, databaseType: 'postgresql', exposeAs: 'db' })
-
-core.app.get('/users/:id', async (c) => {
-  const db = c.get('db')
-  const user = await db.findById({ _: { name: 'users' } }, c.req.param('id'))
-  return c.json({ user })
+// Configure Database
+DB.configure({
+  connections: {
+    default: {
+      driver: 'postgres',
+      host: 'localhost',
+      database: 'myapp'
+    }
+  }
 })
+
+// Access in application
+const users = await DB.table('users').get()
 ```
 
-## ORM Guide
+## Usage Guides
 
 - [ORM Usage Guide (English)](../guide/orm-usage.md)
-- [ORM Usage Guide (zh-TW)](../../zh-TW/guide/orm-usage.md)
+- [ORM 使用指南（繁體中文）](../../../zh-TW/guide/orm-usage.md)
+

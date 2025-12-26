@@ -259,7 +259,7 @@
     }
 
     .docs-table {
-        @apply w-full border-collapse text-left table-fixed;
+        @apply w-full border-collapse text-left table-auto;
     }
 
     .docs-table th {
@@ -281,7 +281,7 @@
     /* Column 1: Property Name - Architectural separation */
     .docs-table td:first-child,
     .docs-table th:first-child {
-        @apply w-[25%] min-w-[180px] font-mono font-bold text-[15px] text-singularity/90 tracking-tight border-r border-white/[0.03];
+        @apply w-[30%] min-w-[200px] font-mono font-bold text-[15px] text-singularity/90 tracking-tight border-r border-white/[0.03] break-all;
     }
 
     /* Column 2: Type Definition - Technical styling */

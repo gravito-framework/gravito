@@ -4,11 +4,11 @@ title: Atlas
 
 # Atlas
 
-> 以 Gravito Orbit 形式提供資料庫整合，**完整支援 PostgreSQL 並針對效能進行優化**。
+> 為 Gravito 打造的標準化資料庫 Orbit —— 具備 Laravel 風格的查詢構造器與 ORM。
 
 套件：`@gravito/atlas`
 
-此動力模組整合 **Drizzle ORM**，提供標準化的資料庫連線、Context 注入、交易支援、查詢輔助方法、健康檢查、遷移/Seed 與 Hooks。
+此模組提供了標準化的資料庫連線管理、Fluent 查詢介面、交易支援、模型關聯、遷移與數據填充 (Seed)。
 
 ## 閱讀導覽
 
@@ -17,23 +17,25 @@ title: Atlas
 | 主題 | 頁面 |
 |------|------|
 | 快速上手 | [快速上手](./atlas/getting-started.md) |
-| DBService（查詢輔助） | [DBService](./atlas/dbservice.md) |
-| Models（類 Eloquent API） | [Models](./atlas/models.md) |
-| 關聯查詢 | [Relations](./atlas/relations.md) |
+| 查詢構造器 | [Query Builder](./atlas/query-builder.md) |
+| 模型 (ORM) | [Models](./atlas/models.md) |
+| 模型關聯 | [Relations](./atlas/relations.md) |
+| 序列化 | [Serialization](./atlas/serialization.md) |
+| 分頁 | [Pagination](./atlas/pagination.md) |
 | 遷移與 Seed | [遷移與 Seed](./atlas/migrations-seeding.md) |
 
 ## 功能概覽
 
-- 在每個請求的 Gravito `Context` 注入 `DBService`
-- 透過 `db.raw` 存取底層 Drizzle 實例
-- 交易、CRUD 輔助、分頁、批量操作、聚合函式
-- 基於 Drizzle `db.raw.query.*` 的關聯查詢
-- 可選的查詢日誌與 Hooks（`db:query`、`db:transaction:*`、`db:migrate:*` 等）
+- **多驅動支援**：完整支援 PostgreSQL, MySQL, SQLite, MongoDB 與 Redis。
+- **流暢查詢**：與 Laravel 相似的查詢構築介面，支援複雜的 `where`、`join` 與 JSON 查詢。
+- **資料庫連接管理**：輕鬆切換與管理多個資料庫連接。
+- **Eloquent 風格 Models**：定義 Model 類別並使用關聯（HasMany, BelongsTo 等）。
+- **完整維護工具**：內建遷移 (Migrations) 與數據填充 (Factories/Seeders)。
 
 ## 安裝
 
 ```bash
-bun add @gravito/atlas drizzle-orm
+bun add @gravito/atlas
 ```
 
 ## 快速開始
@@ -42,18 +44,24 @@ bun add @gravito/atlas drizzle-orm
 
 ```ts
 import { PlanetCore } from 'gravito-core'
-import { OrbitAtlas } from '@gravito/atlas'
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { DB } from '@gravito/atlas'
 
-const core = new PlanetCore()
-const client = postgres(process.env.DATABASE_URL!)
-const db = drizzle(client)
+// 配置資料庫
+DB.configure({
+  connections: {
+    default: {
+      driver: 'postgres',
+      host: 'localhost',
+      database: 'myapp'
+    }
+  }
+})
 
-core.orbit(OrbitAtlas, { db, databaseType: 'postgresql', exposeAs: 'db' })
+// 在應用中存取
+const users = await DB.table('users').get()
 ```
 
-## ORM 使用指南
+## 使用指南
 
 - [ORM 使用指南（繁體中文）](../guide/orm-usage.md)
-- [ORM Usage Guide（English）](../../en/guide/orm-usage.md)
+- [ORM Usage Guide（English）](../../../en/guide/orm-usage.md)

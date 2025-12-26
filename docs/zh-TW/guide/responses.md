@@ -61,6 +61,23 @@ return c.forbidden('權限不足');
 return c.unauthorized();
 return c.badRequest('無效的請求');
 ```
+## 檔案回應 (File Responses)
+
+### 直接顯示檔案
+
+`file` 方法可用於在瀏覽器中直接顯示檔案（如圖片或 PDF），而不是下載：
+
+```typescript
+return c.file('path/to/image.jpg');
+```
+
+### 檔案下載
+
+`download` 方法會強制瀏覽器下載給定路徑的檔案，您可以自定義下載後的檔名：
+
+```typescript
+return c.download('path/to/report.pdf', '2024-年度報告.pdf');
+```
 
 ## 回應標頭 (Headers)
 

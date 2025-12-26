@@ -234,18 +234,19 @@ core.events.on('auth.password-reset', (user) => {
 
 ## 電子郵件整合
 
-Fortify 設計為與 `@gravito/orbit-mail` 搭配使用：
+Fortify 設計為與 `@gravito/signal` 搭配使用：
 
 ```typescript
-import { MailOrbit } from '@gravito/orbit-mail'
+import { OrbitSignal, SmtpTransport } from '@gravito/signal'
 
 // 在您的應用程式中配置郵件
-new MailOrbit({
-  driver: 'smtp',
-  host: process.env.MAIL_HOST,
-  port: 587,
-  username: process.env.MAIL_USERNAME,
-  password: process.env.MAIL_PASSWORD,
+new OrbitSignal({
+  from: { name: 'My App', address: 'no-reply@myapp.com' },
+  transport: new SmtpTransport({
+    host: process.env.MAIL_HOST,
+    port: 587,
+    auth: { user: process.env.MAIL_USERNAME, pass: process.env.MAIL_PASSWORD },
+  })
 })
 ```
 

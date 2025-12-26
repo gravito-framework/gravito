@@ -234,18 +234,19 @@ core.events.on('auth.password-reset', (user) => {
 
 ## Email Integration
 
-Fortify is designed to work with `@gravito/orbit-mail` for sending emails:
+Fortify is designed to work with `@gravito/signal` for sending emails:
 
 ```typescript
-import { MailOrbit } from '@gravito/orbit-mail'
+import { OrbitSignal, SmtpTransport } from '@gravito/signal'
 
 // Configure mail in your application
-new MailOrbit({
-  driver: 'smtp',
-  host: process.env.MAIL_HOST,
-  port: 587,
-  username: process.env.MAIL_USERNAME,
-  password: process.env.MAIL_PASSWORD,
+new OrbitSignal({
+  from: { name: 'My App', address: 'no-reply@myapp.com' },
+  transport: new SmtpTransport({
+    host: process.env.MAIL_HOST,
+    port: 587,
+    auth: { user: process.env.MAIL_USERNAME, pass: process.env.MAIL_PASSWORD },
+  })
 })
 ```
 

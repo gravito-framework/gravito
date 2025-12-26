@@ -4,50 +4,84 @@ title: Relations
 
 # Relations
 
-> Relation queries in Atlas are backed by Drizzle relations and `db.raw.query.*`.
+> Atlas provides rich support for model relationships, making it easy to define and query relationships between data tables.
 
-## Drizzle Relations (Required for `find*With`)
+## Defining Relationships
 
-To use `DBService.findByIdWith/findOneWith/findAllWith`, you must define relations in Drizzle and
-include them in the schema passed to `drizzle(...)`.
-
-```ts
-import { relations } from 'drizzle-orm'
-import { pgTable, integer, text } from 'drizzle-orm/pg-core'
-
-export const users = pgTable('users', {
-  id: integer('id').primaryKey(),
-  name: text('name'),
-})
-
-export const posts = pgTable('posts', {
-  id: integer('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id),
-  title: text('title'),
-})
-
-export const usersRelations = relations(users, ({ many }) => ({
-  posts: many(posts),
-}))
-```
-
-## Querying with Relations
+Defining relationships in a Model class is highly intuitive:
 
 ```ts
-const user = await db.findByIdWith('users', 1, { posts: true })
+import { Model } from '@gravito/atlas'
+
+export class User extends Model {
+  static table = 'users'
+
+  // A user has many posts
+  posts() {
+    return this.hasMany(Post, 'userId')
+  }
+}
+
+export class Post extends Model {
+  static table = 'posts'
+
+  // A post belongs to a user
+  user() {
+    return this.belongsTo(User, 'userId')
+  }
+}
 ```
 
-## Model Relations
+## Supported Relationship Types
 
-`Model.hasMany/belongsTo/...` register relation names and provide helpers like:
+- `hasOne(RelatedModel, foreignKey?, localKey?)`
+- `hasMany(RelatedModel, foreignKey?, localKey?)`
+- `belongsTo(RelatedModel, foreignKey?, ownerKey?)`
+- `belongsToMany(RelatedModel, pivotTable?, foreignPivotKey?, relatedPivotKey?)`
+- `morphTo(name?, typeColumn?, idColumn?)`
+- `morphOne(RelatedModel, name, typeColumn?, idColumn?)`
+- `morphMany(RelatedModel, name, typeColumn?, idColumn?)`
 
-- `await user.relation('posts')`
-- `await user.load(['posts'])`
+## Eager Loading
 
-> **Note**: the actual SQL for relation loading still relies on Drizzle `query` relations.
-Ensure your Drizzle schema defines those relations for the table names you query.
+Eager loading helps you solve the N+1 query problem.
+
+### Using `with` for Eager Loading
+
+```ts
+// Load all users and their posts
+const users = await User.query().with('posts').get()
+
+// Nested eager loading (User -> Posts -> Comments)
+const users = await User.query().with('posts.comments').get()
+
+// Multiple eager loadings
+const users = await User.query().with(['posts', 'profile']).get()
+```
+
+### Lazy Eager Loading
+
+If you already have a model instance, you can use `load`:
+
+```ts
+const user = await User.find(1)
+await user.load('posts')
+
+// Now you can access related data
+const posts = user.posts // Returns ModelCollection
+```
+
+## Relationship Counts
+
+If you only need to know the number of related records without loading the data:
+
+```ts
+const users = await User.query().withCount('posts').get()
+
+// Each user will have a posts_count attribute
+console.log(users[0].posts_count)
+```
 
 ## Polymorphic Relations
 
-Atlas includes `morphTo`, `morphMany`, and `morphOne`. For `morphTo`, you should provide a
-`morphMap` that maps type values to `Model` classes.
+Polymorphic relations allow a model to belong to more than one other model. For details, see the [ORM Usage Guide](../../guide/orm-usage.md#polymorphic-relations).

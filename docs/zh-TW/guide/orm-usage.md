@@ -4,266 +4,149 @@ title: ORM 使用指南
 
 # ORM 使用指南
 
-> 完整的 Atlas ORM 使用說明，涵蓋所有功能和使用場景。
+> 完整的 Atlas ORM 使用說明，涵蓋所有功能和使用場景。Atlas 提供了類似 Laravel Eloquent 的體驗，底層整合了高效能的資料庫驅動。
 
 ## 目錄
 
 1. [基本設定](#基本設定)
-2. [定義 Schema 和 Relations](#定義-schema-和-relations)
-3. [使用 Model 類別（優雅方式）](#使用-model-類別優雅方式)
-4. [CRUD 操作](#crud-操作)
-5. [關聯查詢](#關聯查詢)
-6. [事務操作](#事務操作)
-7. [批量操作](#批量操作)
+2. [定義 Model](#定義-model)
+3. [CRUD 操作](#crud-操作)
+4. [查詢構造器 (Query Builder)](#查詢構造器-query-builder)
+5. [關聯 (Relationships)](#關聯-relationships)
+6. [分頁](#分頁)
+7. [事務操作](#事務操作)
 8. [遷移和 Seeder](#遷移和-seeder)
-9. [部署](#部署)
-10. [最佳實踐](#最佳實踐)
+9. [最佳實踐](#最佳實踐)
 
 ## 基本設定
 
 ### 1. 安裝依賴
 
 ```bash
-bun add @gravito/atlas drizzle-orm postgres
+bun add @gravito/atlas
 ```
 
 ### 2. 初始化資料庫連接
 
+推薦在應用程式的引導階段（`bootstrap.ts`）配置 `DB`。
+
 ```typescript
-import { PlanetCore } from 'gravito-core';
-import orbitDB from '@gravito/atlas';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { DB } from '@gravito/atlas';
 
-const core = new PlanetCore();
-const client = postgres(process.env.DATABASE_URL);
-const db = drizzle(client);
-
-// 註冊 Atlas 模組
-orbitDB(core, {
-  db,
-  databaseType: 'postgresql', // 明確指定 PostgreSQL 以獲得最佳效能
-  exposeAs: 'db',
-  enableQueryLogging: true,   // 開發環境可啟用查詢日誌
-  queryLogLevel: 'debug'
+// 配置 Atlas
+DB.configure({
+  default: 'postgres',
+  connections: {
+    postgres: {
+      driver: 'postgres',
+      host: process.env.DB_HOST || 'localhost',
+      database: process.env.DB_NAME || 'gravito',
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+    }
+  }
 });
 ```
 
 ### 3. 在路由中使用
 
 ```typescript
+import { DB } from '@gravito/atlas';
+
 core.app.get('/users', async (c) => {
-  const db = c.get('db'); // DBService 實例
-  const users = await db.findAll(users);
+  // 直接使用 DB 門面
+  const users = await DB.table('users').get();
   return c.json({ users });
 });
 ```
 
-## 定義 Schema 和 Relations
+## 定義 Model
 
-### 定義表結構
+Atlas 使用 Active Record 模式。定義模型時，只需繼承 `Model` 並設定 `table` 名稱。
 
-```typescript
-import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
-
-// 使用者表
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
-
-// 文章表
-export const posts = pgTable('posts', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id),
-  title: text('title').notNull(),
-  content: text('content'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-// 評論表
-export const comments = pgTable('comments', {
-  id: serial('id').primaryKey(),
-  postId: integer('post_id').notNull().references(() => posts.id),
-  userId: integer('user_id').notNull().references(() => users.id),
-  content: text('content').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-```
-
-### 定義 Relations
-
-```typescript
-import { relations } from 'drizzle-orm';
-
-// 使用者的關聯
-export const usersRelations = relations(users, ({ many }) => ({
-  posts: many(posts),        // 一個使用者有多篇文章
-  comments: many(comments),  // 一個使用者有多個評論
-}));
-
-// 文章的關聯
-export const postsRelations = relations(posts, ({ one, many }) => ({
-  user: one(users, {        // 一篇文章屬於一個使用者
-    fields: [posts.userId],
-    references: [users.id],
-  }),
-  comments: many(comments), // 一篇文章有多個評論
-}));
-
-// 評論的關聯
-export const commentsRelations = relations(comments, ({ one }) => ({
-  post: one(posts, {
-    fields: [comments.postId],
-    references: [posts.id],
-  }),
-  user: one(users, {
-    fields: [comments.userId],
-    references: [users.id],
-  }),
-}));
-```
-
-### 建立 Drizzle 實例（包含 Relations）
-
-```typescript
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-
-const client = postgres(process.env.DATABASE_URL);
-
-// 包含 schema 和 relations
-const db = drizzle(client, {
-  schema: {
-    users,
-    posts,
-    comments,
-    usersRelations,
-    postsRelations,
-    commentsRelations,
-  },
-});
-
-// 然後註冊到 Atlas
-orbitDB(core, { db, databaseType: 'postgresql' });
-```
-
-## 使用 Model 類別（優雅方式）
-
-> **參考 Laravel Eloquent 設計**：提供優雅的 Model API，但底層仍使用 Drizzle 查詢建構器，保持最佳效能。
-
-### 定義 Model
+### 定義 User Model
 
 ```typescript
 import { Model } from '@gravito/atlas';
-import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
 
-// 定義表（仍使用 Drizzle，保持效能）
-export const usersTable = pgTable('users', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
-
-// 定義 User Model（類似 Laravel Eloquent）
 export class User extends Model {
-  // 設定表資訊
-  static table = usersTable;
-  static tableName = 'users';
-  static primaryKey = 'id'; // 可選，預設為 'id'
+  // 設定資料表名稱
+  static table = 'users';
+  
+  // 主鍵（預設為 'id'）
+  static primaryKey = 'id';
 
-  // 型別定義
-  declare attributes: {
-    id?: number;
-    name: string;
-    email: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-  };
+  // 欄位型別標註（用於開發時的智慧提示）
+  declare id: number;
+  declare name: string;
+  declare email: string;
+  declare active: boolean;
 }
 ```
 
-### 自動註冊 Model
+### 資料庫遷移 (Migrations)
 
-當 `Atlas` 初始化時，會自動初始化所有已註冊的 Model：
+Atlas 提供了流暢的 `Blueprint` API 來定義表結構。詳情請參閱 [遷移與 Seed](../api/atlas/migrations-seeding.md)。
 
-```typescript
-import { ModelRegistry } from '@gravito/atlas';
+```ts
+import { Blueprint, Schema } from '@gravito/atlas'
 
-// 註冊 Model（在應用啟動時）
-ModelRegistry.register(User, usersTable, 'users');
-ModelRegistry.register(Post, postsTable, 'posts');
-
-// Atlas 會在 db:connected hook 時自動初始化所有 Model
-orbitDB(core, { db, databaseType: 'postgresql' });
+// 建立資料表
+await Schema.create('users', (table: Blueprint) => {
+  table.id()
+  table.string('name')
+  table.string('email').unique()
+  table.boolean('active').default(true)
+  table.timestamps()
+})
 ```
 
-### 使用 Model（類似 Laravel）
+## CRUD 操作
+
+### 1. 建立與插入
 
 ```typescript
-// 查詢單筆記錄
-const user = await User.find(1);
+// 建立實例並儲存
+const user = new User()
+user.name = 'John Doe'
+user.email = 'john@example.com'
+await user.save()
 
-// 根據條件查詢
-const user = await User.where('email', 'john@example.com');
-
-// 使用多個條件查詢
-const user = await User.whereMany({
-  email: 'john@example.com',
-  name: 'John'
-});
-
-// 查詢所有記錄
-const users = await User.all();
-
-// 帶條件的查詢
-const users = await User.findAll({ name: 'John' });
-
-// 分頁查詢
-const result = await User.paginate({ page: 1, limit: 10 });
-// result.data: User[]
-// result.pagination: { page, limit, total, totalPages, hasNext, hasPrev }
-
-// 計數
-const count = await User.count();
-const count = await User.count({ name: 'John' });
-
-// 檢查是否存在
-const exists = await User.exists({ email: 'john@example.com' });
-
-// 建立記錄
+// 使用快捷方法
 const user = await User.create({
-  name: 'John',
-  email: 'john@example.com'
-});
+  name: 'Jane Doe',
+  email: 'jane@example.com'
+})
+```
 
-// 注意：create() 會立即寫入資料庫。若只需要記憶體中的實例，請使用 make()。
-const draft = User.make({ name: 'Draft User' });
+### 2. 查詢
 
-// 使用實例方法
-const user = new User();
-user.set('name', 'John');
-user.set('email', 'john@example.com');
-await user.save(); // 自動判斷是建立還是更新
+```typescript
+// 根據 ID 查詢
+const user = await User.find(1)
 
-// 更新記錄
-const user = await User.find(1);
-user.set('name', 'Updated Name');
-await user.save();
+// 查詢單筆 (符合條件)
+const user = await User.where('email', 'john@example.com').first()
 
-// 或使用 update 方法
-await user.update({ name: 'Updated Name' });
+// 查詢多筆
+const users = await User.where('active', true).get()
+```
 
-// 刪除記錄
-await user.delete();
+### 3. 更新
 
-// 轉換為 JSON
-const json = user.toJSON();
+```typescript
+const user = await User.find(1)
+if (user) {
+  user.name = 'Updated Name'
+  await user.save()
+}
+```
+
+### 4. 刪除
+
+```typescript
+const user = await User.find(1)
+await user.delete()
 ```
 
 ### 定義關聯（Relations）
@@ -800,39 +683,28 @@ const users = await db.insert(users, [
 // 根據 ID 查詢
 const user = await db.findById(users, 1);
 
-// 查詢單筆記錄
-const user = await db.findOne(users, { email: 'john@example.com' });
+## 查詢構造器 (Query Builder)
 
-// 查詢所有記錄
-const allUsers = await db.findAll(users);
+對於更複雜的查詢，可以使用流暢的查詢構造器 API。
 
-// 帶條件查詢
-const activeUsers = await db.findAll(users, { status: 'active' });
+```typescript
+import { DB } from '@gravito/atlas';
 
-// 帶排序和限制
-const recentUsers = await db.findAll(users, undefined, {
-  orderBy: users.createdAt,
-  orderDirection: 'desc',
-  limit: 10,
-});
+const users = await DB.table('users')
+  .where('votes', '>', 100)
+  .whereIn('status', ['active', 'pending'])
+  .orderBy('created_at', 'desc')
+  .get();
+```
 
-// 計算記錄數
-const totalUsers = await db.count(users);
-const activeCount = await db.count(users, { status: 'active' });
+更多進階查詢（JSON, Joins 等）請參閱 [查詢構造器說明](../api/atlas/dbservice.md)。
 
-// 檢查記錄是否存在
-const exists = await db.exists(users, { email: 'john@example.com' });
+## 分頁
 
-// 分頁查詢
-const result = await db.paginate(users, {
-  page: 1,
-  limit: 10,
-  orderBy: users.createdAt,
-  orderDirection: 'desc',
-});
+Atlas 提供內建分頁支援，建議參閱 [分頁獨立指南](../api/atlas/pagination.md)。
 
-// result.data - 資料陣列
-// result.pagination - 分頁資訊
+```ts
+const results = await User.query().paginate(15, 1);
 ```
 
 ### 更新（Update）
@@ -1308,6 +1180,12 @@ core.app.post('/users', async (c) => {
 
 core.liftoff();
 ```
+
+## 序列化 (Serialization)
+
+如果您使用 Atlas 模型，可以輕鬆控制輸出到 JSON 的欄位（例如：隱藏密碼、追加自定義欄位）。
+
+詳情請參閱 [序列化 API](./api/atlas/serialization.md)。
 
 ## 總結
 

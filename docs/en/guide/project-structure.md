@@ -5,68 +5,82 @@ description: Understanding the directory layout and architecture of a Gravito ap
 
 # Project Structure
 
-Gravito follows a predictive, clean directory structure that feels familiar to MVC developers but is optimized for the Gravito Ecosystem.
+Gravito follows a predictable, clean directory structure. Developers familiar with MVC frameworks like Laravel will feel right at home, while also benefiting from optimizations for performance and modularity.
 
 ## Directory Layout
 
-Here is a look at a standard Gravito project (using the Inertia-React template):
+Here is a look at a standard Gravito project using the **Enterprise MVC** layout:
 
 ```text
 my-gravito-app/
+├── config/              # Feature & Module configuration files
+│   ├── app.ts           # Core application settings
+│   ├── database.ts      # Database connection settings
+│   └── auth.ts          # Authentication & Authorization settings
 ├── src/
-│   ├── client/          # Frontend assets & React components
-│   │   ├── components/  # Shared React components
-│   │   └── pages/       # Inertia Page components (mapped to Controllers)
-│   ├── controllers/     # MVC Controllers (Business logic)
-│   ├── locales/         # Translation files (I18n)
-│   ├── routes/          # Route definitions (Gravito Router)
-│   ├── services/        # Service layer (Database, External APIs)
-│   ├── bootstrap.ts     # The App "Ignition" (Gravito registration)
-│   └── index.ts         # Main Bun entry point
+│   ├── Http/            # HTTP Transport Layer
+│   │   ├── Controllers/ # Controllers (Handle request logic)
+│   │   ├── Middleware/  # Middleware (Filter requests)
+│   │   └── Kernel.ts    # HTTP Kernel (Register global middleware)
+│   ├── Models/          # Data Models (Atlas ORM)
+│   ├── Services/        # Business Logic layer
+│   ├── Providers/       # Service Providers
+│   ├── Exceptions/      # Exception handling logic
+│   ├── routes.ts        # Route definitions
+│   └── bootstrap.ts     # Application bootstrapper
+├── database/            # Database-related resources
+│   ├── migrations/      # Database migrations
+│   ├── factories/       # Model factories (Test data generation)
+│   └── seeders/         # Database seeders
 ├── public/              # Static assets (images, robots.txt)
-├── docs/                # Project documentation
-├── gravito.config.ts    # Framework configuration
-└── package.json
+├── tests/               # Test cases (Unit & Feature)
+├── gravito.config.ts    # Project root configuration
+├── package.json
+└── tsconfig.json
 ```
 
 ---
 
-## The Core Philosophy: Planets & Kinetic Modules
+## Core Directories
 
-To understand how Gravito works, you need to understand two concepts:
+### `config/`
+Contains all your application's configuration files. Gravito encourages splitting configuration by feature into separate files to keep things organized.
 
-### 1. PlanetCore (The Micro-Kernel)
-The core of Gravito is intentionally tiny. It doesn't know how to render React, it doesn't know how to talk to a database. It only knows how to manage the **Lifecycle** and the **Service Container**.
+### `src/Http/`
+The entry point for handling web requests. `Controllers` receive input and return responses, while `Middleware` provides a convenient mechanism for filtering HTTP requests (e.g., authentication).
 
-### 2. Kinetic Modules (Infrastructure)
-Functionalities are added as "Kinetic Modules" that revolve around the core. 
-- Want React? Add **Ion**.
-- Want Vue? Add **Ion**.
-- Want HTML? Add **Prism**.
-- Want SEO? Add **Luminosity**.
-- Need a Database? Add **Atlas** (not available in v1.0).
+### `src/Models/`
+Where your Atlas (ORM) models reside. Each model typically represents a single table in your database.
 
-This "Pay only for what you use" approach ensures your application remains lightning-fast regardless of its scale.
+### `src/Providers/`
+Service Providers are the "ignition points" for Gravito apps. They are responsible for binding services into the **IoC Container**, and registering middleware, event listeners, etc.
+
+### `src/bootstrap.ts`
+The file responsible for initializing `PlanetCore` and loading the necessary Orbits.
+
+---
+
+## Core Philosophy: Galaxy Architecture
+
+Gravito utilizes a "Micro-kernel + Orbits" design pattern:
+
+1.  **PlanetCore (Micro-kernel)**: Intentionally tiny, handling only the application lifecycle, IoC container, and Hook system.
+2.  **Orbits (Modules)**: Features are added as pluggable modules. For example:
+    *   Need a database? Add `@gravito/atlas`.
+    *   Need authentication? Add `@gravito/sentinel`.
+    *   Need task scheduling? Add `@gravito/horizon`.
+
+This ensures "pay only for what you use" performance, meaning your app only runs the code it actually needs.
 
 ---
 
 ## The Lifecycle
 
-When you run `bun dev` or `bun run src/index.ts`, the following happens:
+When you run `gravito dev` or start the server:
 
-1. **Ignition (`index.ts`)**: The Bun runtime starts and calls `bootstrap()`.
-2. **Registration (`bootstrap.ts`)**: All necessary Kinetic Modules are registered. 
-   ```typescript
-   core.orbit(GravitoInertia)
-   core.orbit(GravitoView)
-   ```
-3. **Booting**: The kernel calls `boot()` on every Gravito, preparing services like the View engine or DB connections.
-4. **Liftoff**: The HTTP engine starts listening for requests.
+1.  **Load Config**: The system reads files in `config/` and `gravito.config.ts`.
+2.  **Register Providers**: Every Service Provider's `register()` method is executed, binding services to the container.
+3.  **Boot Providers**: Every Service Provider's `boot()` method is executed once all services are registered and ready.
+4.  **Routing**: HTTP requests hit the `Http/Kernel`, pass through middleware, and finally reach the designated Controller.
 
-## Where to find code?
-
-- **Routing**: Look in `src/routes/index.ts`. This is where you map URLs to Controllers.
-- **Logic**: Look in `src/controllers/`. This is where the "Brain" of your app lives.
-- **UI**: Look in `src/client/pages/`. This is where you build your visual experience.
-
-> **Next Step**: Learn how to handle requests in the [Routing System](/docs/guide/routing).
+> **Next Step**: Learn how to handle requests in the [Routing System](./routing.md).
