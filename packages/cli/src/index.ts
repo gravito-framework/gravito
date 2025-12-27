@@ -444,13 +444,40 @@ const make = new MakeCommand()
 
 cli
   .command('make:controller <name>', 'Create a new controller')
-  .action((name) => make.run('controller', name))
+  .option('--resource', 'Generate a resource controller')
+  .action((name, options) => make.run('controller', name, options))
 
-cli.command('make:model <name>', 'Create a new model').action((name) => make.run('model', name))
+cli
+  .command('make:model <name>', 'Create a new model')
+  .option('-m, --migration', 'Create a new migration file for the model')
+  .option('-c, --controller', 'Create a new controller for the model')
+  .option('-r, --request', 'Create a new form request for the model')
+  .option('-a, --all', 'Create a migration, controller, and form request for the model')
+  .action(async (name, options) => {
+    // 1. Make the model
+    await make.run('model', name, options)
+
+    // 2. Handle linked generation
+    if (options.all || options.migration) {
+      await makeMigration(`create_${name.toLowerCase()}s_table`)
+    }
+
+    if (options.all || options.controller) {
+      await make.run('controller', name, { resource: true })
+    }
+
+    if (options.all || options.request) {
+      await make.run('request', `${name}Store`)
+    }
+  })
 
 cli
   .command('make:middleware <name>', 'Create a new middleware')
   .action((name) => make.run('middleware', name))
+
+cli
+  .command('make:request <name>', 'Create a new form request class')
+  .action((name) => make.run('request', name))
 
 // --- Tinker ---
 cli.command('tinker', 'Interact with your application').action(() => tinker())

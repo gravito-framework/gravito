@@ -40,4 +40,8 @@ export class OrbitMonolith implements GravitoOrbit {
   }
 }
 
+export { Schema } from '@gravito/mass'
 export * from './ContentManager'
+export * from './Controller'
+export * from './FormRequest'
+export { RouterHelper as Route } from './Router'
