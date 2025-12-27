@@ -16,7 +16,15 @@
     "types": ["bun-types", "vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "gravito-core": ["../../packages/core/src/index.ts"],
+      "@gravito/ion": ["../../packages/ion/src/index.ts"],
+      "@gravito/stasis": ["../../packages/stasis/src/index.ts"],
+      "@gravito/prism": ["../../packages/prism/src/index.ts"],
+      "@gravito/constellation": ["../../packages/constellation/src/index.ts"],
+      "@gravito/photon": ["../../packages/photon/src/index.ts"],
+      "@gravito/photon/bun": ["../../packages/photon/src/bun.ts"],
+      "@gravito/plasma": ["../../packages/plasma/src/index.ts"]
     }
   },
   "include": ["src/**/*", "build-static.ts"],
