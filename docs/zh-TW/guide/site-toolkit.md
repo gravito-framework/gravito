@@ -7,10 +7,29 @@ description: 基於 Monolith、Cosmos、Constellation 的靜態文件工具。
 
 Site Toolkit（`@gravito/site`）是以 Monolith、Cosmos 與 Constellation 組成的靜態文件工具，可用於多語系文件站。
 
+## 特色
+
+- Monolith 驅動的 Markdown 內容
+- Cosmos 多語系管理
+- Constellation sitemap 產生
+- 一鍵產生靜態站
+
 ## 安裝
 
 ```bash
 bun add @gravito/site
+```
+
+## 目錄建議
+
+```
+content/
+  zh/
+    docs/
+      introduction.md
+  en/
+    docs/
+      introduction.md
 ```
 
 ## 基本使用
@@ -23,11 +42,29 @@ bun run build
 bun run generate
 ```
 
-## 提供功能
+## 設定範例
 
-- Monolith 驅動的 Markdown 內容
-- Cosmos 多語系管理
-- Constellation sitemap 產生
+```ts
+import { PlanetCore } from 'gravito-core'
+import { OrbitContent } from '@gravito/monolith'
+import { OrbitI18n } from '@gravito/cosmos'
+import { OrbitSitemap } from '@gravito/constellation'
+
+await PlanetCore.boot({
+  orbits: [
+    OrbitContent,
+    OrbitI18n.configure({ locales: ['zh', 'en'], defaultLocale: 'zh' }),
+    OrbitSitemap.configure({ baseUrl: 'https://example.com' }),
+  ],
+  config: {
+    content: { root: './content' },
+  },
+})
+```
+
+## 輸出位置
+
+預設輸出到 `./dist`，可搭配靜態託管或 CDN 直接部署。
 
 ## 下一步
 
