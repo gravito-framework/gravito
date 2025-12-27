@@ -359,11 +359,13 @@ export class DocsService {
             storage: '儲存與檔案',
             nebula_storage: 'Nebula Storage',
             cache_queue: '快取與排程',
+            stasis_cache: 'Stasis Cache',
             seo: 'SEO 與 Sitemap',
             frontend: '前端整合',
             advanced: '進階與維運',
             testing: '測試指南',
             reference: '參考資料',
+            queues: '佇列系統',
 
             // Pages
             intro: '簡介',
@@ -376,6 +378,7 @@ export class DocsService {
             routing: '基礎路由',
             testing_harness: 'HTTP 測試',
             static_site: '靜態網站生成',
+            photon_core: 'Photon Core',
 
             middleware: '中間件 (Middleware)',
             controllers: '控制器 (Controllers)',
@@ -422,6 +425,7 @@ export class DocsService {
             monolith_cms: 'Monolith CMS',
             scaffold_generator: 'Scaffold 專案生成器',
             site_toolkit: 'Site Toolkit',
+            ripple_broadcasting: 'Ripple Broadcasting',
             freeze_react: 'Freeze React',
             freeze_vue: 'Freeze Vue',
             luminosity_cli: 'Luminosity CLI',
@@ -441,11 +445,13 @@ export class DocsService {
             storage: 'Storage & Files',
             nebula_storage: 'Nebula Storage',
             cache_queue: 'Cache & Queue',
+            stasis_cache: 'Stasis Cache',
             seo: 'SEO & Sitemap',
             frontend: 'Frontend Integration',
             advanced: 'Advanced / Operations',
             testing: 'Testing',
             reference: 'Reference',
+            queues: 'Queues',
 
             // Pages
             intro: 'Introduction',
@@ -458,6 +464,7 @@ export class DocsService {
             routing: 'Routing Basics',
             testing_harness: 'HTTP Testing',
             static_site: 'Static Site Gen',
+            photon_core: 'Photon Core',
 
             middleware: 'Middleware',
             controllers: 'Controllers',
@@ -504,6 +511,7 @@ export class DocsService {
             monolith_cms: 'Monolith CMS',
             scaffold_generator: 'Scaffold Generator',
             site_toolkit: 'Site Toolkit',
+            ripple_broadcasting: 'Ripple Broadcasting',
             freeze_react: 'Freeze React',
             freeze_vue: 'Freeze Vue',
             luminosity_cli: 'Luminosity CLI',
@@ -534,6 +542,7 @@ export class DocsService {
         title: trans.first_build,
         path: '#',
         children: [
+          { title: trans.photon_core, path: `${prefix}/guide/photon-core` },
           { title: trans.routing, path: `${prefix}/guide/routing` },
           { title: trans.middleware, path: `${prefix}/guide/middleware` },
           { title: trans.controllers, path: `${prefix}/guide/controllers` },
@@ -555,6 +564,7 @@ export class DocsService {
           { title: trans.monolith_cms, path: `${prefix}/guide/monolith-cms` },
           { title: trans.scaffold_generator, path: `${prefix}/guide/scaffold-generator` },
           { title: trans.site_toolkit, path: `${prefix}/guide/site-toolkit` },
+          { title: trans.ripple_broadcasting, path: `${prefix}/guide/ripple-broadcasting` },
           { title: trans.freeze_react, path: `${prefix}/guide/freeze-react` },
           { title: trans.freeze_vue, path: `${prefix}/guide/freeze-vue` },
           { title: trans.luminosity_cli, path: `${prefix}/guide/luminosity-cli` },
@@ -603,6 +613,14 @@ export class DocsService {
         children: [
           { title: trans.nebula_storage, path: `${prefix}/guide/nebula-storage` },
           { title: trans.image_opt, path: `${prefix}/guide/image-optimization` },
+        ],
+      },
+      {
+        title: trans.cache_queue,
+        path: '#',
+        children: [
+          { title: trans.stasis_cache, path: `${prefix}/guide/stasis-cache` },
+          { title: trans.queues, path: `${prefix}/guide/queues` },
         ],
       },
       {
