@@ -355,7 +355,9 @@ export class DocsService {
             orm: 'Atlas ORM',
             auth: '驗證與安全',
             auth_fortify: '認證 (Fortify)',
+            auth_sentinel: 'Sentinel Auth',
             storage: '儲存與檔案',
+            nebula_storage: 'Nebula Storage',
             cache_queue: '快取與排程',
             seo: 'SEO 與 Sitemap',
             frontend: '前端整合',
@@ -380,6 +382,7 @@ export class DocsService {
             requests: '請求 (Requests)',
             responses: '回應 (Responses)',
             validation: '驗證 (Validation)',
+            helpers: '輔助函式',
 
             // Database Pages
             db_overview: '概覽',
@@ -434,7 +437,9 @@ export class DocsService {
             orm: 'Atlas ORM',
             auth: 'Auth & Security',
             auth_fortify: 'Authentication (Fortify)',
+            auth_sentinel: 'Sentinel Auth',
             storage: 'Storage & Files',
+            nebula_storage: 'Nebula Storage',
             cache_queue: 'Cache & Queue',
             seo: 'SEO & Sitemap',
             frontend: 'Frontend Integration',
@@ -459,6 +464,7 @@ export class DocsService {
             requests: 'Requests',
             responses: 'Responses',
             validation: 'Validation',
+            helpers: 'Helpers',
 
             // Database Pages
             db_overview: 'Overview',
@@ -534,6 +540,7 @@ export class DocsService {
           { title: trans.requests, path: `${prefix}/guide/requests` },
           { title: trans.responses, path: `${prefix}/guide/responses` },
           { title: trans.validation, path: `${prefix}/guide/validation` },
+          { title: trans.helpers, path: `${prefix}/guide/helpers` },
           { title: trans.static_site, path: `${prefix}/guide/static-site-development` },
         ],
       },
@@ -586,13 +593,17 @@ export class DocsService {
         path: '#',
         children: [
           { title: trans.auth_fortify, path: `${prefix}/guide/authentication` },
+          { title: trans.auth_sentinel, path: `${prefix}/guide/sentinel-auth` },
           { title: trans.security, path: `${prefix}/guide/security` },
         ],
       },
       {
         title: trans.storage,
         path: '#',
-        children: [{ title: trans.image_opt, path: `${prefix}/guide/image-optimization` }],
+        children: [
+          { title: trans.nebula_storage, path: `${prefix}/guide/nebula-storage` },
+          { title: trans.image_opt, path: `${prefix}/guide/image-optimization` },
+        ],
       },
       {
         title: trans.seo,
