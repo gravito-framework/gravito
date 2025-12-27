@@ -41,6 +41,8 @@ export { OrbitFlux, type OrbitFluxOptions } from './orbit/OrbitFlux'
 export { BunSQLiteStorage, type BunSQLiteStorageOptions } from './storage/BunSQLiteStorage'
 // Storage
 export { MemoryStorage } from './storage/MemoryStorage'
+// Trace
+export { JsonFileTraceSink } from './trace/JsonFileTraceSink'
 
 // Types
 export type {
@@ -49,12 +51,18 @@ export type {
   // Logger
   FluxLogger,
   FluxResult,
+  // Trace
+  FluxTraceEvent,
+  FluxTraceEventType,
+  FluxTraceSink,
   // Step types
   StepDefinition,
+  StepDescriptor,
   StepExecution,
   StepResult,
   WorkflowContext,
   WorkflowDefinition,
+  WorkflowDescriptor,
   WorkflowFilter,
   WorkflowState,
   // Core types

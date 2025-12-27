@@ -16,10 +16,30 @@ import type { StepDefinition, StepExecution, StepResult, WorkflowContext } from 
 export class StepExecutor {
   private defaultRetries: number
   private defaultTimeout: number
+  private onRetry?: (
+    step: StepDefinition,
+    ctx: WorkflowContext,
+    error: Error,
+    attempt: number,
+    maxRetries: number
+  ) => void | Promise<void>
 
-  constructor(options: { defaultRetries?: number; defaultTimeout?: number } = {}) {
+  constructor(
+    options: {
+      defaultRetries?: number
+      defaultTimeout?: number
+      onRetry?: (
+        step: StepDefinition,
+        ctx: WorkflowContext,
+        error: Error,
+        attempt: number,
+        maxRetries: number
+      ) => void | Promise<void>
+    } = {}
+  ) {
     this.defaultRetries = options.defaultRetries ?? 3
     this.defaultTimeout = options.defaultTimeout ?? 30000
+    this.onRetry = options.onRetry
   }
 
   /**
@@ -68,6 +88,7 @@ export class StepExecutor {
 
         // If not last retry, continue
         if (attempt < maxRetries) {
+          await this.onRetry?.(step, ctx, lastError, attempt + 1, maxRetries)
           // Exponential backoff
           await this.sleep(Math.min(1000 * 2 ** attempt, 10000))
         }

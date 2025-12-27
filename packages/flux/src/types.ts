@@ -136,6 +136,25 @@ export interface WorkflowDefinition<TInput = unknown> {
   validateInput?: (input: unknown) => input is TInput
 }
 
+/**
+ * Workflow descriptor (serializable metadata)
+ */
+export interface WorkflowDescriptor {
+  name: string
+  steps: StepDescriptor[]
+}
+
+/**
+ * Step descriptor (serializable metadata)
+ */
+export interface StepDescriptor {
+  name: string
+  commit: boolean
+  retries?: number
+  timeout?: number
+  hasCondition: boolean
+}
+
 // ─────────────────────────────────────────────────────────────
 // Storage Interface
 // ─────────────────────────────────────────────────────────────
@@ -209,6 +228,40 @@ export interface FluxLogger {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Trace Types
+// ─────────────────────────────────────────────────────────────
+
+export type FluxTraceEventType =
+  | 'workflow:start'
+  | 'workflow:complete'
+  | 'workflow:error'
+  | 'step:start'
+  | 'step:complete'
+  | 'step:error'
+  | 'step:skipped'
+  | 'step:retry'
+
+export interface FluxTraceEvent {
+  type: FluxTraceEventType
+  timestamp: number
+  workflowId: string
+  workflowName: string
+  stepName?: string
+  stepIndex?: number
+  commit?: boolean
+  retries?: number
+  maxRetries?: number
+  duration?: number
+  error?: string
+  status?: WorkflowStatus | StepExecution['status']
+  meta?: Record<string, unknown>
+}
+
+export interface FluxTraceSink {
+  emit(event: FluxTraceEvent): void | Promise<void>
+}
+
+// ─────────────────────────────────────────────────────────────
 // Engine Configuration
 // ─────────────────────────────────────────────────────────────
 
@@ -221,6 +274,9 @@ export interface FluxConfig {
 
   /** Logger instance */
   logger?: FluxLogger
+
+  /** Trace sink for workflow events */
+  trace?: FluxTraceSink
 
   /** Default retry count for steps */
   defaultRetries?: number

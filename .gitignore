@@ -48,3 +48,6 @@ packages/*/src/**/*.d.ts.map
 .luminosity/
 examples/*/static/build/
 examples/*/dist/
+
+# Flux Dev Viewer
+.flux/

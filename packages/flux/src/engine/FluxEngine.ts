@@ -14,6 +14,7 @@ import { MemoryStorage } from '../storage/MemoryStorage'
 import type {
   FluxConfig,
   FluxResult,
+  FluxTraceEvent,
   WorkflowContext,
   WorkflowDefinition,
   WorkflowStorage,
@@ -49,6 +50,21 @@ export class FluxEngine {
     this.executor = new StepExecutor({
       defaultRetries: config.defaultRetries,
       defaultTimeout: config.defaultTimeout,
+      onRetry: async (step, ctx, error, attempt, maxRetries) => {
+        await this.emitTrace({
+          type: 'step:retry',
+          timestamp: Date.now(),
+          workflowId: ctx.id,
+          workflowName: ctx.name,
+          stepName: step.name,
+          stepIndex: ctx.currentStep,
+          commit: Boolean(step.commit),
+          retries: attempt,
+          maxRetries,
+          error: error.message,
+          status: 'running',
+        })
+      },
     })
     this.contextManager = new ContextManager()
   }
@@ -89,6 +105,13 @@ export class FluxEngine {
       // Transition to running
       stateMachine.transition('running')
       Object.assign(ctx, { status: 'running' })
+      await this.emitTrace({
+        type: 'workflow:start',
+        timestamp: Date.now(),
+        workflowId: ctx.id,
+        workflowName: ctx.name,
+        status: ctx.status,
+      })
 
       // Execute steps
       for (let i = 0; i < definition.steps.length; i++) {
@@ -101,6 +124,17 @@ export class FluxEngine {
 
         // Emit step start event
         this.config.on?.stepStart?.(step.name, ctx)
+        await this.emitTrace({
+          type: 'step:start',
+          timestamp: Date.now(),
+          workflowId: ctx.id,
+          workflowName: ctx.name,
+          stepName: step.name,
+          stepIndex: i,
+          commit: Boolean(step.commit),
+          retries: execution.retries,
+          status: execution.status,
+        })
 
         // Execute step
         const result = await this.executor.execute(step, ctx, execution)
@@ -108,9 +142,49 @@ export class FluxEngine {
         if (result.success) {
           // Emit step complete event
           this.config.on?.stepComplete?.(step.name, ctx, result)
+          if (execution.status === 'skipped') {
+            await this.emitTrace({
+              type: 'step:skipped',
+              timestamp: Date.now(),
+              workflowId: ctx.id,
+              workflowName: ctx.name,
+              stepName: step.name,
+              stepIndex: i,
+              commit: Boolean(step.commit),
+              retries: execution.retries,
+              duration: result.duration,
+              status: execution.status,
+            })
+          } else {
+            await this.emitTrace({
+              type: 'step:complete',
+              timestamp: Date.now(),
+              workflowId: ctx.id,
+              workflowName: ctx.name,
+              stepName: step.name,
+              stepIndex: i,
+              commit: Boolean(step.commit),
+              retries: execution.retries,
+              duration: result.duration,
+              status: execution.status,
+            })
+          }
         } else {
           // Emit step error event
           this.config.on?.stepError?.(step.name, ctx, result.error!)
+          await this.emitTrace({
+            type: 'step:error',
+            timestamp: Date.now(),
+            workflowId: ctx.id,
+            workflowName: ctx.name,
+            stepName: step.name,
+            stepIndex: i,
+            commit: Boolean(step.commit),
+            retries: execution.retries,
+            duration: result.duration,
+            error: result.error?.message,
+            status: execution.status,
+          })
 
           // Fail workflow
           stateMachine.transition('failed')
@@ -146,6 +220,14 @@ export class FluxEngine {
 
       // Emit workflow complete event
       this.config.on?.workflowComplete?.(ctx)
+      await this.emitTrace({
+        type: 'workflow:complete',
+        timestamp: Date.now(),
+        workflowId: ctx.id,
+        workflowName: ctx.name,
+        status: ctx.status,
+        duration: Date.now() - startTime,
+      })
 
       return {
         id: ctx.id,
@@ -159,6 +241,15 @@ export class FluxEngine {
 
       // Emit workflow error event
       this.config.on?.workflowError?.(ctx, err)
+      await this.emitTrace({
+        type: 'workflow:error',
+        timestamp: Date.now(),
+        workflowId: ctx.id,
+        workflowName: ctx.name,
+        status: 'failed',
+        duration: Date.now() - startTime,
+        error: err.message,
+      })
 
       stateMachine.forceStatus('failed')
       Object.assign(ctx, { status: 'failed' })
@@ -223,5 +314,13 @@ export class FluxEngine {
    */
   async close(): Promise<void> {
     await this.storage.close?.()
+  }
+
+  private async emitTrace(event: FluxTraceEvent): Promise<void> {
+    try {
+      await this.config.trace?.emit(event)
+    } catch {
+      // Ignore trace failures to avoid breaking workflow execution
+    }
   }
 }

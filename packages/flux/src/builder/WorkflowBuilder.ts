@@ -6,7 +6,13 @@
  * @module @gravito/flux/builder
  */
 
-import type { StepDefinition, WorkflowContext, WorkflowDefinition } from '../types'
+import type {
+  StepDefinition,
+  StepDescriptor,
+  WorkflowContext,
+  WorkflowDefinition,
+  WorkflowDescriptor,
+} from '../types'
 
 /**
  * Step options
@@ -116,6 +122,24 @@ export class WorkflowBuilder<TInput = unknown> {
       name: this._name,
       steps: [...this._steps],
       validateInput: this._validateInput,
+    }
+  }
+
+  /**
+   * Describe workflow (serializable metadata)
+   */
+  describe(): WorkflowDescriptor {
+    const steps: StepDescriptor[] = this._steps.map((step) => ({
+      name: step.name,
+      commit: Boolean(step.commit),
+      retries: step.retries,
+      timeout: step.timeout,
+      hasCondition: Boolean(step.when),
+    }))
+
+    return {
+      name: this._name,
+      steps,
     }
   }
 

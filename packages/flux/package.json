@@ -1,6 +1,6 @@
 {
   "name": "@gravito/flux",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Platform-agnostic workflow engine for Gravito",
   "type": "module",
   "main": "./dist/node/index.cjs",
@@ -28,12 +28,19 @@
       }
     }
   },
+  "bin": {
+    "flux": "./bin/flux.js"
+  },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "README.zh-TW.md",
+    "bin",
+    "dev"
   ],
   "scripts": {
     "build": "bun run build.ts",
+    "dev:viewer": "node ./bin/flux.js dev --trace ./.flux/trace.ndjson --port 4280",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
