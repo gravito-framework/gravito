@@ -49,16 +49,12 @@ export class CleanArchitectureGenerator extends BaseGenerator {
               {
                 type: 'directory',
                 name: 'Entities',
-                children: [
-                  { type: 'file', name: 'Entity.ts', content: this.generateBaseEntity() },
-                  { type: 'file', name: 'User.ts', content: this.generateUserEntity() },
-                ],
+                children: [{ type: 'file', name: 'User.ts', content: this.generateUserEntity() }],
               },
               {
                 type: 'directory',
                 name: 'ValueObjects',
                 children: [
-                  { type: 'file', name: 'ValueObject.ts', content: this.generateBaseValueObject() },
                   { type: 'file', name: 'Email.ts', content: this.generateEmailValueObject() },
                 ],
               },
@@ -76,13 +72,7 @@ export class CleanArchitectureGenerator extends BaseGenerator {
               {
                 type: 'directory',
                 name: 'Exceptions',
-                children: [
-                  {
-                    type: 'file',
-                    name: 'DomainException.ts',
-                    content: this.generateDomainException(),
-                  },
-                ],
+                children: [{ type: 'file', name: '.gitkeep', content: '' }],
               },
             ],
           },
@@ -358,7 +348,7 @@ export abstract class Entity<T> {
  * Contains business logic related to users.
  */
 
-import { Entity } from './Entity'
+import { Entity } from '@gravito/enterprise'
 import { Email } from '../ValueObjects/Email'
 
 export interface UserProps {
@@ -443,7 +433,7 @@ export abstract class ValueObject<T> {
  * Encapsulates email validation and comparison.
  */
 
-import { ValueObject } from './ValueObject'
+import { ValueObject } from '@gravito/enterprise'
 
 interface EmailProps {
   value: string
@@ -485,14 +475,11 @@ export class Email extends ValueObject<EmailProps> {
  * Implementations are in Infrastructure layer.
  */
 
+import type { Repository } from '@gravito/enterprise'
 import type { User } from '../Entities/User'
 
-export interface IUserRepository {
-  findById(id: string): Promise<User | null>
+export interface IUserRepository extends Repository<User, string> {
   findByEmail(email: string): Promise<User | null>
-  save(user: User): Promise<void>
-  delete(id: string): Promise<void>
-  findAll(): Promise<User[]>
 }
 `
   }
@@ -538,6 +525,7 @@ export class InvalidValueException extends DomainException {
  * Application service for creating new users.
  */
 
+import { UseCase } from '@gravito/enterprise'
 import { User } from '../../../Domain/Entities/User'
 import type { IUserRepository } from '../../../Domain/Interfaces/IUserRepository'
 import type { UserDTO } from '../../DTOs/UserDTO'
@@ -551,8 +539,10 @@ export interface CreateUserOutput {
   user: UserDTO
 }
 
-export class CreateUserUseCase {
-  constructor(private userRepository: IUserRepository) {}
+export class CreateUserUseCase extends UseCase<CreateUserInput, CreateUserOutput> {
+  constructor(private userRepository: IUserRepository) {
+    super()
+  }
 
   async execute(input: CreateUserInput): Promise<CreateUserOutput> {
     // Check if email already exists
@@ -590,8 +580,8 @@ export class CreateUserUseCase {
  * Get User Use Case
  */
 
+import { UseCase } from '@gravito/enterprise'
 import type { IUserRepository } from '../../../Domain/Interfaces/IUserRepository'
-import { EntityNotFoundException } from '../../../Domain/Exceptions/DomainException'
 import type { UserDTO } from '../../DTOs/UserDTO'
 
 export interface GetUserInput {
@@ -602,14 +592,16 @@ export interface GetUserOutput {
   user: UserDTO
 }
 
-export class GetUserUseCase {
-  constructor(private userRepository: IUserRepository) {}
+export class GetUserUseCase extends UseCase<GetUserInput, GetUserOutput> {
+  constructor(private userRepository: IUserRepository) {
+    super()
+  }
 
   async execute(input: GetUserInput): Promise<GetUserOutput> {
     const user = await this.userRepository.findById(input.id)
 
     if (!user) {
-      throw new EntityNotFoundException('User', input.id)
+      throw new Error(\`User with id \${input.id} not found\`)
     }
 
     return {
@@ -713,6 +705,10 @@ export class UserRepository implements IUserRepository {
 
   async findAll(): Promise<User[]> {
     return Array.from(users.values())
+  }
+
+  async exists(id: string): Promise<boolean> {
+    return users.has(id)
   }
 }
 `
@@ -955,5 +951,31 @@ src/
 
 Created with ❤️ using Gravito Framework
 `
+  }
+
+  protected override generatePackageJson(context: GeneratorContext): string {
+    const pkg = {
+      name: context.nameKebabCase,
+      version: '0.1.0',
+      type: 'module',
+      scripts: {
+        dev: 'bun run --watch src/bootstrap.ts',
+        build: 'bun build ./src/bootstrap.ts --outdir ./dist --target bun',
+        start: 'bun run dist/bootstrap.js',
+        test: 'bun test',
+        typecheck: 'tsc --noEmit',
+      },
+      dependencies: {
+        'gravito-core': 'workspace:*',
+        '@gravito/enterprise': 'workspace:*',
+        ...(context.withSpectrum ? { '@gravito/spectrum': 'workspace:*' } : {}),
+      },
+      devDependencies: {
+        '@types/bun': 'latest',
+        typescript: '^5.0.0',
+      },
+    }
+
+    return JSON.stringify(pkg, null, 2)
   }
 }
