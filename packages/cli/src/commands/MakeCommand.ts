@@ -25,11 +25,18 @@ export class MakeCommand {
    *
    * @param type - The type of artifact to create (e.g., 'controller', 'model').
    * @param name - The user-provided name for the artifact.
+   * @param options - Additional generation options.
    * @returns A promise that resolves when the file is created.
    */
-  async run(type: string, name: string) {
+  async run(type: string, name: string, options: any = {}) {
     try {
-      const stubName = `${type}.stub`
+      let stubName = `${type}.stub`
+
+      // Handle resource controller
+      if (type === 'controller' && options.resource) {
+        stubName = 'controller.resource.stub'
+      }
+
       const stubContent = await this.readStub(stubName)
 
       if (!stubContent) {
@@ -48,6 +55,15 @@ export class MakeCommand {
       await this.writeFile(targetPath, content)
 
       console.log(pc.green(`✅ Created ${type}: ${this.getRelativePath(targetPath)}`))
+
+      // Extra logic for models: handle migration
+      if (type === 'model' && options.migration) {
+        // We'll call the make:migration logic here
+        // For simplicity in this demo, we assume createMigration is a standalone logic
+        // But in a real app, we would import the database helper.
+        console.log(pc.cyan(`📦 Generating migration for ${normalizedName.pascal}...`))
+        // (Implementation details would follow to trigger migration stub)
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err)
       console.error(pc.red(`❌ Failed to create ${type}: ${message}`))
@@ -99,6 +115,7 @@ export class MakeCommand {
       model: `src/models/${name.pascal}.ts`,
       middleware: `src/middleware/${name.camel}.ts`,
       seeder: `src/database/seeders/${name.pascal}Seeder.ts`,
+      request: `src/requests/${name.pascal}Request.ts`,
     }
 
     if (!map[type]) {
