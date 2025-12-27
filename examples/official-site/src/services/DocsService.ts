@@ -359,6 +359,7 @@ export class DocsService {
             storage: '儲存與檔案',
             nebula_storage: 'Nebula Storage',
             cache_queue: '快取與排程',
+            plasma_redis: 'Plasma Redis',
             stasis_cache: 'Stasis Cache',
             seo: 'SEO 與 Sitemap',
             frontend: '前端整合',
@@ -445,6 +446,7 @@ export class DocsService {
             storage: 'Storage & Files',
             nebula_storage: 'Nebula Storage',
             cache_queue: 'Cache & Queue',
+            plasma_redis: 'Plasma Redis',
             stasis_cache: 'Stasis Cache',
             seo: 'SEO & Sitemap',
             frontend: 'Frontend Integration',
@@ -619,6 +621,7 @@ export class DocsService {
         title: trans.cache_queue,
         path: '#',
         children: [
+          { title: trans.plasma_redis, path: `${prefix}/guide/plasma-redis` },
           { title: trans.stasis_cache, path: `${prefix}/guide/stasis-cache` },
           { title: trans.queues, path: `${prefix}/guide/queues` },
         ],
