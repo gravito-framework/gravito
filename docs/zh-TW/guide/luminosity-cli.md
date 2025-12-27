@@ -7,6 +7,12 @@ description: Sitemap 產生與維護的命令列工具。
 
 Luminosity CLI（`@gravito/luminosity-cli`）提供 Sitemap 產生與維護的命令列工具。
 
+## 特色
+
+- CLI 方式產生 Sitemap
+- 快取管理與更新
+- 可用於 CI/CD 部署流程
+
 ## 安裝
 
 ```bash
@@ -21,6 +27,13 @@ gravito-seo generate
 
 # 清除快取
 gravito-seo flush
+```
+
+## CI/CD 範例
+
+```yaml
+- name: Generate sitemap
+  run: gravito-seo generate
 ```
 
 ## 使用說明
