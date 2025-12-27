@@ -87,28 +87,32 @@ export class RedisDriver implements DriverContract {
     if (!this.client) {
       await this.connect()
     }
-    return this.client!.get(key)
+    if (!this.client) throw new ConnectionError('Redis client not available')
+    return this.client.get(key)
   }
 
   async set(key: string, value: string | number): Promise<'OK'> {
     if (!this.client) {
       await this.connect()
     }
-    return this.client!.set(key, value)
+    if (!this.client) throw new ConnectionError('Redis client not available')
+    return this.client.set(key, value)
   }
 
   async setex(key: string, seconds: number, value: string | number): Promise<'OK'> {
     if (!this.client) {
       await this.connect()
     }
-    return this.client!.setex(key, seconds, value)
+    if (!this.client) throw new ConnectionError('Redis client not available')
+    return this.client.setex(key, seconds, value)
   }
 
   async del(key: string): Promise<number> {
     if (!this.client) {
       await this.connect()
     }
-    return this.client!.del(key)
+    if (!this.client) throw new ConnectionError('Redis client not available')
+    return this.client.del(key)
   }
 
   /**
