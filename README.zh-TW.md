@@ -55,7 +55,8 @@ Gravito 提供了豐富的官方 Orbit 模組，所有模組皆為可插拔設�
 | 套件 | 對應名稱 | 功能描述 | 狀態 |
 |---|---|---|---|
 | `gravito-core` | **PlanetCore** | 極輕量微內核，提供 Hook 與生命週期管理。 | ✅ Stable |
-| `@gravito/orbit-db` | **Orbit** | 基於 Drizzle ORM 的資料庫層，提供遷移與種子系統。 | ✅ Stable |
+| `@gravito/atlas` | **Atlas** | 基於 Active Record 模式的資料庫 ORM，提供遷移與種子系統。 | ✅ Stable |
+| `@gravito/spectrum` | **Spectrum** | 即時除錯儀表板，監控 SQL 查詢、日誌與 HTTP 流量。 | ✅ Beta |
 | `@gravito/sentinel` | **Sentinel** | 現代化身份驗證軌道 (JWT/Session)。 | ✅ Alpha |
 | `@gravito/nebula` | **Nebula** | 檔案儲存與 CDN 整合 (Local/S3/R2)。 | ✅ Beta |
 | `@gravito/stasis` | **Stasis** | 多層快取系統 (Memory/Redis)。 | ✅ Stable |

@@ -71,6 +71,7 @@ Gravito provides a rich set of official packages, all designed to be completely 
 | `@gravito/sentinel` | **Sentinel** | Modern Authentication Orbit (JWT/Session/Guards). | ✅ Alpha |
 | `@gravito/fortify` | **Fortify** | Complete Auth UI scaffolding (Login/Register/Reset). | ✅ Alpha |
 | `@gravito/nebula` | **Nebula** | File Storage & CDN Integration (Local/S3/R2). | ✅ Beta |
+| `@gravito/spectrum` | **Spectrum** | Real-time debug dashboard for monitoring SQL, logs, and HTTP. | ✅ Beta |
 | `@gravito/stasis` | **Stasis** | Multi-layer Cache System (Memory/Redis). | ✅ Stable |
 | `@gravito/prism` | **Prism** | View Engine with Image Optimization & Edge Templates. | ✅ Stable |
 | `@gravito/luminosity` | **Luminosity** | Enterprise SEO Engine (Sitemaps/Meta/Robots). | ✅ Stable |
