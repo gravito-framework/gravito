@@ -2,32 +2,58 @@
  * @gravito/spectrum - SpectrumOrbit
  */
 
-import type { GravitoMiddleware, GravitoOrbit, Logger, PlanetCore } from 'gravito-core'
-import { collector } from './collectors/DataCollector'
+import type {
+  GravitoContext,
+  GravitoMiddleware,
+  GravitoOrbit,
+  Logger,
+  PlanetCore,
+} from 'gravito-core'
+import { MemoryStorage } from './storage/MemoryStorage'
+import type { SpectrumStorage } from './storage/types'
 import type { CapturedLog, CapturedRequest } from './types'
 
 export interface SpectrumConfig {
   path?: string
   maxItems?: number
   enabled?: boolean
+  storage?: SpectrumStorage
+  /**
+   * Authorization gate. Return true to allow access.
+   */
+  gate?: (c: GravitoContext) => boolean | Promise<boolean>
 }
 
 export class SpectrumOrbit implements GravitoOrbit {
   readonly name = 'spectrum'
-  private config: Required<SpectrumConfig>
+  private config: Required<Pick<SpectrumConfig, 'path' | 'maxItems' | 'enabled'>> & {
+    storage: SpectrumStorage
+    gate?: SpectrumConfig['gate']
+  }
+
+  // Singleton instance for global access (e.g. from hooks)
+  private static instance: SpectrumOrbit
 
   constructor(config: SpectrumConfig = {}) {
     this.config = {
       path: config.path || '/gravito/spectrum',
       maxItems: config.maxItems || 100,
       enabled: config.enabled !== undefined ? config.enabled : true,
+      storage: config.storage || new MemoryStorage(),
+      gate: config.gate,
     }
+    SpectrumOrbit.instance = this
+  }
+
+  static getStorage(): SpectrumStorage {
+    return SpectrumOrbit.instance?.config.storage
   }
 
   async install(core: PlanetCore): Promise<void> {
-    if (!this.config.enabled) {
-      return
-    }
+    if (!this.config.enabled) return
+
+    // Initialize Storage
+    await this.config.storage.init()
 
     // 1. Setup Data Collection
     this.setupHttpCollection(core)
@@ -42,24 +68,12 @@ export class SpectrumOrbit implements GravitoOrbit {
 
   private setupDatabaseCollection(core: PlanetCore) {
     // Dynamically check if Atlas is available and try to hook into it
-    // We use a try-catch and dynamic check to avoid hard dependency issues if Atlas is not used
     try {
-      // Try to find Connection class from @gravito/atlas if it's loaded
-      // In a monorepo or standard install, it might be available globally or via require
-      // For now, we can check if DB is initialized or if we can import it.
-      // Since this is a plugin, we can try to look it up in the global scope if it registers itself,
-      // or just try to import it.
-
-      // Better way: Check if core has 'db' service or similar
-      // But Atlas doesn't necessarily register itself to core automatically.
-
-      // Let's use a more generic approach: try to import @gravito/atlas
-      // @ts-expect-error
       import('@gravito/atlas')
         .then((atlas) => {
           if (atlas?.Connection) {
             atlas.Connection.queryListeners.push((query: any) => {
-              collector.addQuery({
+              this.config.storage.storeQuery({
                 id: crypto.randomUUID(),
                 ...query,
               })
@@ -67,7 +81,7 @@ export class SpectrumOrbit implements GravitoOrbit {
             core.logger.info('[Spectrum] Database query collection enabled')
           }
         })
-        .catch(() => {
+        .catch((_e) => {
           // Atlas not found, skip
         })
     } catch (_e) {
@@ -77,7 +91,7 @@ export class SpectrumOrbit implements GravitoOrbit {
 
   private setupHttpCollection(core: PlanetCore) {
     const middleware: GravitoMiddleware = async (c, next) => {
-      // Skip spectrum's own API calls to avoid infinite loops/noise
+      // Skip spectrum's own API calls
       if (c.req.path.startsWith(this.config.path)) {
         await next()
         return undefined
@@ -90,7 +104,6 @@ export class SpectrumOrbit implements GravitoOrbit {
 
       const duration = performance.now() - startTime
 
-      // Get status and headers from either the returned response or context
       const finalRes = res || ((c as any).res as Response | undefined)
 
       const request: CapturedRequest = {
@@ -107,7 +120,7 @@ export class SpectrumOrbit implements GravitoOrbit {
         responseHeaders: finalRes ? Object.fromEntries((finalRes.headers as any).entries()) : {},
       }
 
-      collector.addRequest(request)
+      this.config.storage.storeRequest(request)
       return res
     }
 
@@ -147,33 +160,96 @@ export class SpectrumOrbit implements GravitoOrbit {
       args,
       timestamp: Date.now(),
     }
-    collector.addLog(log)
+    this.config.storage.storeLog(log)
   }
 
   private registerRoutes(core: PlanetCore) {
     const router = core.router
     const apiPath = `${this.config.path}/api`
 
-    router.get(`${apiPath}/requests`, (c) => {
-      return c.json(collector.getRequests())
-    })
+    // Apply auth middleware to API and UI routes manually inside handlers or grouping?
+    // Gravito Router doesn't support easy "grouping" for dynamically registered routes without creating a new group instance.
+    // We'll wrap the handler.
 
-    router.get(`${apiPath}/logs`, (c) => {
-      return c.json(collector.getLogs())
-    })
+    const wrap = (handler: (c: any) => any) => {
+      return async (c: any) => {
+        if (this.config.gate) {
+          const allowed = await this.config.gate(c)
+          if (!allowed) return c.json({ error: 'Unauthorized' }, 403)
+        }
+        return handler(c)
+      }
+    }
 
-    router.get(`${apiPath}/queries`, (c) => {
-      return c.json(collector.getQueries())
-    })
+    router.get(
+      `${apiPath}/requests`,
+      wrap(async (c) => {
+        return c.json(await this.config.storage.getRequests())
+      })
+    )
 
-    router.post(`${apiPath}/clear`, (c) => {
-      collector.clear()
-      return c.json({ success: true })
-    })
+    router.get(
+      `${apiPath}/logs`,
+      wrap(async (c) => {
+        return c.json(await this.config.storage.getLogs())
+      })
+    )
+
+    router.get(
+      `${apiPath}/queries`,
+      wrap(async (c) => {
+        return c.json(await this.config.storage.getQueries())
+      })
+    )
+
+    router.post(
+      `${apiPath}/clear`,
+      wrap(async (c) => {
+        await this.config.storage.clear()
+        return c.json({ success: true })
+      })
+    )
+
+    // Replay endpoint (Backend logic)
+    router.post(
+      `${apiPath}/replay/:id`,
+      wrap(async (c) => {
+        const id = c.req.param('id')
+        if (!id) return c.json({ error: 'ID required' }, 400)
+
+        const req = await this.config.storage.getRequest(id)
+        if (!req) return c.json({ error: 'Request not found' }, 404)
+
+        // Execute replay
+        try {
+          // Construct a new request based on captured data
+          const replayReq = new Request(req.url, {
+            method: req.method,
+            headers: req.requestHeaders,
+            // Body logic would be needed here (if captured)
+          })
+
+          // Use core.fetch to dispatch internally without networking overhead if possible,
+          // or just fetch() to hit localhost.
+          // core.adapter.fetch is better for internal dispatch.
+          const res = await core.adapter.fetch(replayReq)
+
+          return c.json({
+            success: true,
+            status: res.status,
+            statusText: res.statusText,
+          })
+        } catch (e: any) {
+          return c.json({ success: false, error: e.message }, 500)
+        }
+      })
+    )
 
     // Dashboard UI
-    router.get(this.config.path, (c) => {
-      return c.html(`
+    router.get(
+      this.config.path,
+      wrap((c) => {
+        return c.html(`
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -223,7 +299,10 @@ export class SpectrumOrbit implements GravitoOrbit {
                           <span :class="getStatusClass(req.status)" class="font-medium">{{ req.status }}</span>
                         </td>
                         <td class="p-3 text-slate-400">{{ req.duration.toFixed(2) }}ms</td>
-                        <td class="p-3 text-slate-500 text-xs">{{ formatTime(req.startTime) }}</td>
+                        <td class="p-3 text-slate-500 text-xs">
+                          {{ formatTime(req.startTime) }}
+                          <button @click="replayRequest(req.id)" class="ml-2 text-sky-500 hover:text-sky-400 hover:underline" title="Replay Request">↺</button>
+                        </td>
                       </tr>
                       <tr v-if="requests.length === 0">
                         <td colspan="5" class="p-8 text-center text-slate-500 italic">No requests captured yet.</td>
@@ -308,6 +387,20 @@ export class SpectrumOrbit implements GravitoOrbit {
                     this.fetchData();
                   }
                 },
+                async replayRequest(id) {
+                   try {
+                     const res = await fetch('${apiPath}/replay/' + id, { method: 'POST' });
+                     const data = await res.json();
+                     if (data.success) {
+                       alert('Replay successful! Status: ' + data.status);
+                       this.fetchData();
+                     } else {
+                       alert('Replay failed: ' + data.error);
+                     }
+                   } catch (e) {
+                     alert('Replay failed: ' + e.message);
+                   }
+                },
                 formatTime(ts) {
                   return new Date(ts).toLocaleTimeString();
                 },
@@ -342,6 +435,7 @@ export class SpectrumOrbit implements GravitoOrbit {
         </body>
         </html>
       `)
-    })
+      })
+    )
   }
 }

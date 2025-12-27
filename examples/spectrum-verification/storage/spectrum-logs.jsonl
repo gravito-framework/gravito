@@ -1,0 +1,5 @@
+{"id":"15d6e783-f5fa-4ba6-80df-7722e61bd9ec","level":"info","message":"[Spectrum] Debug Dashboard initialized at /gravito/spectrum","args":[],"timestamp":1766801966039}
+{"id":"df8e12b3-56fe-4967-8bb8-acb29f86c1bc","level":"info","message":"[Spectrum] Database query collection enabled","args":[],"timestamp":1766801966040}
+{"id":"6e8148b3-b162-4b4c-8811-f909e531bc5e","level":"info","message":"Ready to liftoff on port 3000 🚀","args":[],"timestamp":1766801966041}
+{"id":"acbc7dae-8372-40d6-a50a-c66478b8ca14","level":"info","message":"Hello route accessed","args":[],"timestamp":1766801966048}
+{"id":"d90daf7d-8814-4f8f-9f89-1d5e0478c5e8","level":"info","message":"Hello route accessed","args":[],"timestamp":1766801966054}
