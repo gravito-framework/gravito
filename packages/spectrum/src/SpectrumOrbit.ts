@@ -29,14 +29,12 @@ export interface SpectrumConfig {
 }
 
 export class SpectrumOrbit implements GravitoOrbit {
+  static instance: SpectrumOrbit | undefined
   readonly name = 'spectrum'
   private config: Required<Pick<SpectrumConfig, 'path' | 'maxItems' | 'enabled' | 'sampleRate'>> & {
     storage: SpectrumStorage
     gate?: SpectrumConfig['gate']
   }
-
-  // Singleton instance
-  private static instance: SpectrumOrbit
 
   // Event listeners for SSE
   private listeners: Set<(data: string) => void> = new Set()
@@ -56,7 +54,9 @@ export class SpectrumOrbit implements GravitoOrbit {
   }
 
   private shouldCapture(): boolean {
-    if (this.config.sampleRate >= 1.0) return true
+    if (this.config.sampleRate >= 1.0) {
+      return true
+    }
     return Math.random() < this.config.sampleRate
   }
 
@@ -69,7 +69,9 @@ export class SpectrumOrbit implements GravitoOrbit {
   }
 
   async install(core: PlanetCore): Promise<void> {
-    if (!this.config.enabled) return
+    if (!this.config.enabled) {
+      return
+    }
 
     // Initialize Storage
     await this.config.storage.init()
@@ -92,7 +94,9 @@ export class SpectrumOrbit implements GravitoOrbit {
         .then((atlas) => {
           if (atlas?.Connection) {
             atlas.Connection.queryListeners.push((query: any) => {
-              if (!this.shouldCapture()) return
+              if (!this.shouldCapture()) {
+                return
+              }
               const data = {
                 id: crypto.randomUUID(),
                 ...query,
@@ -126,7 +130,9 @@ export class SpectrumOrbit implements GravitoOrbit {
 
       const duration = performance.now() - startTime
 
-      if (!this.shouldCapture()) return res
+      if (!this.shouldCapture()) {
+        return res
+      }
 
       const finalRes = res || ((c as any).res as Response | undefined)
 
@@ -178,7 +184,9 @@ export class SpectrumOrbit implements GravitoOrbit {
   }
 
   private captureLog(level: any, message: string, args: any[]) {
-    if (!this.shouldCapture()) return
+    if (!this.shouldCapture()) {
+      return
+    }
     const log: CapturedLog = {
       id: crypto.randomUUID(),
       level,
@@ -203,12 +211,14 @@ export class SpectrumOrbit implements GravitoOrbit {
         // 1. User defined gate
         if (this.config.gate) {
           const allowed = await this.config.gate(c)
-          if (!allowed) return c.json({ error: 'Unauthorized' }, 403)
+          if (!allowed) {
+            return c.json({ error: 'Unauthorized' }, 403)
+          }
         }
         // 2. Default production protection (if no gate defined)
         else if (process.env.NODE_ENV === 'production') {
           // Allow only if request is local
-          const ip = c.req.header('x-forwarded-for') || c.req.header('host')
+          const _ip = c.req.header('x-forwarded-for') || c.req.header('host')
           // This is a naive check, but better than nothing.
           // Real security should be done via config.gate
           // For now, we log a warning once.
@@ -262,7 +272,7 @@ export class SpectrumOrbit implements GravitoOrbit {
 
     router.get(
       `${apiPath}/events`,
-      wrap((c) => {
+      wrap((_c) => {
         const { readable, writable } = new TransformStream()
 
         const writer = writable.getWriter()
@@ -314,10 +324,14 @@ export class SpectrumOrbit implements GravitoOrbit {
       `${apiPath}/replay/:id`,
       wrap(async (c) => {
         const id = c.req.param('id')
-        if (!id) return c.json({ error: 'ID required' }, 400)
+        if (!id) {
+          return c.json({ error: 'ID required' }, 400)
+        }
 
         const req = await this.config.storage.getRequest(id)
-        if (!req) return c.json({ error: 'Request not found' }, 404)
+        if (!req) {
+          return c.json({ error: 'Request not found' }, 404)
+        }
 
         // Execute replay
         try {
