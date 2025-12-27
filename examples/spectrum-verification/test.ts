@@ -85,10 +85,39 @@ const found = savedRequests.find((r) => r.id === capturedReq.id)
 if (found) {
   console.log('✅ Persistence verified!')
 } else {
-  console.error('❌ Persistence failed: Data not found in new storage instance')
-  console.error(
-    'Saved Requests IDs:',
-    savedRequests.map((r) => r.id)
-  )
+  console.error('❌ Persistence failed: Request ID not found in saved data')
   process.exit(1)
 }
+
+// Verify SSE (Real-time)
+console.log('Verifying Real-time SSE...')
+const sseRes = await fetch(new Request('http://localhost/gravito/spectrum/api/events'))
+
+if (sseRes.headers.get('Content-Type') !== 'text/event-stream') {
+  console.error('❌ SSE failed: Invalid Content-Type', sseRes.headers.get('Content-Type'))
+  process.exit(1)
+}
+
+const reader = sseRes.body?.getReader()
+if (!reader) {
+  console.error('❌ SSE failed: No body reader')
+  process.exit(1)
+}
+
+// Trigger a new request while listening
+console.log('Triggering new request for SSE...')
+fetch(new Request('http://localhost/hello'))
+
+const { value } = await reader.read()
+const text = new TextDecoder().decode(value)
+console.log('SSE Received:', text)
+
+if (text.includes('data:') && (text.includes('request') || text.includes('log'))) {
+  console.log('✅ SSE Push verified!')
+} else {
+  console.error('❌ SSE Push failed: Unexpected data format', text)
+  process.exit(1)
+}
+
+console.log('--- Spectrum Tier 2 Verification Complete! ---')
+process.exit(0)

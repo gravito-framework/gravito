@@ -31,8 +31,11 @@ export class SpectrumOrbit implements GravitoOrbit {
     gate?: SpectrumConfig['gate']
   }
 
-  // Singleton instance for global access (e.g. from hooks)
+  // Singleton instance
   private static instance: SpectrumOrbit
+
+  // Event listeners for SSE
+  private listeners: Set<(data: string) => void> = new Set()
 
   constructor(config: SpectrumConfig = {}) {
     this.config = {
@@ -45,8 +48,11 @@ export class SpectrumOrbit implements GravitoOrbit {
     SpectrumOrbit.instance = this
   }
 
-  static getStorage(): SpectrumStorage {
-    return SpectrumOrbit.instance?.config.storage
+  private broadcast(type: 'request' | 'log' | 'query', data: any) {
+    const payload = JSON.stringify({ type, data })
+    for (const listener of this.listeners) {
+      listener(payload)
+    }
   }
 
   async install(core: PlanetCore): Promise<void> {
@@ -73,10 +79,12 @@ export class SpectrumOrbit implements GravitoOrbit {
         .then((atlas) => {
           if (atlas?.Connection) {
             atlas.Connection.queryListeners.push((query: any) => {
-              this.config.storage.storeQuery({
+              const data = {
                 id: crypto.randomUUID(),
                 ...query,
-              })
+              }
+              this.config.storage.storeQuery(data)
+              this.broadcast('query', data)
             })
             core.logger.info('[Spectrum] Database query collection enabled')
           }
@@ -121,6 +129,7 @@ export class SpectrumOrbit implements GravitoOrbit {
       }
 
       this.config.storage.storeRequest(request)
+      this.broadcast('request', request)
       return res
     }
 
@@ -161,6 +170,7 @@ export class SpectrumOrbit implements GravitoOrbit {
       timestamp: Date.now(),
     }
     this.config.storage.storeLog(log)
+    this.broadcast('log', log)
   }
 
   private registerRoutes(core: PlanetCore) {
@@ -206,7 +216,59 @@ export class SpectrumOrbit implements GravitoOrbit {
       `${apiPath}/clear`,
       wrap(async (c) => {
         await this.config.storage.clear()
+
         return c.json({ success: true })
+      })
+    )
+
+    // SSE Events Endpoint
+
+    router.get(
+      `${apiPath}/events`,
+      wrap((c) => {
+        const { readable, writable } = new TransformStream()
+
+        const writer = writable.getWriter()
+
+        const encoder = new TextEncoder()
+
+        const send = (payload: string) => {
+          try {
+            writer.write(encoder.encode(`data: ${payload}\n\n`))
+          } catch (_e) {
+            // Listener probably disconnected
+
+            this.listeners.delete(send)
+          }
+        }
+
+        this.listeners.add(send)
+
+        // Keep-alive heartbeat every 30 seconds
+
+        const heartbeat = setInterval(() => {
+          try {
+            writer.write(encoder.encode(': heartbeat\n\n'))
+          } catch (_e) {
+            clearInterval(heartbeat)
+
+            this.listeners.delete(send)
+          }
+        }, 30000)
+
+        // Handle disconnection if the adapter supports it,
+
+        // or rely on writer.write failure.
+
+        return new Response(readable, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+
+            'Cache-Control': 'no-cache',
+
+            Connection: 'keep-alive',
+          },
+        })
       })
     )
 
@@ -264,12 +326,35 @@ export class SpectrumOrbit implements GravitoOrbit {
         <body class="bg-slate-950 text-slate-200 min-h-screen">
           <div id="app" v-cloak class="p-4 md:p-8">
             <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-              <h1 class="text-2xl font-bold text-sky-400">Gravito <span class="text-white">Spectrum</span></h1>
+              <div class="flex items-center gap-4">
+                <h1 class="text-2xl font-bold text-sky-400">Gravito <span class="text-white">Spectrum</span></h1>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider animate-pulse" v-if="connected">Live</span>
+              </div>
               <div class="flex gap-4">
                 <button @click="clearData" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 rounded text-sm font-medium transition">Clear Data</button>
                 <button @click="fetchData" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 rounded text-sm font-medium transition">Refresh</button>
               </div>
             </header>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+                <div class="text-slate-500 text-xs uppercase font-semibold">Total Requests</div>
+                <div class="text-2xl font-bold text-white">{{ stats.totalRequests }}</div>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+                <div class="text-slate-500 text-xs uppercase font-semibold">Avg Latency</div>
+                <div class="text-2xl font-bold text-sky-400">{{ stats.avgLatency.toFixed(1) }}ms</div>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+                <div class="text-slate-500 text-xs uppercase font-semibold">Error Rate</div>
+                <div class="text-2xl font-bold" :class="stats.errorRate > 5 ? 'text-rose-500' : 'text-emerald-500'">{{ stats.errorRate.toFixed(1) }}%</div>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+                <div class="text-slate-500 text-xs uppercase font-semibold">DB Queries</div>
+                <div class="text-2xl font-bold text-emerald-400">{{ queries.length }}</div>
+              </div>
+            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <!-- Requests Section -->
@@ -359,14 +444,52 @@ export class SpectrumOrbit implements GravitoOrbit {
                 return {
                   requests: [],
                   logs: [],
-                  queries: []
+                  queries: [],
+                  connected: false,
+                  eventSource: null
+                }
+              },
+              computed: {
+                stats() {
+                  const total = this.requests.length;
+                  if (total === 0) return { totalRequests: 0, avgLatency: 0, errorRate: 0 };
+                  
+                  const errors = this.requests.filter(r => r.status >= 400).length;
+                  const latencySum = this.requests.reduce((sum, r) => sum + r.duration, 0);
+                  
+                  return {
+                    totalRequests: total,
+                    avgLatency: latencySum / total,
+                    errorRate: (errors / total) * 100
+                  };
                 }
               },
               mounted() {
                 this.fetchData();
-                setInterval(this.fetchData, 3000); // Auto-refresh every 3s
+                this.initRealtime();
               },
               methods: {
+                initRealtime() {
+                  this.eventSource = new EventSource('${apiPath}/events');
+                  this.eventSource.onopen = () => this.connected = true;
+                  this.eventSource.onerror = () => {
+                    this.connected = false;
+                    // EventSource automatically reconnects
+                  };
+                  this.eventSource.onmessage = (e) => {
+                    const { type, data } = JSON.parse(e.data);
+                    if (type === 'request') {
+                      this.requests.unshift(data);
+                      if (this.requests.length > 100) this.requests.pop();
+                    } else if (type === 'log') {
+                      this.logs.unshift(data);
+                      if (this.logs.length > 100) this.logs.pop();
+                    } else if (type === 'query') {
+                      this.queries.unshift(data);
+                      if (this.queries.length > 100) this.queries.pop();
+                    }
+                  };
+                },
                 async fetchData() {
                   try {
                     const [reqs, logs, queries] = await Promise.all([
