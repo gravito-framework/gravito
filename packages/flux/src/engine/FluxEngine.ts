@@ -237,6 +237,9 @@ export class FluxEngine {
   private resetHistoryFrom(ctx: WorkflowContext, startIndex: number): void {
     for (let i = startIndex; i < ctx.history.length; i++) {
       const entry = ctx.history[i]
+      if (!entry) {
+        continue
+      }
       entry.status = 'pending'
       entry.startedAt = undefined
       entry.completedAt = undefined
