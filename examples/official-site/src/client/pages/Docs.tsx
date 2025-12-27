@@ -428,7 +428,7 @@ export default function Docs() {
                                 prose-h3:text-2xl prose-h3:text-white/90 prose-h3:mt-16 prose-h3:mb-6 prose-h3:flex prose-h3:items-center prose-h3:gap-3
                                 prose-a:font-bold prose-a:text-singularity hover:prose-a:text-cyan-300 transition-colors
                                 prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-8 prose-p:font-medium
-                                prose-pre:bg-transparent prose-pre:border-0 prose-pre:rounded-2xl prose-pre:shadow-none
+                                prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:shadow-lg prose-pre:p-6
                                 prose-strong:text-white prose-strong:font-black
                                 prose-hr:border-white/5 prose-hr:my-20
                                 prose-blockquote:border-singularity prose-blockquote:bg-singularity/5 prose-blockquote:py-2 prose-blockquote:px-8 prose-blockquote:rounded-r-2xl prose-blockquote:italic prose-blockquote:text-gray-300
