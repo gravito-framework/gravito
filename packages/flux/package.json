@@ -36,7 +36,8 @@
     "README.md",
     "README.zh-TW.md",
     "bin",
-    "dev"
+    "dev",
+    "assets"
   ],
   "scripts": {
     "build": "bun run build.ts",

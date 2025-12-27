@@ -8,6 +8,19 @@
 - **可靠性與可觀測**：狀態機 + 重試 + trace sink，讓流程可追蹤、可審計、可恢復。
 - **可抽離與可複用**：Flux 可獨立於框架使用，讓 workflow 本身成為可移植的 workflow as code。
 
+## API 語意（input / step / commit）
+
+- `input<T>()`：定義輸入資料型別，提供型別推斷與編輯器提示。
+- `step(name, handler, options)`：一般步驟，會依序執行，可設定重試/逾時/條件。
+- `commit(name, handler, options)`：具副作用的步驟（寫庫、扣款、通知），在重播或重跑時語意更明確。
+
+## 最佳實務與注意事項
+
+- **儲存介面**：Memory 僅適合開發與測試，正式環境請使用持久化 storage。
+- **版本變更**：workflow 定義改動時，既有流程的重跑需評估相容性。
+- **重試策略**：外部依賴錯誤才重試，業務邏輯錯誤建議直接 fail。
+- **Step vs Commit**：有副作用的操作應放在 commit，確保重播一致性。
+
 ## 核心特色
 
 - **純狀態機模型** - 以明確狀態描述流程，讓每一步清晰可控
@@ -155,6 +168,68 @@ const first = await engine.execute(flow, { orderId: 'ORD-001' })
 await engine.retryStep(flow, first.id, 'charge')
 ```
 
+## 與隊列搭配的應用
+
+隊列消費者只負責觸發 Flux，Flux 會把任務拆成多步驟 workflow。當某一步失敗時，只重試該步，不會重跑已完成的步驟。
+
+```typescript
+queue.on('message', async (job) => {
+  await flux.execute(orderFlow, job.data)
+})
+```
+
+搭配持久化 storage，已完成的步驟會被保留，避免重複執行。
+
+### Kafka 完整案例（事件 → 消費者 → Flux）
+
+**1) 事件觸發：把任務丟進 Kafka**
+
+```typescript
+import { Kafka } from 'kafkajs'
+
+const kafka = new Kafka({ clientId: 'orders', brokers: ['localhost:9092'] })
+const producer = kafka.producer()
+
+await producer.connect()
+await producer.send({
+  topic: 'order.created',
+  messages: [
+    { key: 'ORD-001', value: JSON.stringify({ orderId: 'ORD-001', userId: 'u_1' }) },
+  ],
+})
+```
+
+**2) 消費者接到任務後交給 Flux**
+
+```typescript
+import { Kafka } from 'kafkajs'
+import { createWorkflow, FluxEngine, MemoryStorage } from '@gravito/flux'
+
+const orderFlow = createWorkflow('order-flow')
+  .input<{ orderId: string; userId: string }>()
+  .step('validate', async (ctx) => {
+    ctx.data.validated = true
+  })
+  .step('reserve', async (ctx) => {
+    ctx.data.reserved = true
+  })
+  .commit('notify', async () => {})
+
+const flux = new FluxEngine({ storage: new MemoryStorage() })
+
+const kafka = new Kafka({ clientId: 'orders-worker', brokers: ['localhost:9092'] })
+const consumer = kafka.consumer({ groupId: 'order-workers' })
+
+await consumer.connect()
+await consumer.subscribe({ topic: 'order.created' })
+await consumer.run({
+  eachMessage: async ({ message }) => {
+    const payload = JSON.parse(message.value?.toString() ?? '{}')
+    await flux.execute(orderFlow, payload)
+  },
+})
+```
+
 ## 分支流程（多支點）
 
 ```typescript
@@ -189,6 +264,54 @@ const flow = createWorkflow('event-routing')
   })
 ```
 
+## 多節點任務（類似 n8n）
+
+```typescript
+const flow = createWorkflow('multi-node')
+  .input<{ type: 'email' | 'slack' | 'webhook'; payload: unknown }>()
+  .step('classify', async (ctx) => {
+    ctx.data.route = ctx.input.type
+  })
+  .step(
+    'send-email',
+    async (ctx) => {
+      await email.send(ctx.input.payload)
+    },
+    { when: (ctx) => ctx.data.route === 'email' }
+  )
+  .step(
+    'send-slack',
+    async (ctx) => {
+      await slack.send(ctx.input.payload)
+    },
+    { when: (ctx) => ctx.data.route === 'slack' }
+  )
+  .step(
+    'call-webhook',
+    async (ctx) => {
+      await webhook.post(ctx.input.payload)
+    },
+    { when: (ctx) => ctx.data.route === 'webhook' }
+  )
+  .commit('audit', async (ctx) => {
+    await audit.save(ctx.data)
+  })
+```
+
+<img
+  src="./assets/flux-branching.svg"
+  alt="Flux branching diagram"
+  style="max-width: 720px; width: 100%; height: auto; display: block; margin: 12px 0;"
+/>
+
+上圖對應 `when` 條件：只會走符合條件的分支，未符合者會被標記為 skipped。
+
+### 可執行分支範例
+
+```bash
+bun run examples/branching.ts
+```
+
 ## 本地開發視覺化
 
 ```typescript
@@ -213,6 +336,59 @@ bun run dev:viewer
 ## 企業級追蹤
 
 透過 `FluxTraceSink` 可以把事件流送到你自己的監控、排程或分析模組，建立完整的執行查詢、重播與告警能力。
+
+## 以微服務或 AWS Lambda 部署
+
+Flux 可抽離成無狀態 workflow runner。把 workflow 定義與 input 交給函式執行，再將狀態與 trace 寫入外部儲存即可：
+
+```typescript
+import { FluxEngine, JsonFileTraceSink, MemoryStorage, createWorkflow } from '@gravito/flux'
+
+const workflow = createWorkflow('lambda-flow')
+  .input<{ orderId: string }>()
+  .step('prepare', async (ctx) => {
+    ctx.data.ready = true
+  })
+  .commit('notify', async () => {})
+
+const engine = new FluxEngine({
+  storage: new MemoryStorage(),
+  trace: new JsonFileTraceSink({ path: '/tmp/flux-trace.ndjson', reset: false }),
+})
+
+export const handler = async (event: { orderId: string }) => {
+  const result = await engine.execute(workflow, { orderId: event.orderId })
+  return { status: result.status, id: result.id }
+}
+```
+
+### 其他雲端函式範例
+
+GCP Cloud Functions（HTTP，需安裝對應套件並確認最新版本）：
+
+```typescript
+import type { HttpFunction } from '@google-cloud/functions-framework'
+
+export const runFlux: HttpFunction = async (req, res) => {
+  const payload = req.body ?? {}
+  const result = await engine.execute(workflow, payload)
+  res.json({ status: result.status, id: result.id })
+}
+```
+
+Azure Functions（HTTP Trigger，需安裝對應套件並確認最新版本）：
+
+```typescript
+import type { AzureFunction, Context, HttpRequest } from '@azure/functions'
+
+const httpTrigger: AzureFunction = async (context: Context, req: HttpRequest) => {
+  const payload = req.body ?? {}
+  const result = await engine.execute(workflow, payload)
+  context.res = { status: 200, body: { status: result.status, id: result.id } }
+}
+
+export default httpTrigger
+```
 
 ## 儲存介面
 

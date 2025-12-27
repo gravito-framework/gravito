@@ -44,11 +44,24 @@ await engine.execute(onboarding, { userId: 'u_123' })
 - 狀態機模型讓每一步狀態清晰可控，重試機制可自動處理不穩定的外部依賴。
 - 事件 hooks 可在 stepStart/stepError 等時機掛載監控與告警。
 
+## API 語意（input / step / commit）
+
+- `input<T>()`：定義輸入資料型別，提供型別推斷與編輯器提示。
+- `step(name, handler, options)`：一般步驟，會依序執行，可設定重試/逾時/條件。
+- `commit(name, handler, options)`：具副作用的步驟（寫庫、扣款、通知），在重播或重跑時語意更明確，建議把會產生外部影響的操作放在 commit。
+
 ## 定位與價值
 
 - **工作流標準化**：在框架內用同一套模型描述流程，而不是每個服務自行手寫流程。
 - **可靠性與可觀測**：狀態機 + 重試 + trace sink，讓流程可追蹤、可審計、可恢復。
 - **可抽離與可複用**：Flux 可獨立於框架使用，讓 workflow 本身成為可移植的 workflow as code。
+
+## 最佳實務與注意事項
+
+- **儲存介面**：Memory 僅適合開發與測試，正式環境請使用持久化 storage，避免流程狀態遺失。
+- **版本變更**：若 workflow 定義改動（步驟新增/刪除/改名），既有流程的重跑需評估相容性。
+- **重試策略**：建議針對外部依賴錯誤重試；業務邏輯錯誤應直接 fail 以避免無限重試。
+- **Step vs Commit**：會產生副作用的操作（寫庫、扣款、通知）應放在 commit，確保重播語意一致。
 
 ## 進階範例
 
@@ -101,7 +114,7 @@ const imageFlow = createWorkflow('image-processing')
   })
 ```
 
-## 重試、逾時與條件執行
+## 重試與逾時
 
 重試與逾時是 Flux 的關鍵能力，讓流程即使面對不穩定服務也能自動恢復。
 
@@ -115,7 +128,24 @@ const flow = createWorkflow('notify')
     },
     {
       retries: 5,
-      timeout: 10_000,
+      timeout: 10_000, // 10 秒（TypeScript 數字分隔符寫法）
+    }
+  )
+```
+
+## 條件執行
+
+`when` 用來決定是否執行某個 step，條件不成立時會被標記為 `skipped`，不代表重試。
+
+```ts
+const flow = createWorkflow('notify')
+  .input<{ userId: string; enabled: boolean }>()
+  .step(
+    'send',
+    async (ctx) => {
+      await notifier.send(ctx.input.userId)
+    },
+    {
       when: (ctx) => ctx.input.enabled,
     }
   )
@@ -145,6 +175,69 @@ const engine = new FluxEngine({
 const first = await engine.execute(flow, { orderId: 'ORD-001' })
 // 修復外部依賴後重跑
 await engine.retryStep(flow, first.id, 'charge')
+```
+
+## 與隊列搭配的應用
+
+將隊列消費者作為「觸發器」，把工作交給 Flux 執行，可以把單一任務拆成多步驟的 workflow。當某一步失敗時，只會重試該步，而不是整個任務從頭重跑。
+
+```ts
+// Queue consumer
+queue.on('message', async (job) => {
+  await flux.execute(orderFlow, job.data)
+})
+```
+
+搭配持久化 storage，已完成的步驟會被保留，避免重複執行；這讓隊列重試與 workflow 重試的職責分離，流程更穩定、更可控。
+
+### Kafka 完整案例（事件 → 消費者 → Flux）
+
+**1) 事件觸發：把任務丟進 Kafka**
+
+```ts
+import { Kafka } from 'kafkajs'
+
+const kafka = new Kafka({ clientId: 'orders', brokers: ['localhost:9092'] })
+const producer = kafka.producer()
+
+await producer.connect()
+await producer.send({
+  topic: 'order.created',
+  messages: [
+    { key: 'ORD-001', value: JSON.stringify({ orderId: 'ORD-001', userId: 'u_1' }) },
+  ],
+})
+```
+
+**2) 消費者接到任務後交給 Flux**
+
+```ts
+import { Kafka } from 'kafkajs'
+import { createWorkflow, FluxEngine, MemoryStorage } from '@gravito/flux'
+
+const orderFlow = createWorkflow('order-flow')
+  .input<{ orderId: string; userId: string }>()
+  .step('validate', async (ctx) => {
+    ctx.data.validated = true
+  })
+  .step('reserve', async (ctx) => {
+    ctx.data.reserved = true
+  })
+  .commit('notify', async () => {})
+
+const flux = new FluxEngine({ storage: new MemoryStorage() })
+
+const kafka = new Kafka({ clientId: 'orders-worker', brokers: ['localhost:9092'] })
+const consumer = kafka.consumer({ groupId: 'order-workers' })
+
+await consumer.connect()
+await consumer.subscribe({ topic: 'order.created' })
+await consumer.run({
+  eachMessage: async ({ message }) => {
+    const payload = JSON.parse(message.value?.toString() ?? '{}')
+    await flux.execute(orderFlow, payload)
+  },
+})
 ```
 
 ## 事件 Hooks
@@ -207,6 +300,54 @@ const engine = new FluxEngine()
 await engine.execute(flow, { payload: eventPayload })
 ```
 
+### 多節點任務（類似 n8n）
+
+```ts
+const flow = createWorkflow('multi-node')
+  .input<{ type: 'email' | 'slack' | 'webhook'; payload: unknown }>()
+  .step('classify', async (ctx) => {
+    ctx.data.route = ctx.input.type
+  })
+  .step(
+    'send-email',
+    async (ctx) => {
+      await email.send(ctx.input.payload)
+    },
+    { when: (ctx) => ctx.data.route === 'email' }
+  )
+  .step(
+    'send-slack',
+    async (ctx) => {
+      await slack.send(ctx.input.payload)
+    },
+    { when: (ctx) => ctx.data.route === 'slack' }
+  )
+  .step(
+    'call-webhook',
+    async (ctx) => {
+      await webhook.post(ctx.input.payload)
+    },
+    { when: (ctx) => ctx.data.route === 'webhook' }
+  )
+  .commit('audit', async (ctx) => {
+    await audit.save(ctx.data)
+  })
+```
+
+<img
+  src="/static/image/flux-branching.svg"
+  alt="Flux branching diagram"
+  style="max-width: 720px; width: 100%; height: auto; display: block; margin: 12px 0;"
+/>
+
+上圖對應 `when` 條件：只會走符合條件的分支，未符合者會被標記為 skipped。
+
+### 可執行分支範例
+
+```bash
+bun run examples/branching.ts
+```
+
 ## 本地開發視覺化
 
 開發階段可啟用 Trace Sink，將事件流輸出為 NDJSON，並使用內建 CLI 開啟 Dev Viewer 直觀檢視流程走向與重試狀態。
@@ -233,6 +374,59 @@ bun run dev:viewer
 ## 企業級追蹤
 
 Flux 的 Trace Sink 可以接到你既有的觀測/排程模組，將 workflow 的事件流寫入資料庫或監控系統，後續可做執行查詢、重播、告警與監控面板。
+
+## 以微服務或 AWS Lambda 部署
+
+Flux 可以抽離成無狀態 workflow runner。把 workflow 定義與 input 交給函式執行，再將狀態與 trace 寫入外部儲存即可。以下為 Lambda 範例（示意）：
+
+```ts
+import { FluxEngine, JsonFileTraceSink, MemoryStorage, createWorkflow } from '@gravito/flux'
+
+const workflow = createWorkflow('lambda-flow')
+  .input<{ orderId: string }>()
+  .step('prepare', async (ctx) => {
+    ctx.data.ready = true
+  })
+  .commit('notify', async () => {})
+
+const engine = new FluxEngine({
+  storage: new MemoryStorage(), // 實務上可換成 DynamoDB / Postgres adapter
+  trace: new JsonFileTraceSink({ path: '/tmp/flux-trace.ndjson', reset: false }),
+})
+
+export const handler = async (event: { orderId: string }) => {
+  const result = await engine.execute(workflow, { orderId: event.orderId })
+  return { status: result.status, id: result.id }
+}
+```
+
+### 其他雲端函式範例
+
+GCP Cloud Functions（HTTP，需安裝對應套件並確認最新版本）：
+
+```ts
+import type { HttpFunction } from '@google-cloud/functions-framework'
+
+export const runFlux: HttpFunction = async (req, res) => {
+  const payload = req.body ?? {}
+  const result = await engine.execute(workflow, payload)
+  res.json({ status: result.status, id: result.id })
+}
+```
+
+Azure Functions（HTTP Trigger，需安裝對應套件並確認最新版本）：
+
+```ts
+import type { AzureFunction, Context, HttpRequest } from '@azure/functions'
+
+const httpTrigger: AzureFunction = async (context: Context, req: HttpRequest) => {
+  const payload = req.body ?? {}
+  const result = await engine.execute(workflow, payload)
+  context.res = { status: 200, body: { status: result.status, id: result.id } }
+}
+
+export default httpTrigger
+```
 
 ## 與 Gravito 整合
 
