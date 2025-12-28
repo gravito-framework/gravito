@@ -129,6 +129,21 @@ core.adapter.use(
 )
 ```
 
+也可提供函式以便依請求產生 CSP（例如 nonce）：
+
+```ts
+core.adapter.use(
+  '*',
+  securityHeaders({
+    contentSecurityPolicy: (c) => {
+      const nonce = crypto.randomUUID()
+      c.set('cspNonce', nonce)
+      return `default-src 'self'; script-src 'self' 'nonce-${nonce}'`
+    },
+  })
+)
+```
+
 ## Request Body 限制
 
 使用 `bodySizeLimit` 及早拒絕過大的請求。

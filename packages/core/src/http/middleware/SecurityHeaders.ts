@@ -7,7 +7,7 @@ export type HstsOptions = {
 }
 
 export type SecurityHeadersOptions = {
-  contentSecurityPolicy?: string | false
+  contentSecurityPolicy?: string | false | ((c: GravitoContext) => string | false)
   frameOptions?: string | false
   referrerPolicy?: string | false
   noSniff?: boolean
@@ -73,8 +73,12 @@ export function securityHeaders(options: SecurityHeadersOptions = {}): GravitoMi
     if (merged.crossOriginResourcePolicy) {
       setHeader(c, 'Cross-Origin-Resource-Policy', merged.crossOriginResourcePolicy)
     }
-    if (merged.contentSecurityPolicy) {
-      setHeader(c, 'Content-Security-Policy', merged.contentSecurityPolicy)
+    const cspValue =
+      typeof merged.contentSecurityPolicy === 'function'
+        ? merged.contentSecurityPolicy(c)
+        : merged.contentSecurityPolicy
+    if (cspValue) {
+      setHeader(c, 'Content-Security-Policy', cspValue)
     }
     if (merged.hsts) {
       setHeader(c, 'Strict-Transport-Security', buildHstsHeader(merged.hsts))

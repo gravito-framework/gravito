@@ -129,6 +129,21 @@ core.adapter.use(
 )
 ```
 
+You can also provide a function for per-request CSP (e.g., nonces):
+
+```ts
+core.adapter.use(
+  '*',
+  securityHeaders({
+    contentSecurityPolicy: (c) => {
+      const nonce = crypto.randomUUID()
+      c.set('cspNonce', nonce)
+      return `default-src 'self'; script-src 'self' 'nonce-${nonce}'`
+    },
+  })
+)
+```
+
 ## Request Body Limits
 
 Use `bodySizeLimit` to reject oversized requests early.
