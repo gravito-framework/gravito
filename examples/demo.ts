@@ -35,11 +35,12 @@ core.hooks.addFilter('api:response', async (data) => {
 })
 
 // 4. Static file serving
-core.app.use('/static/*', serveStatic({ root: './templates/basic/' }))
-core.app.get('/favicon.ico', serveStatic({ path: './templates/basic/static/favicon.ico' }))
+// Fix applied: use core.adapter.use instead of core.router.use
+core.adapter.use('/static/*', serveStatic({ root: './templates/basic/' }))
+core.router.get('/favicon.ico', serveStatic({ path: './templates/basic/static/favicon.ico' }))
 
 // 5. HTML Page Routes
-core.app.get('/', async (c) => {
+core.router.get('/', async (c) => {
   // Increment visitor counter using cache
   const cache = c.get('cache')
   const count = ((await cache.get<number>('visitor:count')) ?? 0) + 1
@@ -130,7 +131,7 @@ core.app.get('/', async (c) => {
 // 6. API Routes
 const startTime = Date.now()
 
-core.app.get('/api/health', async (c) => {
+core.router.get('/api/health', async (c) => {
   const response = await core.hooks.applyFilters('api:response', {
     status: 'healthy',
     service: core.config.get('APP_NAME'),
@@ -138,7 +139,7 @@ core.app.get('/api/health', async (c) => {
   return c.json(response)
 })
 
-core.app.get('/api/config', async (c) => {
+core.router.get('/api/config', async (c) => {
   const response = await core.hooks.applyFilters('api:response', {
     app: {
       name: core.config.get('APP_NAME'),
@@ -152,7 +153,7 @@ core.app.get('/api/config', async (c) => {
   return c.json(response)
 })
 
-core.app.get('/api/stats', async (c) => {
+core.router.get('/api/stats', async (c) => {
   const cache = c.get('cache')
   const uptimeMs = Date.now() - startTime
   const uptimeSeconds = Math.floor(uptimeMs / 1000)

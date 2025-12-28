@@ -8,18 +8,19 @@
     ],
     "scripts": {
         "build": "turbo run build",
-        "test": "turbo run test",
-        "test:ci": "turbo run test:ci",
+        "test": "turbo run test --filter='./packages/* '",
+        "test:ci": "turbo run test --filter='./packages/* '",
         "lint": "biome lint .",
         "format": "biome format --write .",
         "check": "biome check . --diagnostic-level=error",
-        "typecheck": "turbo run typecheck",
+        "typecheck": "turbo run typecheck --filter='./packages/* '",
         "version:check": "bun run scripts/check-versions.ts",
         "changeset": "changeset",
         "ci:version": "changeset version",
         "ci:publish": "changeset publish",
         "pub:beta": "changeset publish --tag beta",
-        "pub:snapshot": "changeset publish --tag snapshot"
+        "pub:snapshot": "changeset publish --tag snapshot",
+        "launchpad:up": "bun scripts/start-launchpad.ts"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.3.10",
