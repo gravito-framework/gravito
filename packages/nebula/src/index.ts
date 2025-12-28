@@ -1,5 +1,5 @@
 import { mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
+import { isAbsolute, join, normalize, resolve, sep } from 'node:path'
 import type { GravitoContext, GravitoNext, GravitoOrbit, PlanetCore } from 'gravito-core'
 
 export interface StorageProvider {
@@ -34,7 +34,7 @@ export class LocalStorageProvider implements StorageProvider {
    * @param data - The data to store.
    */
   async put(key: string, data: Blob | Buffer | string): Promise<void> {
-    const path = join(this.rootDir, key)
+    const path = this.resolveKeyPath(key)
     // Ensure dir exists
     const dir = path.substring(0, path.lastIndexOf('/'))
     if (dir && dir !== this.rootDir) {
@@ -50,7 +50,7 @@ export class LocalStorageProvider implements StorageProvider {
    * @returns A promise resolving to the file Blob or null if not found.
    */
   async get(key: string): Promise<Blob | null> {
-    const file = Bun.file(join(this.rootDir, key))
+    const file = Bun.file(this.resolveKeyPath(key))
     if (!(await file.exists())) {
       return null
     }
@@ -69,7 +69,7 @@ export class LocalStorageProvider implements StorageProvider {
     // Let's use simple node:fs for deletion.
     const fs = await import('node:fs/promises')
     try {
-      await fs.unlink(join(this.rootDir, key))
+      await fs.unlink(this.resolveKeyPath(key))
     } catch {
       // Ignore if not found
     }
@@ -82,7 +82,35 @@ export class LocalStorageProvider implements StorageProvider {
    * @returns The public URL string.
    */
   getUrl(key: string): string {
-    return `${this.baseUrl}/${key}`
+    const safeKey = this.normalizeKey(key)
+    return `${this.baseUrl}/${safeKey}`
+  }
+
+  private normalizeKey(key: string): string {
+    if (!key || key.includes('\0')) {
+      throw new Error('Invalid storage key.')
+    }
+    const normalized = normalize(key).replace(/^[/\\]+/, '')
+    if (
+      normalized === '.' ||
+      normalized === '..' ||
+      normalized.startsWith(`..${sep}`) ||
+      isAbsolute(normalized)
+    ) {
+      throw new Error('Invalid storage key.')
+    }
+    return normalized.replace(/\\/g, '/')
+  }
+
+  private resolveKeyPath(key: string): string {
+    const normalized = this.normalizeKey(key)
+    const root = resolve(this.rootDir)
+    const resolved = resolve(root, normalized)
+    const rootPrefix = root.endsWith(sep) ? root : `${root}${sep}`
+    if (!resolved.startsWith(rootPrefix) && resolved !== root) {
+      throw new Error('Invalid storage key.')
+    }
+    return resolved
   }
 }
 

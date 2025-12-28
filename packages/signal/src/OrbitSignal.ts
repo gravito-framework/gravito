@@ -63,7 +63,10 @@ export class OrbitSignal implements GravitoOrbit {
       this.config.transport = new MemoryTransport(this.devMailbox)
       core.logger.info('[OrbitSignal] Dev Mode Enabled: Emails will be intercepted to Dev Mailbox')
 
-      const devServer = new DevServer(this.devMailbox, this.config.devUiPrefix || '/__mail')
+      const devServer = new DevServer(this.devMailbox, this.config.devUiPrefix || '/__mail', {
+        allowInProduction: this.config.devUiAllowInProduction,
+        gate: this.config.devUiGate,
+      })
       devServer.register(core)
     }
 

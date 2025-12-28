@@ -1,7 +1,7 @@
 import { serveStatic } from '@gravito/photon/bun'
 import { OrbitPrism } from '@gravito/prism'
 import { OrbitCache } from '@gravito/stasis'
-import { defineConfig, PlanetCore } from 'gravito-core'
+import { bodySizeLimit, defineConfig, PlanetCore, securityHeaders } from 'gravito-core'
 import { registerHooks } from './hooks'
 import { registerRoutes } from './routes'
 
@@ -46,6 +46,35 @@ export async function bootstrap(options: AppConfig = {}) {
   // 2. Boot
   const core = await PlanetCore.boot(config)
   core.registerGlobalErrorHandlers()
+
+  // 2.1 Security middleware
+  const defaultCsp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+  ].join('; ')
+  const cspValue = process.env.APP_CSP
+  const csp = cspValue === 'false' ? false : (cspValue ?? defaultCsp)
+  const hstsMaxAge = Number.parseInt(process.env.APP_HSTS_MAX_AGE ?? '15552000', 10)
+  const bodyLimit = Number.parseInt(process.env.APP_BODY_LIMIT ?? '1048576', 10)
+
+  core.adapter.use(
+    '*',
+    securityHeaders({
+      contentSecurityPolicy: csp,
+      hsts:
+        process.env.NODE_ENV === 'production'
+          ? { maxAge: Number.isNaN(hstsMaxAge) ? 15552000 : hstsMaxAge, includeSubDomains: true }
+          : false,
+    })
+  )
+  if (!Number.isNaN(bodyLimit) && bodyLimit > 0) {
+    core.adapter.use('*', bodySizeLimit(bodyLimit))
+  }
 
   // 3. Static files
   core.app.use('/static/*', serveStatic({ root: './' }))

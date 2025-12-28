@@ -18,7 +18,7 @@ const createCore = () => {
 }
 
 describe('DevServer', () => {
-  it('registers mailbox routes and serves entries', () => {
+  it('registers mailbox routes and serves entries', async () => {
     const mailbox = new DevMailbox()
     const entry = mailbox.add({
       from: { address: 'from@example.com' },
@@ -29,34 +29,34 @@ describe('DevServer', () => {
     })
 
     const core = createCore()
-    const server = new DevServer(mailbox, '/__mail/')
+    const server = new DevServer(mailbox, '/__mail/', { allowInProduction: true })
     server.register(core as any)
 
-    const list = core.routes.get('/__mail')!({
+    const list = await core.routes.get('/__mail')!({
       html: (body: string) => body,
     })
     expect(list).toContain('Hello')
 
-    const preview = core.routes.get('/__mail/:id')!({
+    const preview = await core.routes.get('/__mail/:id')!({
       req: { param: () => entry.id },
       html: (body: string) => body,
       text: () => '',
     })
     expect(preview).toContain('Email Preview')
 
-    const raw = core.routes.get('/__mail/:id/raw')!({
+    const raw = await core.routes.get('/__mail/:id/raw')!({
       req: { param: () => entry.id },
       json: (body: unknown) => body,
     })
     expect((raw as any).id).toBe(entry.id)
 
-    const deleted = core.deletes.get('/__mail/:id')!({
+    const deleted = await core.deletes.get('/__mail/:id')!({
       req: { param: () => entry.id },
       json: (body: unknown) => body,
     })
     expect((deleted as any).success).toBe(true)
 
-    const cleared = core.deletes.get('/__mail')!({
+    const cleared = await core.deletes.get('/__mail')!({
       json: (body: unknown) => body,
     })
     expect((cleared as any).success).toBe(true)

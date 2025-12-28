@@ -217,22 +217,13 @@ export class SpectrumOrbit implements GravitoOrbit {
         }
         // 2. Default production protection (if no gate defined)
         else if (process.env.NODE_ENV === 'production') {
-          // Allow only if request is local
-          const _ip = c.req.header('x-forwarded-for') || c.req.header('host')
-          // This is a naive check, but better than nothing.
-          // Real security should be done via config.gate
-          // For now, we log a warning once.
           if (!this.warnedSecurity) {
             console.warn(
-              '[Spectrum] ⚠️ Running in production without a security gate! Only localhost allowed.'
+              '[Spectrum] ⚠️ Production access requires a security gate. Requests will be blocked.'
             )
             this.warnedSecurity = true
           }
-          // Assuming typical local dev setups or direct access.
-          // In real prod, this might block legit access if behind LB without proper header parsing.
-          // So we rely on user configuring it.
-          // We will NOT block by default to avoid confusion in complex setups,
-          // BUT we strongly advise via logs.
+          return c.json({ error: 'Unauthorized' }, 403)
         }
         return handler(c)
       }

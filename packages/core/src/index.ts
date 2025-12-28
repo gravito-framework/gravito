@@ -72,6 +72,13 @@ export { HookManager } from './HookManager'
 export * from './helpers'
 // HTTP / Security utilities
 export { CookieJar, type CookieOptions } from './http/CookieJar'
+export { type BodySizeLimitOptions, bodySizeLimit } from './http/middleware/BodySizeLimit'
+export { type CsrfOptions, csrfProtection, getCsrfToken } from './http/middleware/Csrf'
+export {
+  type HstsOptions,
+  type SecurityHeadersOptions,
+  securityHeaders,
+} from './http/middleware/SecurityHeaders'
 export { ThrottleRequests } from './http/middleware/ThrottleRequests'
 // Listeners
 export type { Listener, ShouldQueue } from './Listener'

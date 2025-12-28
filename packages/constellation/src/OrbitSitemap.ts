@@ -16,6 +16,22 @@ import type {
   SitemapStreamOptions,
 } from './types'
 
+function sanitizeFilename(value: string): string | null {
+  if (!value) {
+    return null
+  }
+  if (value.includes('\0')) {
+    return null
+  }
+  if (value.includes('/') || value.includes('\\')) {
+    return null
+  }
+  if (value.includes('..')) {
+    return null
+  }
+  return value
+}
+
 export interface DynamicSitemapOptions extends SitemapStreamOptions {
   path?: string | undefined // default: '/sitemap.xml'
   providers: SitemapProvider[]
@@ -114,7 +130,11 @@ export class OrbitSitemap {
     const handler = async (ctx: GravitoContext) => {
       // Determine filename from request
       const reqPath = ctx.req.path
-      const filename = reqPath.split('/').pop() || indexFilename
+      const rawName = reqPath.split('/').pop() || indexFilename
+      const filename = sanitizeFilename(rawName)
+      if (!filename) {
+        return ctx.text('Not Found', 404)
+      }
       const isIndex = filename === indexFilename
 
       // Check storage

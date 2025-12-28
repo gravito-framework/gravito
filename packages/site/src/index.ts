@@ -1,6 +1,6 @@
 import { I18nOrbit } from '@gravito/cosmos'
 import { OrbitMonolith } from '@gravito/monolith'
-import { type GravitoConfig, PlanetCore } from 'gravito-core'
+import { bodySizeLimit, type GravitoConfig, PlanetCore, securityHeaders } from 'gravito-core'
 
 // Load Translations (Mock for now)
 const translations = {
@@ -30,12 +30,50 @@ const config: GravitoConfig = {
 
 export const app = await PlanetCore.boot(config)
 
+const defaultCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+  "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com",
+  "img-src 'self' https: data:",
+  "style-src 'self' 'unsafe-inline'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+].join('; ')
+const cspValue = process.env.APP_CSP
+const csp = cspValue === 'false' ? false : (cspValue ?? defaultCsp)
+const hstsMaxAge = Number.parseInt(process.env.APP_HSTS_MAX_AGE ?? '15552000', 10)
+const bodyLimit = Number.parseInt(process.env.APP_BODY_LIMIT ?? '1048576', 10)
+
+app.adapter.use(
+  '*',
+  securityHeaders({
+    contentSecurityPolicy: csp,
+    hsts:
+      process.env.NODE_ENV === 'production'
+        ? { maxAge: Number.isNaN(hstsMaxAge) ? 15552000 : hstsMaxAge, includeSubDomains: true }
+        : false,
+  })
+)
+if (!Number.isNaN(bodyLimit) && bodyLimit > 0) {
+  app.adapter.use('*', bodySizeLimit(bodyLimit))
+}
+
+const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+
 // SEO & I18n Routing
 app.router.prefix('/:locale').group((router) => {
   // Landing Page
   router.get('/', async (c) => {
     const i18n = c.get('i18n')
     const lang = i18n.locale
+    const heroTitle = escapeHtml(String(i18n.t('hero.title')))
+    const switchLabel = escapeHtml(String(i18n.t('nav.switch')))
 
     return c.html(`
             <!DOCTYPE html>
@@ -45,10 +83,10 @@ app.router.prefix('/:locale').group((router) => {
                 <meta name="description" content="The future of web development.">
             </head>
             <body>
-                <h1>${i18n.t('hero.title')}</h1>
+                <h1>${heroTitle}</h1>
                 <nav>
                     <a href="/${lang}/docs/intro">Documentation</a> | 
-                    <a href="/${lang === 'en' ? 'zh' : 'en'}">${i18n.t('nav.switch')}</a>
+                    <a href="/${lang === 'en' ? 'zh' : 'en'}">${switchLabel}</a>
                 </nav>
             </body>
             </html>
@@ -70,8 +108,11 @@ app.router.prefix('/:locale').group((router) => {
 
     const gaId = process.env.GA_MEASUREMENT_ID || 'G-XXXXXXXXXX'
     const baseUrl = 'https://gravito.dev'
-    const url = `${baseUrl}/${locale}/docs/${slug}`
+    const safeSlug = encodeURIComponent(String(slug))
+    const url = `${baseUrl}/${locale}/docs/${safeSlug}`
     const imageUrl = `${baseUrl}/og-image.jpg` // Placeholder
+    const title = escapeHtml(String(doc.meta.title ?? 'Gravito'))
+    const description = escapeHtml(String(doc.meta.description ?? ''))
 
     return c.html(`
             <!DOCTYPE html>
@@ -81,16 +122,16 @@ app.router.prefix('/:locale').group((router) => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 
                 <!-- Primary Meta Tags -->
-                <title>${doc.meta.title} | Gravito</title>
-                <meta name="title" content="${doc.meta.title} | Gravito">
-                <meta name="description" content="${doc.meta.description}">
+                <title>${title} | Gravito</title>
+                <meta name="title" content="${title} | Gravito">
+                <meta name="description" content="${description}">
                 <link rel="canonical" href="${url}">
 
                 <!-- Open Graph / Facebook -->
                 <meta property="og:type" content="article">
                 <meta property="og:url" content="${url}">
-                <meta property="og:title" content="${doc.meta.title} | Gravito">
-                <meta property="og:description" content="${doc.meta.description}">
+                <meta property="og:title" content="${title} | Gravito">
+                <meta property="og:description" content="${description}">
                 <meta property="og:image" content="${imageUrl}">
                 <meta property="og:site_name" content="Gravito">
                 <meta property="og:locale" content="${locale === 'en' ? 'en_US' : 'zh_TW'}">
@@ -98,8 +139,8 @@ app.router.prefix('/:locale').group((router) => {
                 <!-- Twitter -->
                 <meta property="twitter:card" content="summary_large_image">
                 <meta property="twitter:url" content="${url}">
-                <meta property="twitter:title" content="${doc.meta.title} | Gravito">
-                <meta property="twitter:description" content="${doc.meta.description}">
+                <meta property="twitter:title" content="${title} | Gravito">
+                <meta property="twitter:description" content="${description}">
                 <meta property="twitter:image" content="${imageUrl}">
 
                 <!-- Google Analytics -->

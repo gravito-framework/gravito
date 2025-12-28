@@ -11,6 +11,8 @@ export type { CookieOptions } from './CookieJar'
 
 // Cookie Management
 export { CookieJar } from './CookieJar'
+// Middleware
+export { type BodySizeLimitOptions, bodySizeLimit } from './middleware/BodySizeLimit'
 // Core HTTP Types (Gravito Abstractions)
 export type {
   ContentfulStatusCode,

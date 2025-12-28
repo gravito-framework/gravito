@@ -11,7 +11,8 @@ export class JwtGuard<User extends Authenticatable = Authenticatable> implements
     protected provider: UserProvider<User>,
     protected ctx: Context,
     protected secret: string,
-    protected algo = 'HS256'
+    protected algo = 'HS256',
+    protected allowQueryToken = false
   ) {}
 
   async check(): Promise<boolean> {
@@ -71,7 +72,7 @@ export class JwtGuard<User extends Authenticatable = Authenticatable> implements
   protected getTokenForRequest(): string | null {
     const header = this.ctx.req.header('Authorization')
     if (!header || !header.startsWith('Bearer ')) {
-      return this.ctx.req.query('token') || null
+      return this.allowQueryToken ? this.ctx.req.query('token') || null : null
     }
     return header.substring(7)
   }

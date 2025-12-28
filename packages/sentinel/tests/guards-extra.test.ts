@@ -51,7 +51,7 @@ describe('TokenGuard', () => {
       validateCredentials: async () => true,
     }
 
-    const guard = new TokenGuard(provider as any, ctx as any)
+    const guard = new TokenGuard(provider as any, ctx as any, 'api_token', 'api_token', false, true)
     expect(await guard.user()).toBeDefined()
 
     const ctx2 = {
