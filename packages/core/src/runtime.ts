@@ -137,7 +137,7 @@ const createBunAdapter = (): RuntimeAdapter => ({
       exited: proc.exited,
       stdout: proc.stdout ?? null,
       stderr: proc.stderr ?? null,
-      kill: (signal?: string) => proc.kill(signal),
+      kill: (signal?: string | number) => proc.kill(signal),
     }
   },
   async writeFile(path, data) {
@@ -207,7 +207,7 @@ const createNodeAdapter = (): RuntimeAdapter => ({
       if (typeof (maybeWeb as any).getReader === 'function') {
         return maybeWeb
       }
-      return stream.Readable.toWeb(streamReadable) as ReadableStream<Uint8Array>
+      return stream.Readable.toWeb(streamReadable) as unknown as ReadableStream<Uint8Array>
     }
 
     const exited = new Promise<number>((resolve, reject) => {
@@ -219,7 +219,7 @@ const createNodeAdapter = (): RuntimeAdapter => ({
       exited,
       stdout: toWeb(child.stdout),
       stderr: toWeb(child.stderr),
-      kill: (signal?: string | number) => child.kill(signal as NodeJS.Signals),
+      kill: (signal?: string | number) => child.kill(signal as NodeJS.Signals | number),
     }
   },
   async writeFile(path, data) {
@@ -294,11 +294,8 @@ const createDenoAdapter = (): RuntimeAdapter => ({
       stdout: (proc.stdout as unknown as ReadableStream<Uint8Array>) ?? null,
       stderr: (proc.stderr as unknown as ReadableStream<Uint8Array>) ?? null,
       kill: (signal?: string | number) => {
-        if (signal) {
-          proc.kill(signal)
-          return
-        }
-        proc.kill()
+        const killSignal = (signal ?? 'SIGTERM') as string
+        proc.kill(killSignal)
       },
     }
   },
