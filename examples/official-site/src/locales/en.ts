@@ -39,6 +39,9 @@ export default {
     sectionTitleHighlight: 'Gravito Ecosystem',
     sectionDesc:
       'Gravito uses a micro-kernel design. The initial 1.0 release features our most stable and powerful base modules.',
+    group_core: 'Core Layer',
+    group_data: 'Data Layer',
+    group_ops: 'Operations',
     kernel_title: 'PlanetCore',
     kernel_subtitle: 'The Soul of Gravito',
     kernel_desc:
@@ -49,9 +52,22 @@ export default {
     cli_title: 'Pulse',
     cli_subtitle: 'Productivity Tool (CLI)',
     cli_desc: 'Automated scaffolding and dev commands for better workflow.',
+    atlas_title: 'Atlas',
+    atlas_subtitle: 'Bun-Native ORM',
+    atlas_desc:
+      'A modern Active Record layer inspired by Prisma and Drizzle, optimized for Bun performance.',
     seo_title: 'Luminosity',
     seo_subtitle: 'Smart Indexing (SEO)',
     seo_desc: 'Automated sitemap generation and meta management for visibility.',
+    monitor_title: 'Monitor',
+    monitor_subtitle: 'Observability Suite',
+    monitor_desc: 'Health checks, metrics, and tracing with OpenTelemetry-ready hooks.',
+    stream_title: 'Stream',
+    stream_subtitle: 'Universal Queue',
+    stream_desc: 'Background jobs with multi-driver support, from Redis to Kafka.',
+    stasis_title: 'Stasis',
+    stasis_subtitle: 'Cache & Locks',
+    stasis_desc: 'Flexible caching, rate limiting, and distributed locks for scale.',
     image_title: 'Prism',
     image_subtitle: 'Performance Focus (Image)',
     image_desc:
