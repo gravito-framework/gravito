@@ -9,7 +9,8 @@
     "scripts": {
         "build": "turbo run build",
         "test": "turbo run test --filter='./packages/*'",
-        "test:ci": "turbo run test --filter='./packages/*'",
+        "test:coverage": "turbo run test:coverage --filter='./packages/*'",
+        "test:ci": "turbo run test:coverage --filter='./packages/*'",
         "lint": "biome lint .",
         "format": "biome format --write .",
         "check": "biome check . --diagnostic-level=error",
@@ -34,7 +35,7 @@
     },
     "simple-git-hooks": {
         "pre-commit": "export PATH=\"~/.bun/bin:$PATH\" && bunx lint-staged",
-        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && turbo run typecheck test:ci --filter=[HEAD^1]"
+        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && turbo run typecheck test:coverage --filter=[HEAD^1]"
     },
     "lint-staged": {
         "*.{js,ts,cjs,mjs}": [
