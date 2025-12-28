@@ -84,4 +84,20 @@ export class Rocket extends AggregateRoot<string> {
   public decommission(): void {
     this._status = RocketStatus.DECOMMISSIONED
   }
+
+  public toJSON() {
+    return {
+      id: this.id,
+      containerId: this.containerId,
+      status: this._status,
+      currentMission: this._currentMission,
+    }
+  }
+
+  public static fromJSON(data: any): Rocket {
+    const rocket = new Rocket(data.id, data.containerId)
+    rocket._status = data.status
+    rocket._currentMission = data.currentMission
+    return rocket
+  }
 }
