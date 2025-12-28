@@ -44,7 +44,18 @@ export class DocsService {
     if (!DocsService.highlighter) {
       DocsService.highlighter = await createHighlighter({
         themes: ['rose-pine-moon', 'github-dark'],
-        langs: ['ts', 'js', 'bash', 'json', 'yaml', 'markdown', 'typescript', 'html', 'css'],
+        langs: [
+          'ts',
+          'js',
+          'bash',
+          'json',
+          'yaml',
+          'markdown',
+          'typescript',
+          'html',
+          'css',
+          'dockerfile',
+        ],
       })
     }
     return DocsService.highlighter
