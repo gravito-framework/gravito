@@ -126,7 +126,11 @@ const toUint8Array = async (
 const createBunAdapter = (): RuntimeAdapter => ({
   kind: 'bun',
   spawn(command, options = {}) {
-    const proc = Bun.spawn(command, {
+    const [cmd, ...args] = command
+    if (!cmd) {
+      throw new Error('[RuntimeAdapter] spawn() requires a command')
+    }
+    const proc = Bun.spawn([cmd, ...args], {
       cwd: options.cwd,
       env: options.env,
       stdin: options.stdin,
@@ -137,7 +141,11 @@ const createBunAdapter = (): RuntimeAdapter => ({
       exited: proc.exited,
       stdout: proc.stdout ?? null,
       stderr: proc.stderr ?? null,
-      kill: (signal?: string | number) => proc.kill(signal),
+      kill: (signal?: string | number) => {
+        const bunSignal =
+          typeof signal === 'number' ? signal : (signal as NodeJS.Signals | undefined)
+        proc.kill(bunSignal)
+      },
     }
   },
   async writeFile(path, data) {
@@ -178,6 +186,10 @@ const createBunAdapter = (): RuntimeAdapter => ({
 const createNodeAdapter = (): RuntimeAdapter => ({
   kind: 'node',
   spawn(command, options = {}) {
+    const [cmd, ...args] = command
+    if (!cmd) {
+      throw new Error('[RuntimeAdapter] spawn() requires a command')
+    }
     const require = createRequire(import.meta.url)
     const childProcess = require('node:child_process') as typeof import('node:child_process')
     const stream = require('node:stream') as typeof import('node:stream')
@@ -193,7 +205,7 @@ const createNodeAdapter = (): RuntimeAdapter => ({
       return 'pipe'
     }
 
-    const child = childProcess.spawn(command[0], command.slice(1), {
+    const child = childProcess.spawn(cmd, args, {
       cwd: options.cwd,
       env: options.env as Record<string, string>,
       stdio: [stdinMap(options.stdin), stdioMap(options.stdout), stdioMap(options.stderr)],
@@ -266,6 +278,10 @@ const createNodeAdapter = (): RuntimeAdapter => ({
 const createDenoAdapter = (): RuntimeAdapter => ({
   kind: 'deno',
   spawn(command, options = {}) {
+    const [cmd, ...args] = command
+    if (!cmd) {
+      throw new Error('[RuntimeAdapter] spawn() requires a command')
+    }
     const deno = (globalThis as any).Deno
     if (!deno?.Command) {
       throw new Error('[RuntimeAdapter] Deno runtime is required for spawn()')
@@ -278,8 +294,8 @@ const createDenoAdapter = (): RuntimeAdapter => ({
     const stderr =
       options.stderr === 'inherit' ? 'inherit' : options.stderr === 'ignore' ? 'null' : 'piped'
 
-    const proc = new deno.Command(command[0], {
-      args: command.slice(1),
+    const proc = new deno.Command(cmd, {
+      args,
       cwd: options.cwd,
       env: options.env,
       stdin,
@@ -294,7 +310,7 @@ const createDenoAdapter = (): RuntimeAdapter => ({
       stdout: (proc.stdout as unknown as ReadableStream<Uint8Array>) ?? null,
       stderr: (proc.stderr as unknown as ReadableStream<Uint8Array>) ?? null,
       kill: (signal?: string | number) => {
-        const killSignal = (signal ?? 'SIGTERM') as string
+        const killSignal = typeof signal === 'string' ? signal : 'SIGTERM'
         proc.kill(killSignal)
       },
     }
