@@ -1031,7 +1031,7 @@
       },
     },
     "satellites/catalog": {
-      "name": "gravito-satellite-catalog",
+      "name": "@gravito/satellite-catalog",
       "version": "0.1.0",
       "dependencies": {
         "@gravito/atlas": "workspace:*",
@@ -1449,6 +1449,8 @@
     "@gravito/ripple": ["@gravito/ripple@workspace:packages/ripple"],
 
     "@gravito/ripple-client": ["@gravito/ripple-client@workspace:packages/ripple-client"],
+
+    "@gravito/satellite-catalog": ["@gravito/satellite-catalog@workspace:satellites/catalog"],
 
     "@gravito/satellite-membership": ["@gravito/satellite-membership@workspace:satellites/membership"],
 
@@ -2305,8 +2307,6 @@
     "gravito-core": ["gravito-core@workspace:packages/core"],
 
     "gravito-official-site": ["gravito-official-site@workspace:examples/official-site"],
-
-    "gravito-satellite-catalog": ["gravito-satellite-catalog@workspace:satellites/catalog"],
 
     "gray-matter": ["gray-matter@4.0.3", "", { "dependencies": { "js-yaml": "^3.13.1", "kind-of": "^6.0.2", "section-matter": "^1.0.0", "strip-bom-string": "^1.0.0" } }, "sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q=="],
 
