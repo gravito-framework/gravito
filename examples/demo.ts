@@ -1,5 +1,10 @@
 import { serveStatic } from '@gravito/photon/bun'
-import { defineConfig, PlanetCore } from '../packages/core/src/index.ts'
+import {
+  bodySizeLimit,
+  defineConfig,
+  PlanetCore,
+  securityHeaders,
+} from '../packages/core/src/index.ts'
 import { OrbitCache } from '../packages/stasis/src/index.ts'
 
 // 1. Define Configuration (IoC Style)
@@ -17,6 +22,34 @@ const config = defineConfig({
 
 // 2. Boot the Planet
 const core = await PlanetCore.boot(config)
+
+const defaultCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+].join('; ')
+const cspValue = process.env.APP_CSP
+const csp = cspValue === 'false' ? false : (cspValue ?? defaultCsp)
+const hstsMaxAge = Number.parseInt(process.env.APP_HSTS_MAX_AGE ?? '15552000', 10)
+const bodyLimit = Number.parseInt(process.env.APP_BODY_LIMIT ?? '1048576', 10)
+
+core.adapter.use(
+  '*',
+  securityHeaders({
+    contentSecurityPolicy: csp,
+    hsts:
+      process.env.NODE_ENV === 'production'
+        ? { maxAge: Number.isNaN(hstsMaxAge) ? 15552000 : hstsMaxAge, includeSubDomains: true }
+        : false,
+  })
+)
+if (!Number.isNaN(bodyLimit) && bodyLimit > 0) {
+  core.adapter.use('*', bodySizeLimit(bodyLimit))
+}
 
 // 3. Add hooks to demonstrate the hook system
 core.hooks.addAction('app:liftoff', ({ port }) => {

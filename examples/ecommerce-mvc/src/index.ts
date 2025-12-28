@@ -1,10 +1,38 @@
 import { OrbitMonolith, Route } from '@gravito/monolith'
 import { OrbitPhoton } from '@gravito/photon'
-import { PlanetCore } from 'gravito-core'
+import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
 import { ProductController } from './controllers/ProductController'
 import { StoreProductRequest } from './requests/StoreProductRequest'
 
 const core = new PlanetCore()
+
+const defaultCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+].join('; ')
+const cspValue = process.env.APP_CSP
+const csp = cspValue === 'false' ? false : (cspValue ?? defaultCsp)
+const hstsMaxAge = Number.parseInt(process.env.APP_HSTS_MAX_AGE ?? '15552000', 10)
+const bodyLimit = Number.parseInt(process.env.APP_BODY_LIMIT ?? '1048576', 10)
+
+core.adapter.use(
+  '*',
+  securityHeaders({
+    contentSecurityPolicy: csp,
+    hsts:
+      process.env.NODE_ENV === 'production'
+        ? { maxAge: Number.isNaN(hstsMaxAge) ? 15552000 : hstsMaxAge, includeSubDomains: true }
+        : false,
+  })
+)
+if (!Number.isNaN(bodyLimit) && bodyLimit > 0) {
+  core.adapter.use('*', bodySizeLimit(bodyLimit))
+}
 
 // 1. 註冊核心軌道
 await core.orbit(new OrbitPhoton({ port: 3000 }))
