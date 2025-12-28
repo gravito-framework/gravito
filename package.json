@@ -19,7 +19,8 @@
         "ci:version": "changeset version",
         "ci:publish": "changeset publish",
         "pub:beta": "changeset publish --tag beta",
-        "pub:snapshot": "changeset publish --tag snapshot"
+        "pub:snapshot": "changeset publish --tag snapshot",
+        "launchpad:up": "bun scripts/start-launchpad.ts"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.3.10",
