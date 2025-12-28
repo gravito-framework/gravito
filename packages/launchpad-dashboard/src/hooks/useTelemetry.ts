@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react'
 // @ts-expect-error
 import { createRippleClient } from '@gravito/ripple-client'
-import { useEffect, useState } from 'react'
 
 export interface LogData {
   rocketId: string
@@ -15,42 +15,49 @@ export interface StatsData {
   timestamp: number
 }
 
-export function useTelemetry(url = 'ws://localhost:4000') {
+export function useTelemetry(url: string = 'ws://localhost:4000/ws') {
   const [logs, setLogs] = useState<LogData[]>([])
   const [stats, setStats] = useState<Record<string, StatsData>>({})
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
-    // 使用 Gravito Ripple Client
+    // 修正：依照 RippleClient 規範
+    // 1. 注意 URL 通常會加上 /ws (後端 RippleOrbit 預設路徑)
     const client = createRippleClient({
-      url,
-      autoConnect: true,
+      host: url,
+      autoConnect: false // 我們手動控制
     })
 
-    client.on('connect', () => {
-      setConnected(true)
-      console.log('[Telemetry] Ripple Connected')
-    })
+    const start = async () => {
+      try {
+        await client.connect()
+        setConnected(true)
+        console.log('[Telemetry] Ripple Connected')
 
-    client.on('disconnect', () => {
-      setConnected(false)
-      console.log('[Telemetry] Ripple Disconnected')
-    })
+        // 2. 訂閱 'telemetry' 頻道並監聽事件
+        // 在 Ripple 中，通常事件名稱是類別名或自定義名
+        // 根據我們後端的實作: core.ripple.publish('telemetry', { type, data })
+        // Ripple 的廣播通常會包裝成事件。
+        client.channel('telemetry').listen('telemetry.data', (payload: any) => {
+          const { type, data } = payload
+          const timestamp = Date.now()
 
-    // 訂閱 telemetry 頻道
-    client.subscribe('telemetry', (payload: any) => {
-      const { type, data } = payload
-      const timestamp = Date.now()
-
-      if (type === 'log') {
-        setLogs((prev) => [...prev.slice(-99), { ...data, timestamp }])
-      } else if (type === 'stats') {
-        setStats((prev) => ({
-          ...prev,
-          [data.rocketId]: { ...data, timestamp },
-        }))
+          if (type === 'log') {
+            setLogs(prev => [...prev.slice(-99), { ...data, timestamp }])
+          } else if (type === 'stats') {
+            setStats(prev => ({
+              ...prev,
+              [data.rocketId]: { ...data, timestamp }
+            }))
+          }
+        })
+      } catch (err) {
+        console.error('[Telemetry] Connection failed', err)
+        setConnected(false)
       }
-    })
+    }
+
+    start()
 
     return () => {
       client.disconnect()

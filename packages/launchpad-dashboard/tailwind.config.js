@@ -7,20 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        space: {
-          950: '#020617',
-          900: '#0f172a',
-          800: '#1e293b',
+        control: {
+          950: '#050505', // 純黑底色
+          900: '#0a0a0a', // 面板底色
+          800: '#171717', // 邊框色
+          accent: '#0ea5e9', // 指揮中心藍
         }
       },
       animation: {
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'scanline': 'scanline 8s linear infinite',
+        'blink': 'blink 1s step-end infinite',
       },
       keyframes: {
-        glow: {
-          '0%': { 'box-shadow': '0 0 5px rgba(56, 189, 248, 0.2)' },
-          '100%': { 'box-shadow': '0 0 20px rgba(56, 189, 248, 0.5)' },
+        scanline: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100%)' },
+        },
+        blink: {
+          'from, to': { opacity: 1 },
+          '50%': { opacity: 0.3 },
         }
       }
     },
