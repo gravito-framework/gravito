@@ -189,13 +189,14 @@ Some developer tools should never be exposed publicly. In production:
 ```ts
 import { OrbitSignal } from '@gravito/signal'
 import { SpectrumOrbit } from '@gravito/spectrum'
+import { createHeaderGate } from 'gravito-core'
 
-new OrbitSignal({
-  devMode: true,
-  devUiGate: (c) => c.req.header('x-admin-token') === process.env.ADMIN_TOKEN,
+const adminGate = createHeaderGate({
+  headerName: 'x-admin-token',
+  token: process.env.ADMIN_TOKEN,
 })
 
-new SpectrumOrbit({
-  gate: (c) => c.req.header('x-admin-token') === process.env.ADMIN_TOKEN,
-})
+new OrbitSignal({ devMode: true, devUiGate: adminGate })
+
+new SpectrumOrbit({ gate: adminGate })
 ```

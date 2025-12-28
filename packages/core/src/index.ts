@@ -76,6 +76,12 @@ export { type BodySizeLimitOptions, bodySizeLimit } from './http/middleware/Body
 export { type CorsOptions, type CorsOrigin, cors } from './http/middleware/Cors'
 export { type CsrfOptions, csrfProtection, getCsrfToken } from './http/middleware/Csrf'
 export {
+  createHeaderGate,
+  type HeaderTokenGateOptions,
+  type RequireHeaderTokenOptions,
+  requireHeaderToken,
+} from './http/middleware/HeaderTokenGate'
+export {
   type HstsOptions,
   type SecurityHeadersOptions,
   securityHeaders,
