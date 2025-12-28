@@ -67,11 +67,75 @@ export class DockerAdapter implements IDockerAdapter {
   }
 
   /**
-   * 強制移除容器
-   */
+
+     * 強制移除容器
+
+     */
+
   async removeContainer(containerId: string): Promise<void> {
     const proc = Bun.spawn(['docker', 'rm', '-f', containerId])
 
     await proc.exited
+  }
+
+  /**
+
+     * 串流容器日誌
+
+     */
+
+  streamLogs(containerId: string, onData: (data: string) => void): void {
+    const proc = Bun.spawn(['docker', 'logs', '-f', containerId], {
+      stdout: 'pipe',
+
+      stderr: 'pipe',
+    })
+
+    // 處理 stdout
+
+    const readStream = async (stream: ReadableStream) => {
+      const reader = stream.getReader()
+
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+
+        if (done) break
+
+        onData(decoder.decode(value))
+      }
+    }
+
+    readStream(proc.stdout)
+
+    readStream(proc.stderr)
+  }
+
+  /**
+
+     * 獲取容器效能數據
+
+     */
+
+  async getStats(containerId: string): Promise<{ cpu: string; memory: string }> {
+    const proc = Bun.spawn([
+      'docker',
+      'stats',
+      containerId,
+      '--no-stream',
+      '--format',
+      '{{.CPUPerc}},{{.MemUsage}}',
+    ])
+
+    const stdout = await new Response(proc.stdout).text()
+
+    const [cpu, memory] = stdout.trim().split(',')
+
+    return {
+      cpu: cpu || '0%',
+
+      memory: memory || '0B / 0B',
+    }
   }
 }

@@ -11,6 +11,16 @@ export interface IDockerAdapter {
     command: string[]
   ): Promise<{ stdout: string; stderr: string; exitCode: number }>
   removeContainer(containerId: string): Promise<void>
+
+  /**
+   * 串流容器日誌
+   */
+  streamLogs(containerId: string, onData: (data: string) => void): void
+
+  /**
+   * 獲取容器效能數據
+   */
+  getStats(containerId: string): Promise<{ cpu: string; memory: string }>
 }
 
 /**
