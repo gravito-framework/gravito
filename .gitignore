@@ -50,3 +50,6 @@ examples/*/dist/
 
 # Flux Dev Viewer
 .flux/
+
+# Test temp artifacts
+packages/*/tests/.tmp-*
