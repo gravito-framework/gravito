@@ -7,9 +7,6 @@ export class PayloadInjector {
     private git: IGitAdapter
   ) {}
 
-  /**
-   * 執行載荷注入：Clone -> Inject -> Install -> Ignite
-   */
   async deploy(rocket: Rocket): Promise<void> {
     if (!rocket.currentMission) {
       throw new Error(`Rocket ${rocket.id} 沒有指派任務，無法部署`)
@@ -38,7 +35,7 @@ export class PayloadInjector {
     await this.docker.executeCommand(containerId, ['rm', '-f', '/app/bun.lockb'])
 
     // 安裝 (跳過腳本以避免編譯原生模組失敗)
-    const _installRes = await this.docker.executeCommand(containerId, [
+    const installRes = await this.docker.executeCommand(containerId, [
       'bun',
       'install',
       '--cwd',
@@ -47,15 +44,13 @@ export class PayloadInjector {
       '--ignore-scripts',
     ])
 
-    // Debug: Check file content
-    const fileContent = await this.docker.executeCommand(containerId, [
-      'cat',
-      '/app/examples/demo.ts',
-    ])
-    console.log('[Debug] demo.ts snippet:', fileContent.stdout.split('\n').slice(35, 40).join('\n'))
+    if (installRes.exitCode !== 0) {
+      throw new Error(`安裝依賴失敗: ${installRes.stderr}`)
+    }
 
     console.log(`[PayloadInjector] 點火！`)
-    // 真正啟動應用程式 (非同步執行，不等待結束)
+
+    // 真正啟動應用程式
     this.docker.executeCommand(containerId, ['bun', 'run', '/app/examples/demo.ts']).catch((e) => {
       console.error(`[PayloadInjector] 運行異常:`, e)
     })

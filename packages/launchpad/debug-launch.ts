@@ -1,11 +1,11 @@
 import { DockerAdapter } from './src/Infrastructure/Docker/DockerAdapter'
-import { createLaunchpadServer } from './src/index'
+import { bootstrapLaunchpad } from './src/index'
 
 async function run() {
   console.log('🤖 Starting Auto-Debug Sequence...')
 
   // 1. Cleanup
-  const _docker = new DockerAdapter()
+  const docker = new DockerAdapter()
   try {
     const containers = await Bun.spawn([
       'docker',
@@ -15,39 +15,46 @@ async function run() {
       'label=gravito-origin=launchpad',
     ]).text()
     if (containers.trim()) {
-      console.log('🧹 Cleaning up old containers:', containers.replace(/\n/g, ' '))
+      console.log('🧹 Cleaning up old containers...')
       await Bun.spawn(['docker', 'rm', '-f', ...containers.trim().split('\n')]).exited
     }
-  } catch (_e) {}
+  } catch (e) {}
 
   // 2. Start Server
-  const server = createLaunchpadServer()
-  console.log(`🚀 Server started at ${server.url}`)
+  const config = await bootstrapLaunchpad()
+  const server = Bun.serve(config)
+  console.log(`🚀 Server started at http://localhost:${config.port}`)
 
   // 3. Launch Mission
   console.log('🔫 Firing Mission...')
   try {
-    const res = await fetch(`http://localhost:${server.port}/launch`, {
+    const res = await fetch(`http://localhost:${config.port}/launch`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-GitHub-Event': 'pull_request', // 模擬 GitHub 事件
+      },
       body: JSON.stringify({
-        id: `AUTO-DEBUG-${Date.now()}`,
-        repoUrl: 'https://github.com/gravito-framework/gravito',
-        branch: 'feat/launchpad-dashboard',
+        action: 'opened',
+        pull_request: {
+          number: 77,
+          head: { ref: 'feat/launchpad-dashboard', sha: 'latest' },
+          base: {
+            repo: {
+              owner: { login: 'gravito' },
+              name: 'core',
+              clone_url: 'https://github.com/gravito-framework/gravito.git',
+            },
+          },
+        },
       }),
     })
 
     const data = await res.json()
     console.log('Response:', data)
 
-    if (!data.success) {
-      console.error('❌ Launch API failed')
-      process.exit(1)
-    }
-
-    console.log('✅ Launch command accepted. Waiting for logs...')
-    // Keep alive to see logs from server stdout
-    await new Promise((r) => setTimeout(r, 60000))
+    console.log('✅ Mission active. Monitoring for 30s...')
+    await new Promise((r) => setTimeout(r, 30000))
   } catch (e) {
     console.error('❌ Error:', e)
   } finally {
