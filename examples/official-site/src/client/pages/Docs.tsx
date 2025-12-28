@@ -169,6 +169,26 @@ export default function Docs() {
     return () => observer.disconnect()
   }, [tocItems, content])
 
+  useEffect(() => {
+    const syncFromHash = () => {
+      if (typeof window === 'undefined') {
+        return
+      }
+      const hash = window.location.hash.replace(/^#/, '')
+      if (!hash) {
+        return
+      }
+      const match = tocItems.find((item) => item.id === hash)
+      if (match) {
+        setActiveId(match.id)
+      }
+    }
+
+    syncFromHash()
+    window.addEventListener('hashchange', syncFromHash)
+    return () => window.removeEventListener('hashchange', syncFromHash)
+  }, [tocItems])
+
   // SPA Link Interceptor: Prevent full page reload for internal docs links
   useEffect(() => {
     const root = contentRef.current
