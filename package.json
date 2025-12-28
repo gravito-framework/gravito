@@ -2,10 +2,10 @@
     "name": "gravito-monorepo",
     "private": true,
     "workspaces": [
+        "satellites/*",
         "packages/*",
         "templates/*",
-        "examples/*",
-        "satellites/*"
+        "examples/*"
     ],
     "scripts": {
         "build": "turbo run build",
