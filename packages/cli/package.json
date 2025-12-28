@@ -8,7 +8,10 @@
   "type": "module",
   "scripts": {
     "build": "bun build ./src/index.ts --outdir ./dist --target bun --external giget --external cac --external @clack/prompts --external picocolors",
-    "dev": "bun run ./src/index.ts"
+    "dev": "bun run ./src/index.ts",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "files": [
     "dist",
@@ -37,5 +40,8 @@
     "type": "git",
     "url": "git+https://github.com/gravito-framework/gravito.git",
     "directory": "packages/cli"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
   }
 }

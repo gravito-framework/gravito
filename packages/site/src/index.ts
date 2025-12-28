@@ -1,11 +1,11 @@
-import { I18nOrbit, localeMiddleware } from '@gravito/cosmos'
+import { I18nOrbit } from '@gravito/cosmos'
 import { OrbitMonolith } from '@gravito/monolith'
 import { type GravitoConfig, PlanetCore } from 'gravito-core'
 
 // Load Translations (Mock for now)
 const translations = {
-  en: { 'hero.title': 'Gravito Framework', 'nav.switch': '中文' },
-  zh: { 'hero.title': 'Gravito 框架', 'nav.switch': 'English' },
+  en: { hero: { title: 'Gravito Framework' }, nav: { switch: '中文' } },
+  zh: { hero: { title: 'Gravito 框架' }, nav: { switch: 'English' } },
 }
 
 // Dynamic Content Path Logic (Dev vs Docker vs Root)
@@ -31,16 +31,13 @@ const config: GravitoConfig = {
 export const app = await PlanetCore.boot(config)
 
 // SEO & I18n Routing
-app.router
-  .prefix('/:locale')
-  .middleware(localeMiddleware)
-  .group((router) => {
-    // Landing Page
-    router.get('/', async (c) => {
-      const i18n = c.get('i18n')
-      const lang = i18n.locale
+app.router.prefix('/:locale').group((router) => {
+  // Landing Page
+  router.get('/', async (c) => {
+    const i18n = c.get('i18n')
+    const lang = i18n.locale
 
-      return c.html(`
+    return c.html(`
             <!DOCTYPE html>
             <html lang="${lang}">
             <head>
@@ -56,27 +53,27 @@ app.router
             </body>
             </html>
         `)
-    })
+  })
 
-    // Docs Page with Full SEO
-    router.get('/docs/:slug', async (c) => {
-      const content = c.get('content')
-      const i18n = c.get('i18n')
-      const slug = c.req.param('slug')
-      const locale = i18n.locale
+  // Docs Page with Full SEO
+  router.get('/docs/:slug', async (c) => {
+    const content = c.get('content')
+    const i18n = c.get('i18n')
+    const slug = c.req.param('slug')
+    const locale = i18n.locale
 
-      const doc = await content.find('docs', slug, locale)
+    const doc = await content.find('docs', slug, locale)
 
-      if (!doc) {
-        return c.text('Not Found', 404)
-      }
+    if (!doc) {
+      return c.text('Not Found', 404)
+    }
 
-      const gaId = process.env.GA_MEASUREMENT_ID || 'G-XXXXXXXXXX'
-      const baseUrl = 'https://gravito.dev'
-      const url = `${baseUrl}/${locale}/docs/${slug}`
-      const imageUrl = `${baseUrl}/og-image.jpg` // Placeholder
+    const gaId = process.env.GA_MEASUREMENT_ID || 'G-XXXXXXXXXX'
+    const baseUrl = 'https://gravito.dev'
+    const url = `${baseUrl}/${locale}/docs/${slug}`
+    const imageUrl = `${baseUrl}/og-image.jpg` // Placeholder
 
-      return c.html(`
+    return c.html(`
             <!DOCTYPE html>
             <html lang="${locale}">
             <head>
@@ -126,14 +123,14 @@ app.router
             </body>
             </html>
         `)
-    })
   })
+})
 
 // Root redirect
-app.app.get('/', (c) => c.redirect('/en'))
+app.router.get('/', (c) => c.redirect('/en'))
 
 // Liveness Probe
-app.app.get('/health', (c) => c.text('OK'))
+app.router.get('/health', (c) => c.text('OK'))
 
 // Conditional Start (Only if run directly via bun run)
 if (import.meta.main) {
@@ -143,5 +140,5 @@ if (import.meta.main) {
 // Default export for testing or library usage
 export default {
   port: 3000,
-  fetch: app.app.fetch,
+  fetch: app.adapter.fetch.bind(app.adapter),
 }

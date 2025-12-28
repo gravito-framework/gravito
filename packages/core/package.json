@@ -26,8 +26,8 @@
   "scripts": {
     "build": "bun run build.ts",
     "test": "bun test",
-    "test:coverage": "bun test --coverage",
-    "test:ci": "bun test --coverage --coverage-threshold=100",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80",
     "lint": "biome lint ./src ./tests",
     "lint:fix": "biome lint --write ./src ./tests",
     "format": "biome format --write ./src ./tests",

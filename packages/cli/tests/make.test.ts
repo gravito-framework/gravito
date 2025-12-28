@@ -32,7 +32,7 @@ describe('MakeCommand', () => {
 
     const content = await fs.readFile(file, 'utf-8')
     expect(content).toContain('class TestUserController')
-    expect(content).toContain("message: 'TestUser index'")
+    expect(content).toContain("message: 'Hello from TestUser'")
   })
 
   it('should create a middleware', async () => {

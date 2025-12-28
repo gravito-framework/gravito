@@ -7,7 +7,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
-    "test": "bun test"
+    "test": "bun test",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "keywords": [
     "gravito",
@@ -58,7 +60,8 @@
     "gravito-core": "1.0.0-beta.6",
     "tsup": "8.5.1",
     "typescript": "^5.0.0",
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "bun-types": "latest"
   },
   "publishConfig": {
     "access": "public"

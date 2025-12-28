@@ -14,7 +14,9 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "test": "bun test",
     "lint": "biome check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "files": [
     "dist"
@@ -32,7 +34,8 @@
   },
   "devDependencies": {
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "bun-types": "latest"
   },
   "publishConfig": {
     "access": "public"

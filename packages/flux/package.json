@@ -43,7 +43,9 @@
     "build": "bun run build.ts",
     "dev:viewer": "node ./bin/flux.js dev --trace ./.flux/trace.ndjson --port 4280",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "peerDependencies": {
     "gravito-core": "1.0.0-beta.6"

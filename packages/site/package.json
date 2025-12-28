@@ -7,7 +7,10 @@
     "build": "bun build ./src/index.ts --outdir ./dist --target node --external gravito-core --external @gravito/monolith --external @gravito/cosmos --external @gravito/constellation --external @gravito/photon",
     "generate": "bun run ./build-static.ts",
     "deploy": "bun run generate && gh-pages -d dist-static --dotfiles",
-    "start": "bun run ./dist/index.js"
+    "start": "bun run ./dist/index.js",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "dependencies": {
     "gravito-core": "workspace:*",

@@ -17,6 +17,11 @@
             "inputs": ["src/**", "tests/**", "package.json", "tsconfig.json", "bunfig.toml"],
             "outputs": []
         },
+        "test:ci": {
+            "dependsOn": [],
+            "inputs": ["src/**", "tests/**", "package.json", "tsconfig.json", "bunfig.toml"],
+            "outputs": []
+        },
         "lint": {
             "outputs": []
         },

@@ -8,7 +8,9 @@
   "type": "module",
   "scripts": {
     "build": "echo Skipping...",
-    "test": "echo \"No tests for create-gravito-app\" && exit 0"
+    "test": "bun test",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "keywords": [
     "gravito",
@@ -20,6 +22,9 @@
   "license": "MIT",
   "dependencies": {
     "@gravito/pulse": "1.0.0-beta.6"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
   },
   "publishConfig": {
     "access": "public"

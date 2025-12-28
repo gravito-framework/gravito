@@ -11,6 +11,7 @@
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { ConfigManager } from './ConfigManager'
 import { Container } from './Container'
 import type { EventManager } from './EventManager'
@@ -230,7 +231,7 @@ export class Application {
         const filePath = path.resolve(configPath, file)
 
         try {
-          const module = await import(filePath)
+          const module = await import(pathToFileURL(filePath).href)
           const value = module.default ?? module
 
           this.config.set(key, value)
@@ -269,7 +270,7 @@ export class Application {
         const filePath = path.resolve(providersPath, file)
 
         try {
-          const module = await import(filePath)
+          const module = await import(pathToFileURL(filePath).href)
 
           // Look for default export or a class that extends ServiceProvider
           const ProviderClass =

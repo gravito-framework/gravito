@@ -40,10 +40,16 @@
     }
   },
   "scripts": {
-    "build": "bun run build.ts"
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage --coverage-threshold=80",
+    "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "dependencies": {
     "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
   },
   "publishConfig": {
     "access": "public"
