@@ -1,4 +1,5 @@
 import { Mailable } from '@gravito/signal'
+import { app } from 'gravito-core'
 
 export class WelcomeMail extends Mailable {
   constructor(
@@ -18,7 +19,6 @@ export class WelcomeMail extends Mailable {
 
     try {
       // 嘗試從全域獲取 (僅在 PlanetCore 運行時有效)
-      const { app } = require('gravito-core')
       const core = app()
       if (core) {
         branding.name = core.config.get('membership.branding.name', branding.name)

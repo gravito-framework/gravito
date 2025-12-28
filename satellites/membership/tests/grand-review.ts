@@ -5,6 +5,7 @@ import { MembershipServiceProvider } from '../src/index'
 import { LoginMember } from '../src/Application/UseCases/LoginMember'
 import { RegisterMember } from '../src/Application/UseCases/RegisterMember'
 import { verifySingleDevice } from '../src/Interface/Http/Middleware/VerifySingleDevice'
+import path from 'node:path'
 
 /**
  * 🛰️ Gravito Membership "Grand Review" (大校閱)
@@ -33,7 +34,7 @@ async function grandReview() {
       new OrbitSignal({
         devMode: true,
         from: { address: 'system@gravito.dev', name: 'Gravito Core' },
-        viewsDir: require('path').resolve(__dirname, '../views')
+        viewsDir: path.resolve(import.meta.dir, '../views')
       })
     ]
   })

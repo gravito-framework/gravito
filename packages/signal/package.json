@@ -6,7 +6,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts --external gravito-core --external @gravito/stream --external @gravito/prism",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80"

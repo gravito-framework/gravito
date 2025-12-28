@@ -1,4 +1,5 @@
 import { Mailable } from '@gravito/signal'
+import { app } from 'gravito-core'
 
 export class ForgotPasswordMail extends Mailable {
   constructor(
@@ -16,7 +17,6 @@ export class ForgotPasswordMail extends Mailable {
     let baseUrl = 'http://localhost:3000'
 
     try {
-      const { app } = require('gravito-core')
       const core = app()
       if (core) {
         branding.name = core.config.get('membership.branding.name', branding.name)

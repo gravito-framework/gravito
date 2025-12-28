@@ -3,6 +3,7 @@ import { RegisterMember } from "../src/Application/UseCases/RegisterMember";
 import { AtlasMemberRepository } from "../src/Infrastructure/Persistence/AtlasMemberRepository";
 import { DB, Schema } from "@gravito/atlas";
 import { OrbitSignal, MemoryTransport, DevMailbox } from "@gravito/signal";
+import path from "node:path";
 
 describe("Membership Email Integration", () => {
   const repo = new AtlasMemberRepository();
@@ -50,7 +51,7 @@ describe("Membership Email Integration", () => {
   const signal = new OrbitSignal({ 
     transport,
     from: { address: "no-reply@gravito.dev", name: "Gravito" },
-    viewsDir: require('path').resolve(__dirname, "../views")
+    viewsDir: path.resolve(import.meta.dir, "../views")
   });
   
   // Setup UseCase
