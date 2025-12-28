@@ -1,3 +1,4 @@
+import { getRuntimeAdapter } from 'gravito-core'
 import { DockerAdapter } from './src/Infrastructure/Docker/DockerAdapter'
 import { bootstrapLaunchpad } from './src/index'
 
@@ -6,23 +7,25 @@ async function run() {
 
   // 1. Cleanup
   const _docker = new DockerAdapter()
+  const runtime = getRuntimeAdapter()
   try {
-    const containers = await Bun.spawn([
+    const listProc = runtime.spawn([
       'docker',
       'ps',
       '-aq',
       '--filter',
       'label=gravito-origin=launchpad',
-    ]).text()
+    ])
+    const containers = await new Response(listProc.stdout ?? null).text()
     if (containers.trim()) {
       console.log('🧹 Cleaning up old containers...')
-      await Bun.spawn(['docker', 'rm', '-f', ...containers.trim().split('\n')]).exited
+      await runtime.spawn(['docker', 'rm', '-f', ...containers.trim().split('\n')]).exited
     }
   } catch (_e) {}
 
   // 2. Start Server
   const config = await bootstrapLaunchpad()
-  const server = Bun.serve(config)
+  const server = runtime.serve(config)
   console.log(`🚀 Server started at http://localhost:${config.port}`)
 
   // 3. Launch Mission

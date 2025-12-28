@@ -12,13 +12,28 @@ export class MakeCommand {
    *
    * Resolves the path to the stubs directory.
    */
-  constructor() {
+  constructor(stubsPath?: string) {
+    if (stubsPath) {
+      this.stubsPath = stubsPath
+      return
+    }
     // Resolve stubs relative to the compiled CLI executable or source
     // In dev: src/commands/MakeCommand.ts -> ../../stubs
     // In prod: dist/index.js -> ../stubs
     const devPath = path.resolve(__dirname, '../../stubs')
     const prodPath = path.resolve(__dirname, '../stubs')
-    this.stubsPath = existsSync(prodPath) ? prodPath : devPath
+    const cwd = process.cwd()
+    const candidates = [
+      prodPath,
+      devPath,
+      path.resolve(cwd, 'stubs'),
+      path.resolve(cwd, '../stubs'),
+      path.resolve(cwd, 'packages/cli/stubs'),
+      path.resolve(cwd, '../packages/cli/stubs'),
+    ]
+
+    this.stubsPath =
+      candidates.find((candidate) => existsSync(path.join(candidate, 'controller.stub'))) ?? devPath
   }
 
   /**

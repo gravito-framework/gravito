@@ -1,4 +1,5 @@
 import { mkdir } from 'node:fs/promises'
+import { getRuntimeAdapter } from 'gravito-core'
 import type { IGitAdapter } from '../../Domain/Interfaces'
 
 export class ShellGitAdapter implements IGitAdapter {
@@ -10,10 +11,20 @@ export class ShellGitAdapter implements IGitAdapter {
 
     await mkdir(this.baseDir, { recursive: true })
 
-    const proc = Bun.spawn(['git', 'clone', '--depth', '1', '--branch', branch, repoUrl, targetDir])
+    const runtime = getRuntimeAdapter()
+    const proc = runtime.spawn([
+      'git',
+      'clone',
+      '--depth',
+      '1',
+      '--branch',
+      branch,
+      repoUrl,
+      targetDir,
+    ])
 
-    await proc.exited
-    if (proc.exitCode !== 0) {
+    const exitCode = await proc.exited
+    if (exitCode !== 0) {
       throw new Error('Git Clone Failed')
     }
 

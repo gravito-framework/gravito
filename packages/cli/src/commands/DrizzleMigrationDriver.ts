@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { spawn } from 'bun'
+import { getRuntimeAdapter } from 'gravito-core'
 
 /**
  * Migration result interface
@@ -53,18 +53,19 @@ export async function down(db: any): Promise<void> {
 
   async migrate(): Promise<MigrationResult> {
     try {
+      const runtime = getRuntimeAdapter()
       // Use drizzle-kit migrate for applying migration files
-      const proc = spawn(['bunx', 'drizzle-kit', 'migrate', '--config', this.configPath], {
+      const proc = runtime.spawn(['bunx', 'drizzle-kit', 'migrate', '--config', this.configPath], {
         cwd: process.cwd(),
         stdout: 'pipe',
         stderr: 'pipe',
       })
 
-      const output = await new Response(proc.stdout).text()
+      const output = await new Response(proc.stdout ?? null).text()
       const exitCode = await proc.exited
 
       if (exitCode !== 0) {
-        const error = await new Response(proc.stderr).text()
+        const error = await new Response(proc.stderr ?? null).text()
         // If migration fails, it might be because migrations folder is empty or not initialized.
         // Fallback or explicit error?
         // Standard behavior: migrate fails if something is wrong.
@@ -91,7 +92,8 @@ export async function down(db: any): Promise<void> {
 
   async fresh(): Promise<MigrationResult> {
     try {
-      const dropProc = spawn(['bunx', 'drizzle-kit', 'drop', '--config', this.configPath], {
+      const runtime = getRuntimeAdapter()
+      const dropProc = runtime.spawn(['bunx', 'drizzle-kit', 'drop', '--config', this.configPath], {
         cwd: process.cwd(),
         stdout: 'pipe',
         stderr: 'pipe',

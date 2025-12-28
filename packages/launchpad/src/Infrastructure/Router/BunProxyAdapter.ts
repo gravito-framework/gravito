@@ -1,3 +1,4 @@
+import { getRuntimeAdapter } from 'gravito-core'
 import type { IRouterAdapter } from '../../Domain/Interfaces'
 
 export class BunProxyAdapter implements IRouterAdapter {
@@ -15,8 +16,9 @@ export class BunProxyAdapter implements IRouterAdapter {
 
   start(port: number): void {
     const self = this
+    const runtime = getRuntimeAdapter()
 
-    Bun.serve({
+    runtime.serve({
       port,
       async fetch(request) {
         const host = request.headers.get('host')?.split(':')[0]?.toLowerCase()

@@ -8,6 +8,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { cancel, intro, isCancel, note, outro, select, spinner, text } from '@clack/prompts'
 import { type ArchitectureType, Scaffold } from '@gravito/scaffold'
+import { getRuntimeAdapter } from 'gravito-core'
 import pc from 'picocolors'
 
 interface InitOptions {
@@ -168,10 +169,11 @@ export async function initCommand(options: InitOptions = {}) {
       gitSpinner.start('初始化 Git 倉庫...')
 
       try {
-        const proc = Bun.spawn(['git', 'init'], { cwd: targetDir })
-        await proc.exited
+        const runtime = getRuntimeAdapter()
+        const proc = runtime.spawn(['git', 'init'], { cwd: targetDir })
+        const exitCode = await proc.exited
 
-        if (proc.exitCode === 0) {
+        if (exitCode === 0) {
           gitSpinner.stop('Git 倉庫已初始化!')
         } else {
           gitSpinner.stop('Git 初始化跳過 (可能未安裝 git)')
@@ -189,10 +191,11 @@ export async function initCommand(options: InitOptions = {}) {
       try {
         const installCmd =
           packageManager === 'npm' ? ['npm', 'install'] : [packageManager, 'install']
-        const proc = Bun.spawn(installCmd, { cwd: targetDir })
-        await proc.exited
+        const runtime = getRuntimeAdapter()
+        const proc = runtime.spawn(installCmd, { cwd: targetDir })
+        const exitCode = await proc.exited
 
-        if (proc.exitCode === 0) {
+        if (exitCode === 0) {
           installSpinner.stop('依賴安裝完成!')
         } else {
           installSpinner.stop('依賴安裝失敗，請手動執行 install')

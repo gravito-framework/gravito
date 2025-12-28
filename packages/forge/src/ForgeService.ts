@@ -4,6 +4,7 @@
 
 import { randomUUID } from 'node:crypto'
 import type { StorageProvider } from '@gravito/nebula'
+import { getRuntimeAdapter } from 'gravito-core'
 import { ImagePipeline } from './pipelines/ImagePipeline'
 import { VideoPipeline } from './pipelines/VideoPipeline'
 import { ImageProcessor } from './processors/ImageProcessor'
@@ -70,6 +71,7 @@ export class ForgeService {
   private imageProcessor: ImageProcessor
   private storage?: StorageProvider
   private statusStore?: StatusStore
+  private runtime = getRuntimeAdapter()
 
   /**
    * Create a new ForgeService instance.
@@ -99,7 +101,7 @@ export class ForgeService {
 
     // Upload to storage if configured
     if (this.storage && output.path) {
-      const file = Bun.file(output.path)
+      const file = await this.runtime.readFileAsBlob(output.path)
       const storageKey = this.generateStorageKey(input.filename || 'processed')
       await this.storage.put(storageKey, file)
       output.url = this.storage.getUrl(storageKey)

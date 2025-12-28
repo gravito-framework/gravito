@@ -1,6 +1,12 @@
 import { mkdir } from 'node:fs/promises'
 import { isAbsolute, normalize, resolve, sep } from 'node:path'
-import type { GravitoContext, GravitoNext, GravitoOrbit, PlanetCore } from 'gravito-core'
+import {
+  type GravitoContext,
+  type GravitoNext,
+  type GravitoOrbit,
+  getRuntimeAdapter,
+  type PlanetCore,
+} from 'gravito-core'
 
 export interface StorageProvider {
   put(key: string, data: Blob | Buffer | string): Promise<void>
@@ -15,6 +21,7 @@ export interface StorageProvider {
 export class LocalStorageProvider implements StorageProvider {
   private rootDir: string
   private baseUrl: string
+  private runtime = getRuntimeAdapter()
 
   /**
    * Create a new LocalStorageProvider.
@@ -40,7 +47,7 @@ export class LocalStorageProvider implements StorageProvider {
     if (dir && dir !== this.rootDir) {
       await mkdir(dir, { recursive: true })
     }
-    await Bun.write(path, data)
+    await this.runtime.writeFile(path, data)
   }
 
   /**
@@ -50,11 +57,11 @@ export class LocalStorageProvider implements StorageProvider {
    * @returns A promise resolving to the file Blob or null if not found.
    */
   async get(key: string): Promise<Blob | null> {
-    const file = Bun.file(this.resolveKeyPath(key))
-    if (!(await file.exists())) {
+    const path = this.resolveKeyPath(key)
+    if (!(await this.runtime.exists(path))) {
       return null
     }
-    return file
+    return await this.runtime.readFileAsBlob(path)
   }
 
   /**
@@ -63,16 +70,7 @@ export class LocalStorageProvider implements StorageProvider {
    * @param key - The storage key.
    */
   async delete(key: string): Promise<void> {
-    // Bun currently lacks a direct 'unlink' API in Bun.file, using fs/promises is safer for checking
-    // But actually, Node COMPAT layer is preferred.
-    // Or just use shell for "rm"? No, unsafe.
-    // Let's use simple node:fs for deletion.
-    const fs = await import('node:fs/promises')
-    try {
-      await fs.unlink(this.resolveKeyPath(key))
-    } catch {
-      // Ignore if not found
-    }
+    await this.runtime.deleteFile(this.resolveKeyPath(key))
   }
 
   /**

@@ -14,7 +14,7 @@ const TEST_DIR = path.resolve(__dirname, 'temp_make_test')
 // resolve(..., '../../stubs') -> .../packages/cli/stubs. Correct.
 
 describe('MakeCommand', () => {
-  const cmd = new MakeCommand()
+  const cmd = new MakeCommand(path.resolve(__dirname, '../stubs'))
   // We need to change cwd for the duration of the test, or mock it.
   // MakeCommand uses process.cwd(). Let's chdir.
 

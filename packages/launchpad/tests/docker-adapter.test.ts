@@ -8,7 +8,7 @@ function makeProcess(stdoutText: string, stderrText: string, exitCode = 0) {
     stdout: makeStream(stdoutText),
     stderr: makeStream(stderrText),
     exitCode,
-    exited: Promise.resolve(),
+    exited: Promise.resolve(exitCode),
   }
 }
 

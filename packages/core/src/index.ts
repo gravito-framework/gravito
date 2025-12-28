@@ -128,6 +128,27 @@ export { Event } from './types/events'
 export * from './testing'
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Runtime Adapters
+// ─────────────────────────────────────────────────────────────────────────────
+
+export {
+  createSqliteDatabase,
+  getPasswordAdapter,
+  getRuntimeAdapter,
+  getRuntimeEnv,
+  type RuntimeAdapter,
+  type RuntimeFileStat,
+  type RuntimeKind,
+  type RuntimePasswordAdapter,
+  type RuntimeProcess,
+  type RuntimeServeConfig,
+  type RuntimeServer,
+  type RuntimeSpawnOptions,
+  type RuntimeSqliteDatabase,
+  type RuntimeSqliteStatement,
+} from './runtime'
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Configuration Helper
 // ─────────────────────────────────────────────────────────────────────────────
 
