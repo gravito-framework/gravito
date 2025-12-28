@@ -406,6 +406,7 @@ export class DocsService {
             orm_factories: '模型工廠 (Factories)',
             orm_collections: '集合 (Collections)',
             orm_resources: 'API 資源 (Resources)',
+            orm_usage: 'ORM 使用指南',
 
             security: '安全機制',
             image_opt: '圖片優化',
@@ -418,6 +419,7 @@ export class DocsService {
             i18n: '國際化 (I18n)',
             deployment: '正式環境部署',
             enterprise_integration: '企業級整合',
+            monitor: '觀察者系統 (Monitor)',
             cli: 'CLI 指令',
             plugins: '插件開發',
             beam_client: 'Beam 客戶端',
@@ -493,6 +495,7 @@ export class DocsService {
             orm_factories: 'Factories',
             orm_collections: 'Collections',
             orm_resources: 'API Resources',
+            orm_usage: 'ORM Usage Guide',
 
             security: 'Security',
             image_opt: 'Image Optimization',
@@ -505,6 +508,7 @@ export class DocsService {
             i18n: 'Internationalization',
             deployment: 'Production Deployment',
             enterprise_integration: 'Enterprise Integration',
+            monitor: 'Monitoring (Monitor)',
             cli: 'CLI Commands',
             plugins: 'Plugin Development',
             beam_client: 'Beam Client',
@@ -592,6 +596,7 @@ export class DocsService {
         title: trans.orm,
         path: '#',
         children: [
+          { title: trans.orm_usage, path: `${prefix}/guide/orm-usage` },
           { title: trans.orm_getting_started, path: `${prefix}/guide/database/orm-quick-start` },
           { title: trans.orm_relationships, path: `${prefix}/guide/database/atlas-relationships` },
           { title: trans.orm_collections, path: `${prefix}/guide/database/atlas-collections` },
@@ -651,6 +656,7 @@ export class DocsService {
         children: [
           { title: trans.deployment, path: `${prefix}/guide/deployment` },
           { title: trans.enterprise_integration, path: `${prefix}/guide/enterprise-integration` },
+          { title: trans.monitor, path: `${prefix}/guide/monitor` },
         ],
       },
       {
