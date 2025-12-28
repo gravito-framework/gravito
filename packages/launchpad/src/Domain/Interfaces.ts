@@ -17,6 +17,11 @@ export interface IDockerAdapter {
   getExposedPort(containerId: string, containerPort?: number): Promise<number>
 
   removeContainer(containerId: string): Promise<void>
+  /**
+   * 根據 Label 批量移除容器
+   */
+  removeContainerByLabel(label: string): Promise<void>
+
   streamLogs(containerId: string, onData: (data: string) => void): void
   getStats(containerId: string): Promise<{ cpu: string; memory: string }>
 }
