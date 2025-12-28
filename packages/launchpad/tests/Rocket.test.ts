@@ -1,49 +1,49 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import {
+  MissionAssigned,
+  RefurbishmentCompleted,
+  RocketIgnited,
+  RocketSplashedDown,
+} from '../src/Domain/Events'
 import { Mission } from '../src/Domain/Mission'
 import { Rocket } from '../src/Domain/Rocket'
 import { RocketStatus } from '../src/Domain/RocketStatus'
 
-describe('Rocket Aggregate Root (State Machine)', () => {
-  const mission = Mission.create({
-    id: 'pr-123',
-    repoUrl: 'https://github.com/gravito/app',
-    branch: 'main',
-    commitSha: 'abc',
-  })
+describe('Rocket', () => {
+  test('transitions through mission lifecycle and emits events', () => {
+    const mission = Mission.create({
+      id: 'mission-1',
+      repoUrl: 'https://example.com/repo.git',
+      branch: 'main',
+      commitSha: 'abc123',
+    })
+    const rocket = new Rocket('rocket-1', 'container-1')
 
-  it('應該能正確執行完整的生命週期', () => {
-    const rocket = new Rocket('rocket-01', 'docker-id-01')
-    expect(rocket.status).toBe(RocketStatus.IDLE)
-
-    // Assign
     rocket.assignMission(mission)
     expect(rocket.status).toBe(RocketStatus.PREPARING)
-    expect(rocket.currentMission?.id).toBe('pr-123')
+    expect(rocket.currentMission).toBe(mission)
+    expect(rocket.pullDomainEvents()[0]).toBeInstanceOf(MissionAssigned)
 
-    // Ignite
     rocket.ignite()
     expect(rocket.status).toBe(RocketStatus.ORBITING)
+    expect(rocket.pullDomainEvents()[0]).toBeInstanceOf(RocketIgnited)
 
-    // Splashdown
     rocket.splashDown()
     expect(rocket.status).toBe(RocketStatus.REFURBISHING)
+    expect(rocket.pullDomainEvents()[0]).toBeInstanceOf(RocketSplashedDown)
 
-    // Finish
     rocket.finishRefurbishment()
     expect(rocket.status).toBe(RocketStatus.IDLE)
     expect(rocket.currentMission).toBeNull()
+    expect(rocket.pullDomainEvents()[0]).toBeInstanceOf(RefurbishmentCompleted)
   })
 
-  it('當狀態不正確時應該拋出錯誤', () => {
-    const rocket = new Rocket('rocket-02', 'docker-id-02')
+  test('guards invalid transitions', () => {
+    const rocket = new Rocket('rocket-2', 'container-2')
 
-    // 直接點火 (錯誤)
     expect(() => rocket.ignite()).toThrow()
-
-    // 指派任務
-    rocket.assignMission(mission)
-
-    // 重複指派 (錯誤)
-    expect(() => rocket.assignMission(mission)).toThrow()
+    expect(() => rocket.splashDown()).toThrow()
+    rocket.decommission()
+    expect(rocket.status).toBe(RocketStatus.DECOMMISSIONED)
   })
 })
