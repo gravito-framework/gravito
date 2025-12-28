@@ -1,5 +1,5 @@
 import type { GravitoContext } from 'gravito-core'
-import type { IMemberRepository } from '../../../../Domain/Contracts/IMemberRepository'
+import type { IMemberRepository } from '../../../Domain/Contracts/IMemberRepository'
 
 /**
  * Verify Single Device Middleware

@@ -34,6 +34,9 @@ export class Variant extends Entity<string> {
   get options() {
     return this.props.options
   }
+  get metadata() {
+    return this.props.metadata || {}
+  }
 
   public reduceStock(quantity: number): void {
     if (this.props.stock < quantity) {
@@ -97,6 +100,9 @@ export class Product extends Entity<string> {
   }
   get categoryIds() {
     return this.props.categoryIds
+  }
+  get metadata() {
+    return this.props.metadata || {}
   }
 
   public setThumbnail(key: string): void {

@@ -21,14 +21,12 @@ export class ProductController {
    * Get a single product details
    */
   async show(c: GravitoContext) {
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const core = c.get('core' as any) as any
     const repo = core.container.make('catalog.repo.product') as IProductRepository
 
     const product = await repo.findById(id)
-    if (!product) {
-      return c.json({ error: 'Product not found' }, 404)
-    }
+    if (!product) return c.json({ error: 'Product not found' }, 404)
 
     return c.json({
       data: ProductMapper.toDTO(product),
@@ -42,7 +40,7 @@ export class ProductController {
     const core = c.get('core' as any) as any
     const useCase = core.container.make('catalog.create-product') as CreateProduct
 
-    const body = await c.req.json()
+    const body = (await c.req.json()) as any
     const productDTO = await useCase.execute(body)
 
     return c.json(
