@@ -45,6 +45,7 @@ export async function bootstrap(options: AppConfig = {}) {
   const csp = cspValue === 'false' ? false : (cspValue ?? defaultCsp)
   const hstsMaxAge = Number.parseInt(process.env.APP_HSTS_MAX_AGE ?? '15552000', 10)
   const bodyLimit = Number.parseInt(process.env.APP_BODY_LIMIT ?? '1048576', 10)
+  const requireLength = process.env.APP_BODY_REQUIRE_LENGTH === 'true'
 
   core.adapter.use(
     '*',
@@ -57,7 +58,7 @@ export async function bootstrap(options: AppConfig = {}) {
     })
   )
   if (!Number.isNaN(bodyLimit) && bodyLimit > 0) {
-    core.adapter.use('*', bodySizeLimit(bodyLimit))
+    core.adapter.use('*', bodySizeLimit(bodyLimit, { requireContentLength: requireLength }))
   }
 
   // 3. Static files

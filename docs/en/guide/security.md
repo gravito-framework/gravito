@@ -22,6 +22,8 @@ APP_CSP=default-src 'self'; script-src 'self' 'unsafe-inline'
 APP_HSTS_MAX_AGE=15552000
 # Body size limit (bytes). Set 0 or negative to disable.
 APP_BODY_LIMIT=1048576
+# Require Content-Length header ("true" to enable)
+APP_BODY_REQUIRE_LENGTH=false
 ```
 
 ## Configuration

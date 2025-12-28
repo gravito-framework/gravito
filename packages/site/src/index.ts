@@ -43,6 +43,7 @@ const cspValue = process.env.APP_CSP
 const csp = cspValue === 'false' ? false : (cspValue ?? defaultCsp)
 const hstsMaxAge = Number.parseInt(process.env.APP_HSTS_MAX_AGE ?? '15552000', 10)
 const bodyLimit = Number.parseInt(process.env.APP_BODY_LIMIT ?? '1048576', 10)
+const requireLength = process.env.APP_BODY_REQUIRE_LENGTH === 'true'
 
 app.adapter.use(
   '*',
@@ -55,7 +56,7 @@ app.adapter.use(
   })
 )
 if (!Number.isNaN(bodyLimit) && bodyLimit > 0) {
-  app.adapter.use('*', bodySizeLimit(bodyLimit))
+  app.adapter.use('*', bodySizeLimit(bodyLimit, { requireContentLength: requireLength }))
 }
 
 const escapeHtml = (value: string): string =>

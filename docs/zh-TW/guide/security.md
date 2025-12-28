@@ -22,6 +22,8 @@ APP_CSP=default-src 'self'; script-src 'self' 'unsafe-inline'
 APP_HSTS_MAX_AGE=15552000
 # Body size 上限（bytes）。設為 0 或負值視為關閉。
 APP_BODY_LIMIT=1048576
+# 強制要求 Content-Length（"true" 啟用）
+APP_BODY_REQUIRE_LENGTH=false
 ```
 
 ## 設定
