@@ -10,9 +10,9 @@ async function simulateWebhook(action: 'opened' | 'synchronize' | 'closed') {
 
   const payload = {
     action: action,
-    number: 99,
+    number: 19,
     pull_request: {
-      number: 99,
+      number: 19,
       state: action === 'closed' ? 'closed' : 'open',
       head: {
         ref: 'feat/launchpad-github-bot',
@@ -50,14 +50,6 @@ async function simulateWebhook(action: 'opened' | 'synchronize' | 'closed') {
 async function runTest() {
   // 1. 模擬開啟 PR (觸發部署)
   await simulateWebhook('opened')
-
-  // 2. 模擬更新 PR (觸發同步)
-  // await new Promise(r => setTimeout(r, 5000));
-  // await simulateWebhook('synchronize');
-
-  // 3. 模擬關閉 PR (觸發回收)
-  // await new Promise(r => setTimeout(r, 10000));
-  // await simulateWebhook('closed');
 }
 
 runTest()

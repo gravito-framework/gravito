@@ -76,8 +76,20 @@ class LaunchpadServiceProvider extends ServiceProvider {
   }
 
   boot(): void {
+    const logger = this.core.logger
     const router = this.core.container.make<BunProxyAdapter>('launchpad.router')
+    const docker = this.core.container.make<DockerAdapter>('launchpad.docker')
+
+    // 啟動路由代理
     router.start(8080)
+
+    // [New] 啟動時自動清理殘留容器，維持系統純淨
+    logger.info('[Launchpad] 正在掃描並清理殘留資源...')
+    docker.removeContainerByLabel('gravito-origin=launchpad').then(() => {
+      logger.info('[Launchpad] 資源清理完畢，系統就緒。')
+    }).catch(err => {
+      logger.warn('[Launchpad] 自動清理失敗 (可能是環境無容器):', err.message)
+    })
   }
 }
 

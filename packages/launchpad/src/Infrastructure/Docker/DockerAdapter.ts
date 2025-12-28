@@ -72,6 +72,16 @@ export class DockerAdapter implements IDockerAdapter {
     await Bun.spawn(['docker', 'rm', '-f', containerId]).exited
   }
 
+  async removeContainerByLabel(label: string): Promise<void> {
+    const listProc = Bun.spawn(['docker', 'ps', '-aq', '--filter', `label=${label}`])
+    const ids = await new Response(listProc.stdout).text()
+    
+    if (ids.trim()) {
+      const idList = ids.trim().split('\n')
+      await Bun.spawn(['docker', 'rm', '-f', ...idList]).exited
+    }
+  }
+
   streamLogs(containerId: string, onData: (data: string) => void): void {
     const proc = Bun.spawn(['docker', 'logs', '-f', containerId], {
       stdout: 'pipe',
