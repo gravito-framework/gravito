@@ -40,13 +40,13 @@ export class DevServer {
     // Remove trailing slash
     const prefix = this.base.replace(/\/$/, '')
 
-    const wrap = (handler: (ctx: GravitoContext) => unknown) => {
+    const wrap = (handler: (ctx: GravitoContext) => Response | Promise<Response>) => {
       return async (ctx: GravitoContext) => {
         const allowed = await this.canAccess(ctx)
         if (!allowed) {
           return ctx.text('Unauthorized', 403)
         }
-        return handler(ctx)
+        return await handler(ctx)
       }
     }
 

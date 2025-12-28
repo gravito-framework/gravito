@@ -56,7 +56,7 @@ export class AtlasMemberRepository implements IMemberRepository {
 
   async findAll(): Promise<Member[]> {
     const rows = await DB.table(this.table).get()
-    return rows.map((row) => this.mapToDomain(row))
+    return rows.map((row: any) => this.mapToDomain(row))
   }
 
   async delete(id: string): Promise<void> {
