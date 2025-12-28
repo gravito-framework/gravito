@@ -12,6 +12,7 @@ import { VideoProcessor } from './processors/VideoProcessor'
 import { ProcessingStatusManager } from './status/ProcessingStatus'
 import type { StatusStore } from './status/StatusStore'
 import type { FileInput, FileOutput, ProcessingStatus, ProcessOptions } from './types'
+import { sniffMimeType } from './utils/mime'
 
 /**
  * Forge service configuration
@@ -93,7 +94,7 @@ export class ForgeService {
     input: FileInput,
     options: ProcessOptions & { sync?: boolean } = {}
   ): Promise<FileOutput> {
-    const processor = this.getProcessor(input)
+    const processor = await this.getProcessor(input)
     const output = await processor.process(input, options)
 
     // Upload to storage if configured
@@ -158,8 +159,8 @@ export class ForgeService {
    * @returns The appropriate Processor instance.
    * @throws {Error} If the file type is not supported.
    */
-  private getProcessor(input: FileInput): Processor {
-    const mimeType = this.getMimeType(input)
+  private async getProcessor(input: FileInput): Promise<Processor> {
+    const mimeType = await this.getMimeType(input)
 
     if (this.videoProcessor.supports(mimeType)) {
       return this.videoProcessor
@@ -178,9 +179,14 @@ export class ForgeService {
    * @param input - The file input.
    * @returns The MIME type string.
    */
-  private getMimeType(input: FileInput): string {
+  private async getMimeType(input: FileInput): Promise<string> {
     if (input.mimeType) {
       return input.mimeType
+    }
+
+    const sniffed = await sniffMimeType(input.source)
+    if (sniffed) {
+      return sniffed
     }
 
     if (input.filename) {
