@@ -46,6 +46,7 @@ export default function Docs() {
     e.preventDefault()
     const element = document.getElementById(id)
     if (element) {
+      setActiveId(id)
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
       // Update URL hash without triggering navigation
       window.history.pushState(null, '', `#${id}`)
@@ -170,23 +171,34 @@ export default function Docs() {
   }, [tocItems, content])
 
   useEffect(() => {
-    const syncFromHash = () => {
+    let raf = 0
+    const syncFromHash = (behavior: ScrollBehavior = 'auto') => {
       if (typeof window === 'undefined') {
         return
       }
-      const hash = window.location.hash.replace(/^#/, '')
+      const rawHash = window.location.hash.replace(/^#/, '')
+      const hash = rawHash ? decodeURIComponent(rawHash) : ''
       if (!hash) {
         return
       }
       const match = tocItems.find((item) => item.id === hash)
-      if (match) {
-        setActiveId(match.id)
+      if (!match) {
+        return
+      }
+      setActiveId(match.id)
+      const element = document.getElementById(match.id)
+      if (element) {
+        element.scrollIntoView({ behavior, block: 'start' })
       }
     }
 
-    syncFromHash()
-    window.addEventListener('hashchange', syncFromHash)
-    return () => window.removeEventListener('hashchange', syncFromHash)
+    raf = window.requestAnimationFrame(() => syncFromHash('auto'))
+    const handleHashChange = () => syncFromHash('smooth')
+    window.addEventListener('hashchange', handleHashChange)
+    return () => {
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('hashchange', handleHashChange)
+    }
   }, [tocItems])
 
   // SPA Link Interceptor: Prevent full page reload for internal docs links
