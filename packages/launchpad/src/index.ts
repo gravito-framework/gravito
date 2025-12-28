@@ -32,7 +32,9 @@ export function createLaunchpadServer() {
     port: 4000,
     async fetch(req, server) {
       // 處理 WebSocket 升級
-      if (server.upgrade(req)) return
+      if (server.upgrade(req)) {
+        return
+      }
 
       const url = new URL(req.url)
 
@@ -56,7 +58,7 @@ export function createLaunchpadServer() {
       // 2. 回收任務 (模擬 PR Closed/Merged)
       if (url.pathname === '/recycle' && req.method === 'POST') {
         const body = (await req.json()) as any
-        if (!body.missionId) return Response.json({ error: 'missionId required' }, 400)
+        if (!body.missionId) return Response.json({ error: 'missionId required' }, { status: 400 })
 
         await pool.recycle(body.missionId)
         return Response.json({ success: true })

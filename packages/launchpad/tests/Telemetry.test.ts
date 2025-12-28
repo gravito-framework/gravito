@@ -21,7 +21,7 @@ describe('MissionControl Telemetry', () => {
     }
 
     const mockDocker: any = {
-      streamLogs: mock((id, cb) => {
+      streamLogs: mock((_id, cb) => {
         cb('hello world') // 模擬一條日誌
       }),
       getStats: mock(() => Promise.resolve({ cpu: '10%', memory: '100MB' })),

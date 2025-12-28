@@ -18,7 +18,10 @@ export class DockerAdapter implements IDockerAdapter {
       rocketId,
       '--label',
       'gravito-origin=launchpad',
-      // Mount host bun cache to container to speed up install
+      '--network',
+      'host',
+      '-v',
+      `${process.env.HOME}/.bun/install/cache:/root/.bun/install/cache`,
       '-v',
       `${process.env.HOME}/.bun/install/cache:/home/bun/.bun/install/cache`,
       this.baseImage,
@@ -67,7 +70,8 @@ export class DockerAdapter implements IDockerAdapter {
     containerId: string,
     command: string[]
   ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    const proc = Bun.spawn(['docker', 'exec', containerId, ...command])
+    // 使用 -u 0 (root) 確保有權限安裝依賴與刪除檔案
+    const proc = Bun.spawn(['docker', 'exec', '-u', '0', containerId, ...command])
 
     const stdout = await new Response(proc.stdout).text()
     const stderr = await new Response(proc.stderr).text()
@@ -115,7 +119,9 @@ export class DockerAdapter implements IDockerAdapter {
       while (true) {
         const { done, value } = await reader.read()
 
-        if (done) break
+        if (done) {
+          break
+        }
 
         onData(decoder.decode(value))
       }
