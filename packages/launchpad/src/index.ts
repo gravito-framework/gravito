@@ -9,6 +9,7 @@ import { Mission } from './Domain/Mission'
 import { DockerAdapter } from './Infrastructure/Docker/DockerAdapter'
 import { ShellGitAdapter } from './Infrastructure/Git/ShellGitAdapter'
 import { CachedRocketRepository } from './Infrastructure/Persistence/CachedRocketRepository'
+import { BunProxyAdapter } from './Infrastructure/Router/BunProxyAdapter'
 
 export * from './Application/MissionControl'
 export * from './Application/PayloadInjector'
@@ -28,17 +29,20 @@ export class LaunchpadOrbit implements GravitoOrbit {
     // 1. Initialize Infrastructure
     const docker = new DockerAdapter()
     const git = new ShellGitAdapter()
+    const router = new BunProxyAdapter()
 
     // 取得 Cache Service (由 OrbitCache 注入)
-    // 注意：Orbit 之間有安裝順序依賴，Launchpad 依賴 Cache
     const cache = core.container.make<any>('cache')
     const repo = new CachedRocketRepository(cache)
     const refurbish = new RefurbishUnit(docker)
 
     // 2. Initialize Application Services
-    const pool = new PoolManager(docker, repo, refurbish)
+    const pool = new PoolManager(docker, repo, refurbish, router)
     const injector = new PayloadInjector(docker, git)
-    const ctrl = new MissionControl(pool, injector, docker)
+    const ctrl = new MissionControl(pool, injector, docker, router)
+
+    // 啟動反向代理伺服器 (預設 8080)
+    router.start(8080)
 
     // 3. Register Routes
     core.router.post('/launch', async (c) => {
@@ -56,12 +60,18 @@ export class LaunchpadOrbit implements GravitoOrbit {
         core.ripple.publish('telemetry', { type, data })
       })
 
-      return c.json({ success: true, rocketId })
+      return c.json({
+        success: true,
+        rocketId,
+        previewUrl: `http://${mission.id}.dev.local:8080`,
+      })
     })
 
     core.router.post('/recycle', async (c) => {
       const body = (await c.req.json()) as any
-      if (!body.missionId) return c.json({ error: 'missionId required' }, 400)
+      if (!body.missionId) {
+        return c.json({ error: 'missionId required' }, 400)
+      }
 
       await pool.recycle(body.missionId)
       return c.json({ success: true })

@@ -17,7 +17,8 @@ afterAll(async () => {
 })
 
 const createCore = (config?: any) => {
-  let middleware: ((c: any, next: () => Promise<void>) => Promise<void | undefined>) | null = null
+  let middleware: ((c: any, next: () => Promise<void>) => Promise<undefined | undefined>) | null =
+    null
 
   const core = {
     config: {

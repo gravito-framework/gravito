@@ -8,7 +8,9 @@ describe('create-gravito-app', () => {
       calls.push({ cmd, args, opts })
       return {
         on: (event: string, cb: (code?: number) => void) => {
-          if (event === 'exit') cb(0)
+          if (event === 'exit') {
+            cb(0)
+          }
         },
       }
     }

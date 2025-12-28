@@ -12,6 +12,7 @@ export class Rocket extends AggregateRoot<string> {
   private _status: RocketStatus = RocketStatus.IDLE
   private _currentMission: Mission | null = null
   private _containerId: string
+  private _assignedDomain: string | null = null
 
   constructor(id: string, containerId: string) {
     super(id)
@@ -26,6 +27,16 @@ export class Rocket extends AggregateRoot<string> {
   }
   get containerId() {
     return this._containerId
+  }
+  get assignedDomain() {
+    return this._assignedDomain
+  }
+
+  /**
+   * 分配域名
+   */
+  public assignDomain(domain: string): void {
+    this._assignedDomain = domain
   }
 
   /**
@@ -91,6 +102,7 @@ export class Rocket extends AggregateRoot<string> {
       containerId: this.containerId,
       status: this._status,
       currentMission: this._currentMission,
+      assignedDomain: this._assignedDomain,
     }
   }
 
@@ -98,6 +110,7 @@ export class Rocket extends AggregateRoot<string> {
     const rocket = new Rocket(data.id, data.containerId)
     rocket._status = data.status
     rocket._currentMission = data.currentMission
+    rocket._assignedDomain = data.assignedDomain
     return rocket
   }
 }

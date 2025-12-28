@@ -81,7 +81,7 @@ let useFreeze: typeof import('../src').useFreeze
 let defineConfig: typeof import('../src').defineConfig
 let createDetector: typeof import('../src').createDetector
 
-const unwrapElement = (node: any): any => {
+const _unwrapElement = (node: any): any => {
   if (!node || typeof node !== 'object') {
     return node
   }

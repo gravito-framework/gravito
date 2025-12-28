@@ -3,7 +3,8 @@ import { OrbitPrism, TemplateEngine } from '../src/index'
 
 describe('OrbitPrism', () => {
   it('should register view engine', async () => {
-    let middleware: ((c: any, next: () => Promise<void>) => Promise<void | undefined>) | null = null
+    let middleware: ((c: any, next: () => Promise<void>) => Promise<undefined | undefined>) | null =
+      null
     const core = {
       logger: { info: mock(() => {}) },
       config: {

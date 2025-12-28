@@ -125,8 +125,12 @@ const makeContext = (options: {
   const { auth, view, body = {}, params = {}, query = {}, headers = {} } = options
   return {
     get: (key: string) => {
-      if (key === 'auth') return auth
-      if (key === 'view') return view
+      if (key === 'auth') {
+        return auth
+      }
+      if (key === 'view') {
+        return view
+      }
       return undefined
     },
     req: {

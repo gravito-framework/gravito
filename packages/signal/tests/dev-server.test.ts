@@ -32,31 +32,31 @@ describe('DevServer', () => {
     const server = new DevServer(mailbox, '/__mail/')
     server.register(core as any)
 
-    const list = core.routes.get('/__mail')!({
+    const list = core.routes.get('/__mail')?.({
       html: (body: string) => body,
     })
     expect(list).toContain('Hello')
 
-    const preview = core.routes.get('/__mail/:id')!({
+    const preview = core.routes.get('/__mail/:id')?.({
       req: { param: () => entry.id },
       html: (body: string) => body,
       text: () => '',
     })
     expect(preview).toContain('Email Preview')
 
-    const raw = core.routes.get('/__mail/:id/raw')!({
+    const raw = core.routes.get('/__mail/:id/raw')?.({
       req: { param: () => entry.id },
       json: (body: unknown) => body,
     })
     expect((raw as any).id).toBe(entry.id)
 
-    const deleted = core.deletes.get('/__mail/:id')!({
+    const deleted = core.deletes.get('/__mail/:id')?.({
       req: { param: () => entry.id },
       json: (body: unknown) => body,
     })
     expect((deleted as any).success).toBe(true)
 
-    const cleared = core.deletes.get('/__mail')!({
+    const cleared = core.deletes.get('/__mail')?.({
       json: (body: unknown) => body,
     })
     expect((cleared as any).success).toBe(true)
