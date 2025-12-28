@@ -60,6 +60,10 @@ export class DockerAdapter implements IDockerAdapter {
   async copyFiles(containerId: string, sourcePath: string, targetPath: string): Promise<void> {
     const proc = Bun.spawn(['docker', 'cp', sourcePath, `${containerId}:${targetPath}`])
     await proc.exited
+    if (proc.exitCode && proc.exitCode !== 0) {
+      const stderr = await new Response(proc.stderr).text()
+      throw new Error(stderr || 'Docker copy failed')
+    }
   }
 
   async executeCommand(

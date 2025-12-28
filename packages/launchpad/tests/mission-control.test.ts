@@ -7,6 +7,7 @@ function createRocket() {
     id: 'rocket-telemetry',
     containerId: 'container-telemetry',
     status: 'ORBITING',
+    assignDomain: mock(() => {}),
   }
 }
 
@@ -30,6 +31,7 @@ describe('MissionControl timers', () => {
     const docker = {
       streamLogs: mock(() => {}),
       getStats: mock(async () => ({ cpu: '5%', memory: '10MB' })),
+      getExposedPort: mock(async () => 3000),
     }
 
     const originalSetInterval = global.setInterval

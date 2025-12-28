@@ -8,6 +8,7 @@ describe('MissionControl Telemetry', () => {
       id: 'r1',
       containerId: 'c1',
       status: 'PREPARING',
+      assignDomain: mock(() => {}),
       assignMission: mock(() => {}),
       ignite: mock(() => {}),
     }
@@ -21,6 +22,7 @@ describe('MissionControl Telemetry', () => {
     }
 
     const mockDocker: any = {
+      getExposedPort: mock(() => Promise.resolve(3000)),
       streamLogs: mock((_id, cb) => {
         cb('hello world') // 模擬一條日誌
       }),
