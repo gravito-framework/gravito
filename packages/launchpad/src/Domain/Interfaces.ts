@@ -44,6 +44,21 @@ export interface IRouterAdapter {
 }
 
 /**
+ * 負責與 GitHub API 互動的轉接器
+ */
+export interface IGitHubAdapter {
+  /**
+   * 驗證 Webhook 簽名
+   */
+  verifySignature(payload: string, signature: string, secret: string): boolean
+
+  /**
+   * 在 Pull Request 下方留言
+   */
+  postComment(repoOwner: string, repoName: string, prNumber: number, comment: string): Promise<void>
+}
+
+/**
  * 負責代碼獲取
  */
 export interface IGitAdapter {

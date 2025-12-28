@@ -13,10 +13,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "gravito-core": "workspace:*",
     "@gravito/enterprise": "workspace:*",
+    "@gravito/ripple": "workspace:*",
     "@gravito/stasis": "workspace:*",
-    "@gravito/ripple": "workspace:*"
+    "@octokit/rest": "^22.0.1",
+    "gravito-core": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
