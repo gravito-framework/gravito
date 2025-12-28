@@ -1,4 +1,4 @@
-import { Rocket, Cpu, Activity, Terminal, Shield, Globe, Clock, LayoutGrid, Radio, AlertTriangle } from 'lucide-react'
+import { Rocket, Cpu, Activity, Terminal, Shield, Globe, Clock, LayoutGrid, Radio, Zap } from 'lucide-react'
 import { useTelemetry } from './hooks/useTelemetry'
 import { cn } from './utils'
 import { useState, useEffect } from 'react'
@@ -7,10 +7,10 @@ import { useState, useEffect } from 'react'
  * 工業級數據讀數組件
  */
 const DataReadout = ({ label, value, unit, colorClass }: any) => (
-  <div className="bg-black/40 border border-white/5 p-3 rounded shadow-inner">
+  <div className="bg-black/40 border border-white/5 p-3 rounded shadow-inner group hover:border-sky-500/30 transition-colors">
     <div className="text-[9px] uppercase text-slate-500 font-bold mb-1 tracking-tighter">{label}</div>
     <div className="flex items-baseline gap-1">
-      <span className={cn("text-xl font-black font-mono tracking-tighter", colorClass)}>{value}</span>
+      <span className={cn("text-xl font-black font-mono tracking-tighter transition-all", colorClass)}>{value}</span>
       <span className="text-[10px] text-slate-600 font-bold">{unit}</span>
     </div>
   </div>
@@ -28,7 +28,7 @@ function App() {
   const rockets = Array.from(new Set([...logs.map(l => l.rocketId), ...Object.keys(stats)]))
 
   return (
-    <div className="h-screen w-screen ground-control-bg relative flex flex-col overflow-hidden">
+    <div className="h-screen w-screen ground-control-bg relative flex flex-col overflow-hidden selection:bg-sky-500/30">
       <div className="scanline animate-scanline"></div>
 
       {/* 🟢 TOP STATUS BAR (HOUSTON HEADER) */}
@@ -57,10 +57,19 @@ function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded text-emerald-400">
-             <div className="text-[8px] uppercase font-bold tracking-tighter leading-none mb-1">Mission Clock</div>
-             <div className="text-lg font-mono font-black tabular-nums leading-none">T+{Math.floor(time.getTime()/1000) % 100000}</div>
+        <div className="flex items-center gap-6 bg-slate-900/50 backdrop-blur-md border border-white/5 p-3 px-5 rounded-2xl">
+          <div className="flex flex-col items-end">
+            <span className="text-[8px] text-slate-500 uppercase font-bold tracking-tighter">Core Engine</span>
+            <span className={cn("text-[10px] font-black", connected ? "text-sky-400" : "text-rose-500")}>
+              {connected ? 'OPERATIONAL' : 'OFFLINE'}
+            </span>
+          </div>
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 border border-white/5",
+            connected ? "bg-sky-500/5 text-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.1)]" : "bg-rose-500/5 text-rose-500"
+          )}>
+            {/* 旋轉陀螺儀細節 */}
+            <Shield className={cn("w-5 h-5", connected && "animate-[spin_4s_linear_infinite]")} />
           </div>
         </div>
       </header>
@@ -71,13 +80,13 @@ function App() {
         <aside className="w-64 border-r border-white/5 bg-black/40 p-6 flex flex-col gap-8 hidden lg:flex">
           <section>
             <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-4 h-4 text-slate-500" />
-              <h2 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">System Integrity</h2>
+              <Activity className="w-4 h-4 text-slate-500 animate-pulse" />
+              <h2 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Telemetry Analysis</h2>
             </div>
             <div className="space-y-3">
-              <DataReadout label="Active Rockets" value={rockets.length} unit="UNITS" colorClass="text-sky-400" />
-              <DataReadout label="Pool Capacity" value="85" unit="%" colorClass="text-emerald-400" />
-              <DataReadout label="Uplink Rate" value="1.2" unit="MB/S" colorClass="text-amber-400" />
+              <DataReadout label="Uplink Stream" value={rockets.length} unit="ACTIVE" colorClass="text-sky-400" />
+              <DataReadout label="Bandwidth" value="98.2" unit="%" colorClass="text-emerald-400" />
+              <DataReadout label="Response" value="12" unit="MS" colorClass="text-amber-400" />
             </div>
           </section>
 
@@ -87,7 +96,6 @@ function App() {
               <h2 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Live Frequency</h2>
             </div>
             <div className="h-32 bg-sky-500/5 border border-sky-500/10 rounded-sm relative overflow-hidden group">
-               {/* 16 根具備非同步、不對稱跳動感的線條 */}
                <div className="absolute inset-0 flex items-center justify-around px-4 gap-1.5">
                   {[...Array(16)].map((_, i) => (
                     <div 
@@ -113,6 +121,11 @@ function App() {
                 85% { transform: scaleY(1.3); opacity: 0.7; }
                 100% { transform: scaleY(1); opacity: 0.3; }
               }
+              @keyframes data-pulse {
+                0% { border-color: rgba(14, 165, 233, 0.1); }
+                50% { border-color: rgba(14, 165, 233, 0.6); box-shadow: 0 0 15px rgba(14, 165, 233, 0.2); }
+                100% { border-color: rgba(14, 165, 233, 0.1); }
+              }
             `}} />
           </section>
         </aside>
@@ -129,19 +142,26 @@ function App() {
               {rockets.map(rocketId => {
                 const rocketStats = stats[rocketId]
                 const rocketLogs = logs.filter(l => l.rocketId === rocketId).slice(-12)
+                const lastLogTimestamp = rocketLogs.length > 0 ? rocketLogs[rocketLogs.length - 1].timestamp : 0
 
                 return (
-                  <div key={rocketId} className="bg-[#0a0a0a] border-2 border-white/5 rounded shadow-2xl overflow-hidden flex flex-col">
+                  <div 
+                    key={rocketId} 
+                    className="bg-[#0a0a0a] border-2 border-white/5 rounded shadow-2xl overflow-hidden flex flex-col transition-all duration-300"
+                    style={{ 
+                      animation: lastLogTimestamp ? 'data-pulse 0.5s ease-out' : 'none' 
+                    }}
+                  >
                     {/* Module Header */}
                     <div className="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
                       <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-sm animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+                        <div className="w-3 h-3 bg-sky-500 rounded-sm animate-pulse shadow-[0_0_8px_rgba(14,165,233,0.6)]"></div>
                         <span className="text-xs font-black font-mono tracking-widest text-white">{rocketId}</span>
                       </div>
                       <div className="flex gap-4">
                         <div className="text-right">
-                          <div className="text-[8px] text-slate-500 font-bold uppercase leading-none">Telemetry Node</div>
-                          <div className="text-[10px] font-mono text-sky-500 font-bold">NODE-{rocketId.slice(-4).toUpperCase()}</div>
+                          <div className="text-[8px] text-slate-500 font-bold uppercase leading-none">Status</div>
+                          <div className="text-[10px] font-mono text-emerald-500 font-bold tracking-tighter">ACTIVE_LINK</div>
                         </div>
                       </div>
                     </div>
@@ -150,33 +170,36 @@ function App() {
                       {/* Left: Quick Stats */}
                       <div className="p-5 flex flex-col gap-4 w-full md:w-48 bg-black/20">
                         <div className="space-y-1">
-                          <div className="text-[8px] text-slate-500 uppercase font-bold">Propulsion (CPU)</div>
+                          <div className="text-[8px] text-slate-500 uppercase font-bold">Propulsion</div>
                           <div className="text-lg font-mono font-black text-white">{rocketStats?.cpu || '0.0%'}</div>
                           <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.5)]" style={{ width: rocketStats?.cpu || '0%' }}></div>
+                            <div className="h-full bg-sky-500 transition-all duration-1000" style={{ width: rocketStats?.cpu || '0%' }}></div>
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-[8px] text-slate-500 uppercase font-bold">Payload (MEM)</div>
+                          <div className="text-[8px] text-slate-500 uppercase font-bold">Payload</div>
                           <div className="text-[11px] font-mono font-bold text-slate-300">{rocketStats?.memory.split('/')[0] || '0 MB'}</div>
                         </div>
                         <div className="mt-auto pt-4 border-t border-white/5">
-                           <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-bold tracking-widest animate-pulse">
-                             <Shield className="w-3 h-3" />
+                           <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-bold tracking-widest">
+                             <Shield className="w-3 h-3 animate-pulse" />
                              NOMINAL
                            </div>
                         </div>
                       </div>
 
                       {/* Right: Terminal */}
-                      <div className="flex-1 bg-black p-4 font-mono text-[10px] min-h-[200px] flex flex-col relative">
-                        <div className="absolute top-2 right-2 text-white/5 uppercase font-black tracking-widest select-none">Log Stream</div>
-                        <div className="flex-1 overflow-y-auto space-y-1 pr-2 custom-scrollbar">
-                          {rocketLogs.length === 0 && <div className="text-slate-800">{"\u003e\u003e\u003e"} ESTABLISHING DATALINK...</div>}
+                      <div className="flex-1 bg-black p-4 font-mono text-[10px] min-h-[200px] flex flex-col relative overflow-hidden group/term">
+                        {/* CRT Scanline Effect */}
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 pointer-events-none bg-[length:100%_2px,3px_100%]"></div>
+                        
+                        <div className="absolute top-2 right-2 text-white/5 uppercase font-black tracking-widest select-none z-20">Log Stream</div>
+                        <div className="flex-1 overflow-y-auto space-y-1 pr-2 custom-scrollbar z-20 relative">
+                          {rocketLogs.length === 0 && <div className="text-slate-800 animate-pulse">{"\u003e\u003e\u003e"} ESTABLISHING DATALINK...</div>}
                           {rocketLogs.map((log, i) => (
                             <div key={i} className="flex gap-2">
                               <span className="text-sky-500/40 select-none">[{new Date(log.timestamp).toTimeString().slice(0, 8)}]</span>
-                              <span className="text-slate-400 leading-tight">{log.text}</span>
+                              <span className="text-slate-400 leading-tight group-hover/term:text-slate-200 transition-colors">{log.text}</span>
                             </div>
                           ))}
                         </div>
@@ -204,7 +227,7 @@ function App() {
         <div className="flex gap-4 text-[9px] font-bold uppercase tracking-tighter text-slate-600">
           <span>TX: ENABLED</span>
           <span>RX: SECURE</span>
-          <span className="text-emerald-500">AUTO-RECYCLE: ACTIVE</span>
+          <span className="text-emerald-400 tracking-widest">RECYCLE: AUTO</span>
         </div>
       </footer>
     </div>
