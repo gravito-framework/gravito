@@ -32,6 +32,6 @@
         "@vitejs/plugin-vue": "^5.0.0",
         "bun-types": "latest",
         "typescript": "^5.0.0",
-        "vite": "^5.0.0"
+        "vite": "^6.4.1"
     }
 }
