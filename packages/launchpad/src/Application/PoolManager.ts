@@ -1,11 +1,13 @@
 import type { IDockerAdapter, IRocketRepository } from '../Domain/Interfaces'
 import type { Mission } from '../Domain/Mission'
 import { Rocket } from '../Domain/Rocket'
+import type { RefurbishUnit } from './RefurbishUnit'
 
 export class PoolManager {
   constructor(
     private dockerAdapter: IDockerAdapter,
-    private rocketRepository: IRocketRepository
+    private rocketRepository: IRocketRepository,
+    private refurbishUnit?: RefurbishUnit
   ) {}
 
   /**
@@ -15,9 +17,7 @@ export class PoolManager {
     const currentRockets = await this.rocketRepository.findAll()
     const needed = count - currentRockets.length
 
-    if (needed <= 0) {
-      return
-    }
+    if (needed <= 0) return
 
     console.log(`[LaunchPad] 正在熱機，準備發射 ${needed} 架新火箭...`)
 
@@ -60,12 +60,14 @@ export class PoolManager {
       return
     }
 
-    rocket.splashDown()
-    // 此處應有翻新邏輯 (例如呼叫 dockerAdapter 執行清理)
-    // 為了 MVP 簡化，直接完成翻新
-    rocket.finishRefurbishment()
+    if (this.refurbishUnit) {
+      await this.refurbishUnit.refurbish(rocket)
+    } else {
+      // 回退邏輯：如果沒有提供回收單元，則直接標記完成
+      rocket.splashDown()
+      rocket.finishRefurbishment()
+    }
 
     await this.rocketRepository.save(rocket)
-    console.log(`[LaunchPad] 火箭 ${rocket.id} 已成功降落並回收。`)
   }
 }
