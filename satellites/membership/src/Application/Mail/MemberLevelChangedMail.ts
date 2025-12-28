@@ -11,9 +11,9 @@ export class MemberLevelChangedMail extends Mailable {
   }
 
   build(): this {
-    let branding = {
+    const branding = {
       name: 'Gravito App',
-      color: '#f59e0b'
+      color: '#f59e0b',
     }
 
     try {
@@ -22,12 +22,11 @@ export class MemberLevelChangedMail extends Mailable {
         branding.name = core.config.get('membership.branding.name', branding.name)
         branding.color = core.config.get('membership.branding.primary_color', branding.color)
       }
-    } catch (e) {}
+    } catch (_e) {}
 
-    return this
-      .to(this.email)
+    return this.to(this.email)
       .subject(this.t('membership.emails.level_changed_subject'))
-      .view('emails/level_changed', { 
+      .view('emails/level_changed', {
         oldLevel: this.oldLevel,
         newLevel: this.newLevel,
         branding,
@@ -35,8 +34,8 @@ export class MemberLevelChangedMail extends Mailable {
         lang: {
           badge_text: this.t('membership.emails.level_changed_badge'),
           title: this.t('membership.emails.level_changed_title'),
-          body: this.t('membership.emails.level_changed_body')
-        }
+          body: this.t('membership.emails.level_changed_body'),
+        },
       })
   }
 }

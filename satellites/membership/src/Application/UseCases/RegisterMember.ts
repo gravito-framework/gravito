@@ -1,9 +1,9 @@
 import { UseCase } from '@gravito/enterprise'
+import type { PlanetCore } from 'gravito-core'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
 import { Member } from '../../Domain/Entities/Member'
 import type { MemberDTO } from '../DTOs/MemberDTO'
 import { MemberMapper } from '../DTOs/MemberDTO'
-import { PlanetCore } from 'gravito-core'
 
 /**
  * Input for the member registration process
@@ -16,7 +16,7 @@ export interface RegisterMemberInput {
 
 /**
  * Register Member Use Case
- * 
+ *
  * Coordinates the registration of a new member including validation,
  * password hashing, and domain event triggering.
  */
@@ -44,12 +44,7 @@ export class RegisterMember extends UseCase<RegisterMemberInput, MemberDTO> {
     const passwordHash = await this.core.hasher.make(input.passwordPlain)
 
     // 3. Create domain entity
-    const member = Member.create(
-      crypto.randomUUID(),
-      input.name,
-      input.email,
-      passwordHash
-    )
+    const member = Member.create(crypto.randomUUID(), input.name, input.email, passwordHash)
 
     // 4. Save to persistence
     await this.repository.save(member)
@@ -57,12 +52,12 @@ export class RegisterMember extends UseCase<RegisterMemberInput, MemberDTO> {
     // 5. Send Verification Email (via Signal hook)
     await this.core.hooks.doAction('membership:send-verification', {
       email: member.email,
-      token: member.verificationToken
+      token: member.verificationToken,
     })
 
     // 6. Trigger hooks for general extensions
-    await this.core.hooks.doAction('membership:registered', { 
-        member: MemberMapper.toDTO(member) 
+    await this.core.hooks.doAction('membership:registered', {
+      member: MemberMapper.toDTO(member),
     })
 
     return MemberMapper.toDTO(member)

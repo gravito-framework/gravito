@@ -11,9 +11,9 @@ export class WelcomeMail extends Mailable {
 
   build(): this {
     // 品牌配置抽象化 (提供安全回退值)
-    let branding = {
+    const branding = {
       name: 'Gravito App',
-      color: '#6366f1'
+      color: '#6366f1',
     }
     let baseUrl = 'http://localhost:3000'
 
@@ -25,22 +25,21 @@ export class WelcomeMail extends Mailable {
         branding.color = core.config.get('membership.branding.primary_color', branding.color)
         baseUrl = core.config.get('app.url', baseUrl)
       }
-    } catch (e) {
+    } catch (_e) {
       // 忽略錯誤，使用預設值
     }
 
-    return this
-      .to(this.email)
+    return this.to(this.email)
       .subject(this.t('membership.emails.welcome_subject'))
-      .view('emails/welcome', { 
+      .view('emails/welcome', {
         verificationUrl: `${baseUrl}/verify?token=${this.token}`,
         branding,
         currentYear: new Date().getFullYear(),
         lang: {
           welcome_title: this.t('membership.emails.welcome_title'),
           welcome_body: this.t('membership.emails.welcome_body'),
-          verify_button: this.t('membership.emails.verify_button')
-        }
+          verify_button: this.t('membership.emails.verify_button'),
+        },
       })
   }
 }

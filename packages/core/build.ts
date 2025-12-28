@@ -19,6 +19,8 @@ const tsup = spawn(
     '@gravito/photon', // Photon is a peer dependency
     '--external',
     'bun:test', // Bun test module
+    '--external',
+    'bun:sqlite', // Bun sqlite module (runtime-only)
     '--outDir',
     'dist',
   ],

@@ -1,10 +1,10 @@
-import type { UserProvider, Authenticatable } from '@gravito/sentinel'
+import type { Authenticatable, UserProvider } from '@gravito/sentinel'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
-import { Member } from '../../Domain/Entities/Member'
+import type { Member } from '../../Domain/Entities/Member'
 
 /**
  * Sentinel Member Provider
- * 
+ *
  * Adapts our Member Repository to Gravito Sentinel's Auth system.
  */
 export class SentinelMemberProvider implements UserProvider {
@@ -32,13 +32,18 @@ export class SentinelMemberProvider implements UserProvider {
   }
 
   async retrieveByCredentials(credentials: Record<string, any>): Promise<Authenticatable | null> {
-    if (!credentials.email) return null
+    if (!credentials.email) {
+      return null
+    }
     return await this.repository.findByEmail(credentials.email)
   }
 
-  async validateCredentials(user: Authenticatable, credentials: Record<string, any>): Promise<boolean> {
+  async validateCredentials(
+    _user: Authenticatable,
+    _credentials: Record<string, any>
+  ): Promise<boolean> {
     // Note: In a real app, you might check if account is active here
-    return true 
+    return true
   }
 
   private toAuthenticatable(member: Member): Authenticatable {

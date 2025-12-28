@@ -2,20 +2,20 @@
     "name": "gravito-monorepo",
     "private": true,
     "workspaces": [
+        "satellites/*",
         "packages/*",
         "templates/*",
-        "examples/*",
-        "satellites/*"
+        "examples/*"
     ],
     "scripts": {
         "build": "turbo run build",
-        "test": "turbo run test --filter='./packages/*'",
-        "test:coverage": "turbo run test:coverage --filter='./packages/*'",
-        "test:ci": "turbo run test:coverage --filter='./packages/*'",
+        "test": "turbo run test --filter='./packages/*' --filter='./satellites/*'",
+        "test:coverage": "turbo run test:coverage --filter='./packages/*' --filter='./satellites/*'",
+        "test:ci": "turbo run test:coverage --filter='./packages/*' --filter='./satellites/*'",
         "lint": "biome lint .",
         "format": "biome format --write .",
         "check": "biome check . --diagnostic-level=error",
-        "typecheck": "turbo run typecheck --filter='./packages/*'",
+        "typecheck": "turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
         "version:check": "bun run scripts/check-versions.ts",
         "changeset": "changeset",
         "ci:version": "changeset version",

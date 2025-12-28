@@ -426,7 +426,7 @@
         "typescript": "^5.9.3",
       },
       "peerDependencies": {
-        "gravito-core": "1.0.0-beta.5",
+        "gravito-core": "1.0.0-beta.6",
       },
     },
     "packages/enterprise": {
@@ -678,7 +678,7 @@
       "name": "@gravito/luminosity-adapter-express",
       "version": "1.0.0",
       "dependencies": {
-        "@gravito/luminosity": "1.0.0-beta.5",
+        "@gravito/luminosity": "1.0.0",
       },
       "devDependencies": {
         "@types/express": "^4.17.21",
@@ -691,7 +691,7 @@
       "name": "@gravito/luminosity-adapter-photon",
       "version": "1.0.0",
       "dependencies": {
-        "@gravito/luminosity": "1.0.0-beta.6",
+        "@gravito/luminosity": "1.0.0",
       },
       "devDependencies": {
         "bun-types": "latest",
@@ -708,7 +708,7 @@
         "gravito-seo": "dist/bin/gravito-seo.js",
       },
       "dependencies": {
-        "@gravito/luminosity": "1.0.0-beta.5",
+        "@gravito/luminosity": "1.0.0",
         "commander": "^12.0.0",
         "picocolors": "^1.0.0",
       },
@@ -934,22 +934,22 @@
         "nodemailer": "^7.0.11",
       },
       "devDependencies": {
-        "@gravito/prism": "1.0.0-beta.6",
-        "@gravito/stream": "1.0.0-beta.1",
+        "@gravito/prism": "workspace:*",
+        "@gravito/stream": "workspace:*",
         "@types/nodemailer": "^6.4.14",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vue/server-renderer": "^3.0.0",
         "bun-types": "latest",
-        "gravito-core": "1.0.0-beta.6",
+        "gravito-core": "workspace:*",
         "tsup": "8.5.1",
         "typescript": "^5.0.0",
         "vue": "^3.0.0",
       },
       "peerDependencies": {
-        "@gravito/prism": "1.0.0-beta.6",
-        "@gravito/stream": "1.0.0-beta.1",
-        "gravito-core": "1.0.0-beta.6",
+        "@gravito/prism": "workspace:*",
+        "@gravito/stream": "workspace:*",
+        "gravito-core": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "vue": "^3.0.0",
@@ -1028,6 +1028,21 @@
         "bun-types": "latest",
         "tsup": "^8.5.1",
         "typescript": "^5.9.3",
+      },
+    },
+    "satellites/catalog": {
+      "name": "@gravito/satellite-catalog",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "@gravito/signal": "workspace:*",
+        "@gravito/stasis": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
       },
     },
     "satellites/membership": {
@@ -1434,6 +1449,8 @@
     "@gravito/ripple": ["@gravito/ripple@workspace:packages/ripple"],
 
     "@gravito/ripple-client": ["@gravito/ripple-client@workspace:packages/ripple-client"],
+
+    "@gravito/satellite-catalog": ["@gravito/satellite-catalog@workspace:satellites/catalog"],
 
     "@gravito/satellite-membership": ["@gravito/satellite-membership@workspace:satellites/membership"],
 

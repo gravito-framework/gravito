@@ -1,6 +1,6 @@
+import { DB } from '@gravito/atlas'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
 import { Member } from '../../Domain/Entities/Member'
-import { DB } from '@gravito/atlas'
 
 /**
  * Atlas Member Repository Implementation
@@ -23,7 +23,7 @@ export class AtlasMemberRepository implements IMemberRepository {
       current_session_id: member.currentSessionId || null,
       remember_token: member.rememberToken || null,
       created_at: member.createdAt,
-      metadata: JSON.stringify(member.metadata)
+      metadata: JSON.stringify(member.metadata),
     }
 
     const exists = await this.exists(member.id)
@@ -56,7 +56,7 @@ export class AtlasMemberRepository implements IMemberRepository {
 
   async findAll(): Promise<Member[]> {
     const rows = await DB.table(this.table).get()
-    return rows.map(row => this.mapToDomain(row))
+    return rows.map((row: any) => this.mapToDomain(row))
   }
 
   async delete(id: string): Promise<void> {
@@ -78,12 +78,14 @@ export class AtlasMemberRepository implements IMemberRepository {
       verificationToken: row.verification_token,
       emailVerifiedAt: row.email_verified_at ? new Date(row.email_verified_at) : undefined,
       passwordResetToken: row.password_reset_token,
-      passwordResetExpiresAt: row.password_reset_expires_at ? new Date(row.password_reset_expires_at) : undefined,
+      passwordResetExpiresAt: row.password_reset_expires_at
+        ? new Date(row.password_reset_expires_at)
+        : undefined,
       currentSessionId: row.current_session_id,
       rememberToken: row.remember_token,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at || row.created_at),
-      metadata: row.metadata ? JSON.parse(row.metadata) : {}
+      metadata: row.metadata ? JSON.parse(row.metadata) : {},
     })
   }
 }

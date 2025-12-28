@@ -1,15 +1,15 @@
-import { PlanetCore, setApp } from 'gravito-core'
-import { OrbitAtlas, DB, Schema } from '@gravito/atlas'
-import { OrbitSignal } from '@gravito/signal'
-import { MembershipServiceProvider } from '../src/index'
-import { LoginMember } from '../src/Application/UseCases/LoginMember'
-import { RegisterMember } from '../src/Application/UseCases/RegisterMember'
-import { verifySingleDevice } from '../src/Interface/Http/Middleware/VerifySingleDevice'
 import path from 'node:path'
+import { DB, Schema } from '@gravito/atlas'
+import { OrbitSignal } from '@gravito/signal'
+import { PlanetCore, setApp } from 'gravito-core'
+import type { LoginMember } from '../src/Application/UseCases/LoginMember'
+import type { RegisterMember } from '../src/Application/UseCases/RegisterMember'
+import { verifySingleDevice } from '../src/Interface/Http/Middleware/VerifySingleDevice'
+import { MembershipServiceProvider } from '../src/index'
 
 /**
  * 🛰️ Gravito Membership "Grand Review" (大校閱)
- * 
+ *
  * 此腳本模擬全系統在 Launchpad 環境下的運行狀況
  */
 async function grandReview() {
@@ -27,16 +27,16 @@ async function grandReview() {
       'database.default': 'sqlite',
       'database.connections.sqlite': {
         driver: 'sqlite',
-        database: ':memory:'
-      }
+        database: ':memory:',
+      },
     },
     orbits: [
       new OrbitSignal({
         devMode: true,
         from: { address: 'system@gravito.dev', name: 'Gravito Core' },
-        viewsDir: path.resolve(import.meta.dir, '../views')
-      })
-    ]
+        viewsDir: path.resolve(import.meta.dir, '../views'),
+      }),
+    ],
   })
 
   // 1.2 強制設置全局 app 實例，供 Mailable 內部使用
@@ -45,34 +45,36 @@ async function grandReview() {
   // 1.5 初始化 Atlas
   DB.addConnection('default', {
     driver: 'sqlite',
-    database: ':memory:'
+    database: ':memory:',
   })
 
   // 2. 註冊服務
   core.container.instance('i18n', {
     t: (k: string) => k,
     addResource: () => {},
-    on: () => {}
+    on: () => {},
   })
 
   // 取得真正的 Repository
-  const realRepo = new (await import('../src/Infrastructure/Persistence/AtlasMemberRepository')).AtlasMemberRepository()
+  const realRepo = new (
+    await import('../src/Infrastructure/Persistence/AtlasMemberRepository')
+  ).AtlasMemberRepository()
   core.container.instance('membership.repo', realRepo)
 
   // Mock Auth (Sentinel)
   const mockAuth = {
     guard: () => ({
-        attempt: async () => true,
-        user: async () => {
-            // 從 Repo 抓出剛才註冊的人
-            const members = await realRepo.findAll()
-            return members[0]
-        },
-        logout: async () => {}
-    })
+      attempt: async () => true,
+      user: async () => {
+        // 從 Repo 抓出剛才註冊的人
+        const members = await realRepo.findAll()
+        return members[0]
+      },
+      logout: async () => {},
+    }),
   }
   core.container.instance('auth', mockAuth)
-  
+
   await core.use(new MembershipServiceProvider())
   await core.bootstrap()
 
@@ -98,7 +100,7 @@ async function grandReview() {
     table.text('metadata').nullable()
   })
 
-  const repo = core.container.make<any>('membership.repo')
+  const _repo = core.container.make<any>('membership.repo')
   const register = core.container.make<RegisterMember>('membership.register')
   const login = core.container.make<LoginMember>('membership.login')
 
@@ -108,50 +110,52 @@ async function grandReview() {
   await register.execute({
     name: 'Gravito Commander',
     email: email,
-    passwordPlain: 'mission-critical-123'
+    passwordPlain: 'mission-critical-123',
   })
-  
+
   console.log('📬 [Signal] 請檢查上方日誌，應包含美化後的 Welcome Mail HTML。')
 
   // --- 測試案例 B: 多設備限制 ---
   console.log('\n🧪 [Test B] 模擬多設備登入限制...')
-  
+
   // 模擬 Session A
-  const mockSessionA = { 
+  const mockSessionA = {
     id: () => 'session_device_1',
-    get: (k: string) => k === 'login_web_auth_session' ? email : null,
+    get: (k: string) => (k === 'login_web_auth_session' ? email : null),
     put: () => {},
-    regenerate: () => {}
+    regenerate: () => {},
   }
   core.container.instance('session', mockSessionA)
-  
+
   console.log('📱 設備 1 正在登入...')
   await login.execute({ email, passwordPlain: 'mission-critical-123' })
-  
+
   // 模擬 Session B (另一個設備)
-  const mockSessionB = { 
+  const mockSessionB = {
     id: () => 'session_device_2',
-    get: (k: string) => k === 'login_web_auth_session' ? email : null,
+    get: (k: string) => (k === 'login_web_auth_session' ? email : null),
     put: () => {},
-    regenerate: () => {}
+    regenerate: () => {},
   }
   core.container.instance('session', mockSessionB)
-  
+
   console.log('💻 設備 2 (新設備) 正在登入...')
   await login.execute({ email, passwordPlain: 'mission-critical-123' })
 
   // 模擬設備 1 的後續請求，應被攔截
   console.log('🛡️  驗證設備 1 是否被強制登出...')
   core.container.instance('session', mockSessionA) // 切換回設備 1 的環境
-  
+
   // 建立模擬 Context
   const mockContext: any = {
     get: (key: string) => {
-        if (key === 'core') return core
-        return null
+      if (key === 'core') {
+        return core
+      }
+      return null
     },
     req: { header: () => 'application/json' },
-    json: (d: any) => d
+    json: (d: any) => d,
   }
 
   try {
@@ -166,7 +170,7 @@ async function grandReview() {
   process.exit(0)
 }
 
-grandReview().catch(err => {
+grandReview().catch((err) => {
   console.error('💥 校閱過程中發生崩潰:', err)
   process.exit(1)
 })
