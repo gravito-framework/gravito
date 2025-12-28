@@ -25,9 +25,9 @@ const { t } = useI18n()
         <div class="flex flex-col gap-4">
             <h4 class="text-white font-bold uppercase tracking-widest text-[10px]">{{ t('footer.resources') }}</h4>
             <ul class="flex flex-col gap-2 text-gray-500 text-xs font-mono">
-                <li><a href="#" class="hover:text-atlas-cyan transition-colors">{{ t('footer.guide') }}</a></li>
-                <li><a href="#" class="hover:text-atlas-cyan transition-colors">{{ t('footer.api') }}</a></li>
-                <li><a href="#" class="hover:text-atlas-cyan transition-colors">{{ t('footer.examples') }}</a></li>
+                <li><StaticLink to="/docs/cli" class="hover:text-atlas-cyan transition-colors">{{ t('footer.guide') }}</StaticLink></li>
+                <li><a href="https://gravito-framework.github.io/atlas-site-dist/docs/cli" class="hover:text-atlas-cyan transition-colors">{{ t('footer.api') }}</a></li>
+                <li><a href="https://github.com/gravito-framework/gravito/tree/main/packages/atlas" target="_blank" rel="noopener noreferrer" class="hover:text-atlas-cyan transition-colors">{{ t('footer.examples') }}</a></li>
             </ul>
         </div>
 

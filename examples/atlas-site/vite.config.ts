@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/atlas-site-dist/',
   plugins: [vue()],
   resolve: {
     alias: {
