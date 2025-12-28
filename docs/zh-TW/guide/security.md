@@ -139,6 +139,12 @@ import { bodySizeLimit } from 'gravito-core'
 core.adapter.use('*', bodySizeLimit(1_048_576))
 ```
 
+若要強制要求 `Content-Length`，可啟用 strict 模式：
+
+```ts
+core.adapter.use('*', bodySizeLimit(1_048_576, { requireContentLength: true }))
+```
+
 ## Production Gate（Debug/Dev 工具）
 
 部分開發工具不應在 production 直接公開：

@@ -139,6 +139,12 @@ import { bodySizeLimit } from 'gravito-core'
 core.adapter.use('*', bodySizeLimit(1_048_576))
 ```
 
+If you want to enforce `Content-Length`, enable strict mode:
+
+```ts
+core.adapter.use('*', bodySizeLimit(1_048_576, { requireContentLength: true }))
+```
+
 ## Production Gates (Debug & Dev Tools)
 
 Some developer tools should never be exposed publicly. In production:
