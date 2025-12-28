@@ -5,12 +5,12 @@ description: Start your journey with Gravito in less than 5 minutes.
 
 # Getting Started
 
-Welcome to Gravito! This guide will help you set up your development environment and create your first high-performance fullstack application.
+Welcome to Gravito! This guide will help you set up your development environment and create your first high-performance fullstack application. This 1.0 beta release is Bun-native and optimized for speed.
 
 ## Prerequisites
 
 Gravito is built for the modern age. You only need one thing:
-- **[Bun](https://bun.sh/) 1.1.0 or higher**: The incredibly fast JavaScript runtime.
+- **[Bun](https://bun.sh/) 1.3.4 or higher**: The incredibly fast JavaScript runtime.
 
 To check your version, run:
 ```bash

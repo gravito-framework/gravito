@@ -5,12 +5,12 @@ description: 在 5 分鐘內開啟您的 Gravito 開發之旅。
 
 # 快速上手
 
-歡迎來到 Gravito！本指南將幫助您建立開發環境，並建構您的第一個高效能全端應用程式。
+歡迎來到 Gravito！本指南將幫助您建立開發環境，並建構您的第一個高效能全端應用程式。本次 1.0 beta 以 Bun 原生效能為核心，並針對速度做出最佳化。
 
 ## 準備工作
 
 Gravito 為現代開發而生。您只需要準備一樣東西：
-- **[Bun](https://bun.sh/) 1.1.0 或更高版本**：極致快速的 JavaScript 執行環境。
+- **[Bun](https://bun.sh/) 1.3.4 或更高版本**：極致快速的 JavaScript 執行環境。
 
 要檢查您的版本，請執行：
 ```bash
@@ -54,12 +54,14 @@ Gravito 內建了「工匠級」的 CLI 工具，能為您代勞繁重的工程�
 bun gravito make:controller UserController
 bun gravito make:middleware EnsureAdmin
 
+# 資料庫 (需要 @gravito/atlas)
+bun gravito migrate
+bun gravito db:seed
+
 # 開發工具 (Development Utilities)
 bun gravito route:list
 bun gravito tinker # 進入互動式 REPL
 ```
-
-> **注意**：資料庫管理命令（`make:migration`、`migrate` 等）在 v1.0 版本中不可用。這些功能將在未來的版本中推出。
 
 ### 剛才發生了什麼？
 Gravito 同時啟動了兩個同步運作的引擎：
