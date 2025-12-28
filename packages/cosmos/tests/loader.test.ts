@@ -1,17 +1,17 @@
 import { describe, expect, it, jest } from 'bun:test'
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { loadTranslations } from '../src/loader'
 
 describe('loadTranslations', () => {
   it('loads json translation files from a directory', async () => {
-    const tmpDir = join(process.cwd(), 'tests', '.tmp-i18n')
-    await rm(tmpDir, { force: true, recursive: true })
-    await mkdir(tmpDir, { recursive: true })
+    const tmpDir = mkdtempSync(join(tmpdir(), 'gravito-i18n-'))
 
     try {
-      await writeFile(join(tmpDir, 'en.json'), JSON.stringify({ hello: 'Hello' }))
-      await writeFile(join(tmpDir, 'zh.json'), JSON.stringify({ hello: '你好' }))
+      writeFileSync(join(tmpDir, 'en.json'), JSON.stringify({ hello: 'Hello' }))
+      writeFileSync(join(tmpDir, 'zh.json'), JSON.stringify({ hello: '你好' }))
 
       const translations = await loadTranslations(tmpDir)
 
@@ -23,15 +23,13 @@ describe('loadTranslations', () => {
   })
 
   it('skips invalid json files and returns empty for missing dir', async () => {
-    const tmpDir = join(process.cwd(), 'tests', '.tmp-i18n-invalid')
-    await rm(tmpDir, { force: true, recursive: true })
-    await mkdir(tmpDir, { recursive: true })
+    const tmpDir = mkdtempSync(join(tmpdir(), 'gravito-i18n-invalid-'))
 
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
 
     try {
-      await writeFile(join(tmpDir, 'en.json'), '{invalid json}')
+      writeFileSync(join(tmpDir, 'en.json'), '{invalid json}')
       const translations = await loadTranslations(tmpDir)
       expect(translations.en).toBeUndefined()
 

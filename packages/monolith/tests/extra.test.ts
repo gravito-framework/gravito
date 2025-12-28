@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -77,7 +77,7 @@ describe('ContentManager security helpers', () => {
   it('sanitizes path segments and escapes unsafe output', async () => {
     const root = mkdtempSync(join(tmpdir(), 'monolith-content-'))
     const base = join(root, 'content', 'docs', 'en')
-    await mkdir(base, { recursive: true })
+    mkdirSync(base, { recursive: true })
 
     const markdown = `---\ntitle: Safe\n---\n\n<link>\n\n[bad](javascript:alert(1))\n\n[good](https://example.com "Title")`
     writeFileSync(join(base, 'safe.md'), markdown)

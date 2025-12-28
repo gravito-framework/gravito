@@ -1,5 +1,7 @@
 import { describe, expect, it, jest } from 'bun:test'
+import { mkdtempSync } from 'node:fs'
 import { readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createWorkflow, MemoryStorage } from '../src'
 import { ContextManager } from '../src/core/ContextManager'
@@ -69,14 +71,16 @@ describe('FluxLogger', () => {
 
 describe('JsonFileTraceSink', () => {
   it('writes trace events to a file', async () => {
-    const filePath = join(process.cwd(), 'tests', '.tmp-trace', 'trace.ndjson')
-    await rm(join(process.cwd(), 'tests', '.tmp-trace'), { recursive: true, force: true })
+    const traceDir = mkdtempSync(join(tmpdir(), 'gravito-trace-'))
+    const filePath = join(traceDir, 'trace.ndjson')
 
     const sink = new JsonFileTraceSink({ path: filePath })
     await sink.emit({ type: 'workflow:start', timestamp: Date.now() })
 
     const contents = await readFile(filePath, 'utf8')
     expect(contents).toContain('"type":"workflow:start"')
+
+    await rm(traceDir, { recursive: true, force: true })
   })
 })
 

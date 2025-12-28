@@ -12,14 +12,14 @@ const TEST_DIR = join(import.meta.dir, '.tmp-strategy-test')
 describe('Strategies', () => {
   beforeEach(async () => {
     if (existsSync(TEST_DIR)) {
-      rmSync(TEST_DIR, { recursive: true })
+      rmSync(TEST_DIR, { recursive: true, force: true })
     }
     await mkdir(TEST_DIR, { recursive: true })
   })
 
   afterEach(() => {
     if (existsSync(TEST_DIR)) {
-      rmSync(TEST_DIR, { recursive: true })
+      rmSync(TEST_DIR, { recursive: true, force: true })
     }
   })
 

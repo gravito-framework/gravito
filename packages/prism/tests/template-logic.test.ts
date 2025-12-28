@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { TemplateEngine } from '../src/TemplateEngine'
@@ -7,7 +8,7 @@ import { TemplateEngine } from '../src/TemplateEngine'
 let viewsDir = ''
 
 beforeAll(async () => {
-  viewsDir = await mkdtemp(join(tmpdir(), 'gravito-prism-'))
+  viewsDir = mkdtempSync(join(tmpdir(), 'gravito-prism-'))
   const template = [
     '{{#each items}}<p>{{this}}</p>{{/each}}',
     '{{#if show}}YES{{else}}NO{{/if}}',
@@ -18,7 +19,7 @@ beforeAll(async () => {
     '{{{rawHtml}}} {{escaped}}',
   ].join('\n')
 
-  await writeFile(join(viewsDir, 'page.html'), template, 'utf-8')
+  writeFileSync(join(viewsDir, 'page.html'), template, 'utf-8')
 })
 
 afterAll(async () => {
