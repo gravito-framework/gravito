@@ -37,6 +37,16 @@ export class MissionControl {
       onTelemetry('stats', { rocketId: rocket.id, ...stats })
     }, 5000)
 
+    // [Auto-Recycle] 設定任務生存時間 (例如 10 分鐘)
+    // 實務上這個時間可以從 Mission 設定中讀取
+    const ttl = 10 * 60 * 1000
+    setTimeout(async () => {
+      console.log(`[MissionControl] 任務 ${mission.id} TTL 已到期，執行自動回收...`)
+      clearInterval(statsTimer) // 停止監控
+      await this.poolManager.recycle(mission.id)
+      onTelemetry('log', { rocketId: rocket.id, text: '--- MISSION EXPIRED (TTL) ---' })
+    }, ttl)
+
     return rocket.id
   }
 }
