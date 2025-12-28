@@ -13,6 +13,7 @@ export abstract class Mailable implements Queueable {
   protected renderer?: Renderer
   private rendererResolver?: () => Promise<Renderer>
   protected renderData: Record<string, unknown> = {}
+  protected config?: MailConfig
 
   // ===== Fluent API (Envelope Construction) =====
 
@@ -134,9 +135,20 @@ export abstract class Mailable implements Queueable {
    * Queue the mailable for sending.
    */
   async queue(): Promise<void> {
-    // Avoid circular dependency by dynamically importing OrbitSignal
-    const { OrbitSignal } = await import('./OrbitSignal')
-    return OrbitSignal.getInstance().queue(this)
+    // We should ideally use the container to get the mail service
+    // But since Mailable might be used outside a core context, we'll try a safe approach.
+    try {
+      // biome-ignore lint/suspicious/noTsIgnore: Global access to app() helper from core
+      // @ts-ignore
+      const { app } = await import('gravito-core')
+      const mail = app().container.make<any>('mail')
+      if (mail) {
+        return mail.queue(this)
+      }
+    } catch (_e) {
+      // Fallback if core is not available
+      console.warn('[Mailable] Could not auto-resolve mail service for queuing.')
+    }
   }
 
   // ===== I18n Support =====
@@ -178,6 +190,7 @@ export abstract class Mailable implements Queueable {
    */
   async buildEnvelope(configPromise: MailConfig | Promise<MailConfig>): Promise<Envelope> {
     const config = await Promise.resolve(configPromise)
+    this.config = config
 
     // Inject translator from config if available
     if (config.translator) {
@@ -188,8 +201,8 @@ export abstract class Mailable implements Queueable {
 
     // Ensure Renderer is initialized if using TemplateRenderer with config path
     if (this.renderer instanceof TemplateRenderer && config.viewsDir) {
-      // Here we could re-initialize TemplateRenderer if we had a setter for viewsDir
-      // For now, it defaults to process.cwd()/src/emails which is standard
+      // Re-initialize or update TemplateRenderer with the correct directory
+      this.renderer = new TemplateRenderer((this.renderer as any).template, config.viewsDir)
     }
 
     const envelope: Envelope = {

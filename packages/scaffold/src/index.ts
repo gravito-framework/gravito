@@ -16,6 +16,7 @@ export {
 export { CleanArchitectureGenerator } from './generators/CleanArchitectureGenerator'
 export { DddGenerator } from './generators/DddGenerator'
 export { EnterpriseMvcGenerator } from './generators/EnterpriseMvcGenerator'
+export { SatelliteGenerator } from './generators/SatelliteGenerator'
 
 // Stub Generator
 export { type StubConfig, StubGenerator, type StubVariables } from './generators/StubGenerator'

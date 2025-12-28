@@ -479,6 +479,11 @@ cli
   .command('make:request <name>', 'Create a new form request class')
   .action((name) => make.run('request', name))
 
+cli
+  .command('make:satellite <name>', 'Create a new Gravito Satellite (Plugin)')
+  .option('--internal', 'Create as an internal official satellite in satellites/ directory')
+  .action((name, options) => make.run('satellite', name, options))
+
 // --- Tinker ---
 cli.command('tinker', 'Interact with your application').action(() => tinker())
 

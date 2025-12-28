@@ -1,92 +1,84 @@
-# Gravito Satellite (插件系統) 技術規範書 v1.0
+# 🛰️ Gravito Satellite Specification (GASS) v1.0
 
-> **核心哲學**：Satellite (衛星) 是環繞著 PlanetCore (行星) 運行的功能單元。它們既能獨立存在（解耦），又能透過「引力」（DI & Hooks）互相擴充與協作。
+這份文件定義了 Gravito 生態系中衛星模組（Satellite）的開發標準，旨在確保模組的高內聚、低耦合以及卓越的開發者體驗（DX）。
 
----
+## 1. 核心哲學
+- **DDD 驅動**: 邏輯應位於 Domain 層，而非框架層。
+- **配置化優先**: 所有的品牌標誌、顏色與外部連結都應是可配置的。
+- **Hooks 通訊**: 插件之間透過 Hook 而非直接引用來協作。
 
-## 1. 架構標準 (Architecture Standard)
-
-所有 Satellite 必須嚴格遵循 **DDD (領域驅動設計)** 與 **Clean Architecture (乾淨架構)**。
-
-### 1.1 內部目錄結構
+## 2. 標準目錄結構
 ```text
-@gravito/satellite-name/
-├── src/
-│   ├── Domain/          # 核心業務邏輯 (Entity, VO, Domain Services)
-│   │   └── Contracts/   # 介面定義 (對外承諾的功能與需要的依賴)
-│   ├── Application/     # 應用層 (UseCases, Command/Query Handlers)
-│   │   └── DTOs/        # 數據傳輸對象
-│   ├── Infrastructure/  # 基礎設施 (Persistence, External API)
-│   │   └── Persistence/Migrations/ # 獨立的資料遷移檔
-│   ├── Interface/       # 接口層 (Controllers, CLI, Event Handlers)
-│   └── index.ts         # 插件入口 (SatelliteServiceProvider)
-├── manifest.json        # 插件能力宣言 (描述提供哪些 Service 與需要的 Bridge)
-├── tests/               # 測試代碼 (Unit, Integration)
-├── package.json
-└── README.md
+src/
+├── Domain/           # 業務邏輯、實體 (Entities)、介面定義
+├── Application/      # UseCases (業務流程)、DTOs (數據交換)
+├── Infrastructure/   # 持久化實現 (Repositories)、外部驅動
+└── Interface/        # HTTP 中間件、控制器、CLI 指令
 ```
 
-### 1.2 依賴原則
-- **內向依賴**：`Infrastructure` -> `Application` -> `Domain` (不允許反向)。
-- **核心依賴**：僅允許依賴 `@gravito/enterprise` 與 `gravito-core`。
-- **絕對解耦**：嚴禁直接 `import` 其他 Satellite。所有交互必須透過介面或事件。
+## 3. 命名與註冊規範
+- **類名**: 必須以 `ServiceProvider` 結尾（如 `MembershipServiceProvider`）。
+- **容器鍵名**: 建議使用 `插件名.功能` 格式（如 `membership.register`）。
+- **Hook 命名**: `插件名:動作`（如 `membership:registered`）。
+
+## 4. 品牌抽象化標準
+所有的郵件或 UI 內容應遵循以下獲取模式：
+```typescript
+const brandingName = core.config.get('membership.branding.name', 'Default App');
+```
+
+## 5. 隊列配套標準
+所有對外發出的副作用（Side Effects）動作應預設支援排程：
+```typescript
+// 優雅降級模式
+async queue(job) {
+  const queue = container.make('queue');
+  if (queue) return queue.push(job);
+  return this.send(job); // 同步回退
+}
+```
+
+## 6. 驗證清單 (CI Checklist)
+- [ ] 是否在 `satellites/` 目錄下？
+- [ ] 是否導出了 `ServiceProvider`？
+- [ ] 所有的 `require()` 是否已替換為 `import`？
+- [ ] 是否包含 `README.md` 與 `docs/EXTENDING.md`？
+- [ ] 是否通過了 `grand-review.ts` 整合測試？
+
+## 7. 環境相容性與工具鏈避雷指南 (Pitfalls)
+
+為了確保模組在 CI/CD 環境與各種執行環境（Bun/Node）下的穩定性，請務必遵循以下規範：
+
+### A. TypeScript 指令衝突
+- **陷阱**: 在本地開發時，若依賴包未建置，可能需要 `@ts-expect-error`；但 CI 環境中依賴包已就緒，會觸發「Unused Directive」錯誤。
+- **規範**: 
+  - 盡量避免使用指令。
+  - 若必須使用，請優先選用 `@ts-ignore` 並配合 `// biome-ignore` 防止 Linter 自動將其修復回 `@ts-expect-error`。
+  - 範例：
+    ```typescript
+    // biome-ignore lint/suspicious/noTsIgnore: 說明原因
+    // @ts-ignore
+    import { something } from '...'
+    ```
+
+### B. ESM 與路徑解析
+- **陷阱**: `__dirname` 與 `require()` 在純 ESM 模式下會報錯或失效。
+- **規範**: 
+  - 衛星模組必須全面使用頂層 `import`。
+  - 路徑解析請統一使用 `import.meta.dir` 與 `node:path` 模組。
+  - 禁止在 `.ts` 檔案中使用 `require()`，這會導致某些打包工具（如 tsup）在處理 CJS/ESM 混用時發生崩潰。
+
+### C. 依賴規範 (Monorepo)
+- **規範**: 所有的 `@gravito/*` 或 `gravito-core` 依賴必須標註為 `workspace:*`。
+- **優點**: 確保測試與建置時始終連結到專案內最新的原始碼，而非 NPM 上的舊版本。
+
+### D. 類型與值 (Imports)
+- **陷阱**: 僅以 `import type` 導入類別（如 Mapper），但在代碼中將其作為實體調用，會導致 `ReferenceError`。
+- **規範**: 若需要調用靜態方法或實例化，請確保使用標準 `import`。
+
+### E. 資料庫 Schema 一致性
+- **陷阱**: 手動寫測試 Schema 時漏掉欄位（如 `email_verified_at`）。
+- **規範**: 測試中的 `Schema.create` 應與 `Domain/Entities` 的屬性完全對齊，建議定期執行 `grand-review.ts` 進行全量欄位檢查。
 
 ---
-
-## 2. 資料主權與持久化 (Data Sovereignty)
-
-### 2.1 獨立 Schema 原則
-- 每個 Satellite 擁有獨立的資料架構 (Schema)。
-- **禁止外鍵 (FK)**：模組間禁止建立資料庫外鍵，僅透過邏輯 ID (UUID) 關聯。
-- **禁止跨模組 JOIN**：嚴禁在 A 模組中撰寫查詢 B 模組資料表的 SQL。
-
-### 2.2 遷移自動發現 (Discovery)
-- 插件必須透過入口類別暴露遷移路徑。
-- 腳手架工具負責在 `gravito migrate` 時彙整所有已安裝衛星的遷移任務。
-
-### 2.3 資料表擴充 (Schema Extension)
-- 允許透過 `Extension Satellite` 執行「增量遷移」(Incremental Migration)，在不改動原插件原始碼的情況下，對現有資料表進行 `ALTER TABLE`。
-
----
-
-## 3. 調度與行為編排 (Orchestration)
-
-### 3.1 標的導向開發 (Target-Oriented)
-- 插件開發者應將插件視為一個**「自治的原子 API」**，只對外提供原子化的功能。
-- **編排位置**：跨模組的業務流程必須寫在 **「主應用程式 (The Hub)」** 的 `Application/UseCases` 中。
-
-### 3.2 編排模式 (UseCase Orchestration)
-- 主應用程式擔任「指揮家」，在一個 UseCase 中依序呼叫不同衛星的 Service，並處理之間的數據轉換 (Mapping)。
-
----
-
-## 4. 組合與協助工具規範 (Composition & Tooling)
-
-### 4.1 智慧鏈結 (Smart Linking)
-- **`gravito satellite:link`**：自動掃描各衛星的 `manifest.json`，發現未滿足的依賴介面，並自動產生「橋接代碼 (Glue Code)」樣板。
-
-### 4.2 編排劇本 (Playbooks)
-- 提供針對常見場景（如電商結帳）的官方編排模板。開發者可透過腳手架快速生成成熟的跨模組調度邏輯。
-
-### 4.3 數據充水器 (Hydrators)
-- 提供工具自動將邏輯 ID (如 `user_id`) 轉換為人類可讀資訊 (如 `user_name`)，解決跨模組查詢的顯示需求。
-
----
-
-## 5. 擴充與裝飾 (Extension & Decoration)
-
-### 5.1 橫向擴充 (Hooks)
-- 利用 `HookManager` 在關鍵邏輯處保留掛鉤。
-- 每個 Satellite 必須在 `README.md` 中列出所有可供攔截的 `Actions` 與 `Filters`。
-
-### 5.2 縱向擴充 (DI Override)
-- 允許主應用程式透過 DI 容器重新綁定 (Rebind) 某個介面的實作，實現功能的完全替換。
-
----
-
-## 6. 合規性檢查 (Compliance)
-
-- [ ] 是否完全移除對其他插件的靜態引用？
-- [ ] 遷移檔案是否存放在規範目錄中？
-- [ ] 是否具備對應的 Mock 實作供組裝者測試？
-- [ ] `manifest.json` 是否清晰描述了 Capabilities 與 Requirements？
+*Created by Gravito Core Team.*

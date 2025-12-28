@@ -31,7 +31,7 @@
     },
     "examples/atlas-site": {
       "name": "atlas-site",
-      "version": "0.0.0",
+      "version": "0.0.1",
       "dependencies": {
         "@gravito/atlas": "workspace:*",
         "@gravito/photon": "workspace:*",
@@ -68,7 +68,7 @@
     },
     "examples/ecommerce-mvc": {
       "name": "example-ecommerce-mvc",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@gravito/atlas": "workspace:*",
         "@gravito/mass": "workspace:*",
@@ -115,7 +115,7 @@
     },
     "examples/luminosity-benchmark": {
       "name": "luminosity-benchmark",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@faker-js/faker": "^9.8.0",
         "@gravito/constellation": "workspace:*",
@@ -140,7 +140,7 @@
     },
     "examples/luminosity-site": {
       "name": "luminosity-marketing-site",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@gravito/freeze-vue": "workspace:*",
         "@gravito/ion": "workspace:*",
@@ -184,7 +184,7 @@
     },
     "examples/official-site": {
       "name": "gravito-official-site",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@gravito/constellation": "workspace:*",
         "@gravito/freeze": "workspace:*",
@@ -240,7 +240,7 @@
     },
     "examples/route-scanner-test": {
       "name": "route-scanner-test",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@gravito/luminosity": "workspace:*",
         "express": "^4.21.0",
@@ -263,7 +263,7 @@
     },
     "examples/spectrum-verification": {
       "name": "example-spectrum-verification",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@gravito/atlas": "workspace:*",
         "@gravito/spectrum": "workspace:*",
@@ -290,7 +290,7 @@
     },
     "packages/atlas": {
       "name": "@gravito/atlas",
-      "version": "1.0.0-beta.6",
+      "version": "1.0.0",
       "bin": {
         "orbit": "./src/cli.ts",
       },
@@ -660,7 +660,7 @@
     },
     "packages/luminosity": {
       "name": "@gravito/luminosity",
-      "version": "1.0.0-beta.6",
+      "version": "1.0.0",
       "bin": {
         "lux": "./dist/cli.js",
       },
@@ -676,7 +676,7 @@
     },
     "packages/luminosity-adapter-express": {
       "name": "@gravito/luminosity-adapter-express",
-      "version": "1.0.0-beta.6",
+      "version": "1.0.0",
       "dependencies": {
         "@gravito/luminosity": "1.0.0-beta.5",
       },
@@ -689,7 +689,7 @@
     },
     "packages/luminosity-adapter-photon": {
       "name": "@gravito/luminosity-adapter-photon",
-      "version": "1.0.0-beta.6",
+      "version": "1.0.0",
       "dependencies": {
         "@gravito/luminosity": "1.0.0-beta.6",
       },
@@ -703,7 +703,7 @@
     },
     "packages/luminosity-cli": {
       "name": "@gravito/luminosity-cli",
-      "version": "1.0.0-beta.6",
+      "version": "1.0.0",
       "bin": {
         "gravito-seo": "dist/bin/gravito-seo.js",
       },
@@ -977,7 +977,7 @@
     },
     "packages/spectrum": {
       "name": "@gravito/spectrum",
-      "version": "1.0.0-beta.1",
+      "version": "1.0.0",
       "devDependencies": {
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.57.0",
@@ -1028,6 +1028,23 @@
         "bun-types": "latest",
         "tsup": "^8.5.1",
         "typescript": "^5.9.3",
+      },
+    },
+    "satellites/membership": {
+      "name": "@gravito/satellite-membership",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/cosmos": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "@gravito/sentinel": "workspace:*",
+        "@gravito/signal": "workspace:*",
+        "@gravito/stasis": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
       },
     },
     "templates/basic": {
@@ -1417,6 +1434,8 @@
     "@gravito/ripple": ["@gravito/ripple@workspace:packages/ripple"],
 
     "@gravito/ripple-client": ["@gravito/ripple-client@workspace:packages/ripple-client"],
+
+    "@gravito/satellite-membership": ["@gravito/satellite-membership@workspace:satellites/membership"],
 
     "@gravito/scaffold": ["@gravito/scaffold@workspace:packages/scaffold"],
 

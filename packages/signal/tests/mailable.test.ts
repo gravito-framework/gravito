@@ -27,7 +27,7 @@ describe('OrbitSignal Core', () => {
   it('should send a simple email via transport', async () => {
     const transport = new MockTransport()
 
-    const mailer = OrbitSignal.configure({
+    const mailer = new OrbitSignal({
       from: { name: 'System', address: 'system@example.com' },
       transport: transport,
     })
