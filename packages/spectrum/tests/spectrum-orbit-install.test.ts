@@ -3,12 +3,6 @@ import { MemoryStorage } from '../src/storage/MemoryStorage'
 
 const queryListeners: Array<(query: any) => void> = []
 
-mock.module('@gravito/atlas', () => ({
-  Connection: {
-    queryListeners,
-  },
-}))
-
 const { SpectrumOrbit } = await import('../src/SpectrumOrbit')
 
 function createCore() {
@@ -45,7 +39,10 @@ describe('SpectrumOrbit install flow', () => {
     const storage = new MemoryStorage()
     const core = createCore()
 
-    const orbit = new SpectrumOrbit({ storage, sampleRate: 1 })
+    const orbit = new SpectrumOrbit(
+      { storage, sampleRate: 1 },
+      { atlas: { Connection: { queryListeners } } }
+    )
     await orbit.install(core as any)
 
     const middleware = core.routes['use:*']
@@ -68,7 +65,7 @@ describe('SpectrumOrbit install flow', () => {
     core.logger.debug('dbg')
     core.logger.warn('warn')
     core.logger.error('err')
-    expect((await storage.getLogs()).length).toBe(5)
+    expect((await storage.getLogs()).length).toBe(6)
 
     await new Promise((resolve) => setTimeout(resolve, 0))
     queryListeners[0]?.({ sql: 'select 1' })

@@ -28,6 +28,11 @@ export interface SpectrumConfig {
   sampleRate?: number
 }
 
+interface SpectrumOrbitDeps {
+  atlas?: { Connection?: { queryListeners: Array<(query: any) => void> } } | null
+  loadAtlas?: () => Promise<{ Connection?: { queryListeners: Array<(query: any) => void> } } | null>
+}
+
 export class SpectrumOrbit implements GravitoOrbit {
   static instance: SpectrumOrbit | undefined
   readonly name = 'spectrum'
@@ -40,8 +45,9 @@ export class SpectrumOrbit implements GravitoOrbit {
   private listeners: Set<(data: string) => void> = new Set()
 
   private warnedSecurity = false
+  private deps: SpectrumOrbitDeps
 
-  constructor(config: SpectrumConfig = {}) {
+  constructor(config: SpectrumConfig = {}, deps: SpectrumOrbitDeps = {}) {
     this.config = {
       path: config.path || '/gravito/spectrum',
       maxItems: config.maxItems || 100,
@@ -50,6 +56,7 @@ export class SpectrumOrbit implements GravitoOrbit {
       gate: config.gate,
       sampleRate: config.sampleRate ?? 1.0,
     }
+    this.deps = deps
     SpectrumOrbit.instance = this
   }
 
@@ -89,23 +96,49 @@ export class SpectrumOrbit implements GravitoOrbit {
 
   private setupDatabaseCollection(core: PlanetCore) {
     // Dynamically check if Atlas is available and try to hook into it
+    const attachListener = (atlas: {
+      Connection?: { queryListeners: Array<(query: any) => void> }
+    }) => {
+      if (!atlas?.Connection) {
+        return
+      }
+      atlas.Connection.queryListeners.push((query: any) => {
+        if (!this.shouldCapture()) {
+          return
+        }
+        const data = {
+          id: crypto.randomUUID(),
+          ...query,
+        }
+        this.config.storage.storeQuery(data)
+        this.broadcast('query', data)
+      })
+      core.logger.info('[Spectrum] Database query collection enabled')
+    }
+
+    if (this.deps.atlas) {
+      attachListener(this.deps.atlas)
+      return
+    }
+
+    if (this.deps.loadAtlas) {
+      this.deps
+        .loadAtlas()
+        .then((atlas) => {
+          if (atlas) {
+            attachListener(atlas)
+          }
+        })
+        .catch((_e) => {
+          // Atlas not found, skip
+        })
+      return
+    }
+
     try {
       import('@gravito/atlas')
         .then((atlas) => {
-          if (atlas?.Connection) {
-            atlas.Connection.queryListeners.push((query: any) => {
-              if (!this.shouldCapture()) {
-                return
-              }
-              const data = {
-                id: crypto.randomUUID(),
-                ...query,
-              }
-              this.config.storage.storeQuery(data)
-              this.broadcast('query', data)
-            })
-            core.logger.info('[Spectrum] Database query collection enabled')
-          }
+          attachListener(atlas)
         })
         .catch((_e) => {
           // Atlas not found, skip

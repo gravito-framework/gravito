@@ -1,10 +1,4 @@
-import { describe, expect, mock, test } from 'bun:test'
-
-mock.module('@gravito/photon/jwt', () => ({
-  verify: async () => {
-    throw new Error('invalid token')
-  },
-}))
+import { describe, expect, test } from 'bun:test'
 
 const { JwtGuard } = await import('../src/guards/JwtGuard')
 
@@ -22,7 +16,11 @@ describe('JwtGuard invalid token', () => {
       validateCredentials: async () => true,
     }
 
-    const guard = new JwtGuard(provider as any, ctx as any, 'secret')
+    const guard = new JwtGuard(provider as any, ctx as any, 'secret', 'HS256', false, {
+      verify: async () => {
+        throw new Error('invalid token')
+      },
+    })
     expect(await guard.user()).toBeNull()
   })
 })

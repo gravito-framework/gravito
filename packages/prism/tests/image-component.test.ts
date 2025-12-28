@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, mock } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test'
 
 mock.module('react', () => ({}))
 mock.module('react/jsx-runtime', () => ({
@@ -15,6 +15,10 @@ let Image: typeof import('../src/components/Image').Image
 
 beforeAll(async () => {
   ;({ Image } = await import('../src/components/Image'))
+})
+
+afterAll(() => {
+  mock.restore()
 })
 
 describe('Image component', () => {

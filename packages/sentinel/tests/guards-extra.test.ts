@@ -1,9 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test'
 
-mock.module('@gravito/photon/jwt', () => ({
-  verify: async (_token: string) => ({ sub: 'user-1' }),
-}))
-
 const { JwtGuard } = await import('../src/guards/JwtGuard')
 const { SessionGuard } = await import('../src/guards/SessionGuard')
 const { TokenGuard } = await import('../src/guards/TokenGuard')
@@ -126,7 +122,9 @@ describe('JwtGuard', () => {
       validateCredentials: async () => true,
     }
 
-    const guard = new JwtGuard(provider as any, ctx as any, 'secret')
+    const guard = new JwtGuard(provider as any, ctx as any, 'secret', 'HS256', false, {
+      verify: async (_token: string) => ({ sub: 'user-1' }),
+    })
     expect(await guard.user()).toBeDefined()
     expect(await guard.id()).toBe('user-1')
   })

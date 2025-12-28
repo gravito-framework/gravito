@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, mock } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test'
 
 const detectorState = { isStatic: true, currentLocale: 'en' }
 
@@ -100,6 +100,10 @@ beforeAll(async () => {
   useFreeze = module.useFreeze
   defineConfig = module.defineConfig
   createDetector = module.createDetector
+})
+
+afterAll(() => {
+  mock.restore()
 })
 
 describe('@gravito/freeze-react', () => {

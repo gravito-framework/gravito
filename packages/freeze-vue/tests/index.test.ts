@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, mock } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test'
 
 const injectionStore = new Map<unknown, unknown>()
 
@@ -49,6 +49,10 @@ beforeAll(async () => {
   FREEZE_KEY = module.FREEZE_KEY
   StaticLink = module.StaticLink
   LocaleSwitcher = module.LocaleSwitcher
+})
+
+afterAll(() => {
+  mock.restore()
 })
 
 describe('@gravito/freeze-vue', () => {

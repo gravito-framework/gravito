@@ -83,10 +83,17 @@ export abstract class Mailable implements Queueable {
    * Set the content using a React component.
    * Dynamically imports ReactRenderer to avoid hard dependency errors if React is not installed.
    */
-  react<P extends object>(component: ComponentType, props?: P): this {
+  react<P extends object>(
+    component: ComponentType,
+    props?: P,
+    deps?: {
+      createElement?: (...args: any[]) => any
+      renderToStaticMarkup?: (element: any) => string
+    }
+  ): this {
     this.rendererResolver = async () => {
       const { ReactRenderer } = await import('./renderers/ReactRenderer')
-      return new ReactRenderer(component, props)
+      return new ReactRenderer(component, props, deps)
     }
     return this
   }
@@ -95,10 +102,18 @@ export abstract class Mailable implements Queueable {
    * Set the content using a Vue component.
    * Dynamically imports VueRenderer to avoid hard dependency errors if Vue is not installed.
    */
-  vue<P extends object>(component: ComponentType, props?: P): this {
+  vue<P extends object>(
+    component: ComponentType,
+    props?: P,
+    deps?: {
+      createSSRApp?: (...args: any[]) => any
+      h?: (...args: any[]) => any
+      renderToString?: (app: any) => Promise<string>
+    }
+  ): this {
     this.rendererResolver = async () => {
       const { VueRenderer } = await import('./renderers/VueRenderer')
-      return new VueRenderer(component, props as any)
+      return new VueRenderer(component, props as any, deps)
     }
     return this
   }

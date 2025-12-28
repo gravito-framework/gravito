@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 import * as honoBun from 'hono/bun'
 import * as honoClient from 'hono/client'
@@ -15,16 +15,6 @@ import * as regExpRouterExports from '../src/router/reg-exp-router'
 import * as trieRouterExports from '../src/router/trie-router'
 
 const keys = (mod: Record<string, unknown>) => Object.keys(mod).sort()
-
-const jwtStub = {
-  jwt: () => null,
-  verify: () => null,
-  decode: () => null,
-  sign: () => null,
-  verifyWithJwks: () => null,
-}
-
-mock.module('hono/jwt', () => jwtStub)
 
 describe('photon exports', () => {
   it('aliases Hono as Photon', () => {
