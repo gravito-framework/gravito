@@ -48,8 +48,10 @@ export class DockerAdapter implements IDockerAdapter {
     // 我們取第一行並提取端口
     const firstLine = stdout.split('\n')[0]
     const match = firstLine.match(/:(\d+)$/)
-    if (!match) throw new Error(`無法獲取容器映射端口: ${stdout}`)
-    return parseInt(match[1])
+    if (!match) {
+      throw new Error(`無法獲取容器映射端口: ${stdout}`)
+    }
+    return parseInt(match[1], 10)
   }
 
   async copyFiles(containerId: string, sourcePath: string, targetPath: string): Promise<void> {
@@ -75,7 +77,7 @@ export class DockerAdapter implements IDockerAdapter {
   async removeContainerByLabel(label: string): Promise<void> {
     const listProc = Bun.spawn(['docker', 'ps', '-aq', '--filter', `label=${label}`])
     const ids = await new Response(listProc.stdout).text()
-    
+
     if (ids.trim()) {
       const idList = ids.trim().split('\n')
       await Bun.spawn(['docker', 'rm', '-f', ...idList]).exited
@@ -92,7 +94,9 @@ export class DockerAdapter implements IDockerAdapter {
       const decoder = new TextDecoder()
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
+        if (done) {
+          break
+        }
         onData(decoder.decode(value))
       }
     }

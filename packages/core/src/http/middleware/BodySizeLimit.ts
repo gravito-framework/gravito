@@ -1,4 +1,4 @@
-import type { GravitoContext, GravitoMiddleware } from '../types'
+import type { GravitoMiddleware } from '../types'
 
 export type BodySizeLimitOptions = {
   methods?: string[]

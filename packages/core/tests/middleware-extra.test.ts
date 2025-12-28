@@ -18,9 +18,13 @@ const makeContext = (options: {
     req: {
       method: options.method ?? 'GET',
       header: (key: string) => {
-        if (headers[key] !== undefined) return headers[key]
+        if (headers[key] !== undefined) {
+          return headers[key]
+        }
         const lowerKey = key.toLowerCase()
-        if (headers[lowerKey] !== undefined) return headers[lowerKey]
+        if (headers[lowerKey] !== undefined) {
+          return headers[lowerKey]
+        }
         const found = Object.keys(headers).find((k) => k.toLowerCase() === lowerKey)
         return found ? headers[found] : undefined
       },

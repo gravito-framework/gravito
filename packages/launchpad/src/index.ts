@@ -85,11 +85,14 @@ class LaunchpadServiceProvider extends ServiceProvider {
 
     // [New] 啟動時自動清理殘留容器，維持系統純淨
     logger.info('[Launchpad] 正在掃描並清理殘留資源...')
-    docker.removeContainerByLabel('gravito-origin=launchpad').then(() => {
-      logger.info('[Launchpad] 資源清理完畢，系統就緒。')
-    }).catch(err => {
-      logger.warn('[Launchpad] 自動清理失敗 (可能是環境無容器):', err.message)
-    })
+    docker
+      .removeContainerByLabel('gravito-origin=launchpad')
+      .then(() => {
+        logger.info('[Launchpad] 資源清理完畢，系統就緒。')
+      })
+      .catch((err) => {
+        logger.warn('[Launchpad] 自動清理失敗 (可能是環境無容器):', err.message)
+      })
   }
 }
 
@@ -207,7 +210,9 @@ export async function bootstrapLaunchpad() {
     port: liftoffConfig.port,
     websocket: ripple.getHandler(),
     fetch: (req: Request, server: any) => {
-      if (ripple.getServer().upgrade(req, server)) return
+      if (ripple.getServer().upgrade(req, server)) {
+        return
+      }
       return liftoffConfig.fetch(req, server)
     },
   }

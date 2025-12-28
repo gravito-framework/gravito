@@ -1,5 +1,5 @@
 import { mkdir } from 'node:fs/promises'
-import { isAbsolute, join, normalize, resolve, sep } from 'node:path'
+import { isAbsolute, normalize, resolve, sep } from 'node:path'
 import type { GravitoContext, GravitoNext, GravitoOrbit, PlanetCore } from 'gravito-core'
 
 export interface StorageProvider {

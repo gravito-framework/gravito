@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
 // @ts-expect-error
 import { createRippleClient } from '@gravito/ripple-client'
+import { useEffect, useState } from 'react'
 
 export interface LogData {
   rocketId: string
@@ -15,7 +15,7 @@ export interface StatsData {
   timestamp: number
 }
 
-export function useTelemetry(url: string = 'ws://localhost:4000/ws') {
+export function useTelemetry(url = 'ws://localhost:4000/ws') {
   const [logs, setLogs] = useState<LogData[]>([])
   const [stats, setStats] = useState<Record<string, StatsData>>({})
   const [connected, setConnected] = useState(false)
@@ -25,7 +25,7 @@ export function useTelemetry(url: string = 'ws://localhost:4000/ws') {
     // 1. 注意 URL 通常會加上 /ws (後端 RippleOrbit 預設路徑)
     const client = createRippleClient({
       host: url,
-      autoConnect: false // 我們手動控制
+      autoConnect: false, // 我們手動控制
     })
 
     const start = async () => {
@@ -43,11 +43,11 @@ export function useTelemetry(url: string = 'ws://localhost:4000/ws') {
           const timestamp = Date.now()
 
           if (type === 'log') {
-            setLogs(prev => [...prev.slice(-99), { ...data, timestamp }])
+            setLogs((prev) => [...prev.slice(-99), { ...data, timestamp }])
           } else if (type === 'stats') {
-            setStats(prev => ({
+            setStats((prev) => ({
               ...prev,
-              [data.rocketId]: { ...data, timestamp }
+              [data.rocketId]: { ...data, timestamp },
             }))
           }
         })

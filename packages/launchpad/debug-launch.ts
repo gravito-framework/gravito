@@ -5,7 +5,7 @@ async function run() {
   console.log('🤖 Starting Auto-Debug Sequence...')
 
   // 1. Cleanup
-  const docker = new DockerAdapter()
+  const _docker = new DockerAdapter()
   try {
     const containers = await Bun.spawn([
       'docker',
@@ -18,7 +18,7 @@ async function run() {
       console.log('🧹 Cleaning up old containers...')
       await Bun.spawn(['docker', 'rm', '-f', ...containers.trim().split('\n')]).exited
     }
-  } catch (e) {}
+  } catch (_e) {}
 
   // 2. Start Server
   const config = await bootstrapLaunchpad()

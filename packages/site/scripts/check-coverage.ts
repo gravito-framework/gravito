@@ -5,7 +5,7 @@ const lcovPath = process.argv[2] ?? 'coverage/lcov.info'
 const threshold = Number.parseFloat(process.env.COVERAGE_THRESHOLD ?? '80')
 
 const root = resolve(process.cwd())
-const srcRoot = resolve(root, 'src') + '/'
+const srcRoot = `${resolve(root, 'src')}/`
 
 const content = readFileSync(lcovPath, 'utf-8')
 const lines = content.split('\n')
