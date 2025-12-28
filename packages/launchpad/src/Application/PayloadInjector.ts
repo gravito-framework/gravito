@@ -37,12 +37,11 @@ export class PayloadInjector {
     }
 
     console.log(`[PayloadInjector] 點火！`)
-    // 實際應用中這裡應該使用後台執行 (detached)，或透過 process manager (如 pm2/supervisord)
-    // 這裡我們模擬執行 index.ts
-    // 注意：這裡不應該 await 直到結束，因為這是 server process
-    // 但為了 MVP 測試，我們先假設它會快速回傳或我們只驗證啟動
+    // 真正啟動應用程式 (非同步執行，不等待結束)
+    this.docker.executeCommand(containerId, ['bun', 'run', '/app/examples/demo.ts']).catch((e) => {
+      console.error(`[PayloadInjector] 運行異常:`, e)
+    })
 
-    // 正確做法：Rocket.ignite() 標記狀態，實際執行可能由另一個監控程序確認
     rocket.ignite()
   }
 }
