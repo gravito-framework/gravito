@@ -934,22 +934,22 @@
         "nodemailer": "^7.0.11",
       },
       "devDependencies": {
-        "@gravito/prism": "1.0.0-beta.6",
-        "@gravito/stream": "1.0.0-beta.1",
+        "@gravito/prism": "workspace:*",
+        "@gravito/stream": "workspace:*",
         "@types/nodemailer": "^6.4.14",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vue/server-renderer": "^3.0.0",
         "bun-types": "latest",
-        "gravito-core": "1.0.0-beta.6",
+        "gravito-core": "workspace:*",
         "tsup": "8.5.1",
         "typescript": "^5.0.0",
         "vue": "^3.0.0",
       },
       "peerDependencies": {
-        "@gravito/prism": "1.0.0-beta.6",
-        "@gravito/stream": "1.0.0-beta.1",
-        "gravito-core": "1.0.0-beta.6",
+        "@gravito/prism": "workspace:*",
+        "@gravito/stream": "workspace:*",
+        "gravito-core": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "vue": "^3.0.0",
@@ -1028,6 +1028,21 @@
         "bun-types": "latest",
         "tsup": "^8.5.1",
         "typescript": "^5.9.3",
+      },
+    },
+    "satellites/catalog": {
+      "name": "gravito-satellite-catalog",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "@gravito/signal": "workspace:*",
+        "@gravito/stasis": "^1.0.0-beta.1",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
       },
     },
     "satellites/membership": {
@@ -2290,6 +2305,8 @@
     "gravito-core": ["gravito-core@workspace:packages/core"],
 
     "gravito-official-site": ["gravito-official-site@workspace:examples/official-site"],
+
+    "gravito-satellite-catalog": ["gravito-satellite-catalog@workspace:satellites/catalog"],
 
     "gray-matter": ["gray-matter@4.0.3", "", { "dependencies": { "js-yaml": "^3.13.1", "kind-of": "^6.0.2", "section-matter": "^1.0.0", "strip-bom-string": "^1.0.0" } }, "sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q=="],
 

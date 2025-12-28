@@ -10,6 +10,8 @@
     "includes": [
       "packages/**/*.ts",
       "packages/**/*.tsx",
+      "satellites/**/*.ts",
+      "satellites/**/*.tsx",
       "templates/**/*.ts",
       "templates/**/*.tsx",
       "examples/**/*.ts",
