@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "gravito-core": "workspace:*",
-    "@gravito/enterprise": "workspace:*"
+    "@gravito/enterprise": "workspace:*",
+    "@gravito/stasis": "workspace:*",
+    "@gravito/ripple": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

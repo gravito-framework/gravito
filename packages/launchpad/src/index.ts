@@ -1,3 +1,6 @@
+import { OrbitRipple } from '@gravito/ripple'
+import { OrbitCache } from '@gravito/stasis'
+import { type GravitoOrbit, PlanetCore } from 'gravito-core'
 import { MissionControl } from './Application/MissionControl'
 import { PayloadInjector } from './Application/PayloadInjector'
 import { PoolManager } from './Application/PoolManager'
@@ -5,7 +8,7 @@ import { RefurbishUnit } from './Application/RefurbishUnit'
 import { Mission } from './Domain/Mission'
 import { DockerAdapter } from './Infrastructure/Docker/DockerAdapter'
 import { ShellGitAdapter } from './Infrastructure/Git/ShellGitAdapter'
-import { InMemoryRocketRepository } from './Infrastructure/Persistence/InMemoryRocketRepository'
+import { CachedRocketRepository } from './Infrastructure/Persistence/CachedRocketRepository'
 
 export * from './Application/MissionControl'
 export * from './Application/PayloadInjector'
@@ -16,64 +19,71 @@ export * from './Domain/Rocket'
 export * from './Domain/RocketStatus'
 
 /**
- * 簡易發射基地伺服器原型
+ * Gravito Launchpad Orbit
  */
-export function createLaunchpadServer() {
-  const docker = new DockerAdapter()
-  const repo = new InMemoryRocketRepository()
-  const git = new ShellGitAdapter()
-  const refurbish = new RefurbishUnit(docker)
+export class LaunchpadOrbit implements GravitoOrbit {
+  async install(core: PlanetCore): Promise<void> {
+    const logger = core.logger
 
-  const pool = new PoolManager(docker, repo, refurbish)
-  const injector = new PayloadInjector(docker, git)
-  const ctrl = new MissionControl(pool, injector, docker)
+    // 1. Initialize Infrastructure
+    const docker = new DockerAdapter()
+    const git = new ShellGitAdapter()
 
-  return Bun.serve({
-    port: 4000,
-    async fetch(req, server) {
-      // 處理 WebSocket 升級
-      if (server.upgrade(req)) {
-        return
-      }
+    // 取得 Cache Service (由 OrbitCache 注入)
+    // 注意：Orbit 之間有安裝順序依賴，Launchpad 依賴 Cache
+    const cache = core.container.make<any>('cache')
+    const repo = new CachedRocketRepository(cache)
+    const refurbish = new RefurbishUnit(docker)
 
-      const url = new URL(req.url)
+    // 2. Initialize Application Services
+    const pool = new PoolManager(docker, repo, refurbish)
+    const injector = new PayloadInjector(docker, git)
+    const ctrl = new MissionControl(pool, injector, docker)
 
-      // 1. 發射任務 (模擬 PR Open/Update)
-      if (url.pathname === '/launch' && req.method === 'POST') {
-        const body = (await req.json()) as any
-        const mission = Mission.create({
-          id: body.id || `pr-${Date.now()}`,
-          repoUrl: body.repoUrl,
-          branch: body.branch || 'main',
-          commitSha: body.commitSha || 'latest',
-        })
+    // 3. Register Routes
+    core.router.post('/launch', async (c) => {
+      const body = (await c.req.json()) as any
+      const mission = Mission.create({
+        id: body.id || `pr-${Date.now()}`,
+        repoUrl: body.repoUrl,
+        branch: body.branch || 'main',
+        commitSha: body.commitSha || 'latest',
+      })
 
-        const rocketId = await ctrl.launch(mission, (type, data) => {
-          server.publish('telemetry', JSON.stringify({ type, data }))
-        })
+      const rocketId = await ctrl.launch(mission, (type, data) => {
+        // 使用 Ripple 進行廣播
+        // @ts-expect-error Ripple injection
+        core.ripple.publish('telemetry', { type, data })
+      })
 
-        return Response.json({ success: true, rocketId })
-      }
+      return c.json({ success: true, rocketId })
+    })
 
-      // 2. 回收任務 (模擬 PR Closed/Merged)
-      if (url.pathname === '/recycle' && req.method === 'POST') {
-        const body = (await req.json()) as any
-        if (!body.missionId) return Response.json({ error: 'missionId required' }, { status: 400 })
+    core.router.post('/recycle', async (c) => {
+      const body = (await c.req.json()) as any
+      if (!body.missionId) return c.json({ error: 'missionId required' }, 400)
 
-        await pool.recycle(body.missionId)
-        return Response.json({ success: true })
-      }
+      await pool.recycle(body.missionId)
+      return c.json({ success: true })
+    })
 
-      return new Response('Gravito Launchpad Command Center')
+    logger.info('[Launchpad] Mission Control orbit installed.')
+  }
+}
+
+/**
+ * 一鍵啟動 Launchpad 應用程式
+ */
+export async function bootstrapLaunchpad() {
+  const core = await PlanetCore.boot({
+    config: {
+      APP_NAME: 'Gravito Launchpad',
+      PORT: 4000,
+      // Cache 設定：使用檔案儲存以達到持久化
+      CACHE_DRIVER: 'file',
     },
-    websocket: {
-      open(ws) {
-        ws.subscribe('telemetry')
-        console.log('[WS] 客戶端已連線，已訂閱遙測頻道')
-      },
-      message(_ws, message) {
-        console.log(`[WS] 收到訊息: ${message}`)
-      },
-    },
+    orbits: [new OrbitCache(), new OrbitRipple(), new LaunchpadOrbit()],
   })
+
+  return core.liftoff()
 }

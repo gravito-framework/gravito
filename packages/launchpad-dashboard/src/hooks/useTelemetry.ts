@@ -1,3 +1,5 @@
+// @ts-expect-error
+import { createRippleClient } from '@gravito/ripple-client'
 import { useEffect, useState } from 'react'
 
 export interface LogData {
@@ -19,47 +21,39 @@ export function useTelemetry(url = 'ws://localhost:4000') {
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
-    let ws: WebSocket
-    let reconnectTimer: any
+    // 使用 Gravito Ripple Client
+    const client = createRippleClient({
+      url,
+      autoConnect: true,
+    })
 
-    const connect = () => {
-      ws = new WebSocket(url)
+    client.on('connect', () => {
+      setConnected(true)
+      console.log('[Telemetry] Ripple Connected')
+    })
 
-      ws.onopen = () => {
-        setConnected(true)
-        console.log('[Telemetry] Connected')
+    client.on('disconnect', () => {
+      setConnected(false)
+      console.log('[Telemetry] Ripple Disconnected')
+    })
+
+    // 訂閱 telemetry 頻道
+    client.subscribe('telemetry', (payload: any) => {
+      const { type, data } = payload
+      const timestamp = Date.now()
+
+      if (type === 'log') {
+        setLogs((prev) => [...prev.slice(-99), { ...data, timestamp }])
+      } else if (type === 'stats') {
+        setStats((prev) => ({
+          ...prev,
+          [data.rocketId]: { ...data, timestamp },
+        }))
       }
-
-      ws.onclose = () => {
-        setConnected(false)
-        console.log('[Telemetry] Disconnected, reconnecting...')
-        reconnectTimer = setTimeout(connect, 3000)
-      }
-
-      ws.onmessage = (event) => {
-        try {
-          const { type, data } = JSON.parse(event.data)
-          const timestamp = Date.now()
-
-          if (type === 'log') {
-            setLogs((prev) => [...prev.slice(-99), { ...data, timestamp }])
-          } else if (type === 'stats') {
-            setStats((prev) => ({
-              ...prev,
-              [data.rocketId]: { ...data, timestamp },
-            }))
-          }
-        } catch (e) {
-          console.error('Parse error', e)
-        }
-      }
-    }
-
-    connect()
+    })
 
     return () => {
-      ws?.close()
-      clearTimeout(reconnectTimer)
+      client.disconnect()
     }
   }, [url])
 
