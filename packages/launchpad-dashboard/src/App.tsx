@@ -86,18 +86,34 @@ function App() {
               <Radio className="w-4 h-4 text-slate-500" />
               <h2 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Live Frequency</h2>
             </div>
-            <div className="h-32 bg-sky-500/5 border border-sky-500/10 rounded relative overflow-hidden">
-               {/* Waveform Mock */}
-               <div className="absolute inset-0 flex items-center justify-around px-2 gap-1">
-                  {[...Array(12)].map((_, i) => (
+            <div className="h-32 bg-sky-500/5 border border-sky-500/10 rounded-sm relative overflow-hidden group">
+               {/* 16 根具備非同步、不對稱跳動感的線條 */}
+               <div className="absolute inset-0 flex items-center justify-around px-4 gap-1.5">
+                  {[...Array(16)].map((_, i) => (
                     <div 
                       key={i} 
-                      className="w-1 bg-sky-500/40 rounded-full animate-pulse" 
-                      style={{ height: `${20 + Math.random() * 60}%`, animationDelay: `${i * 0.1}s` }}
+                      className="w-1.5 bg-sky-500/40 rounded-full transition-all duration-700 group-hover:bg-sky-400/60" 
+                      style={{ 
+                        height: `${20 + Math.random() * 40}%`,
+                        animation: `chaotic-signal ${1 + Math.random() * 2.5}s cubic-bezier(0.45, 0.05, 0.55, 0.95) ${i * 0.13}s infinite`,
+                        boxShadow: '0 0 8px rgba(14, 165, 233, 0.05)'
+                      }}
                     ></div>
                   ))}
                </div>
             </div>
+            
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes chaotic-signal {
+                0% { transform: scaleY(1); opacity: 0.3; }
+                15% { transform: scaleY(1.4); opacity: 0.6; }
+                30% { transform: scaleY(0.7); opacity: 0.4; }
+                55% { transform: scaleY(1.8); opacity: 0.8; }
+                70% { transform: scaleY(0.9); opacity: 0.5; }
+                85% { transform: scaleY(1.3); opacity: 0.7; }
+                100% { transform: scaleY(1); opacity: 0.3; }
+              }
+            `}} />
           </section>
         </aside>
 
@@ -156,7 +172,7 @@ function App() {
                       <div className="flex-1 bg-black p-4 font-mono text-[10px] min-h-[200px] flex flex-col relative">
                         <div className="absolute top-2 right-2 text-white/5 uppercase font-black tracking-widest select-none">Log Stream</div>
                         <div className="flex-1 overflow-y-auto space-y-1 pr-2 custom-scrollbar">
-                          {rocketLogs.length === 0 && <div className="text-slate-800">>>> ESTABLISHING DATALINK...</div>}
+                          {rocketLogs.length === 0 && <div className="text-slate-800">{"\u003e\u003e\u003e"} ESTABLISHING DATALINK...</div>}
                           {rocketLogs.map((log, i) => (
                             <div key={i} className="flex gap-2">
                               <span className="text-sky-500/40 select-none">[{new Date(log.timestamp).toTimeString().slice(0, 8)}]</span>
@@ -182,7 +198,7 @@ function App() {
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="text-[10px] font-mono text-slate-500 truncate animate-pulse">
-            {logs.length > 0 ? `> Incoming data from ${logs[logs.length-1].rocketId}: ${logs[logs.length-1].text}` : '> SYSTEM READY. STANDING BY FOR MISSION ASSIGNMENT...'}
+            {logs.length > 0 ? `\u003e Incoming data from ${logs[logs.length-1].rocketId}: ${logs[logs.length-1].text}` : '\u003e SYSTEM READY. STANDING BY FOR MISSION ASSIGNMENT...'}
           </div>
         </div>
         <div className="flex gap-4 text-[9px] font-bold uppercase tracking-tighter text-slate-600">
