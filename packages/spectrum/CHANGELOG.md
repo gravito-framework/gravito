@@ -1,5 +1,11 @@
 # @gravito/spectrum
 
+## 1.0.1-beta.1
+
+### Patch Changes
+
+- beta republish to align with 1.0 beta rollout
+
 ## 1.0.0
 
 ### Minor Changes
