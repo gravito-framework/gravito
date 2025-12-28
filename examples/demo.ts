@@ -35,7 +35,8 @@ core.hooks.addFilter('api:response', async (data) => {
 })
 
 // 4. Static file serving
-core.router.use('/static/*', serveStatic({ root: './templates/basic/' }))
+// Fix applied: use core.adapter.use instead of core.router.use
+core.adapter.use('/static/*', serveStatic({ root: './templates/basic/' }))
 core.router.get('/favicon.ico', serveStatic({ path: './templates/basic/static/favicon.ico' }))
 
 // 5. HTML Page Routes
