@@ -12,7 +12,7 @@ mock.module('@gravito/plasma', () => ({
 
 const { OrbitPulsar } = await import('../src')
 
-type Middleware = (c: any, next: () => Promise<void>) => Promise<Response | void>
+type Middleware = (c: any, next: () => Promise<void>) => Promise<Response | undefined>
 
 const createCore = (sessionConfig?: any) => {
   let middleware: Middleware | null = null

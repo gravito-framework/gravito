@@ -30,7 +30,8 @@ describe('OrbitPlasma', async () => {
   const { OrbitPlasma } = await import('../src/OrbitPlasma')
 
   const createCore = (config: unknown) => {
-    let middleware: ((c: any, next: () => Promise<void>) => Promise<void | undefined>) | null = null
+    let middleware: ((c: any, next: () => Promise<void>) => Promise<undefined | undefined>) | null =
+      null
     let shutdownHandler: (() => Promise<void>) | null = null
 
     const core = {

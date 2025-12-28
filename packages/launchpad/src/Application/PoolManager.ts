@@ -1,4 +1,4 @@
-import type { IDockerAdapter, IRocketRepository } from '../Domain/Interfaces'
+import type { IDockerAdapter, IRocketRepository, IRouterAdapter } from '../Domain/Interfaces'
 import type { Mission } from '../Domain/Mission'
 import { Rocket } from '../Domain/Rocket'
 import type { RefurbishUnit } from './RefurbishUnit'
@@ -7,7 +7,8 @@ export class PoolManager {
   constructor(
     private dockerAdapter: IDockerAdapter,
     private rocketRepository: IRocketRepository,
-    private refurbishUnit?: RefurbishUnit
+    private refurbishUnit?: RefurbishUnit,
+    private router?: IRouterAdapter
   ) {}
 
   /**
@@ -60,6 +61,11 @@ export class PoolManager {
     if (!rocket) {
       console.warn(`[LaunchPad] 找不到屬於任務 ${missionId} 的火箭`)
       return
+    }
+
+    // [New] 註銷域名映射
+    if (this.router && rocket.assignedDomain) {
+      this.router.unregister(rocket.assignedDomain)
     }
 
     if (this.refurbishUnit) {

@@ -87,7 +87,9 @@ export class RedisDriver implements DriverContract {
     if (!this.client) {
       await this.connect()
     }
-    if (!this.client) throw new ConnectionError('Redis client not available')
+    if (!this.client) {
+      throw new ConnectionError('Redis client not available')
+    }
     return this.client.get(key)
   }
 
@@ -95,7 +97,9 @@ export class RedisDriver implements DriverContract {
     if (!this.client) {
       await this.connect()
     }
-    if (!this.client) throw new ConnectionError('Redis client not available')
+    if (!this.client) {
+      throw new ConnectionError('Redis client not available')
+    }
     return this.client.set(key, value)
   }
 
@@ -103,7 +107,9 @@ export class RedisDriver implements DriverContract {
     if (!this.client) {
       await this.connect()
     }
-    if (!this.client) throw new ConnectionError('Redis client not available')
+    if (!this.client) {
+      throw new ConnectionError('Redis client not available')
+    }
     return this.client.setex(key, seconds, value)
   }
 
@@ -111,7 +117,9 @@ export class RedisDriver implements DriverContract {
     if (!this.client) {
       await this.connect()
     }
-    if (!this.client) throw new ConnectionError('Redis client not available')
+    if (!this.client) {
+      throw new ConnectionError('Redis client not available')
+    }
     return this.client.del(key)
   }
 
