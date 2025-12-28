@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { beforeEach, describe, expect, it, mock } from 'bun:test'
 import { DevMailbox } from '../src/dev/DevMailbox'
 import { Mailable } from '../src/Mailable'
 import { OrbitSignal } from '../src/OrbitSignal'
@@ -11,6 +11,10 @@ class EmptyMail extends Mailable {
 }
 
 describe('OrbitSignal', () => {
+  beforeEach(() => {
+    ;(OrbitSignal as any).instance = undefined
+  })
+
   it('throws when instance is missing', () => {
     expect(() => OrbitSignal.getInstance()).toThrow(
       'OrbitSignal has not been initialized. Call OrbitSignal.configure() first.'
