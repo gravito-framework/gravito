@@ -15,7 +15,6 @@
     "gravito",
     "mail",
     "smtp",
-    "mjml",
     "email",
     "react-email",
     "vue-email"
@@ -24,7 +23,6 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-ses": "^3.953.0",
-    "mjml": "^4.14.1",
     "nodemailer": "^7.0.11"
   },
   "peerDependencies": {
@@ -52,7 +50,6 @@
   "devDependencies": {
     "@gravito/prism": "1.0.0-beta.6",
     "@gravito/stream": "1.0.0-beta.1",
-    "@types/mjml": "^4.7.4",
     "@types/nodemailer": "^6.4.14",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
