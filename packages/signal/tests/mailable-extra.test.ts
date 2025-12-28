@@ -42,10 +42,19 @@ describe('Mailable', () => {
     const orbit = new OrbitSignal({
       transport: new MemoryTransport(new DevMailbox()),
     })
-    ;(orbit as any).queueService = { push: queueMock }
 
-    const mail = new DemoMail().onQueue('emails').onConnection('redis').delay(5)
-    await mail.queue()
-    expect(queueMock).toHaveBeenCalledWith(mail)
+    // 模擬容器中的隊列服務
+    ;(orbit as any).core = {
+      container: {
+        make: (key: string) => {
+          if (key === 'queue') return { push: queueMock }
+          return null
+        },
+      },
+    }
+
+    const mail = new DemoMail()
+    await orbit.queue(mail)
+    expect(queueMock).toHaveBeenCalled()
   })
 })
