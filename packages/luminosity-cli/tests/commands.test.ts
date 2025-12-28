@@ -8,22 +8,6 @@ const writeFileMock = mock(async () => {})
 const mkdirMock = mock(async () => {})
 const existsSyncMock = mock(() => false)
 
-mock.module('node:readline/promises', () => ({
-  createInterface: () => ({
-    question: questionMock,
-    close: closeMock,
-  }),
-}))
-
-mock.module('node:fs/promises', () => ({
-  mkdir: mkdirMock,
-  writeFile: writeFileMock,
-}))
-
-mock.module('node:fs', () => ({
-  existsSync: existsSyncMock,
-}))
-
 class FakeIncrementalStrategy {
   compact = mock(async () => {})
 }
@@ -97,12 +81,23 @@ class FakeXmlStreamBuilder {
   }
 }
 
-mock.module('@gravito/luminosity', () => ({
+const deps = {
   ConfigLoader: FakeConfigLoader,
   SeoEngine: FakeEngine,
   XmlStreamBuilder: FakeXmlStreamBuilder,
   IncrementalStrategy: FakeIncrementalStrategy,
-}))
+  mkdir: mkdirMock,
+  writeFile: writeFileMock,
+}
+
+const initDeps = {
+  createInterface: () => ({
+    question: questionMock,
+    close: closeMock,
+  }),
+  writeFile: writeFileMock,
+  existsSync: existsSyncMock,
+}
 
 const { compactCommand } = await import('../src/commands/compact')
 const { generateCommand } = await import('../src/commands/generate')
@@ -113,7 +108,7 @@ describe('luminosity-cli commands', () => {
   test('compactCommand runs incremental compaction', async () => {
     loaderMode = 'incremental'
     strategyKind = 'incremental'
-    await compactCommand({})
+    await compactCommand({}, deps)
   })
 
   test('compactCommand exits when mode is not incremental', async () => {
@@ -126,7 +121,7 @@ describe('luminosity-cli commands', () => {
     }) as any
 
     try {
-      await expect(compactCommand({})).rejects.toThrow('exit:1')
+      await expect(compactCommand({}, deps)).rejects.toThrow('exit:1')
     } finally {
       process.exit = originalExit
     }
@@ -141,7 +136,7 @@ describe('luminosity-cli commands', () => {
     }) as any
 
     try {
-      await expect(compactCommand({})).rejects.toThrow('exit:1')
+      await expect(compactCommand({}, deps)).rejects.toThrow('exit:1')
     } finally {
       loaderShouldThrow = false
       process.exit = originalExit
@@ -151,25 +146,25 @@ describe('luminosity-cli commands', () => {
   test('generateCommand writes XML for array entries', async () => {
     loaderMode = 'incremental'
     strategyKind = 'entries'
-    await generateCommand({})
+    await generateCommand({}, deps)
     expect(writeFileMock).toHaveBeenCalled()
   })
 
   test('generateCommand streams async entries', async () => {
     entriesMode = 'async'
-    await generateCommand({ out: 'tmp/sitemap.xml' })
+    await generateCommand({ out: 'tmp/sitemap.xml' }, deps)
     expect(writeFileMock).toHaveBeenCalled()
   })
 
   test('generateCommand handles background mode', async () => {
     entriesMode = 'array'
-    await generateCommand({ background: true })
+    await generateCommand({ background: true }, deps)
     expect(writeFileMock).toHaveBeenCalled()
   })
 
   test('generateCommand streams batch entries', async () => {
     entriesMode = 'batch'
-    await generateCommand({ out: 'tmp/batch.xml' })
+    await generateCommand({ out: 'tmp/batch.xml' }, deps)
     expect(writeFileMock).toHaveBeenCalled()
   })
 
@@ -182,7 +177,7 @@ describe('luminosity-cli commands', () => {
     }) as any
 
     try {
-      await expect(generateCommand({})).rejects.toThrow('exit:1')
+      await expect(generateCommand({}, deps)).rejects.toThrow('exit:1')
     } finally {
       loaderShouldThrow = false
       process.exit = originalExit
@@ -225,7 +220,7 @@ describe('luminosity-cli commands', () => {
     answers = ['https://example.com/', '']
     existsSyncMock.mockImplementation(() => false)
 
-    await initCommand()
+    await initCommand(initDeps)
     expect(writeFileMock).toHaveBeenCalled()
   })
 
@@ -239,7 +234,7 @@ describe('luminosity-cli commands', () => {
     }) as any
 
     try {
-      await expect(initCommand()).rejects.toThrow('exit:1')
+      await expect(initCommand(initDeps)).rejects.toThrow('exit:1')
     } finally {
       process.exit = originalExit
     }

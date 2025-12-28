@@ -1,4 +1,5 @@
-import { beforeAll, describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
+import { gravitoSeo } from '../src/middleware'
 
 class RobotsBuilder {
   constructor(
@@ -56,37 +57,39 @@ class SeoEngine {
   }
 }
 
-mock.module('@gravito/luminosity', () => ({
-  RobotsBuilder,
-  SeoEngine,
-  SeoRenderer,
-}))
-
-let gravitoSeo: typeof import('../src/middleware').gravitoSeo
-
-beforeAll(async () => {
-  ;({ gravitoSeo } = await import('../src/middleware'))
-})
-
 describe('gravitoSeo middleware', () => {
   it('returns a middleware function', () => {
-    const middleware = gravitoSeo({
-      baseUrl: 'https://example.com',
-      mode: 'dynamic',
-      resolvers: [],
-    } as any)
+    const middleware = gravitoSeo(
+      {
+        baseUrl: 'https://example.com',
+        mode: 'dynamic',
+        resolvers: [],
+      } as any,
+      {
+        RobotsBuilder,
+        SeoEngine,
+        SeoRenderer,
+      }
+    )
     expect(typeof middleware).toBe('function')
   })
 
   it('handles robots.txt with custom rules', async () => {
-    const middleware = gravitoSeo({
-      baseUrl: 'https://example.com',
-      mode: 'dynamic',
-      resolvers: [],
-      robots: {
-        rules: [{ userAgent: '*', allow: ['/'] }],
-      },
-    } as any)
+    const middleware = gravitoSeo(
+      {
+        baseUrl: 'https://example.com',
+        mode: 'dynamic',
+        resolvers: [],
+        robots: {
+          rules: [{ userAgent: '*', allow: ['/'] }],
+        },
+      } as any,
+      {
+        RobotsBuilder,
+        SeoEngine,
+        SeoRenderer,
+      }
+    )
 
     const res = {
       headers: {} as Record<string, string>,
@@ -105,11 +108,18 @@ describe('gravitoSeo middleware', () => {
   })
 
   it('handles robots.txt with default rules', async () => {
-    const middleware = gravitoSeo({
-      baseUrl: 'https://example.com',
-      mode: 'dynamic',
-      resolvers: [],
-    } as any)
+    const middleware = gravitoSeo(
+      {
+        baseUrl: 'https://example.com',
+        mode: 'dynamic',
+        resolvers: [],
+      } as any,
+      {
+        RobotsBuilder,
+        SeoEngine,
+        SeoRenderer,
+      }
+    )
 
     const res = {
       headers: {} as Record<string, string>,
@@ -127,15 +137,22 @@ describe('gravitoSeo middleware', () => {
   })
 
   it('handles sitemap requests', async () => {
-    const middleware = gravitoSeo({
-      baseUrl: 'https://example.com',
-      mode: 'dynamic',
-      resolvers: [
-        {
-          fetch: async () => [{ url: '/one' }, { url: '/two' }],
-        },
-      ],
-    } as any)
+    const middleware = gravitoSeo(
+      {
+        baseUrl: 'https://example.com',
+        mode: 'dynamic',
+        resolvers: [
+          {
+            fetch: async () => [{ url: '/one' }, { url: '/two' }],
+          },
+        ],
+      } as any,
+      {
+        RobotsBuilder,
+        SeoEngine,
+        SeoRenderer,
+      }
+    )
 
     const res = {
       header: (key: string, value: string) => {
@@ -154,12 +171,19 @@ describe('gravitoSeo middleware', () => {
   })
 
   it('calls next on init failure', async () => {
-    const middleware = gravitoSeo({
-      baseUrl: 'https://example.com',
-      mode: 'dynamic',
-      resolvers: [],
-      shouldFailInit: true,
-    } as any)
+    const middleware = gravitoSeo(
+      {
+        baseUrl: 'https://example.com',
+        mode: 'dynamic',
+        resolvers: [],
+        shouldFailInit: true,
+      } as any,
+      {
+        RobotsBuilder,
+        SeoEngine,
+        SeoRenderer,
+      }
+    )
 
     const next = (err?: unknown) => err
     const result = await middleware({ path: '/sitemap.xml', query: {} } as any, {} as any, next)
@@ -167,12 +191,19 @@ describe('gravitoSeo middleware', () => {
   })
 
   it('calls next on render error', async () => {
-    const middleware = gravitoSeo({
-      baseUrl: 'https://example.com',
-      mode: 'dynamic',
-      resolvers: [],
-      shouldFailFetch: true,
-    } as any)
+    const middleware = gravitoSeo(
+      {
+        baseUrl: 'https://example.com',
+        mode: 'dynamic',
+        resolvers: [],
+        shouldFailFetch: true,
+      } as any,
+      {
+        RobotsBuilder,
+        SeoEngine,
+        SeoRenderer,
+      }
+    )
 
     let called: unknown
     const next = (err?: unknown) => {
