@@ -36,6 +36,12 @@ mock.module('@gravito/sentinel', () => ({
   EmailVerificationService,
 }))
 
+mock.module('gravito-core', () => ({
+  csrfProtection: () => async (_c: any, next?: () => Promise<unknown>) =>
+    next ? next() : undefined,
+  getCsrfToken: () => 'csrf-token',
+}))
+
 let definefortifyConfig: typeof import('../src/config').definefortifyConfig
 let defaultFortifyConfig: typeof import('../src/config').defaultFortifyConfig
 let FortifyOrbit: typeof import('../src/FortifyOrbit').FortifyOrbit
