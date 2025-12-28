@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+* enforce per-package coverage (>= 80%) in CI and pre-push checks
+* scope site coverage to `packages/site/src` with a dedicated lcov parser
+* expand tests across packages to meet coverage targets (core, atlas, monolith, and others)
+
 ## [0.5.0-alpha](https://github.com/gravito-framework/gravito/compare/v0.4.0-alpha...v0.5.0-alpha) (2025-12-23)
 
 
