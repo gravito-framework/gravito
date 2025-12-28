@@ -1,5 +1,5 @@
 import type { Repository } from '@gravito/enterprise'
-import { Member } from '../Entities/Member'
+import type { Member } from '../Entities/Member'
 
 /**
  * Member Repository Contract

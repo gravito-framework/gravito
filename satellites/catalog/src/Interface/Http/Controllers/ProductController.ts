@@ -26,7 +26,9 @@ export class ProductController {
     const repo = core.container.make('catalog.repo.product') as IProductRepository
 
     const product = await repo.findById(id)
-    if (!product) return c.json({ error: 'Product not found' }, 404)
+    if (!product) {
+      return c.json({ error: 'Product not found' }, 404)
+    }
 
     return c.json({
       data: ProductMapper.toDTO(product),

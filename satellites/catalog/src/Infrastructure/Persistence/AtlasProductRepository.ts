@@ -70,7 +70,9 @@ export class AtlasProductRepository implements IProductRepository {
 
   async findById(id: string): Promise<Product | null> {
     const row = await DB.table(this.productsTable).where('id', id).first()
-    if (!row) return null
+    if (!row) {
+      return null
+    }
 
     const variantRows = await DB.table(this.variantsTable).where('product_id', id).get()
     const categoryRows = await DB.table(this.pivotTable).where('product_id', id).get()
@@ -78,7 +80,7 @@ export class AtlasProductRepository implements IProductRepository {
     return this.mapToDomain(row, variantRows, categoryRows)
   }
 
-  async findAll(filters?: any): Promise<Product[]> {
+  async findAll(_filters?: any): Promise<Product[]> {
     const rows = await DB.table(this.productsTable).get()
     const products: Product[] = []
 

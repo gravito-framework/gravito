@@ -1,8 +1,8 @@
 import { UseCase } from '@gravito/enterprise'
+import type { PlanetCore } from 'gravito-core'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
-import { MemberMapper } from '../DTOs/MemberDTO'
 import type { MemberDTO } from '../DTOs/MemberDTO'
-import { PlanetCore } from 'gravito-core'
+import { MemberMapper } from '../DTOs/MemberDTO'
 
 /**
  * Input for updating member settings
@@ -18,7 +18,7 @@ export interface UpdateSettingsInput {
 
 /**
  * Update Settings Use Case
- * 
+ *
  * Handles profile updates, password changes, and dynamic metadata enrichment.
  */
 export class UpdateSettings extends UseCase<UpdateSettingsInput, MemberDTO> {
@@ -34,7 +34,7 @@ export class UpdateSettings extends UseCase<UpdateSettingsInput, MemberDTO> {
    */
   async execute(input: UpdateSettingsInput): Promise<MemberDTO> {
     const member = await this.repository.findById(input.memberId)
-    
+
     if (!member) {
       throw new Error('Member not found')
     }
@@ -50,7 +50,10 @@ export class UpdateSettings extends UseCase<UpdateSettingsInput, MemberDTO> {
         throw new Error('Current password is required to set a new password')
       }
 
-      const isCurrentValid = await this.core.hasher.check(input.currentPassword, member.passwordHash)
+      const isCurrentValid = await this.core.hasher.check(
+        input.currentPassword,
+        member.passwordHash
+      )
       if (!isCurrentValid) {
         throw new Error('Invalid current password')
       }
@@ -70,7 +73,7 @@ export class UpdateSettings extends UseCase<UpdateSettingsInput, MemberDTO> {
     // 5. Trigger update hook
     await this.core.hooks.doAction('membership:updated', {
       member: MemberMapper.toDTO(member),
-      updatedFields: Object.keys(input).filter(k => k !== 'memberId' && k !== 'currentPassword')
+      updatedFields: Object.keys(input).filter((k) => k !== 'memberId' && k !== 'currentPassword'),
     })
 
     return MemberMapper.toDTO(member)

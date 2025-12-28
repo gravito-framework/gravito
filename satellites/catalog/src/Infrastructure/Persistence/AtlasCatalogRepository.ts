@@ -1,4 +1,3 @@
-import { DB } from '@gravito/atlas'
 import type { ICatalogRepository } from '../../Domain/Contracts/ICatalogRepository'
 import type { Catalog } from '../../Domain/Entities/Catalog'
 
@@ -9,7 +8,7 @@ export class AtlasCatalogRepository implements ICatalogRepository {
     // await DB.table('catalogs').insert({ ... })
   }
 
-  async findById(id: string): Promise<Catalog | null> {
+  async findById(_id: string): Promise<Catalog | null> {
     return null
   }
 
@@ -17,9 +16,9 @@ export class AtlasCatalogRepository implements ICatalogRepository {
     return []
   }
 
-  async delete(id: string): Promise<void> {}
+  async delete(_id: string): Promise<void> {}
 
-  async exists(id: string): Promise<boolean> {
+  async exists(_id: string): Promise<boolean> {
     return false
   }
 }

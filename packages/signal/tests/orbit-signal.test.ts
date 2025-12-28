@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { DevMailbox } from '../src/dev/DevMailbox'
 import { Mailable } from '../src/Mailable'
 import { OrbitSignal } from '../src/OrbitSignal'

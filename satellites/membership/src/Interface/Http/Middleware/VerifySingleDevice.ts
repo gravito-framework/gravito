@@ -3,13 +3,13 @@ import type { IMemberRepository } from '../../../../Domain/Contracts/IMemberRepo
 
 /**
  * Verify Single Device Middleware
- * 
+ *
  * Ensures that the current session matches the one stored in the database.
  * If a new login occurs on another device, the old session becomes invalid.
  */
 export const verifySingleDevice = async (c: GravitoContext, next: () => Promise<void>) => {
   const core = c.get('core' as any) as any
-  
+
   // 1. Check if the feature is enabled
   const isEnabled = core.config.get('membership.auth.single_device', false)
   if (!isEnabled) {
@@ -35,13 +35,16 @@ export const verifySingleDevice = async (c: GravitoContext, next: () => Promise<
   const member = await repo.findById(user.id)
   const currentSessionId = session.id()
 
-  if (member && member.currentSessionId && member.currentSessionId !== currentSessionId) {
+  if (member?.currentSessionId && member.currentSessionId !== currentSessionId) {
     // Session mismatch! Logout the current session.
     await auth.guard('web').logout()
-    
+
     // Redirect or throw error
     const i18n = core.container.make('i18n')
-    throw new Error(i18n?.t('membership.errors.session_expired_other_device') || 'Session expired. Logged in from another device.')
+    throw new Error(
+      i18n?.t('membership.errors.session_expired_other_device') ||
+        'Session expired. Logged in from another device.'
+    )
   }
 
   await next()

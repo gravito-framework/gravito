@@ -38,7 +38,7 @@ export class CategoryMapper {
     for (const dto of dtos) {
       const node = map.get(dto.id)!
       if (dto.parentId && map.has(dto.parentId)) {
-        map.get(dto.parentId)!.children.push(node)
+        map.get(dto.parentId)?.children.push(node)
       } else {
         roots.push(node)
       }

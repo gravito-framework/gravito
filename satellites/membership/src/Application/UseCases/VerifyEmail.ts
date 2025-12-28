@@ -12,7 +12,7 @@ export class VerifyEmail extends UseCase<VerifyEmailInput, void> {
 
   async execute(input: VerifyEmailInput): Promise<void> {
     const member = await this.repository.findByVerificationToken(input.token)
-    
+
     if (!member) {
       throw new Error('Invalid verification token')
     }

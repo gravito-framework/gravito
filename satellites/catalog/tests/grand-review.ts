@@ -1,5 +1,5 @@
 import { expect } from 'bun:test'
-import { DB, Schema } from '@gravito/atlas'
+import { DB } from '@gravito/atlas'
 import { PlanetCore, setApp } from 'gravito-core'
 import { CategoryMapper } from '../src/Application/DTOs/CategoryDTO'
 import type { CreateProduct } from '../src/Application/UseCases/CreateProduct'

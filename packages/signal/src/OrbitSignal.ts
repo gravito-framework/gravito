@@ -107,7 +107,7 @@ export class OrbitSignal implements GravitoOrbit {
         await queue.push(mailable)
         return
       }
-    } catch (e) {
+    } catch (_e) {
       // 找不到隊列服務時，會拋出錯誤，我們捕捉並降級
     }
 

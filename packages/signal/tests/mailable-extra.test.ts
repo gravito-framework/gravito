@@ -47,7 +47,9 @@ describe('Mailable', () => {
     ;(orbit as any).core = {
       container: {
         make: (key: string) => {
-          if (key === 'queue') return { push: queueMock }
+          if (key === 'queue') {
+            return { push: queueMock }
+          }
           return null
         },
       },

@@ -1,8 +1,8 @@
 import { UseCase } from '@gravito/enterprise'
+import type { PlanetCore } from 'gravito-core'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
-import { MemberMapper } from '../DTOs/MemberDTO'
 import type { MemberDTO } from '../DTOs/MemberDTO'
-import { PlanetCore } from 'gravito-core'
+import { MemberMapper } from '../DTOs/MemberDTO'
 
 export interface UpdateLevelInput {
   memberId: string
@@ -11,7 +11,7 @@ export interface UpdateLevelInput {
 
 /**
  * Update Member Level Use Case
- * 
+ *
  * Typically used by administrative systems or loyalty programs to promote members.
  */
 export class UpdateMemberLevel extends UseCase<UpdateLevelInput, MemberDTO> {
@@ -24,14 +24,14 @@ export class UpdateMemberLevel extends UseCase<UpdateLevelInput, MemberDTO> {
 
   async execute(input: UpdateLevelInput): Promise<MemberDTO> {
     const member = await this.repository.findById(input.memberId)
-    
+
     if (!member) {
       throw new Error('Member not found')
     }
 
     const oldLevel = member.level
     member.changeLevel(input.newLevel)
-    
+
     await this.repository.save(member)
 
     // Trigger hook for tier change (e.g., to send congratulations or update discounts)
@@ -39,7 +39,7 @@ export class UpdateMemberLevel extends UseCase<UpdateLevelInput, MemberDTO> {
       memberId: member.id,
       email: member.email,
       oldLevel,
-      newLevel: input.newLevel
+      newLevel: input.newLevel,
     })
 
     return MemberMapper.toDTO(member)

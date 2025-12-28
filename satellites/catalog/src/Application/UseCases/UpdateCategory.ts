@@ -19,7 +19,9 @@ export class UpdateCategory extends UseCase<UpdateCategoryInput, CategoryDTO> {
 
   async execute(input: UpdateCategoryInput): Promise<CategoryDTO> {
     const category = await this.repository.findById(input.id)
-    if (!category) throw new Error('Category not found')
+    if (!category) {
+      throw new Error('Category not found')
+    }
 
     const oldPath = category.path
     const isMoving = input.parentId !== undefined && input.parentId !== category.parentId
@@ -43,10 +45,12 @@ export class UpdateCategory extends UseCase<UpdateCategoryInput, CategoryDTO> {
         const descendants = await this.repository.findByPathPrefix(oldPath)
         console.log(`[Debug] 找到子孫數量: ${descendants.length} (使用前綴: ${oldPath})`)
         for (const desc of descendants) {
-          if (desc.id === category.id) continue
+          if (desc.id === category.id) {
+            continue
+          }
 
           // 確保只替換開頭的路徑部分
-          const subPath = desc.path!.substring(oldPath.length)
+          const subPath = desc.path?.substring(oldPath.length)
           // @ts-expect-error
           desc.props.path = newPath + subPath
           await this.repository.save(desc)

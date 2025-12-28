@@ -6,7 +6,7 @@ import { Entity } from '@gravito/enterprise'
 export enum MemberStatus {
   ACTIVE = 'active',
   PENDING = 'pending',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
 /**
@@ -34,7 +34,10 @@ export interface MemberProps {
  * Member Domain Entity
  */
 export class Member extends Entity<string> {
-  private constructor(id: string, private props: MemberProps) {
+  private constructor(
+    id: string,
+    private props: MemberProps
+  ) {
     super(id)
   }
 
@@ -47,7 +50,7 @@ export class Member extends Entity<string> {
       roles: ['member'],
       verificationToken: crypto.randomUUID(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
   }
 
@@ -56,24 +59,56 @@ export class Member extends Entity<string> {
   }
 
   // Getters
-  get name() { return this.props.name }
-  get email() { return this.props.email }
-  get status() { return this.props.status }
-  get roles() { return this.props.roles }
-  get passwordHash() { return this.props.passwordHash }
-  get createdAt() { return this.props.createdAt }
-  get emailVerifiedAt() { return this.props.emailVerifiedAt }
-  get verificationToken() { return this.props.verificationToken }
-  get passwordResetToken() { return this.props.passwordResetToken }
-  get passwordResetExpiresAt() { return this.props.passwordResetExpiresAt }
-  get currentSessionId() { return this.props.currentSessionId }
-  get rememberToken() { return this.props.rememberToken }
-  get metadata() { return this.props.metadata || {} }
+  get name() {
+    return this.props.name
+  }
+  get email() {
+    return this.props.email
+  }
+  get status() {
+    return this.props.status
+  }
+  get roles() {
+    return this.props.roles
+  }
+  get passwordHash() {
+    return this.props.passwordHash
+  }
+  get createdAt() {
+    return this.props.createdAt
+  }
+  get emailVerifiedAt() {
+    return this.props.emailVerifiedAt
+  }
+  get verificationToken() {
+    return this.props.verificationToken
+  }
+  get passwordResetToken() {
+    return this.props.passwordResetToken
+  }
+  get passwordResetExpiresAt() {
+    return this.props.passwordResetExpiresAt
+  }
+  get currentSessionId() {
+    return this.props.currentSessionId
+  }
+  get rememberToken() {
+    return this.props.rememberToken
+  }
+  get metadata() {
+    return this.props.metadata || {}
+  }
 
   // Authenticatable implementation
-  getAuthIdentifier(): string { return this.id }
-  getAuthPassword(): string { return this.props.passwordHash }
-  getRememberToken(): string | null { return this.props.rememberToken || null }
+  getAuthIdentifier(): string {
+    return this.id
+  }
+  getAuthPassword(): string {
+    return this.props.passwordHash
+  }
+  getRememberToken(): string | null {
+    return this.props.rememberToken || null
+  }
   setRememberToken(token: string): void {
     this.props.rememberToken = token
     this.props.updatedAt = new Date()
@@ -115,7 +150,7 @@ export class Member extends Entity<string> {
    * Remove a role
    */
   public removeRole(role: string): void {
-    this.props.roles = this.props.roles.filter(r => r !== role)
+    this.props.roles = this.props.roles.filter((r) => r !== role)
     this.props.updatedAt = new Date()
   }
 
@@ -148,7 +183,7 @@ export class Member extends Entity<string> {
   public updateMetadata(data: Record<string, any>): void {
     this.props.metadata = {
       ...(this.props.metadata || {}),
-      ...data
+      ...data,
     }
     this.props.updatedAt = new Date()
   }

@@ -1,6 +1,6 @@
 import { UseCase } from '@gravito/enterprise'
+import type { PlanetCore } from 'gravito-core'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
-import { PlanetCore } from 'gravito-core'
 
 export interface ForgotPasswordInput {
   email: string
@@ -16,7 +16,7 @@ export class ForgotPassword extends UseCase<ForgotPasswordInput, void> {
 
   async execute(input: ForgotPasswordInput): Promise<void> {
     const member = await this.repository.findByEmail(input.email)
-    
+
     if (!member) {
       // Security: Don't reveal if user exists
       return
@@ -28,7 +28,7 @@ export class ForgotPassword extends UseCase<ForgotPasswordInput, void> {
     // Trigger hook to send reset email
     await this.core.hooks.doAction('membership:send-reset-password', {
       email: member.email,
-      token: member.passwordResetToken
+      token: member.passwordResetToken,
     })
   }
 }

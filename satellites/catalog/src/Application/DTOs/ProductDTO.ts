@@ -34,7 +34,7 @@ export class ProductMapper {
         if (storage) {
           thumbnailUrl = storage.getUrl(product.thumbnail)
         }
-      } catch (e) {
+      } catch (_e) {
         // Fallback to key if storage not available or core not booted
         thumbnailUrl = `/storage/${product.thumbnail}`
       }

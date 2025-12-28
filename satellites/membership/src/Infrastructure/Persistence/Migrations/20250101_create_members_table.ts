@@ -1,4 +1,4 @@
-import { Schema, type Blueprint } from '@gravito/atlas'
+import { type Blueprint, Schema } from '@gravito/atlas'
 
 /**
  * Migration to create the members table with full features
@@ -26,5 +26,5 @@ export default {
 
   async down() {
     await Schema.dropIfExists('members')
-  }
+  },
 }

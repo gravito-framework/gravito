@@ -40,7 +40,9 @@ export class CatalogServiceProvider extends ServiceProvider {
    */
   override async boot(): Promise<void> {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     const productCtrl = new ProductController()
     const categoryCtrl = new CategoryController()

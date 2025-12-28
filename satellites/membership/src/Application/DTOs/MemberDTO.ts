@@ -28,7 +28,7 @@ export class MemberMapper {
       level: member.level || 'standard',
       roles: member.roles || [],
       createdAt: member.createdAt.toISOString(),
-      metadata: member.metadata
+      metadata: member.metadata,
     }
   }
 }
