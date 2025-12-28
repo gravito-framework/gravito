@@ -7,41 +7,11 @@ import { MemoryTransport } from './transports/MemoryTransport'
 import type { MailConfig, Message } from './types'
 
 export class OrbitSignal implements GravitoOrbit {
-  private static instance?: OrbitSignal
   private config: MailConfig
   private devMailbox?: DevMailbox
 
   constructor(config: MailConfig = {}) {
     this.config = config
-    OrbitSignal.instance = this
-  }
-
-  /**
-   * Get the singleton instance of OrbitSignal
-   *
-   * @returns The singleton instance of OrbitSignal.
-   * @throws {Error} If OrbitSignal has not been initialized.
-   */
-  static getInstance(): OrbitSignal {
-    if (!OrbitSignal.instance) {
-      throw new Error('OrbitSignal has not been initialized. Call OrbitSignal.configure() first.')
-    }
-    return OrbitSignal.instance
-  }
-
-  /**
-   * Configure the OrbitSignal instance
-   *
-   * @param config - The mail configuration object.
-   * @returns A new instance of OrbitSignal.
-   */
-  static configure(config: MailConfig): OrbitSignal {
-    // Basic validation
-    if (!config.transport && !config.devMode) {
-      console.warn('[OrbitSignal] No transport provided, falling back to LogTransport')
-      config.transport = new LogTransport()
-    }
-    return new OrbitSignal(config)
   }
 
   /**
@@ -50,14 +20,14 @@ export class OrbitSignal implements GravitoOrbit {
    * @param core - The PlanetCore instance.
    */
   install(core: PlanetCore): void {
-    core.logger.info('[OrbitSignal] Initializing Mail Service (Exposed as: mail)')
+    core.logger.info('[OrbitSignal] Initializing Mail Service')
 
-    // Ensure transport exists (fallback to Log if not set)
+    // 1. Ensure transport exists (fallback to Log if not set)
     if (!this.config.transport && !this.config.devMode) {
       this.config.transport = new LogTransport()
     }
 
-    // In Dev Mode, override transport and setup Dev Server
+    // 2. In Dev Mode, override transport and setup Dev Server
     if (this.config.devMode) {
       this.devMailbox = new DevMailbox()
       this.config.transport = new MemoryTransport(this.devMailbox)
@@ -70,12 +40,12 @@ export class OrbitSignal implements GravitoOrbit {
       devServer.register(core)
     }
 
-    // Inject mail service into context
+    // 3. Register in container
+    core.container.singleton('mail', () => this)
+
+    // 4. Inject mail service into context for easy access in routes
     core.adapter.use('*', async (c, next) => {
-      c.set('mail', {
-        send: (mailable: Mailable) => this.send(mailable),
-        queue: (mailable: Mailable) => this.queue(mailable),
-      })
+      c.set('mail', this)
       await next()
       return undefined
     })
@@ -119,38 +89,17 @@ export class OrbitSignal implements GravitoOrbit {
 
     // 4. Send via transport
     if (!this.config.transport) {
-      throw new Error(
-        '[OrbitSignal] No transport configured. Did you call configure() or register the orbit?'
-      )
+      throw new Error('[OrbitSignal] No transport configured. Did you call register the orbit?')
     }
     await this.config.transport.send(message)
   }
 
   /**
    * Queue a mailable instance
-   *
-   * Push a mailable into the queue for execution.
-   * Requires OrbitStream to be installed and available in the context.
-   *
-   * @param mailable - The mailable object to queue.
-   * @returns A promise that resolves when the job is pushed to the queue or sent immediately if no queue service is found.
    */
   async queue(mailable: Mailable): Promise<void> {
-    // Try to get queue service from context.
-    // If not available, send immediately (backward compatible).
-    const queue = (
-      this as unknown as { queueService?: { push: (job: unknown) => Promise<unknown> } }
-    ).queueService
-
-    if (queue) {
-      // Push via Queue system.
-      await queue.push(mailable)
-    } else {
-      // Fallback: send immediately (backward compatible).
-      console.warn(
-        '[OrbitSignal] Queue service not available, sending immediately. Install OrbitStream to enable queuing.'
-      )
-      await this.send(mailable)
-    }
+    // Attempt to use OrbitStream if available
+    // For now, simple fallback
+    await this.send(mailable)
   }
 }

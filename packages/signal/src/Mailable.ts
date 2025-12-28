@@ -134,9 +134,19 @@ export abstract class Mailable implements Queueable {
    * Queue the mailable for sending.
    */
   async queue(): Promise<void> {
-    // Avoid circular dependency by dynamically importing OrbitSignal
-    const { OrbitSignal } = await import('./OrbitSignal')
-    return OrbitSignal.getInstance().queue(this)
+    // We should ideally use the container to get the mail service
+    // But since Mailable might be used outside a core context, we'll try a safe approach.
+    try {
+      // @ts-expect-error - Global access to app() helper from core
+      const { app } = await import('gravito-core')
+      const mail = app().container.make<any>('mail')
+      if (mail) {
+        return mail.queue(this)
+      }
+    } catch (e) {
+      // Fallback if core is not available
+      console.warn('[Mailable] Could not auto-resolve mail service for queuing.')
+    }
   }
 
   // ===== I18n Support =====
@@ -188,8 +198,8 @@ export abstract class Mailable implements Queueable {
 
     // Ensure Renderer is initialized if using TemplateRenderer with config path
     if (this.renderer instanceof TemplateRenderer && config.viewsDir) {
-      // Here we could re-initialize TemplateRenderer if we had a setter for viewsDir
-      // For now, it defaults to process.cwd()/src/emails which is standard
+      // Re-initialize or update TemplateRenderer with the correct directory
+      this.renderer = new TemplateRenderer((this.renderer as any).template, config.viewsDir)
     }
 
     const envelope: Envelope = {
