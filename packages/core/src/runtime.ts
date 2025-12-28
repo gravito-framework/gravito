@@ -14,7 +14,7 @@ export interface RuntimeProcess {
   exited: Promise<number>
   stdout?: ReadableStream<Uint8Array> | null
   stderr?: ReadableStream<Uint8Array> | null
-  kill?: (signal?: string) => void
+  kill?: (signal?: string | number) => void
 }
 
 export interface RuntimeFileStat {
@@ -170,7 +170,7 @@ const createBunAdapter = (): RuntimeAdapter => ({
     return Bun.serve({
       port: config.port,
       fetch: config.fetch,
-      websocket: config.websocket,
+      websocket: config.websocket as any,
     })
   },
 })
@@ -197,7 +197,7 @@ const createNodeAdapter = (): RuntimeAdapter => ({
       cwd: options.cwd,
       env: options.env as Record<string, string>,
       stdio: [stdinMap(options.stdin), stdioMap(options.stdout), stdioMap(options.stderr)],
-    })
+    }) as import('node:child_process').ChildProcess
 
     const toWeb = (streamReadable: NodeJS.ReadableStream | null) => {
       if (!streamReadable) {
@@ -219,7 +219,7 @@ const createNodeAdapter = (): RuntimeAdapter => ({
       exited,
       stdout: toWeb(child.stdout),
       stderr: toWeb(child.stderr),
-      kill: (signal?: string) => child.kill(signal as NodeJS.Signals),
+      kill: (signal?: string | number) => child.kill(signal as NodeJS.Signals),
     }
   },
   async writeFile(path, data) {
@@ -234,7 +234,7 @@ const createNodeAdapter = (): RuntimeAdapter => ({
   },
   async readFileAsBlob(path) {
     const buffer = await this.readFile(path)
-    return new Blob([buffer])
+    return new Blob([buffer as unknown as BlobPart])
   },
   async exists(path) {
     const fs = await import('node:fs/promises')
@@ -291,9 +291,15 @@ const createDenoAdapter = (): RuntimeAdapter => ({
 
     return {
       exited,
-      stdout: (proc.stdout as ReadableStream<Uint8Array>) ?? null,
-      stderr: (proc.stderr as ReadableStream<Uint8Array>) ?? null,
-      kill: (signal?: string) => proc.kill(signal),
+      stdout: (proc.stdout as unknown as ReadableStream<Uint8Array>) ?? null,
+      stderr: (proc.stderr as unknown as ReadableStream<Uint8Array>) ?? null,
+      kill: (signal?: string | number) => {
+        if (signal) {
+          proc.kill(signal)
+          return
+        }
+        proc.kill()
+      },
     }
   },
   async writeFile(path, data) {
@@ -313,7 +319,7 @@ const createDenoAdapter = (): RuntimeAdapter => ({
   },
   async readFileAsBlob(path) {
     const buffer = await this.readFile(path)
-    return new Blob([buffer])
+    return new Blob([buffer as unknown as BlobPart])
   },
   async exists(path) {
     const deno = (globalThis as any).Deno
