@@ -37,7 +37,7 @@ export class AtlasCategoryRepository implements ICategoryRepository {
 
   async findAll(): Promise<Category[]> {
     const rows = await DB.table(this.table).orderBy('sort_order', 'asc').get()
-    return rows.map((row) => this.mapToDomain(row))
+    return rows.map((row: any) => this.mapToDomain(row))
   }
 
   async findByParentId(parentId: string | null): Promise<Category[]> {
@@ -48,13 +48,13 @@ export class AtlasCategoryRepository implements ICategoryRepository {
       query.where('parent_id', parentId)
     }
     const rows = await query.orderBy('sort_order', 'asc').get()
-    return rows.map((row) => this.mapToDomain(row))
+    return rows.map((row: any) => this.mapToDomain(row))
   }
 
   async findByPathPrefix(path: string): Promise<Category[]> {
     // 獲取該路徑下的所有後代
     const rows = await DB.table(this.table).where('path', 'like', `${path}/%`).get()
-    return rows.map((row) => this.mapToDomain(row))
+    return rows.map((row: any) => this.mapToDomain(row))
   }
 
   async delete(id: string): Promise<void> {

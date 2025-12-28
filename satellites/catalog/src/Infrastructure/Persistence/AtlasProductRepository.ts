@@ -1,3 +1,4 @@
+import type { ConnectionContract } from '@gravito/atlas'
 import { DB } from '@gravito/atlas'
 import type { IProductRepository } from '../../Domain/Contracts/ICatalogRepository'
 import { Product, Variant } from '../../Domain/Entities/Product'
@@ -8,7 +9,7 @@ export class AtlasProductRepository implements IProductRepository {
   private pivotTable = 'category_product'
 
   async save(product: Product): Promise<void> {
-    await DB.transaction(async (db) => {
+    await DB.transaction(async (db: ConnectionContract) => {
       // 1. 保存商品主體
       const productData = {
         id: product.id,
@@ -94,7 +95,7 @@ export class AtlasProductRepository implements IProductRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await DB.transaction(async (db) => {
+    await DB.transaction(async (db: ConnectionContract) => {
       await db.table(this.pivotTable).where('product_id', id).delete()
       await db.table(this.variantsTable).where('product_id', id).delete()
       await db.table(this.productsTable).where('id', id).delete()
