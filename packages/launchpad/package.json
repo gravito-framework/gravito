@@ -1,0 +1,21 @@
+{
+  "name": "@gravito/launchpad",
+  "version": "0.1.0",
+  "description": "Container lifecycle management system for flash deployments",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "gravito-core": "workspace:*",
+    "@gravito/enterprise": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
