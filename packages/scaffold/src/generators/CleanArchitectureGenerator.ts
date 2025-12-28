@@ -900,6 +900,8 @@ Created with ❤️ using Gravito Framework
         start: 'bun run dist/bootstrap.js',
         test: 'bun test',
         typecheck: 'tsc --noEmit',
+        'docker:build': `docker build -t ${context.nameKebabCase} .`,
+        'docker:run': `docker run -it -p 3000:3000 ${context.nameKebabCase}`,
       },
       dependencies: {
         'gravito-core': 'workspace:*',
