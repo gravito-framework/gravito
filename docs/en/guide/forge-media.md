@@ -1,15 +1,23 @@
 ---
-title: Forge Media
-description: Image and video processing with status tracking and storage integration.
+title: Forge Media Processing
+description: Image and video pipelines with status tracking and storage integration.
 ---
 
-# Forge Media
+# Forge Media Processing
 
-Forge provides image and video processing pipelines for Gravito. It integrates with storage, queues, and real-time status tracking.
+Forge provides Gravito's media pipeline for images and video, integrating storage, queues, and realtime status tracking.
 
 ## When to use Forge
 
-Use Forge when you need upload processing, transcoding, or resizing with progress feedback.
+Ideal for uploads that need transcoding, thumbnailing, or progress feedback.
+
+## Highlights
+
+- Image and video processing (Resize/Rotate/Transcode)
+- Sync and async modes
+- SSE progress tracking
+- Storage / Queue integration
+- Frontend components (React / Vue)
 
 ## Installation
 
@@ -19,8 +27,13 @@ bun add @gravito/forge
 
 ## Prerequisites
 
-- FFmpeg (video processing)
-- ImageMagick (image processing)
+- FFmpeg (video)
+- ImageMagick (image)
+
+```bash
+# macOS
+brew install ffmpeg imagemagick
+```
 
 ## Quick Start
 
@@ -43,7 +56,116 @@ const core = await PlanetCore.boot({
 })
 ```
 
+## Synchronous Processing
+
+```ts
+app.post('/upload', async (c) => {
+  const forge = c.get('forge')
+  const file = await c.req.file()
+  if (!file) return c.json({ error: 'No file uploaded' }, 400)
+
+  const result = await forge.process(
+    { source: file, filename: file.name, mimeType: file.type },
+    { width: 1920, height: 1080, format: 'mp4' }
+  )
+
+  return c.json({ url: result.url })
+})
+```
+
+## Async Processing (Queue)
+
+```ts
+app.post('/upload', async (c) => {
+  const forge = c.get('forge')
+  const queue = c.get('queue')
+  const file = await c.req.file()
+  if (!file) return c.json({ error: 'No file uploaded' }, 400)
+
+  const job = await forge.processAsync(
+    { source: file, filename: file.name, mimeType: file.type },
+    { width: 1920, height: 1080, format: 'mp4' }
+  )
+
+  await queue.push(
+    new ProcessFileJob({
+      jobId: job.id,
+      input: { source: file, filename: file.name, mimeType: file.type },
+      options: { width: 1920, height: 1080, format: 'mp4' },
+      forgeService: forge,
+      statusStore: forge.getStatusStore(),
+      storage: c.get('storage'),
+    })
+  )
+
+  return c.json({ jobId: job.id })
+})
+```
+
+## Pipeline Usage
+
+```ts
+const forge = c.get('forge')
+
+const videoPipeline = forge
+  .createVideoPipeline()
+  .resize(1920, 1080)
+  .rotate(90)
+  .transcode('mp4', 'h264', 23)
+
+const result = await videoPipeline.execute({
+  source: file,
+  filename: file.name,
+  mimeType: 'video/mp4',
+})
+```
+
+```ts
+const imagePipeline = forge.createImagePipeline().resize(800, 600).format('webp', 85)
+
+const imageResult = await imagePipeline.execute({
+  source: imageFile,
+  filename: imageFile.name,
+  mimeType: 'image/jpeg',
+})
+```
+
+## Frontend Components (Progress)
+
+React:
+
+```tsx
+import { ProcessingImage } from '@gravito/forge/react'
+
+<ProcessingImage
+  jobId={jobId}
+  placeholder="/placeholder.jpg"
+  onComplete={(result) => console.log(result.url)}
+  onError={(error) => console.error(error)}
+/>
+```
+
+Vue:
+
+```vue
+<template>
+  <ProcessingImage
+    v-if="jobId"
+    :job-id="jobId"
+    placeholder="/placeholder.jpg"
+    @complete="handleComplete"
+    @error="handleError"
+  />
+</template>
+```
+
+## Configuration Notes
+
+- `video.ffmpegPath` / `image.imagemagickPath`
+- `status.store` (memory / redis)
+- `sse.enabled` and `sse.path`
+
 ## Next Steps
 
-- Serve optimized images with [Image Optimization](./image-optimization.md)
-- Use background workers via [Queues](./queues.md)
+- Image optimization: [Image Optimization](./image-optimization.md)
+- Background jobs: [Queues](./queues.md)
