@@ -18,6 +18,9 @@ export class DockerAdapter implements IDockerAdapter {
       rocketId,
       '--label',
       'gravito-origin=launchpad',
+      // Mount host bun cache to container to speed up install
+      '-v',
+      `${process.env.HOME}/.bun/install/cache:/home/bun/.bun/install/cache`,
       this.baseImage,
       'tail',
       '-f',
@@ -25,12 +28,23 @@ export class DockerAdapter implements IDockerAdapter {
     ])
 
     const stdout = await new Response(proc.stdout).text()
-    if (proc.exitCode !== 0) {
-      const stderr = await new Response(proc.stderr).text()
-      throw new Error(`Docker 容器建立失敗: ${stderr}`)
+    const containerId = stdout.trim()
+
+    // 如果 stdout 看起來像是一個 Container ID (64 char hex)，我們視為成功
+    // 即使 exitCode 非 0 (可能是 warning)
+    if (containerId.length === 64 && /^[0-9a-f]+$/.test(containerId)) {
+      return containerId
     }
 
-    return stdout.trim() // 回傳長 ID
+    if (proc.exitCode !== 0) {
+      const stderr = await new Response(proc.stderr).text()
+      console.error(`[Docker Error] Exit Code: ${proc.exitCode}`)
+      console.error(`[Docker Error] Stdout: ${stdout}`)
+      console.error(`[Docker Error] Stderr: ${stderr}`)
+      throw new Error(`Docker 容器建立失敗: ${stderr || stdout || 'Unknown error'}`)
+    }
+
+    return containerId // 回傳長 ID
   }
 
   /**
