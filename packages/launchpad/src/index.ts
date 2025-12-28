@@ -26,7 +26,7 @@ export * from './Domain/RocketStatus'
 class LaunchpadServiceProvider extends ServiceProvider {
   register(container: Container): void {
     if (!container.has('cache')) {
-      const cacheFromServices = this.core.services.get('cache')
+      const cacheFromServices = this.core?.services?.get('cache')
       if (cacheFromServices) {
         container.instance('cache', cacheFromServices)
       }
@@ -75,10 +75,14 @@ class LaunchpadServiceProvider extends ServiceProvider {
     })
   }
 
-  boot(): void {
-    const logger = this.core.logger
-    const router = this.core.container.make<BunProxyAdapter>('launchpad.router')
-    const docker = this.core.container.make<DockerAdapter>('launchpad.docker')
+  override boot(): void {
+    const core = this.core
+    if (!core) {
+      return
+    }
+    const logger = core.logger
+    const router = core.container.make<BunProxyAdapter>('launchpad.router')
+    const docker = core.container.make<DockerAdapter>('launchpad.docker')
 
     // 啟動路由代理
     router.start(8080)
@@ -114,7 +118,7 @@ export class LaunchpadOrbit implements GravitoOrbit {
 
       if (secret && !github.verifySignature(rawBody, signature, secret)) {
         core.logger.error('[GitHub] Webhook signature verification failed')
-        return c.json({ error: 'Invalid signature' }, { status: 401 })
+        return c.json({ error: 'Invalid signature' }, 401)
       }
 
       const body = JSON.parse(rawBody)
@@ -173,7 +177,7 @@ export class LaunchpadOrbit implements GravitoOrbit {
     core.router.post('/recycle', async (c) => {
       const body = (await c.req.json()) as any
       if (!body.missionId) {
-        return c.json({ error: 'missionId required' }, { status: 400 })
+        return c.json({ error: 'missionId required' }, 400)
       }
 
       const pool = core.container.make<PoolManager>('launchpad.pool')

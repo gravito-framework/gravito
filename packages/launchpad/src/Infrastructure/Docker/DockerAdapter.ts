@@ -46,12 +46,15 @@ export class DockerAdapter implements IDockerAdapter {
     const stdout = await new Response(proc.stdout).text()
     // 輸出格式可能包含多行，如 0.0.0.0:32768 和 [::]:32768
     // 我們取第一行並提取端口
-    const firstLine = stdout.split('\n')[0]
-    const match = firstLine.match(/:(\d+)$/)
-    if (!match) {
+    const firstLine = stdout.split('\n')[0] ?? ''
+    if (!firstLine) {
       throw new Error(`無法獲取容器映射端口: ${stdout}`)
     }
-    return parseInt(match[1], 10)
+    const match = firstLine.match(/:(\d+)$/)
+    if (!match?.[1]) {
+      throw new Error(`無法獲取容器映射端口: ${stdout}`)
+    }
+    return Number.parseInt(match[1], 10)
   }
 
   async copyFiles(containerId: string, sourcePath: string, targetPath: string): Promise<void> {
