@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { Scaffold } from '@gravito/scaffold'
 import pc from 'picocolors'
 
 export class MakeCommand {
@@ -29,6 +30,11 @@ export class MakeCommand {
    * @returns A promise that resolves when the file is created.
    */
   async run(type: string, name: string, options: any = {}) {
+    // 特殊處理 satellite：使用 Scaffold 引擎而不是簡單的 stub
+    if (type === 'satellite') {
+      return this.runSatellite(name, options)
+    }
+
     try {
       let stubName = `${type}.stub`
 
@@ -96,6 +102,38 @@ export class MakeCommand {
    */
   private replaceVariables(content: string, pascal: string, camel: string): string {
     return content.replace(/\{\{ Name \}\}/g, pascal).replace(/\{\{ name \}\}/g, camel)
+  }
+
+  /**
+   * 專門處理 Satellite 的生成邏輯
+   */
+  private async runSatellite(name: string, options: any) {
+    const isInternal = options.internal || false
+    const targetDir = isInternal
+      ? path.resolve(process.cwd(), 'satellites', name.toLowerCase())
+      : path.resolve(process.cwd(), name.toLowerCase())
+
+    const scaffold = new Scaffold()
+
+    console.log(pc.cyan(`🚀 Launching Satellite Scaffolder for "${name}"...`))
+
+    const result = await scaffold.create({
+      name,
+      targetDir,
+      architecture: 'satellite',
+      isInternal,
+      installDeps: false, // 讓使用者手動安裝
+      initGit: !isInternal, // 內部插件不需要獨立 git
+    })
+
+    if (result.success) {
+      console.log(pc.green(`✅ Satellite created at: ${result.targetDir}`))
+      if (isInternal) {
+        console.log(pc.yellow(`ℹ️ Don't forget to run 'bun install' at root to link the workspace.`))
+      }
+    } else {
+      console.error(pc.red(`❌ Failed to create satellite: ${result.errors?.join(', ')}`))
+    }
   }
 
   /**

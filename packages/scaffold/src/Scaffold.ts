@@ -10,6 +10,7 @@ import { BaseGenerator } from './generators/BaseGenerator'
 import { CleanArchitectureGenerator } from './generators/CleanArchitectureGenerator'
 import { DddGenerator } from './generators/DddGenerator'
 import { EnterpriseMvcGenerator } from './generators/EnterpriseMvcGenerator'
+import { SatelliteGenerator } from './generators/SatelliteGenerator'
 import type { ArchitectureType, ScaffoldOptions, ScaffoldResult } from './types'
 
 export class Scaffold {
@@ -45,6 +46,11 @@ export class Scaffold {
         name: 'Domain-Driven Design',
         description: 'Full DDD with Bounded Contexts and CQRS',
       },
+      {
+        type: 'satellite',
+        name: 'Gravito Satellite',
+        description: 'Plug-and-play module for the Gravito ecosystem',
+      },
     ]
   }
 
@@ -62,6 +68,7 @@ export class Scaffold {
       {
         ...options.context,
         withSpectrum: options.withSpectrum ?? false,
+        isInternal: options.isInternal ?? false,
       }
     )
 
@@ -99,6 +106,8 @@ export class Scaffold {
         return new CleanArchitectureGenerator(config)
       case 'ddd':
         return new DddGenerator(config)
+      case 'satellite':
+        return new SatelliteGenerator(config)
       default:
         throw new Error(`Unknown architecture type: ${type}`)
     }

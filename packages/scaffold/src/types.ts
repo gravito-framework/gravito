@@ -1,7 +1,7 @@
 /**
  * Architecture types supported by the scaffolding system.
  */
-export type ArchitectureType = 'enterprise-mvc' | 'clean' | 'ddd'
+export type ArchitectureType = 'enterprise-mvc' | 'clean' | 'ddd' | 'satellite'
 
 /**
  * Options for scaffolding a new project.
@@ -45,6 +45,12 @@ export interface ScaffoldOptions {
    * @default false
    */
   withSpectrum?: boolean
+
+  /**
+   * Whether this is an internal official satellite
+   * @default false
+   */
+  isInternal?: boolean
 
   /**
    * Additional context variables for templates
