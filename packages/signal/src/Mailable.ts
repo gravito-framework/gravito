@@ -13,6 +13,7 @@ export abstract class Mailable implements Queueable {
   protected renderer?: Renderer
   private rendererResolver?: () => Promise<Renderer>
   protected renderData: Record<string, unknown> = {}
+  protected config?: MailConfig
 
   // ===== Fluent API (Envelope Construction) =====
 
@@ -188,6 +189,7 @@ export abstract class Mailable implements Queueable {
    */
   async buildEnvelope(configPromise: MailConfig | Promise<MailConfig>): Promise<Envelope> {
     const config = await Promise.resolve(configPromise)
+    this.config = config
 
     // Inject translator from config if available
     if (config.translator) {

@@ -1,4 +1,4 @@
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore, setApp } from 'gravito-core'
 import { OrbitAtlas, DB, Schema } from '@gravito/atlas'
 import { OrbitSignal } from '@gravito/signal'
 import { MembershipServiceProvider } from '../src/index'
@@ -20,6 +20,9 @@ async function grandReview() {
       APP_NAME: 'Membership Review',
       PORT: 3001,
       'membership.auth.single_device': true, // 開啟多設備限制
+      'membership.branding.name': 'Review Admiral', // 自定義品牌
+      'membership.branding.primary_color': '#10b981', // 自定義顏色 (綠色)
+      'app.url': 'https://review.local',
       'database.default': 'sqlite',
       'database.connections.sqlite': {
         driver: 'sqlite',
@@ -27,13 +30,16 @@ async function grandReview() {
       }
     },
     orbits: [
-      new OrbitSignal({ 
+      new OrbitSignal({
         devMode: true,
         from: { address: 'system@gravito.dev', name: 'Gravito Core' },
         viewsDir: require('path').resolve(__dirname, '../views')
       })
     ]
   })
+
+  // 1.2 強制設置全局 app 實例，供 Mailable 內部使用
+  setApp(core)
 
   // 1.5 初始化 Atlas
   DB.addConnection('default', {

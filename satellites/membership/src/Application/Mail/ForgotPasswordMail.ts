@@ -9,11 +9,29 @@ export class ForgotPasswordMail extends Mailable {
   }
 
   build(): this {
+    let branding = {
+      name: 'Gravito App',
+      color: '#f43f5e'
+    }
+    let baseUrl = 'http://localhost:3000'
+
+    try {
+      const { app } = require('gravito-core')
+      const core = app()
+      if (core) {
+        branding.name = core.config.get('membership.branding.name', branding.name)
+        branding.color = core.config.get('membership.branding.primary_color', branding.color)
+        baseUrl = core.config.get('app.url', baseUrl)
+      }
+    } catch (e) {}
+
     return this
       .to(this.email)
       .subject(this.t('membership.emails.reset_password_subject'))
       .view('emails/reset_password', { 
-        resetUrl: `https://example.com/reset-password?token=${this.token}`,
+        resetUrl: `${baseUrl}/reset-password?token=${this.token}`,
+        branding,
+        currentYear: new Date().getFullYear(),
         lang: {
           reset_password_title: this.t('membership.emails.reset_password_title'),
           reset_password_body: this.t('membership.emails.reset_password_body'),

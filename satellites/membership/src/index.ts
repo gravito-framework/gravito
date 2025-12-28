@@ -100,7 +100,7 @@ export class MembershipServiceProvider extends ServiceProvider {
         try {
           const mail = this.core?.container.make<any>('mail')
           if (mail) {
-            await mail.send(new WelcomeMail(data.email, data.token))
+            await mail.queue(new WelcomeMail(data.email, data.token))
           }
         } catch (err) {
           this.core?.logger.error('[Membership] Failed to send verification email', err)
@@ -111,7 +111,7 @@ export class MembershipServiceProvider extends ServiceProvider {
         try {
           const mail = this.core?.container.make<any>('mail')
           if (mail) {
-            await mail.send(new ForgotPasswordMail(data.email, data.token))
+            await mail.queue(new ForgotPasswordMail(data.email, data.token))
           }
         } catch (err) {
           this.core?.logger.error('[Membership] Failed to send reset password email', err)
@@ -122,7 +122,7 @@ export class MembershipServiceProvider extends ServiceProvider {
         try {
           const mail = this.core?.container.make<any>('mail')
           if (mail) {
-            await mail.send(new MemberLevelChangedMail(data.email, data.oldLevel, data.newLevel))
+            await mail.queue(new MemberLevelChangedMail(data.email, data.oldLevel, data.newLevel))
           }
         } catch (err) {
           this.core?.logger.error('[Membership] Failed to send level change email', err)

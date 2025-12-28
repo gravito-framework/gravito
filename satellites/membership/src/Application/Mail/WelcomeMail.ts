@@ -9,11 +9,33 @@ export class WelcomeMail extends Mailable {
   }
 
   build(): this {
+    // 品牌配置抽象化 (提供安全回退值)
+    let branding = {
+      name: 'Gravito App',
+      color: '#6366f1'
+    }
+    let baseUrl = 'http://localhost:3000'
+
+    try {
+      // 嘗試從全域獲取 (僅在 PlanetCore 運行時有效)
+      const { app } = require('gravito-core')
+      const core = app()
+      if (core) {
+        branding.name = core.config.get('membership.branding.name', branding.name)
+        branding.color = core.config.get('membership.branding.primary_color', branding.color)
+        baseUrl = core.config.get('app.url', baseUrl)
+      }
+    } catch (e) {
+      // 忽略錯誤，使用預設值
+    }
+
     return this
       .to(this.email)
       .subject(this.t('membership.emails.welcome_subject'))
       .view('emails/welcome', { 
-        verificationUrl: `https://example.com/verify?token=${this.token}`,
+        verificationUrl: `${baseUrl}/verify?token=${this.token}`,
+        branding,
+        currentYear: new Date().getFullYear(),
         lang: {
           welcome_title: this.t('membership.emails.welcome_title'),
           welcome_body: this.t('membership.emails.welcome_body'),

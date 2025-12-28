@@ -10,12 +10,28 @@ export class MemberLevelChangedMail extends Mailable {
   }
 
   build(): this {
+    let branding = {
+      name: 'Gravito App',
+      color: '#f59e0b'
+    }
+
+    try {
+      const { app } = require('gravito-core')
+      const core = app()
+      if (core) {
+        branding.name = core.config.get('membership.branding.name', branding.name)
+        branding.color = core.config.get('membership.branding.primary_color', branding.color)
+      }
+    } catch (e) {}
+
     return this
       .to(this.email)
       .subject(this.t('membership.emails.level_changed_subject'))
       .view('emails/level_changed', { 
         oldLevel: this.oldLevel,
         newLevel: this.newLevel,
+        branding,
+        currentYear: new Date().getFullYear(),
         lang: {
           badge_text: this.t('membership.emails.level_changed_badge'),
           title: this.t('membership.emails.level_changed_title'),

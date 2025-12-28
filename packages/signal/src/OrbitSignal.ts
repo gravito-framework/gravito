@@ -9,6 +9,7 @@ import type { MailConfig, Message } from './types'
 export class OrbitSignal implements GravitoOrbit {
   private config: MailConfig
   private devMailbox?: DevMailbox
+  private core?: PlanetCore
 
   constructor(config: MailConfig = {}) {
     this.config = config
@@ -20,6 +21,7 @@ export class OrbitSignal implements GravitoOrbit {
    * @param core - The PlanetCore instance.
    */
   install(core: PlanetCore): void {
+    this.core = core
     core.logger.info('[OrbitSignal] Initializing Mail Service')
 
     // 1. Ensure transport exists (fallback to Log if not set)
@@ -98,8 +100,18 @@ export class OrbitSignal implements GravitoOrbit {
    * Queue a mailable instance
    */
   async queue(mailable: Mailable): Promise<void> {
-    // Attempt to use OrbitStream if available
-    // For now, simple fallback
+    try {
+      // 嘗試從容器獲取隊列服務 (OrbitStream)
+      const queue = this.core?.container.make<any>('queue')
+      if (queue) {
+        await queue.push(mailable)
+        return
+      }
+    } catch (e) {
+      // 找不到隊列服務時，會拋出錯誤，我們捕捉並降級
+    }
+
+    // Fallback: 直接發送
     await this.send(mailable)
   }
 }
