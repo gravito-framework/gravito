@@ -17,7 +17,9 @@ export class PoolManager {
     const currentRockets = await this.rocketRepository.findAll()
     const needed = count - currentRockets.length
 
-    if (needed <= 0) return
+    if (needed <= 0) {
+      return
+    }
 
     console.log(`[LaunchPad] 正在熱機，準備發射 ${needed} 架新火箭...`)
 
