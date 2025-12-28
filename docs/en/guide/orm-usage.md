@@ -4,7 +4,11 @@ title: ORM Usage Guide
 
 # ORM Usage Guide
 
-> Complete guide for using Atlas ORM, covering all features and use cases. Atlas provides a Laravel Eloquent-like experience with high-performance database drivers integrated under the hood.
+> Complete guide for using Atlas ORM, covering all features and use cases. Atlas provides a Laravel Eloquent-like experience with Bun-native performance and database drivers inspired by Prisma and Drizzle.
+
+## Beta Notes
+
+Atlas is built for the Gravito 1.0.0-beta cycle and targets Bun 1.3.4+ for best performance and compatibility. The CLI workflow wraps `drizzle-kit` for migrations, while Atlas keeps a familiar Active Record API on top.
 
 ## Table of Contents
 
