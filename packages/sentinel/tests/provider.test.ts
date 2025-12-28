@@ -40,4 +40,24 @@ describe('CallbackUserProvider', () => {
 
     console.log = originalLog
   })
+
+  it('handles missing token callback and remember token updates', async () => {
+    const user = {
+      rememberToken: '',
+      setRememberToken(token: string) {
+        this.rememberToken = token
+      },
+    }
+
+    const provider = new CallbackUserProvider(
+      async (id) => ({ id, getAuthIdentifier: () => id }) as any,
+      async () => true
+    )
+
+    const tokenUser = await provider.retrieveByToken('1', 'token')
+    expect(tokenUser).toBeNull()
+
+    await provider.updateRememberToken(user as any, 'remember-me')
+    expect(user.rememberToken).toBe('remember-me')
+  })
 })

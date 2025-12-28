@@ -35,6 +35,29 @@ describe('SessionGuard', () => {
     await guard.logout()
     expect(await guard.check()).toBe(false)
   })
+
+  it('returns null when logged out or session is missing', async () => {
+    const ctx = {
+      get: () => ({
+        get: () => null,
+        put: () => {},
+        forget: () => {},
+        regenerate: mock(() => {}),
+      }),
+      set: mock(() => {}),
+    }
+
+    const provider = {
+      retrieveById: async () => null,
+      retrieveByCredentials: async () => null,
+      validateCredentials: async () => false,
+    }
+
+    const guard = new SessionGuard('web', provider as any, ctx as any, 'auth')
+    expect(await guard.user()).toBeNull()
+    await guard.logout()
+    expect(await guard.id()).toBeNull()
+  })
 })
 
 describe('TokenGuard', () => {
@@ -64,6 +87,29 @@ describe('TokenGuard', () => {
     await guard2.user()
     expect(await guard2.id()).toBe('1')
   })
+
+  it('ignores query tokens when disabled and fails validation without validator', async () => {
+    const ctx = {
+      req: {
+        query: () => 'query-token',
+        header: () => null,
+      },
+    }
+    const provider = {
+      retrieveByCredentials: async () => ({ getAuthIdentifier: () => '1' }),
+    }
+
+    const guard = new TokenGuard(
+      provider as any,
+      ctx as any,
+      'api_token',
+      'api_token',
+      false,
+      false
+    )
+    expect(await guard.user()).toBeNull()
+    expect(await guard.validate({ api_token: 'query-token' })).toBe(false)
+  })
 })
 
 describe('JwtGuard', () => {
@@ -83,5 +129,22 @@ describe('JwtGuard', () => {
     const guard = new JwtGuard(provider as any, ctx as any, 'secret')
     expect(await guard.user()).toBeDefined()
     expect(await guard.id()).toBe('user-1')
+  })
+
+  it('resolves tokens from query when enabled', async () => {
+    const ctx = {
+      req: {
+        header: () => null,
+        query: (key: string) => (key === 'token' ? 'query-token' : null),
+      },
+    }
+    const provider = {
+      retrieveById: async (id: string) => ({ getAuthIdentifier: () => id }),
+      retrieveByCredentials: async () => ({ getAuthIdentifier: () => '1' }),
+      validateCredentials: async () => true,
+    }
+
+    const guard = new JwtGuard(provider as any, ctx as any, 'secret', 'HS256', true)
+    expect(await guard.user()).toBeDefined()
   })
 })
