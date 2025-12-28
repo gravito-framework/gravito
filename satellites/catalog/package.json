@@ -1,5 +1,5 @@
 {
-  "name": "gravito-satellite-catalog",
+  "name": "@gravito/satellite-catalog",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
