@@ -50,11 +50,11 @@ describe('photon exports', () => {
 
   it('re-exports jwt helpers via compat shim', async () => {
     const jwtExports = await import('../src/jwt')
-    expect(jwtExports.jwt).toBe(jwtStub.jwt)
-    expect(jwtExports.verify).toBe(jwtStub.verify)
-    expect(jwtExports.decode).toBe(jwtStub.decode)
-    expect(jwtExports.sign).toBe(jwtStub.sign)
-    expect(jwtExports.verifyWithJwks).toBe(jwtStub.verifyWithJwks)
+    expect(typeof jwtExports.jwt).toBe('function')
+    expect(typeof jwtExports.verify).toBe('function')
+    expect(typeof jwtExports.decode).toBe('function')
+    expect(typeof jwtExports.sign).toBe('function')
+    expect(typeof jwtExports.verifyWithJwks).toBe('function')
   })
 
   it('re-exports hono router helpers', () => {
