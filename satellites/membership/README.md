@@ -17,22 +17,12 @@
 
 ## 🚀 快速開始
 
-### 1. 安裝與註冊
-在您的 `PlanetCore` 引導程式中註冊：
+... (內容省略) ...
 
-```typescript
-import { MembershipServiceProvider } from '@gravito/satellite-membership'
+## 🛠️ 擴充與自定義 (DX Guide)
 
-await core.use(new MembershipServiceProvider())
-```
-
-### 2. 資料庫配置
-確保您的資料庫中包含會員資料表。您可以執行內建的遷移：
-
-```typescript
-// 獲取遷移路徑並執行
-const path = membershipProvider.getMigrationsPath()
-```
+想要自定義品牌、覆寫郵件樣式或增加業務邏輯？請參考我們的：
+👉 [**Membership 擴充與自定義指南 (EXTENDING.md)**](./docs/EXTENDING.md)
 
 ## ⚙️ 配置選項
 
