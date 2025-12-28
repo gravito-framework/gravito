@@ -73,6 +73,7 @@ export * from './helpers'
 // HTTP / Security utilities
 export { CookieJar, type CookieOptions } from './http/CookieJar'
 export { type BodySizeLimitOptions, bodySizeLimit } from './http/middleware/BodySizeLimit'
+export { type CorsOptions, type CorsOrigin, cors } from './http/middleware/Cors'
 export { type CsrfOptions, csrfProtection, getCsrfToken } from './http/middleware/Csrf'
 export {
   type HstsOptions,

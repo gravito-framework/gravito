@@ -160,6 +160,23 @@ If you want to enforce `Content-Length`, enable strict mode:
 core.adapter.use('*', bodySizeLimit(1_048_576, { requireContentLength: true }))
 ```
 
+## CORS
+
+Enable CORS with the built-in middleware and keep origins explicit in production.
+
+```ts
+import { cors } from 'gravito-core'
+
+core.adapter.use(
+  '*',
+  cors({
+    origin: ['https://example.com'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+)
+```
+
 ## Production Gates (Debug & Dev Tools)
 
 Some developer tools should never be exposed publicly. In production:

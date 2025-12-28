@@ -160,6 +160,23 @@ core.adapter.use('*', bodySizeLimit(1_048_576))
 core.adapter.use('*', bodySizeLimit(1_048_576, { requireContentLength: true }))
 ```
 
+## CORS
+
+使用內建 middleware 啟用 CORS，並在 production 明確限制允許的來源。
+
+```ts
+import { cors } from 'gravito-core'
+
+core.adapter.use(
+  '*',
+  cors({
+    origin: ['https://example.com'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+)
+```
+
 ## Production Gate（Debug/Dev 工具）
 
 部分開發工具不應在 production 直接公開：
