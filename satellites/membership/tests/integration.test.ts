@@ -47,6 +47,8 @@ describe('Membership Satellite Integration', () => {
       table.timestamp('email_verified_at').nullable()
       table.string('password_reset_token').nullable()
       table.timestamp('password_reset_expires_at').nullable()
+      table.string('current_session_id').nullable()
+      table.string('remember_token').nullable()
       table.timestamp('created_at').default('CURRENT_TIMESTAMP')
       table.timestamp('updated_at').nullable()
       table.text('metadata').nullable()

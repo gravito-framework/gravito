@@ -73,6 +73,8 @@ describe('Membership Email Integration', () => {
       table.timestamp('email_verified_at').nullable()
       table.string('password_reset_token').nullable()
       table.timestamp('password_reset_expires_at').nullable()
+      table.string('current_session_id').nullable()
+      table.string('remember_token').nullable()
       table.timestamp('created_at').default('CURRENT_TIMESTAMP')
       table.text('metadata').nullable()
     })
@@ -101,7 +103,7 @@ describe('Membership Email Integration', () => {
     expect(messages[0].envelope.subject).toBe('membership.emails.welcome_subject')
     // 驗證是否包含 CSS 樣式標籤 (代表模板已渲染)
     expect(messages[0].html).toContain('<style>')
-    expect(messages[0].html).toContain('GRAVITO')
+    expect(messages[0].html).toContain('Gravito App')
   })
 
   it('觸發忘記密碼應發送重設郵件', async () => {
