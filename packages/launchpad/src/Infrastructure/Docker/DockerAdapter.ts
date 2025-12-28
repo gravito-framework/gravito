@@ -99,7 +99,10 @@ export class DockerAdapter implements IDockerAdapter {
       stdout: 'pipe',
       stderr: 'pipe',
     })
-    const read = async (stream: ReadableStream) => {
+    const read = async (stream?: ReadableStream | null) => {
+      if (!stream) {
+        return
+      }
       const reader = stream.getReader()
       const decoder = new TextDecoder()
       while (true) {
