@@ -138,13 +138,14 @@ export abstract class Mailable implements Queueable {
     // We should ideally use the container to get the mail service
     // But since Mailable might be used outside a core context, we'll try a safe approach.
     try {
-      // @ts-expect-error - Global access to app() helper from core
+      // biome-ignore lint/suspicious/noTsIgnore: Global access to app() helper from core
+      // @ts-ignore
       const { app } = await import('gravito-core')
       const mail = app().container.make<any>('mail')
       if (mail) {
         return mail.queue(this)
       }
-    } catch (e) {
+    } catch (_e) {
       // Fallback if core is not available
       console.warn('[Mailable] Could not auto-resolve mail service for queuing.')
     }
