@@ -1,4 +1,4 @@
-import { Rocket, Cpu, Activity, Terminal, Shield, Globe, Clock, LayoutGrid, Radio, Zap } from 'lucide-react'
+import { Rocket, Activity, Terminal, Shield, LayoutGrid, Radio } from 'lucide-react'
 import { useTelemetry } from './hooks/useTelemetry'
 import { cn } from './utils'
 import { useState, useEffect } from 'react'
