@@ -23,8 +23,11 @@ export class PayloadInjector {
 
     console.log(`[PayloadInjector] 正在安裝依賴...`)
 
-    // 寫入一個強制覆蓋的 bunfig.toml
-    const bunfigContent = `[install]\nfrozenLockfile = false\n`
+    const registry = process.env.LAUNCHPAD_NPM_REGISTRY || process.env.NPM_CONFIG_REGISTRY || ''
+    const baseInstallConfig = ['[install]', 'frozenLockfile = false']
+    const bunfigContent = registry
+      ? `${baseInstallConfig.join('\n')}\nregistry = "${registry}"\n`
+      : `${baseInstallConfig.join('\n')}\n`
     await this.docker.executeCommand(containerId, [
       'sh',
       '-c',
@@ -35,7 +38,7 @@ export class PayloadInjector {
     await this.docker.executeCommand(containerId, ['rm', '-f', '/app/bun.lockb'])
 
     // 安裝 (跳過腳本以避免編譯原生模組失敗)
-    const installRes = await this.docker.executeCommand(containerId, [
+    let installRes = await this.docker.executeCommand(containerId, [
       'bun',
       'install',
       '--cwd',
@@ -43,6 +46,24 @@ export class PayloadInjector {
       '--no-save',
       '--ignore-scripts',
     ])
+
+    if (installRes.exitCode !== 0 && !registry) {
+      const fallbackRegistry = 'https://registry.npmmirror.com'
+      const fallbackBunfig = `${baseInstallConfig.join('\n')}\nregistry = "${fallbackRegistry}"\n`
+      await this.docker.executeCommand(containerId, [
+        'sh',
+        '-c',
+        `echo "${fallbackBunfig}" > /app/bunfig.toml`,
+      ])
+      installRes = await this.docker.executeCommand(containerId, [
+        'bun',
+        'install',
+        '--cwd',
+        '/app',
+        '--no-save',
+        '--ignore-scripts',
+      ])
+    }
 
     if (installRes.exitCode !== 0) {
       throw new Error(`安裝依賴失敗: ${installRes.stderr}`)
