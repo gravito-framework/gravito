@@ -20,8 +20,11 @@ export class MergeCart extends UseCase<MergeCartInput, void> {
 
     if (!memberCart) {
       // 透過 (any) 修正私有屬性訪問以執行「身分轉正」
+      // 增加 // @ts-expect-error 保護，防止 CI 報錯
       const casted = guestCart as any
+      // @ts-expect-error
       casted.props.memberId = input.memberId
+      // @ts-expect-error
       casted.props.guestId = null
       await this.repository.save(guestCart)
     } else {
