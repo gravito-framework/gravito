@@ -12,7 +12,7 @@ export class CouponService {
   constructor(private core: PlanetCore) {}
 
   /**
-   * 驗證並套用折價券
+   * 驗證優惠券有效性
    */
   async getAdjustment(code: string, order: any): Promise<CouponAdjustment | null> {
     const coupon = (await DB.table('coupons')
