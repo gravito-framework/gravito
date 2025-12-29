@@ -348,6 +348,22 @@
         "typescript": "^5.7.2",
       },
     },
+    "packages/admin-ui-invoice": {
+      "name": "@gravito/admin-ui-invoice",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/atlas": {
       "name": "@gravito/atlas",
       "version": "1.0.0",
@@ -1135,6 +1151,19 @@
         "typescript": "^5.9.3",
       },
     },
+    "satellites/invoice": {
+      "name": "@gravito/satellite-invoice",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "satellites/logistics": {
       "name": "@gravito/satellite-logistics",
       "version": "0.1.0",
@@ -1521,6 +1550,8 @@
 
     "@gravito/admin-ui-catalog": ["@gravito/admin-ui-catalog@workspace:packages/admin-ui-catalog"],
 
+    "@gravito/admin-ui-invoice": ["@gravito/admin-ui-invoice@workspace:packages/admin-ui-invoice"],
+
     "@gravito/atlas": ["@gravito/atlas@workspace:packages/atlas"],
 
     "@gravito/beam": ["@gravito/beam@workspace:packages/beam"],
@@ -1596,6 +1627,8 @@
     "@gravito/satellite-catalog": ["@gravito/satellite-catalog@workspace:satellites/catalog"],
 
     "@gravito/satellite-commerce": ["@gravito/satellite-commerce@workspace:satellites/commerce"],
+
+    "@gravito/satellite-invoice": ["@gravito/satellite-invoice@workspace:satellites/invoice"],
 
     "@gravito/satellite-logistics": ["@gravito/satellite-logistics@workspace:satellites/logistics"],
 
