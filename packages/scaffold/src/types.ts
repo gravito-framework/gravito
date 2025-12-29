@@ -53,6 +53,17 @@ export interface ScaffoldOptions {
   isInternal?: boolean
 
   /**
+   * Profile preset (Core, Scale, Enterprise)
+   * @default 'core'
+   */
+  profile?: 'core' | 'scale' | 'enterprise'
+
+  /**
+   * Feature add-ons (e.g. 'redis', 'queue', 'otel')
+   */
+  features?: string[]
+
+  /**
    * Additional context variables for templates
    */
   context?: Record<string, unknown>

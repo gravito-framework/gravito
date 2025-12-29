@@ -25,9 +25,19 @@ The fastest way to start is using our professional CLI. You can initialize a pro
 # Initialize a new Gravito project interactively
 bunx gravito create my-gravito-app
 
+# Or select a profile explicitly (Recommended for Production)
+bunx gravito create my-gravito-app --profile scale
+
 # Or use the legacy creator
 bunx create-gravito-app@latest my-gravito-app
 ```
+
+> **New in v1.0**: You can now choose a **Profile** when creating your app.
+> - **Core**: Minimal, no setup required (Default).
+> - **Scale**: Postgres + Redis + Docker.
+> - **Enterprise**: Logging, Security, and Observability.
+>
+> Learn more in our **[Profiles Guide](/docs/guide/profiles)**.
 
 Then, navigate into your new folder:
 ```bash
