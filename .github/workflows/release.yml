@@ -46,7 +46,7 @@ jobs:
         uses: changesets/action@v1
         with:
           # This executes the release command defined in package.json
-          publish: bun run changeset:publish
+          publish: bun run ci:publish
           commit: "chore(release): version packages"
           title: "chore(release): version packages"
         env:
