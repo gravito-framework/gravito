@@ -321,6 +321,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
         "lucide-react": "^0.468.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -1136,9 +1137,6 @@
       "name": "@gravito/satellite-marketing",
       "version": "0.1.0",
       "dependencies": {
-        "@gravito/atlas": "workspace:*",
-        "@gravito/enterprise": "workspace:*",
-        "@gravito/stasis": "workspace:*",
         "gravito-core": "workspace:*",
         "stripe": "^20.1.0",
       },
@@ -2474,8 +2472,6 @@
     "gravito-core": ["gravito-core@workspace:packages/core"],
 
     "gravito-official-site": ["gravito-official-site@workspace:examples/official-site"],
-
-    "@gravito/satellite-marketing": ["@gravito/satellite-marketing@workspace:satellites/marketing"],
 
     "gray-matter": ["gray-matter@4.0.3", "", { "dependencies": { "js-yaml": "^3.13.1", "kind-of": "^6.0.2", "section-matter": "^1.0.0", "strip-bom-string": "^1.0.0" } }, "sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q=="],
 

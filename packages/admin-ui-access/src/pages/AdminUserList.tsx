@@ -1,11 +1,30 @@
-import { useAdmin } from '@gravito/admin-shell-react'
-import { Edit2, Power, PowerOff, Search, Shield, UserPlus, Users } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { cn, useAdmin } from '@gravito/admin-shell-react'
+import {
+  Check,
+  Edit2,
+  Loader2,
+  Power,
+  PowerOff,
+  Search,
+  Shield,
+  UserPlus,
+  Users,
+  X,
+} from 'lucide-react'
+import type React from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export function AdminUserList() {
   const { sdk } = useAdmin()
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  // 分配角色相關狀態
+  const [roles, setRoles] = useState<any[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedRoleIds, setSelectedUserRoleIds] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -19,6 +38,15 @@ export function AdminUserList() {
     }
   }, [sdk])
 
+  const fetchRoles = useCallback(async () => {
+    try {
+      const data = await sdk.api.get<any[]>('/roles')
+      setRoles(data)
+    } catch (err) {
+      console.error('Failed to fetch roles', err)
+    }
+  }, [sdk])
+
   const toggleStatus = async (user: any) => {
     try {
       await sdk.api.patch(`/users/${user.id}`, { isActive: !user.isActive })
@@ -26,6 +54,35 @@ export function AdminUserList() {
     } catch (err) {
       alert('操作失敗')
     }
+  }
+
+  const openAssignModal = (user: any) => {
+    setSelectedUser(user)
+    setSelectedUserRoleIds(user.roles || [])
+    setIsModalOpen(true)
+    fetchRoles() // 確保角色清單是最新的
+  }
+
+  const handleAssignRoles = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedUser) return
+
+    setIsSubmitting(true)
+    try {
+      await sdk.api.patch(`/users/${selectedUser.id}`, { roles: selectedRoleIds })
+      await fetchUsers()
+      setIsModalOpen(false)
+    } catch (err: any) {
+      alert(err.message || '儲存失敗')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const toggleRole = (roleName: string) => {
+    setSelectedUserRoleIds((prev) =>
+      prev.includes(roleName) ? prev.filter((r) => r !== roleName) : [...prev, roleName]
+    )
   }
 
   useEffect(() => {
@@ -46,23 +103,6 @@ export function AdminUserList() {
           <UserPlus size={18} />
           邀請管理員
         </button>
-      </div>
-
-      {/* 搜尋區 */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="搜尋姓名或 Email..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
-          />
-        </div>
-        <select className="px-4 py-2 rounded-lg border border-slate-200 outline-none">
-          <option>所有角色</option>
-          <option>超級管理員</option>
-          <option>商城營運</option>
-        </select>
       </div>
 
       {/* 使用者表格 */}
@@ -101,7 +141,7 @@ export function AdminUserList() {
               users.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 text-sm">
                       <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
                         {user.username[0].toUpperCase()}
                       </div>
@@ -111,8 +151,11 @@ export function AdminUserList() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-sm">
                     <div className="flex flex-wrap gap-1">
+                      {user.roles.length === 0 && (
+                        <span className="text-slate-300 italic text-xs">未分配</span>
+                      )}
                       {user.roles.map((r: string) => (
                         <span
                           key={r}
@@ -124,9 +167,9 @@ export function AdminUserList() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-sm">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
                         user.isActive
                           ? 'bg-emerald-50 text-emerald-700'
                           : 'bg-slate-100 text-slate-500'
@@ -154,9 +197,11 @@ export function AdminUserList() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => openAssignModal(user)}
                         className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        title="分配角色"
                       >
-                        <Edit2 size={16} />
+                        <Shield size={16} />
                       </button>
                     </div>
                   </td>
@@ -166,6 +211,87 @@ export function AdminUserList() {
           </tbody>
         </table>
       </div>
+
+      {/* 分配角色 Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">分配角色</h2>
+                <p className="text-sm text-slate-500">
+                  正在設定 {selectedUser?.username} 的權限角色
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleAssignRoles}>
+              <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                {roles.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 italic">尚無角色可供選擇</div>
+                ) : (
+                  roles.map((role) => (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => toggleRole(role.name)}
+                      className={cn(
+                        'w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left',
+                        selectedRoleIds.includes(role.name)
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Shield
+                          size={18}
+                          className={
+                            selectedRoleIds.includes(role.name)
+                              ? 'text-indigo-600'
+                              : 'text-slate-400'
+                          }
+                        />
+                        <div>
+                          <div className="font-bold text-sm">{role.name}</div>
+                          <div className="text-[10px] opacity-70 uppercase tracking-tight">
+                            {role.permissions.length} 項權限標籤
+                          </div>
+                        </div>
+                      </div>
+                      {selectedRoleIds.includes(role.name) && (
+                        <Check size={18} className="text-indigo-600" />
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+              <div className="p-6 bg-slate-50 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-white transition-all"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 size={18} className="animate-spin" />}
+                  儲存變更
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { type Container, ServiceProvider } from 'gravito-core'
 import { CreateRole } from './Application/UseCases/CreateRole'
 import { ListAdmins } from './Application/UseCases/ListAdmins'
+import { ListPermissions } from './Application/UseCases/ListPermissions'
 import { ListRoles } from './Application/UseCases/ListRoles'
 import { LoginAdmin } from './Application/UseCases/LoginAdmin'
 import { RegisterAdmin } from './Application/UseCases/RegisterAdmin'
@@ -43,6 +44,10 @@ export class AdminServiceProvider extends ServiceProvider {
       'admin.usecase.createRole',
       () => new CreateRole(container.make('admin.repository.role'))
     )
+    container.bind(
+      'admin.usecase.listPermissions',
+      () => new ListPermissions(container.make('admin.repository.permission'))
+    )
 
     // 注入 Controller
     container.singleton('admin.controller.auth', () => new AuthController(this.core!))
@@ -71,6 +76,7 @@ export class AdminServiceProvider extends ServiceProvider {
       // RBAC 路由
       router.get('/roles', (ctx) => rbacController.index(ctx))
       router.post('/roles', (ctx) => rbacController.store(ctx))
+      router.get('/permissions', (ctx) => rbacController.permissions(ctx))
     })
   }
 }

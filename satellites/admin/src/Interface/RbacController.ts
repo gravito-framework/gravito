@@ -1,5 +1,6 @@
 import type { PlanetCore } from 'gravito-core'
 import type { CreateRole } from '../Application/UseCases/CreateRole'
+import type { ListPermissions } from '../Application/UseCases/ListPermissions'
 import type { ListRoles } from '../Application/UseCases/ListRoles'
 
 export class RbacController {
@@ -18,7 +19,27 @@ export class RbacController {
           id: r.id,
           name: r.name,
           permissions: r.permissions,
-          userCount: 0, // 未來可結合 Repository 計算
+          userCount: 0,
+        }))
+      )
+    } catch (error: any) {
+      return ctx.json({ message: error.message }, 500)
+    }
+  }
+
+  /**
+   * GET /permissions
+   */
+  async permissions(ctx: any) {
+    try {
+      const useCase = this.core.container.make<ListPermissions>('admin.usecase.listPermissions')
+      const permissions = await useCase.execute()
+
+      return ctx.json(
+        permissions.map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
         }))
       )
     } catch (error: any) {
