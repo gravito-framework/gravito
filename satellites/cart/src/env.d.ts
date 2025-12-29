@@ -1,7 +1,4 @@
-declare global {
-  interface ImportMeta {
-    dir: string
-  }
+interface ImportMeta {
+  readonly dir: string
+  readonly path: string
 }
-
-export {}
