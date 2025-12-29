@@ -28,6 +28,8 @@ Not a grab bag of packages. Provide fully vetted presets:
 - `realtime` (with ripple / echo)
 - `worker` (queue-first)
 
+Each preset is a Golden Path template; read [Presets](./presets.md) to see what folders, routes, and tests ship with every option.
+
 ## 4. Examples Are a Golden Path, Not a Demo
 
 Generated apps ship with a real, end-to-end slice:
@@ -42,3 +44,5 @@ To beat Laravel, consistency wins:
 
 - Naming for `config key`, `env key`, error codes, logger fields
 - Any orbit must follow the contract to enter official presets
+
+Read [Config Contract](./config-contract.md) for the naming conventions and enforcement hooks that keep every preset aligned.
