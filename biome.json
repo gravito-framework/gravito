@@ -16,6 +16,7 @@
       "templates/**/*.tsx",
       "examples/**/*.ts",
       "examples/**/*.tsx",
+      "scripts/ci-publish.js",
       "src/**/*.ts",
       "src/**/*.tsx",
       "tests/**/*.ts",

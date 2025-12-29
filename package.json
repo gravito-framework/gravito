@@ -20,7 +20,7 @@
         "version:check": "bun run scripts/check-versions.ts",
         "changeset": "changeset",
         "ci:version": "changeset version",
-        "ci:publish": "changeset publish",
+        "ci:publish": "node scripts/ci-publish.js",
         "pub:beta": "changeset publish --tag beta",
         "pub:snapshot": "changeset publish --tag snapshot",
         "launchpad:up": "bun scripts/start-launchpad.ts",
