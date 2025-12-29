@@ -7,9 +7,10 @@
  * @packageDocumentation
  */
 
+export * from './EnvironmentDetector'
 // Main API
 // Core Logic
-export { FileMerger } from './FileMerger'
+export * from './FileMerger'
 // Generators
 export {
   BaseGenerator,
@@ -23,6 +24,7 @@ export { SatelliteGenerator } from './generators/SatelliteGenerator'
 // Stub Generator
 export { type StubConfig, StubGenerator, type StubVariables } from './generators/StubGenerator'
 export { type LockFile, LockGenerator } from './LockGenerator'
+export * from './ProfileResolver'
 export { type ProfileConfig, ProfileResolver, type ProfileType } from './ProfileResolver'
 export { Scaffold } from './Scaffold'
 // Types

@@ -1,7 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { cancel, intro, isCancel, note, outro, select, spinner, text } from '@clack/prompts'
-import { LockGenerator, ProfileResolver, type ProfileType } from '@gravito/scaffold'
+import {
+  EnvironmentDetector,
+  LockGenerator,
+  ProfileResolver,
+  type ProfileType,
+} from '@gravito/scaffold'
 import cac from 'cac'
 import { downloadTemplate } from 'giget'
 import pc from 'picocolors'
@@ -151,10 +156,46 @@ cli
   .option('--with <features>', 'Feature add-ons (comma-separated, e.g. redis,queue)', {
     default: '',
   })
+  .option('--recommend', 'Auto-detect profile based on environment')
   .action(async (name, options) => {
     console.clear()
 
     intro(pc.bgBlack(pc.white(' 🌌 Gravito CLI ')))
+
+    // -1. Environment Detection
+    if (options.recommend) {
+      const detector = new EnvironmentDetector()
+      const detection = detector.detect()
+
+      if (detection.confidence !== 'low') {
+        note(
+          `Detected Environment: ${pc.cyan(detection.platform)}\nReason: ${detection.reason}\nConfidence: ${detection.confidence}`,
+          'Environment Detection'
+        )
+
+        const confirmed = await select({
+          message: `Recommended Profile: ${pc.green(detection.suggestedProfile)}. Use this?`,
+          options: [
+            { value: 'yes', label: `Yes, use ${detection.suggestedProfile}` },
+            { value: 'no', label: 'No, let me choose manually' },
+          ],
+        })
+
+        if (isCancel(confirmed)) {
+          cancel('Operation cancelled.')
+          process.exit(0)
+        }
+
+        if (confirmed === 'yes') {
+          options.profile = detection.suggestedProfile
+          console.log(pc.green(`✅ Using profile: ${options.profile}`))
+        }
+      } else {
+        console.log(
+          pc.yellow('⚠️ No specific environment detected. Proceeding with manual selection.')
+        )
+      }
+    }
 
     const profileResolver = new ProfileResolver()
 
@@ -614,6 +655,59 @@ cli
       force: options.force ?? false,
     })
   })
+
+import { UpgradeCommand } from './commands/upgrade'
+
+cli
+  .command('upgrade', 'Upgrade project to a different profile')
+  .option('--to <profile>', 'Target profile (core, scale, enterprise)')
+  .action(async (options) => {
+    if (!options.to) {
+      console.error(pc.red('Missing required argument: --to <profile>'))
+      process.exit(1)
+    }
+    const cmd = new UpgradeCommand()
+    await cmd.run(options.to as ProfileType)
+  })
+
+import { MaintenanceCommand } from './commands/maintenance'
+
+cli.command('doctor', 'Diagnose project issues').action(async () => {
+  const cmd = new MaintenanceCommand()
+  await cmd.doctor()
+})
+
+cli
+  .command('add <feature>', 'Add a feature to the project')
+  .action(async (feature) => {
+    const cmd = new MaintenanceCommand()
+    await cmd.addFeature(feature)
+  })
+
+  .action(async (feature) => {
+    const cmd = new MaintenanceCommand()
+    await cmd.addFeature(feature)
+  })
+
+cli.command('dev', 'Start development server with health checks').action(async () => {
+  // 1. Run Doctor Check
+  const maintenance = new MaintenanceCommand()
+  // We suppress the output of doctor unless it fails
+  // Actually, doctor exits process if it fails, so this is safe.
+  await maintenance.doctor()
+
+  // 2. Start Vite
+  const { spawn } = await import('node:child_process')
+  const devProcess = spawn('bun', ['run', 'vite'], {
+    stdio: 'inherit',
+    shell: true,
+    env: { ...process.env, FORCE_COLOR: '1' }, // Ensure colors
+  })
+
+  devProcess.on('error', (err) => {
+    console.error(pc.red('Failed to start dev server:'), err)
+  })
+})
 
 cli.help()
 
