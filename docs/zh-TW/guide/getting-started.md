@@ -19,17 +19,30 @@ bun --version
 
 ## 建立您的專案
 
-開始最快的方法是使用我們的專業 CLI。您可以透過互動式介面快速初始化專案：
+`bunx gravito create my-gravito-app` 會呼叫 Gravito CLI 的 `create` 命令，該命令會：
+
+1. 請您輸入要建立的專案名稱（預設 `my-galaxy-app`）。
+2. 選擇要套用的模板，目前提供：
+   - `basic`（超簡潔 Gravito server，適合從骨架開始建置）。
+   - `inertia-react`（Gravito server + Inertia/React 客戶端的起始範本，內建 React 前端和 middleware 整合）。
+   - `static-site`（靜態網站，支援 React 或 Vue 客戶端，適合單純靜態頁面或 Jamstack）。
+3. 依照模板複製 `templates/<template>` 的結構，並針對 `static-site` 模板再詢問要保留 React 還是 Vue 的檔案、更新 `package.json`（移除不用依賴、加上對應的 Vue/React 依賴）以及調整 `vite.config.ts`、 `src/client` 內容。
+4. 建立 `.env`（從 `env.example`）、將 `workspace:*` 依賴換成穩定版本，並把專案名稱格式化為合法 npm 名稱。
+
+這些模板的對應資料夾位於專案的 `templates/` 下，大致內容如下：
+- `basic`：最核心的 Gravito server structure（`controllers`、`routes`、`views`、`hooks`）與少量的 `static/` 入口。
+- `inertia-react`：在 `basic` 之上加入 `src/client/app.tsx`、`components/`、`pages/` 以及 React/Inertia 專用的 `vite.config.ts`。
+- `static-site`：同時提供 React 與 Vue 的 `src/client` 入口與組件，CLI 會根據您選的框架保留對應檔案、調整 `package.json` 依賴、修改 `vite.config.ts` 與環境檔案。
+
+您也可以用 `--template` 直接指定：
 
 ```bash
-# 使用互動式介面建立新的 Gravito 專案
-bunx gravito create my-gravito-app
-
-# 或使用經典的開發者工具
-bunx create-gravito-app@latest my-gravito-app
+bunx gravito create my-gravito-app --template inertia-react
+bunx gravito create my-gravito-app --template static-site
 ```
 
-然後進入專案目錄：
+接著進入專案目錄：
+
 ```bash
 cd my-gravito-app
 bun install
@@ -111,7 +124,11 @@ export class HomeController {
 ```
 
 ### 那支援 Vue 嗎？
-當然！Gravito 完美支援 **Inertia-Vue**。您只需要在設定中將 `@gravito/ion` 的元件目標從 React 換成 Vue，其他開發邏輯完全一致。
+Gravito CLI 的 `static-site` 模板內建了 React + Vue 版本的 `src/client`，建立時會依照選擇移除另外一套：
+- 選 React：保留 `app.tsx`/`.tsx` 組件，移除 Vue 相關 `.vue` 檔案，並自動清掉 `@inertiajs/vue3`、Vue 的依賴。
+- 選 Vue：保留 `app.vue.ts`/`.vue` 檔案，移除 React 的 `.tsx` 檔案，為 `package.json` 加上 `@inertiajs/vue3`、`vue`、`@vitejs/plugin-vue`，並調整 `vite.config.ts` 的入口與插件。
+
+如果你要手動切換 Inertia 前端，可以在 `src/client` 裡自行替換這些檔案，Gravito 會照常支援 React / Vue / 採用 Inertia 之外的純 HTML。
 
 ## 下一步是什麼？
 
