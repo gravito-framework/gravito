@@ -1,38 +1,60 @@
 import { type Container, ServiceProvider } from 'gravito-core'
+import { CouponService } from './Application/Services/CouponService'
+import { PromotionEngine } from './Application/Services/PromotionEngine'
 
 export class MarketingServiceProvider extends ServiceProvider {
   register(container: Container): void {
-    // 註冊行銷引擎單例
+    container.singleton('marketing.promotion-engine', () => {
+      return new PromotionEngine(this.core!)
+    })
+    container.singleton('marketing.coupon-service', () => {
+      return new CouponService(this.core!)
+    })
   }
 
-  override boot(): void {
+  getMigrationsPath(): string {
+    return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
+  }
+
+  override async boot(): Promise<void> {
     const core = this.core
     if (!core) return
 
-    core.logger.info('🛰️ Satellite Marketing is operational')
+    const promoEngine = core.container.make<PromotionEngine>('marketing.promotion-engine')
+    const couponService = core.container.make<CouponService>('marketing.coupon-service')
 
-    /**
+    // 1. 價格調整 Filter (Promotion + Coupon)
+    core.hooks.addFilter(
+      'commerce:order:adjustments',
+      async (adjustments: any[], { order, extras }: any) => {
+        core.logger.info(`🎯 [Marketing] 正在為訂單 ${order.id} 掃描促銷與折價券...`)
 
-         * GASS 聯動：監聽訂單計算 Filter
+        const results = [...adjustments]
 
-         * 當 Commerce 計算金額時，Marketing 自動注入「點火測試 9 折優惠」
+        // 自動套用促銷活動
+        const promoAdjustments = await promoEngine.applyPromotions(order)
+        results.push(...promoAdjustments)
 
-         */
+        // 手動套用折價券 (從下單請求的 extras 中獲取 couponCode)
+        if (extras?.couponCode) {
+          try {
+            const couponAdj = await couponService.getAdjustment(extras.couponCode, order)
+            if (couponAdj) results.push(couponAdj)
+          } catch (e: any) {
+            core.logger.warn(`⚠️ [Marketing] 折價券無效: ${e.message}`)
+            // 注意：這裡我們不拋出錯誤，讓下單繼續但沒有折扣
+          }
+        }
 
-    core.hooks.addFilter('commerce:order:adjustments', async (adjustments: any[], args: any) => {
-      const payload = args as { order: any }
+        return results
+      }
+    )
 
-      core.logger.info(`[Marketing] Inspecting order for discounts: ${payload.order.id}`)
-
-      // 模擬點火測試優惠
-      adjustments.push({
-        label: 'Ignition Promo (10% OFF)',
-        amount: -(payload.order.subtotalAmount * 0.1),
-        sourceType: 'promo',
-        sourceId: 'IGNITION_2025',
-      })
-
-      return adjustments
+    // 2. 訂單完成後的核銷動作
+    core.hooks.addAction('commerce:order-placed', async (payload: any) => {
+      core.logger.info(`📝 [Marketing] 訂單 ${payload.orderId} 已建立，正在處理折價券核銷...`)
     })
+
+    core.logger.info('🛰️ Satellite Marketing is operational')
   }
 }
