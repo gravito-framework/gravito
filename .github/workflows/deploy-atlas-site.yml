@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf atlas-site-dist
-          git clone https://x-access-token:${{ secrets.ATLAS_SITE_DIST_PAT }}@github.com/gravito-framework/atlas-site-dist.git atlas-site-dist
+          git clone https://x-access-token:${{ secrets.DEPLOY_TOKEN }}@github.com/gravito-framework/atlas-site-dist.git atlas-site-dist
           cd atlas-site-dist
           git config user.name "Gravito Deploy Bot"
           git config user.email "bot@gravito.dev"
