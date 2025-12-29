@@ -15,6 +15,12 @@ title: 社群登入架構規劃
    - 在 `sentinel` 增加 WebAuthn credential 層級（建立/驗證 credential、綁定使用者、挑戰/回應流程）。
    - 提供可插拔的 middleware（例如 `passkeysGuard`），讓路由直接套用。
    - 在 membership 星際模組新增 Passkeys API，例如 `POST /auth/passkeys/register` 和 `POST /auth/passkeys/login`，並提供前端資料（challenge, relying party）。
+    - **實作草案**
+      1. 建 `member_passkeys` 表，儲存 credential ID、公鑰、signCount 與設備描述。
+      2. 增加 `PasskeysService`（依賴 `@simplewebauthn/server`）管理註冊/驗證挑戰，並將 challenge 存到 session。
+      3. 註冊 `PasskeyController` 路由，提供 `/register/options`, `/register/verify`, `/login/options`, `/login/verify` 四個端點；
+         使用 `auth()` middleware 限制註冊、用 `email` 或 memberId 查出資格、最後 `auth.login(member)` 建立 session。
+      4. 後續可把這套服務抽出成 `@gravito/passkeys`，讓其他衛星重用。
 
 2. **SSO / OAuth/OIDC**
    - 在 `sentinel` 內部提供 provider 抽象（可注入多個 `OAuthProvider`/`OIDCProvider`）。

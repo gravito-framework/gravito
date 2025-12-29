@@ -79,6 +79,35 @@ app.get('/me', auth(), async (c) => {
 })
 ```
 
+## Passkeys (WebAuthn) 支援
+
+安裝 `@gravito/satellite-membership` 並掛載 `MembershipServiceProvider`，就會啟用 `/api/membership/passkeys` 相關 API（註冊/登入的註釋與範例請參考 `satellites/membership/docs/PASSKEYS.md`）。
+
+```ts
+import { MembershipServiceProvider } from '@gravito/satellite-membership'
+
+new MembershipServiceProvider().install(core)
+```
+
+在 `membership.passkeys` 下填入 RP 描述，若沒設定 `origin`/`rp_id` 會自動取 `APP_URL`。
+
+```ts
+{
+  membership: {
+    passkeys: {
+      origin: 'https://app.example.com',
+      rp_id: 'app.example.com',
+      name: 'App Membership',
+      timeout: 90000,
+      user_verification: 'preferred',
+      attestation: 'none'
+    }
+  }
+}
+```
+
+Passkeys 依賴 session 儲存，因此請先註冊 `OrbitPulsar` 或其他提供 `core.adapter.session` 的 orbit，並在呼叫上述四個 API 時帶 `credentials: 'include'`。前端範例可以參考 [`satellites/membership/docs/PASSKEYS.md`](../../satellites/membership/docs/PASSKEYS.md)。
+
 ## 授權 Gate
 
 ```ts

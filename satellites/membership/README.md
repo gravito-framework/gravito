@@ -9,6 +9,7 @@
 - **安全防護**:
   - **多設備登入限制 (Single Device Login)**: 可開關功能，自動註冊並踢除舊裝置。
   - **密碼安全**: 使用 Bun 原生加密，支援自動 Rehash。
+  - **Passkeys (WebAuthn)**: 內建 Passkeys 登錄 + 登入 API，可配合 `@simplewebauthn/browser` 與瀏覽器原生驗證器。
 - **美化郵件 (Beautiful Emails)**:
   - 使用 Prism 模板引擎。
   - 支援現代化 HTML 佈局。
@@ -23,6 +24,9 @@
 
 想要自定義品牌、覆寫郵件樣式或增加業務邏輯？請參考我們的：
 👉 [**Membership 擴充與自定義指南 (EXTENDING.md)**](./docs/EXTENDING.md)
+
+想要使用 Passkeys？請參考：
+👉 [**Passkeys Integration Guide (PASSKEYS.md)**](./docs/PASSKEYS.md)
 
 ## ⚙️ 配置選項
 

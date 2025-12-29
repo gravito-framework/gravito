@@ -13,7 +13,7 @@ export function auth(guard?: string) {
       throw new AuthenticationException()
     }
 
-    await next()
+    return await next()
   }
 }
 

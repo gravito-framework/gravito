@@ -79,6 +79,35 @@ app.get('/me', auth(), async (c) => {
 })
 ```
 
+## Passkeys (WebAuthn) support
+
+Install `@gravito/satellite-membership` and include its service provider so you expose the `/api/membership/passkeys` endpoints that the membership guide documents.
+
+```ts
+import { MembershipServiceProvider } from '@gravito/satellite-membership'
+
+new MembershipServiceProvider().install(core)
+```
+
+Configure the relying party metadata under `membership.passkeys`. The provider auto-fills `origin`/`rp_id` from `APP_URL` when you omit them.
+
+```ts
+{
+  membership: {
+    passkeys: {
+      origin: 'https://app.example.com',
+      rp_id: 'app.example.com',
+      name: 'App Membership',
+      timeout: 90000,
+      user_verification: 'preferred',
+      attestation: 'none'
+    }
+  }
+}
+```
+
+Passkeys rely on session storage, so ensure you register `OrbitPulsar` (or any session adapter) and call the `/register/options`, `/register/verify`, `/login/options`, and `/login/verify` endpoints with `credentials: 'include'`. For client examples, see [`satellites/membership/docs/PASSKEYS.md`](../../satellites/membership/docs/PASSKEYS.md).
+
 ## Gate Authorization
 
 ```ts
