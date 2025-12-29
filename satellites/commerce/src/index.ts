@@ -1,10 +1,14 @@
 import { type Container, ServiceProvider } from 'gravito-core'
 import { RewardSubscriber } from './Application/Subscribers/RewardSubscriber'
+import { AdminListOrders } from './Application/UseCases/AdminListOrders'
 import { PlaceOrder } from './Application/UseCases/PlaceOrder'
+import { AdminOrderController } from './Interface/Http/Controllers/AdminOrderController'
 import { CheckoutController } from './Interface/Http/Controllers/CheckoutController'
 
 export class CommerceServiceProvider extends ServiceProvider {
   register(container: Container): void {
+    container.bind('commerce.usecase.adminListOrders', () => new AdminListOrders())
+    container.singleton('commerce.controller.admin', () => new AdminOrderController(this.core!))
     // Bind the core order engine
     container.singleton('commerce.place-order', () => {
       return new PlaceOrder(this.core!)
@@ -43,5 +47,13 @@ export class CommerceServiceProvider extends ServiceProvider {
     })
 
     core.logger.info('🛰️ Satellite Commerce is operational')
+
+    const adminCtrl = core.container.make<AdminOrderController>('commerce.controller.admin')
+
+    // 管理端路由
+    core.router.prefix('/api/admin/v1/commerce').group((router) => {
+      router.get('/orders', (ctx) => adminCtrl.index(ctx))
+      router.patch('/orders/:id', (ctx) => adminCtrl.update(ctx))
+    })
   }
 }
