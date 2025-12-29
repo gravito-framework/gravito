@@ -1075,6 +1075,20 @@
         "typescript": "^5.9.3",
       },
     },
+    "satellites/logistics": {
+      "name": "@gravito/satellite-logistics",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "@gravito/stasis": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
+      },
+    },
     "satellites/marketing": {
       "name": "@gravito/satellite-marketing",
       "version": "0.1.0",
@@ -1515,6 +1529,8 @@
     "@gravito/satellite-catalog": ["@gravito/satellite-catalog@workspace:satellites/catalog"],
 
     "@gravito/satellite-commerce": ["@gravito/satellite-commerce@workspace:satellites/commerce"],
+
+    "@gravito/satellite-logistics": ["@gravito/satellite-logistics@workspace:satellites/logistics"],
 
     "@gravito/satellite-marketing": ["@gravito/satellite-marketing@workspace:satellites/marketing"],
 
