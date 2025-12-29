@@ -17,6 +17,7 @@ Gravito is not just another web framework. It is a **full-stack gravitational fi
 
 ### 1. Evolved Developer Experience
 If you enjoy Laravel, Ruby on Rails, or Django, Gravito will feel familiar. Routing, controller injection, and query tooling are designed to be clean and direct.
+For a concrete breakdown, see [Better Than Laravel: Five DX Pillars](./dx-pillars.md).
 
 ### 2. Sustainable Performance
 Powered by [Bun](https://bun.sh/), Gravito keeps memory overhead low and request throughput high. That means more concurrency with less infrastructure cost.
