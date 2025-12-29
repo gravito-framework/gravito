@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "../..",
+    "baseUrl": "../..",
+    "paths": {
+      "gravito-core": ["packages/core/src/index.ts"],
+      "gravito-core/*": ["packages/core/src/*"],
+      "@gravito/*": [
+        "packages/*/src/index.ts",
+        "satellites/*/src/index.ts"
+      ],
+      "@gravito/photon/*": ["packages/photon/src/*"],
+      "@/*": ["satellites/payment/src/*"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

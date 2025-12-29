@@ -38,7 +38,15 @@ export class LineItem extends Entity<string> {
 export interface OrderProps {
   memberId: string | null
   idempotencyKey?: string
-  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'completed' | 'cancelled'
+  status:
+    | 'pending'
+    | 'paid'
+    | 'processing'
+    | 'shipped'
+    | 'completed'
+    | 'cancelled'
+    | 'requested_refund'
+    | 'refunded'
   subtotalAmount: number
   adjustmentAmount: number
   totalAmount: number
@@ -128,6 +136,22 @@ export class Order extends AggregateRoot<string> {
   public markAsPaid(): void {
     if (this.props.status !== 'pending') throw new Error('Invalid status transition')
     ;(this.props as any).status = 'paid'
+    ;(this.props as any).updatedAt = new Date()
+  }
+
+  public requestRefund(): void {
+    const allowedStatuses = ['paid', 'processing', 'completed']
+    if (!allowedStatuses.includes(this.props.status)) {
+      throw new Error(`Refund cannot be requested for order in ${this.props.status} state`)
+    }
+    ;(this.props as any).status = 'requested_refund'
+    ;(this.props as any).updatedAt = new Date()
+  }
+
+  public markAsRefunded(): void {
+    if (this.props.status !== 'requested_refund')
+      throw new Error('Order must be in requested_refund state')
+    ;(this.props as any).status = 'refunded'
     ;(this.props as any).updatedAt = new Date()
   }
 }
