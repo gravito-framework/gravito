@@ -1,61 +1,38 @@
 import { type Container, ServiceProvider } from 'gravito-core'
-import { CreateProduct } from './Application/UseCases/CreateProduct'
-import { UpdateCategory } from './Application/UseCases/UpdateCategory'
-import { AtlasCategoryRepository } from './Infrastructure/Persistence/AtlasCategoryRepository'
-import { AtlasProductRepository } from './Infrastructure/Persistence/AtlasProductRepository'
-import { CategoryController } from './Interface/Http/Controllers/CategoryController'
-import { ProductController } from './Interface/Http/Controllers/ProductController'
+import { RecoverStock } from './Application/UseCases/RecoverStock'
 
-/**
- * Catalog Satellite Service Provider
- */
 export class CatalogServiceProvider extends ServiceProvider {
-  /**
-   * Register bindings in the container
-   */
   register(container: Container): void {
-    // 1. Bind Repositories
-    container.singleton('catalog.repo.category', () => new AtlasCategoryRepository())
-    container.singleton('catalog.repo.product', () => new AtlasProductRepository())
-
-    // 2. Bind UseCases
-    container.singleton('catalog.create-product', () => {
-      return new CreateProduct(container.make('catalog.repo.product'), this.core!)
-    })
-
-    container.singleton('catalog.update-category', () => {
-      return new UpdateCategory(container.make('catalog.repo.category'), this.core!)
-    })
+    container.singleton('catalog.stock.recover', () => new RecoverStock())
   }
 
-  /**
-   * Expose migration path
-   */
-  getMigrationsPath(): string {
-    return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
-  }
-
-  /**
-   * Boot the satellite
-   */
-  override async boot(): Promise<void> {
+  override boot(): void {
     const core = this.core
-    if (!core) {
-      return
-    }
-
-    const productCtrl = new ProductController()
-    const categoryCtrl = new CategoryController()
-
-    // Register Routes
-    core.router.prefix('/api/catalog').group((router) => {
-      router.get('/products', (c) => productCtrl.index(c))
-      router.get('/products/:id', (c) => productCtrl.show(c))
-      router.post('/products', (c) => productCtrl.store(c))
-
-      router.get('/categories', (c) => categoryCtrl.index(c))
-    })
+    if (!core) return
 
     core.logger.info('🛰️ Satellite Catalog is operational')
+
+    /**
+     * GASS 聯動：監聽退款成功，自動恢復庫存
+     */
+    core.hooks.addAction(
+      'payment:refund:succeeded',
+      async (payload: { orderId: string; items: any[] }) => {
+        const recoverStock = core.container.make<RecoverStock>('catalog.stock.recover')
+
+        try {
+          // payload.items 應包含變體 ID 與數量
+          for (const item of payload.items) {
+            await recoverStock.execute({
+              variantId: item.variantId,
+              quantity: item.quantity,
+            })
+          }
+          core.logger.info(`[Catalog] Inventory closure completed for order: ${payload.orderId}`)
+        } catch (error: any) {
+          core.logger.error(`[Catalog] Failed to recover stock: ${error.message}`)
+        }
+      }
+    )
   }
 }
