@@ -1,5 +1,5 @@
 import { cn, useAdmin } from '@gravito/admin-shell-react'
-import { Check, Edit2, Plus, RefreshCw, Shield, ShieldAlert, X } from 'lucide-react'
+import { Check, Edit2, Plus, RefreshCw, Shield, ShieldAlert, Trash2, X } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -12,16 +12,20 @@ export function RoleList() {
   // 彈窗狀態
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingRoleId, setEditingRoleId] = useState<string | null>(null)
   const [formData, setFormData] = useState({ name: '', permissions: [] as string[] })
 
-  // 預設可選權限清單 (真實環境應從 API 獲取)
   const availablePermissions = [
-    { id: 'catalog.products.read', label: '讀取商品' },
-    { id: 'catalog.products.edit', label: '編輯商品' },
-    { id: 'commerce.orders.view', label: '查看訂單' },
-    { id: 'commerce.orders.refund', label: '執行退款' },
-    { id: 'marketing.coupons.manage', label: '管理優惠券' },
-    { id: 'access.roles.manage', label: '管理角色權限' },
+    { id: 'catalog.products.read', label: '讀取商品', desc: '允許查看商品清單與詳情' },
+    { id: 'catalog.products.edit', label: '編輯商品', desc: '允許修改商品資訊、價格與庫存' },
+    { id: 'commerce.orders.view', label: '查看訂單', desc: '允許搜尋與導覽所有訂單記錄' },
+    { id: 'commerce.orders.refund', label: '執行退款', desc: '敏感權限：允許對已支付訂單執行退款' },
+    { id: 'marketing.coupons.manage', label: '管理優惠券', desc: '允許建立、編輯與停用行銷優惠券' },
+    {
+      id: 'access.roles.manage',
+      label: '管理角色權限',
+      desc: '最高權限：允許調整系統角色與人員權限',
+    },
   ]
 
   const fetchRoles = useCallback(async () => {
@@ -37,7 +41,30 @@ export function RoleList() {
     }
   }, [sdk])
 
-  const handleCreateRole = async (e: React.FormEvent) => {
+  const handleDeleteRole = async (id: string) => {
+    if (!window.confirm('確定要刪除此角色嗎？此操作不可復原。')) return
+
+    try {
+      await sdk.api.delete(`/roles/${id}`)
+      await fetchRoles()
+    } catch (err: any) {
+      alert(err.message || '刪除失敗')
+    }
+  }
+
+  const openCreateModal = () => {
+    setEditingRoleId(null)
+    setFormData({ name: '', permissions: [] })
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (role: any) => {
+    setEditingRoleId(role.id)
+    setFormData({ name: role.name, permissions: role.permissions || [] })
+    setIsModalOpen(true)
+  }
+
+  const handleSaveRole = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name) {
       return
@@ -45,12 +72,16 @@ export function RoleList() {
 
     setIsSubmitting(true)
     try {
-      await sdk.api.post('/roles', formData)
+      if (editingRoleId) {
+        await sdk.api.patch(`/roles/${editingRoleId}`, formData)
+      } else {
+        await sdk.api.post('/roles', formData)
+      }
       await fetchRoles() // 重新整理列表
       setIsModalOpen(false)
       setFormData({ name: '', permissions: [] })
     } catch (err: any) {
-      alert(err.message || '建立失敗')
+      alert(err.message || '儲存失敗')
     } finally {
       setIsSubmitting(false)
     }
@@ -86,7 +117,7 @@ export function RoleList() {
           </button>
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={openCreateModal}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-sm"
           >
             <Plus size={18} />
@@ -149,16 +180,31 @@ export function RoleList() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-slate-500">
-                    {role.permissions.length === 0 ? '無權限' : `${role.permissions.length} 項權限`}
+                    {role.permissions.length === 0
+                      ? '無權限'
+                      : role.permissions.includes('*')
+                        ? '超級權限 (*)'
+                        : `${role.permissions.length} 項權限`}
                   </td>
                   <td className="px-6 py-4 text-slate-600">{role.userCount || 0} 位</td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      type="button"
-                      className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg transition-all"
-                    >
-                      <Edit2 size={16} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(role)}
+                        className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg transition-all"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteRole(role.id)}
+                        className="p-2 text-slate-400 hover:text-rose-600 rounded-lg transition-all"
+                        title="刪除角色"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -167,12 +213,14 @@ export function RoleList() {
         </table>
       </div>
 
-      {/* 新增角色 Modal */}
+      {/* 角色編修 Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">新增角色</h2>
+              <h2 className="text-xl font-bold text-slate-900">
+                {editingRoleId ? '編輯角色' : '新增角色'}
+              </h2>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -181,7 +229,7 @@ export function RoleList() {
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleCreateRole}>
+            <form onSubmit={handleSaveRole}>
               <div className="p-6 space-y-6">
                 <div>
                   <label
@@ -202,21 +250,49 @@ export function RoleList() {
                 </div>
                 <div>
                   <span className="block text-sm font-bold text-slate-700 mb-3">權限配置</span>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
                     {availablePermissions.map((p) => (
                       <button
                         key={p.id}
                         type="button"
                         onClick={() => togglePermission(p.id)}
                         className={cn(
-                          'flex items-center justify-between px-4 py-3 rounded-xl border transition-all text-left',
+                          'w-full flex items-start justify-between px-4 py-3 rounded-xl border transition-all text-left group',
                           formData.permissions.includes(p.id)
                             ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600'
                             : 'border-slate-200 hover:border-slate-300 text-slate-600'
                         )}
                       >
-                        <span className="text-sm font-medium">{p.label}</span>
-                        {formData.permissions.includes(p.id) && <Check size={16} />}
+                        <div className="pr-4">
+                          <div className="text-sm font-bold flex items-center gap-2">
+                            {p.label}
+                            <span className="text-[10px] font-mono opacity-50 font-normal">
+                              ({p.id})
+                            </span>
+                          </div>
+                          <div
+                            className={cn(
+                              'text-xs mt-0.5 leading-relaxed',
+                              formData.permissions.includes(p.id)
+                                ? 'text-indigo-500'
+                                : 'text-slate-400'
+                            )}
+                          >
+                            {p.desc}
+                          </div>
+                        </div>
+                        <div
+                          className={cn(
+                            'mt-1 w-5 h-5 rounded-md border flex items-center justify-center transition-all',
+                            formData.permissions.includes(p.id)
+                              ? 'bg-indigo-600 border-indigo-600'
+                              : 'border-slate-300'
+                          )}
+                        >
+                          {formData.permissions.includes(p.id) && (
+                            <Check size={14} className="text-white" />
+                          )}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -235,7 +311,7 @@ export function RoleList() {
                   disabled={isSubmitting}
                   className="flex-[2] bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-100"
                 >
-                  {isSubmitting ? '建立中...' : '確認建立'}
+                  {isSubmitting ? '儲存中...' : '儲存變更'}
                 </button>
               </div>
             </form>

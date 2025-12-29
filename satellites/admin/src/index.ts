@@ -1,11 +1,14 @@
 import { type Container, ServiceProvider } from 'gravito-core'
 import { CreateRole } from './Application/UseCases/CreateRole'
+import { DeleteRole } from './Application/UseCases/DeleteRole'
+import { GetRole } from './Application/UseCases/GetRole'
 import { ListAdmins } from './Application/UseCases/ListAdmins'
 import { ListPermissions } from './Application/UseCases/ListPermissions'
 import { ListRoles } from './Application/UseCases/ListRoles'
 import { LoginAdmin } from './Application/UseCases/LoginAdmin'
 import { RegisterAdmin } from './Application/UseCases/RegisterAdmin'
 import { UpdateAdmin } from './Application/UseCases/UpdateAdmin'
+import { UpdateRole } from './Application/UseCases/UpdateRole'
 import { AtlasAdminUserRepository } from './Infrastructure/Persistence/AtlasAdminUserRepository'
 import { AtlasPermissionRepository } from './Infrastructure/Persistence/AtlasPermissionRepository'
 import { AtlasRoleRepository } from './Infrastructure/Persistence/AtlasRoleRepository'
@@ -45,6 +48,18 @@ export class AdminServiceProvider extends ServiceProvider {
       () => new CreateRole(container.make('admin.repository.role'))
     )
     container.bind(
+      'admin.usecase.getRole',
+      () => new GetRole(container.make('admin.repository.role'))
+    )
+    container.bind(
+      'admin.usecase.updateRole',
+      () => new UpdateRole(container.make('admin.repository.role'))
+    )
+    container.bind(
+      'admin.usecase.deleteRole',
+      () => new DeleteRole(container.make('admin.repository.role'))
+    )
+    container.bind(
       'admin.usecase.listPermissions',
       () => new ListPermissions(container.make('admin.repository.permission'))
     )
@@ -76,6 +91,9 @@ export class AdminServiceProvider extends ServiceProvider {
       // RBAC 路由
       router.get('/roles', (ctx) => rbacController.index(ctx))
       router.post('/roles', (ctx) => rbacController.store(ctx))
+      router.get('/roles/:id', (ctx) => rbacController.show(ctx))
+      router.patch('/roles/:id', (ctx) => rbacController.update(ctx))
+      router.delete('/roles/:id', (ctx) => rbacController.destroy(ctx))
       router.get('/permissions', (ctx) => rbacController.permissions(ctx))
     })
   }
