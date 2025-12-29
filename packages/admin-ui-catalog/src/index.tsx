@@ -1,6 +1,4 @@
 import type { IAdminModule } from '@gravito/admin-sdk'
-import { ShoppingBag } from 'lucide-react'
-import React from 'react'
 import { ProductList } from './pages/ProductList'
 
 /**

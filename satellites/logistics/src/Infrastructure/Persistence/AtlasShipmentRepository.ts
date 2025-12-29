@@ -26,7 +26,9 @@ export class AtlasShipmentRepository implements IShipmentRepository {
 
   async findById(id: string): Promise<Shipment | null> {
     const data = AtlasShipmentRepository.storage.get(id)
-    if (!data) return null
+    if (!data) {
+      return null
+    }
     return new Shipment(data.id, data)
   }
 

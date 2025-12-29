@@ -1,5 +1,4 @@
 import { DB } from '@gravito/atlas'
-import type { PlanetCore } from 'gravito-core'
 import type { IPromotionRule } from '../../Domain/Contracts/IPromotionRule'
 import { BuyXGetYRule } from '../Rules/BuyXGetYRule'
 import { CartThresholdRule } from '../Rules/CartThresholdRule'
@@ -15,8 +14,6 @@ export class PromotionEngine {
     category_discount: new CategoryDiscountRule(),
     free_shipping: new FreeShippingRule(),
   }
-
-  constructor(private core: PlanetCore) {}
 
   async applyPromotions(order: any): Promise<any[]> {
     const activePromotions = (await DB.table('promotions')

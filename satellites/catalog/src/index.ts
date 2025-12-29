@@ -20,7 +20,9 @@ export class CatalogServiceProvider extends ServiceProvider {
 
   override boot(): void {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     core.logger.info('🛰️ Satellite Catalog is operational')
 

@@ -1,6 +1,5 @@
 import { UseCase } from '@gravito/enterprise'
 import type { ICartRepository } from '../../Domain/Contracts/ICartRepository'
-import { Cart } from '../../Domain/Entities/Cart'
 
 export interface MergeCartInput {
   memberId: string
@@ -14,7 +13,9 @@ export class MergeCart extends UseCase<MergeCartInput, void> {
 
   async execute(input: MergeCartInput): Promise<void> {
     const guestCart = await this.repository.find({ guestId: input.guestId })
-    if (!guestCart) return
+    if (!guestCart) {
+      return
+    }
 
     const memberCart = await this.repository.find({ memberId: input.memberId })
 

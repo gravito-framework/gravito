@@ -11,12 +11,12 @@ class LocalShippingProvider implements IShippingProvider {
     return 'local'
   }
 
-  async calculateCost(weight: number, destination: string): Promise<number> {
+  async calculateCost(weight: number, _destination: string): Promise<number> {
     // 簡單的計費邏輯：基礎費 60 + 每公斤 10 元
     return 60 + weight * 10
   }
 
-  async ship(orderId: string, details: any): Promise<string> {
+  async ship(orderId: string, _details: any): Promise<string> {
     // 產生模擬的追蹤碼
     return `LOC-${orderId}-${Date.now().toString().slice(-4)}`
   }

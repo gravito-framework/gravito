@@ -2,13 +2,15 @@ import type { RippleServer } from '@gravito/ripple'
 import { type Container, ServiceProvider } from 'gravito-core'
 
 export class SupportServiceProvider extends ServiceProvider {
-  register(container: Container): void {
+  register(_container: Container): void {
     // 注入 Repository 與 Use Cases (略，暫時使用 Mock)
   }
 
   override boot(): void {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     core.logger.info('🎧 Support Satellite is ready for real-time inquiries')
 
@@ -20,7 +22,7 @@ export class SupportServiceProvider extends ServiceProvider {
      */
     ripple.on(
       'support:client_message',
-      async (socket, payload: { conversationId: string; text: string }) => {
+      async (_socket, payload: { conversationId: string; text: string }) => {
         core.logger.info(`[Support] New message in ${payload.conversationId}`)
 
         // 廣播至該對話專屬頻道 (讓客服端即時收到)

@@ -1,4 +1,4 @@
-import { DB, Schema } from '@gravito/atlas'
+import { DB } from '@gravito/atlas'
 import { PlanetCore, setApp } from 'gravito-core'
 import { CartServiceProvider } from '../src/index'
 
@@ -50,14 +50,18 @@ async function cartGrandReview() {
       `   - 品項 ID: ${memberCart.items[0].props.variantId}, 數量: ${memberCart.items[0].props.quantity}`
     )
 
-    if (memberCart.items[0].props.quantity !== 2) throw new Error('Quantity mismatch after merge')
+    if (memberCart.items[0].props.quantity !== 2) {
+      throw new Error('Quantity mismatch after merge')
+    }
   } else {
     throw new Error('Merge failed: Member cart is empty')
   }
 
   // 檢查訪客購物車是否已被刪除
   const guestCart = await repo.find({ guestId: 'guest_123' })
-  if (guestCart) throw new Error('Guest cart was not cleaned up after merge')
+  if (guestCart) {
+    throw new Error('Guest cart was not cleaned up after merge')
+  }
   console.log('✅ 訪客購物車已成功清理 (Privacy Protection)')
 
   console.log('\n🎉 [Cart Grand Review] 購物車衛星校閱成功！')

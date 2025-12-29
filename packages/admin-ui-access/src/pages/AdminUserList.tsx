@@ -1,16 +1,5 @@
 import { cn, useAdmin } from '@gravito/admin-shell-react'
-import {
-  Check,
-  Edit2,
-  Loader2,
-  Power,
-  PowerOff,
-  Search,
-  Shield,
-  UserPlus,
-  Users,
-  X,
-} from 'lucide-react'
+import { Check, Loader2, Power, PowerOff, Shield, UserPlus, X } from 'lucide-react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -51,7 +40,7 @@ export function AdminUserList() {
     try {
       await sdk.api.patch(`/users/${user.id}`, { isActive: !user.isActive })
       fetchUsers()
-    } catch (err) {
+    } catch (_err) {
       alert('操作失敗')
     }
   }
@@ -65,7 +54,9 @@ export function AdminUserList() {
 
   const handleAssignRoles = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedUser) return
+    if (!selectedUser) {
+      return
+    }
 
     setIsSubmitting(true)
     try {

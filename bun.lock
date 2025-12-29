@@ -332,6 +332,24 @@
         "typescript": "^5.7.2",
       },
     },
+    "packages/admin-ui-analytics": {
+      "name": "@gravito/admin-ui-analytics",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.5.2",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/admin-ui-catalog": {
       "name": "@gravito/admin-ui-catalog",
       "version": "0.1.0",
@@ -1190,6 +1208,17 @@
         "typescript": "^5.7.2",
       },
     },
+    "satellites/analytics": {
+      "name": "@gravito/satellite-analytics",
+      "version": "0.1.0",
+      "dependencies": {
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "satellites/cart": {
       "name": "@gravito/satellite-cart",
       "version": "0.1.0",
@@ -1646,6 +1675,8 @@
 
     "@gravito/admin-ui-access": ["@gravito/admin-ui-access@workspace:packages/admin-ui-access"],
 
+    "@gravito/admin-ui-analytics": ["@gravito/admin-ui-analytics@workspace:packages/admin-ui-analytics"],
+
     "@gravito/admin-ui-catalog": ["@gravito/admin-ui-catalog@workspace:packages/admin-ui-catalog"],
 
     "@gravito/admin-ui-dashboard": ["@gravito/admin-ui-dashboard@workspace:packages/admin-ui-dashboard"],
@@ -1727,6 +1758,8 @@
     "@gravito/ripple": ["@gravito/ripple@workspace:packages/ripple"],
 
     "@gravito/ripple-client": ["@gravito/ripple-client@workspace:packages/ripple-client"],
+
+    "@gravito/satellite-analytics": ["@gravito/satellite-analytics@workspace:satellites/analytics"],
 
     "@gravito/satellite-cart": ["@gravito/satellite-cart@workspace:satellites/cart"],
 

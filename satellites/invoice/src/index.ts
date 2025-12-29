@@ -15,7 +15,9 @@ export class InvoiceServiceProvider extends ServiceProvider {
 
   override boot(): void {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     core.logger.info('🧾 Invoice Satellite is ready')
 

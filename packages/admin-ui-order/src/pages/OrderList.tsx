@@ -1,15 +1,6 @@
 import { useAdmin } from '@gravito/admin-shell-react'
-import {
-  Calendar,
-  ChevronRight,
-  CreditCard,
-  Eye,
-  Filter,
-  Search,
-  ShoppingCart,
-  Truck,
-} from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { Calendar, ChevronRight, CreditCard, Filter, Search, Truck } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 export function OrderList() {
   const { sdk } = useAdmin()

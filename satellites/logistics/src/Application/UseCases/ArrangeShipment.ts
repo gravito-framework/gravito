@@ -1,6 +1,6 @@
 import { UseCase } from '@gravito/enterprise'
 import type { IShipmentRepository } from '../../Domain/Contracts/IShipmentRepository'
-import { Shipment, ShipmentStatus } from '../../Domain/Entities/Shipment'
+import { Shipment } from '../../Domain/Entities/Shipment'
 import type { LogisticsManager } from '../../Infrastructure/LogisticsManager'
 
 export interface ArrangeShipmentInput {

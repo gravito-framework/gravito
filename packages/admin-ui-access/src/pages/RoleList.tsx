@@ -42,7 +42,9 @@ export function RoleList() {
   }, [sdk])
 
   const handleDeleteRole = async (id: string) => {
-    if (!window.confirm('確定要刪除此角色嗎？此操作不可復原。')) return
+    if (!window.confirm('確定要刪除此角色嗎？此操作不可復原。')) {
+      return
+    }
 
     try {
       await sdk.api.delete(`/roles/${id}`)

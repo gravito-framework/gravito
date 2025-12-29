@@ -15,7 +15,7 @@ class MockCore extends PlanetCore {
       debug: () => {},
     } as any
     this.config = {
-      get: (key: string, def: any) => def,
+      get: (_key: string, def: any) => def,
     } as any
   }
 }

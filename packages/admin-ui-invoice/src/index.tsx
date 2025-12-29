@@ -1,5 +1,4 @@
 import type { IAdminModule } from '@gravito/admin-sdk'
-import React from 'react'
 import { InvoiceList } from './pages/InvoiceList'
 
 /**

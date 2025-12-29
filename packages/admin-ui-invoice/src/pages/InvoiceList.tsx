@@ -9,7 +9,7 @@ import {
   Search,
   XCircle,
 } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export function InvoiceList() {
   const { sdk } = useAdmin()

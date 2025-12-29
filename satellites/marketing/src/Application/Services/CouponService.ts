@@ -1,5 +1,4 @@
 import { DB } from '@gravito/atlas'
-import type { PlanetCore } from 'gravito-core'
 
 export interface CouponAdjustment {
   label: string
@@ -9,8 +8,6 @@ export interface CouponAdjustment {
 }
 
 export class CouponService {
-  constructor(private core: PlanetCore) {}
-
   /**
    * 驗證優惠券有效性
    */
