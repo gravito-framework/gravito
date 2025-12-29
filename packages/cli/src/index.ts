@@ -508,6 +508,7 @@ async function group<T extends Record<string, unknown>>(
 }
 
 import { addSpectrumCommand } from './commands/add'
+import { doctor } from './commands/doctor'
 import { registerInitCommand } from './commands/init'
 import { MakeCommand } from './commands/MakeCommand'
 import { routeCache, routeClear } from './commands/routeCache'
@@ -571,6 +572,12 @@ cli
 
 // --- Tinker ---
 cli.command('tinker', 'Interact with your application').action(() => tinker())
+
+// --- Doctor/Health ---
+cli
+  .command('doctor', 'Run Gravito health checks and diagnostics')
+  .option('--fix', 'Attempt to automatically repair detected issues')
+  .action((options) => doctor({ fix: Boolean(options.fix) }))
 
 // --- Route List ---
 cli
