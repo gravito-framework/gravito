@@ -1,7 +1,10 @@
+import { auth } from '@gravito/sentinel'
 import { type Container, ServiceProvider } from 'gravito-core'
 import { ForgotPasswordMail } from './Application/Mail/ForgotPasswordMail'
 import { MemberLevelChangedMail } from './Application/Mail/MemberLevelChangedMail'
 import { WelcomeMail } from './Application/Mail/WelcomeMail'
+import type { PasskeysConfig } from './Application/Services/PasskeysService'
+import { PasskeysService } from './Application/Services/PasskeysService'
 import { ForgotPassword } from './Application/UseCases/ForgotPassword'
 import { LoginMember } from './Application/UseCases/LoginMember'
 import { RegisterMember } from './Application/UseCases/RegisterMember'
@@ -10,7 +13,9 @@ import { UpdateMemberLevel } from './Application/UseCases/UpdateMemberLevel'
 import { UpdateSettings } from './Application/UseCases/UpdateSettings'
 import { VerifyEmail } from './Application/UseCases/VerifyEmail'
 import { SentinelMemberProvider } from './Infrastructure/Auth/SentinelMemberProvider'
+import { AtlasMemberPasskeyRepository } from './Infrastructure/Persistence/AtlasMemberPasskeyRepository'
 import { AtlasMemberRepository } from './Infrastructure/Persistence/AtlasMemberRepository'
+import { PasskeyController } from './Interface/Http/Controllers/PasskeyController'
 
 /**
  * Membership Satellite Service Provider
@@ -66,6 +71,22 @@ export class MembershipServiceProvider extends ServiceProvider {
 
     container.singleton('membership.update-level', () => {
       return new UpdateMemberLevel(container.make('membership.repo'), this.core!)
+    })
+
+    container.singleton('membership.passkeys.repo', () => new AtlasMemberPasskeyRepository())
+
+    container.singleton('membership.passkeys.service', () => {
+      return new PasskeysService(
+        container.make('membership.passkeys.repo'),
+        this.buildPasskeysConfig()
+      )
+    })
+
+    container.singleton('membership.passkeys.controller', () => {
+      return new PasskeyController(
+        container.make('membership.passkeys.service'),
+        container.make('membership.repo')
+      )
     })
   }
 
@@ -142,8 +163,67 @@ export class MembershipServiceProvider extends ServiceProvider {
       )
     }
 
+    if (this.core) {
+      const passkeyController = this.core.container.make(
+        'membership.passkeys.controller'
+      ) as PasskeyController
+      const passkeyRoutes = this.core.router.prefix('/api/membership/passkeys')
+      passkeyRoutes.post('/login/options', (c) => passkeyController.loginOptions(c))
+      passkeyRoutes.post('/login/verify', (c) => passkeyController.verifyAuthentication(c))
+
+      const protectedRoutes = passkeyRoutes.middleware(auth())
+      protectedRoutes.post('/register/options', (c) => passkeyController.registrationOptions(c))
+      protectedRoutes.post('/register/verify', (c) => passkeyController.verifyRegistration(c))
+    }
+
     const startMsg =
       i18n?.t('membership.notifications.operational') || '🛰️ Satellite Membership is operational'
     logger?.info(startMsg)
+  }
+
+  private buildPasskeysConfig(): PasskeysConfig {
+    const config = this.core?.config
+
+    const readString = (key: string): string | undefined => {
+      const value = config?.get(key)
+      return typeof value === 'string' ? value : undefined
+    }
+
+    const origin =
+      readString('membership.passkeys.origin') ??
+      readString('APP_URL') ??
+      process.env.APP_URL ??
+      'http://localhost:3000'
+
+    const rpID =
+      readString('membership.passkeys.rp_id') ??
+      (() => {
+        try {
+          return new URL(origin).hostname
+        } catch {
+          return origin
+        }
+      })()
+
+    const rpName = readString('membership.passkeys.name') ?? 'Gravito Membership'
+    const timeoutValue = config?.get('membership.passkeys.timeout')
+    const timeout =
+      typeof timeoutValue === 'number'
+        ? timeoutValue
+        : typeof timeoutValue === 'string'
+          ? Number(timeoutValue)
+          : 60000
+
+    const userVerification = readString('membership.passkeys.user_verification') ?? 'preferred'
+    const attestation = readString('membership.passkeys.attestation') ?? 'none'
+
+    return {
+      rpName,
+      rpID,
+      origin,
+      timeout,
+      userVerification: userVerification as PasskeysConfig['userVerification'],
+      attestationType: attestation as PasskeysConfig['attestationType'],
+    }
   }
 }

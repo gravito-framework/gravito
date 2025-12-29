@@ -17,6 +17,7 @@
     "@gravito/sentinel": "workspace:*",
     "@gravito/signal": "workspace:*",
     "@gravito/stasis": "workspace:*",
+    "@simplewebauthn/server": "^13.2.2",
     "gravito-core": "workspace:*"
   },
   "devDependencies": {
