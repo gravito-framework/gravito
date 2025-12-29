@@ -46,4 +46,39 @@ describe('Rocket', () => {
     rocket.decommission()
     expect(rocket.status).toBe(RocketStatus.DECOMMISSIONED)
   })
+
+  test('assigns domain and serializes/deserializes', () => {
+    const mission = Mission.create({
+      id: 'mission-2',
+      repoUrl: 'https://example.com/repo.git',
+      branch: 'main',
+      commitSha: 'def456',
+    })
+    const rocket = new Rocket('rocket-3', 'container-3')
+
+    rocket.assignDomain('rocket-3.dev.local')
+    rocket.assignMission(mission)
+
+    const snapshot = rocket.toJSON()
+    const restored = Rocket.fromJSON(snapshot)
+
+    expect(rocket.containerId).toBe('container-3')
+    expect(rocket.assignedDomain).toBe('rocket-3.dev.local')
+    expect(restored.status).toBe(RocketStatus.PREPARING)
+    expect(restored.currentMission).toBe(mission)
+    expect(restored.assignedDomain).toBe('rocket-3.dev.local')
+  })
+
+  test('rejects assigning mission when not idle', () => {
+    const mission = Mission.create({
+      id: 'mission-3',
+      repoUrl: 'https://example.com/repo.git',
+      branch: 'main',
+      commitSha: 'ghi789',
+    })
+    const rocket = new Rocket('rocket-4', 'container-4')
+
+    rocket.assignMission(mission)
+    expect(() => rocket.assignMission(mission)).toThrow('非 IDLE')
+  })
 })
