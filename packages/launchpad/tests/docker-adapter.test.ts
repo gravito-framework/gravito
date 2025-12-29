@@ -28,6 +28,20 @@ describe('DockerAdapter', () => {
     }
   })
 
+  test('returns container id even when exit code is zero but id is invalid', async () => {
+    const adapter = new DockerAdapter()
+    const originalSpawn = Bun.spawn
+
+    Bun.spawn = () => makeProcess('short-id', '', 0) as any
+
+    try {
+      const result = await adapter.createBaseContainer()
+      expect(result).toBe('short-id')
+    } finally {
+      Bun.spawn = originalSpawn
+    }
+  })
+
   test('throws when container creation fails', async () => {
     const adapter = new DockerAdapter()
     const originalSpawn = Bun.spawn
@@ -41,6 +55,46 @@ describe('DockerAdapter', () => {
     }
   })
 
+  test('getExposedPort parses the first line', async () => {
+    const adapter = new DockerAdapter()
+    const originalSpawn = Bun.spawn
+
+    Bun.spawn = () => makeProcess('0.0.0.0:32768\n[::]:32768\n', '', 0) as any
+
+    try {
+      const port = await adapter.getExposedPort('cid')
+      expect(port).toBe(32768)
+    } finally {
+      Bun.spawn = originalSpawn
+    }
+  })
+
+  test('getExposedPort throws on empty output', async () => {
+    const adapter = new DockerAdapter()
+    const originalSpawn = Bun.spawn
+
+    Bun.spawn = () => makeProcess('', '', 0) as any
+
+    try {
+      await expect(adapter.getExposedPort('cid')).rejects.toThrow('無法獲取容器映射端口')
+    } finally {
+      Bun.spawn = originalSpawn
+    }
+  })
+
+  test('getExposedPort throws on invalid output', async () => {
+    const adapter = new DockerAdapter()
+    const originalSpawn = Bun.spawn
+
+    Bun.spawn = () => makeProcess('nonsense', '', 0) as any
+
+    try {
+      await expect(adapter.getExposedPort('cid')).rejects.toThrow('無法獲取容器映射端口')
+    } finally {
+      Bun.spawn = originalSpawn
+    }
+  })
+
   test('copyFiles throws on non-zero exit code', async () => {
     const adapter = new DockerAdapter()
     const originalSpawn = Bun.spawn
@@ -49,6 +103,30 @@ describe('DockerAdapter', () => {
 
     try {
       await expect(adapter.copyFiles('cid', '/src', '/target')).rejects.toThrow('copy failed')
+    } finally {
+      Bun.spawn = originalSpawn
+    }
+  })
+
+  test('removeContainerByLabel removes containers when ids exist', async () => {
+    const adapter = new DockerAdapter()
+    const originalSpawn = Bun.spawn
+    const calls: string[][] = []
+
+    Bun.spawn = ((args: string[]) => {
+      calls.push(args)
+      if (args[1] === 'ps') {
+        return makeProcess('id-1\nid-2\n', '', 0) as any
+      }
+      return makeProcess('', '', 0) as any
+    }) as any
+
+    try {
+      await adapter.removeContainerByLabel('gravito-origin=launchpad')
+      const rmCall = calls.find((call) => call[1] === 'rm')
+      expect(rmCall).toBeTruthy()
+      expect(rmCall).toContain('id-1')
+      expect(rmCall).toContain('id-2')
     } finally {
       Bun.spawn = originalSpawn
     }
