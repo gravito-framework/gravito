@@ -2,10 +2,14 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "src",
-    "baseUrl": ".",
+    "rootDir": "../..",
+    "baseUrl": "../..",
     "paths": {
-      "@/*": ["src/*"]
+      "gravito-core": ["packages/core/src/index.ts"],
+      "gravito-core/*": ["packages/core/src/*.ts"],
+      "@gravito/*": ["packages/*/src/index.ts", "satellites/*/src/index.ts"],
+      "@gravito/photon/*": ["packages/photon/src/*"],
+      "@/*": ["satellites/cart/src/*"]
     }
   },
   "include": ["src/**/*"],
