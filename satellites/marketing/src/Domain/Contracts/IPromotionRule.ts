@@ -7,7 +7,8 @@ export interface MarketingAdjustment {
 
 export interface IPromotionRule {
   /**
-   * 檢查訂單是否符合此規則，若符合，回傳調整項
+   * 檢查訂單是否符合此規則
+   * 支援 async 以便執行跨衛星的 DB 查詢
    */
-  match(order: any, config: any): MarketingAdjustment | null
+  match(order: any, config: any): MarketingAdjustment | null | Promise<MarketingAdjustment | null>
 }
