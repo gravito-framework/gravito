@@ -364,6 +364,22 @@
         "typescript": "^5.7.2",
       },
     },
+    "packages/admin-ui-marketing": {
+      "name": "@gravito/admin-ui-marketing",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/admin-ui-order": {
       "name": "@gravito/admin-ui-order",
       "version": "0.1.0",
@@ -1567,6 +1583,8 @@
     "@gravito/admin-ui-catalog": ["@gravito/admin-ui-catalog@workspace:packages/admin-ui-catalog"],
 
     "@gravito/admin-ui-invoice": ["@gravito/admin-ui-invoice@workspace:packages/admin-ui-invoice"],
+
+    "@gravito/admin-ui-marketing": ["@gravito/admin-ui-marketing@workspace:packages/admin-ui-marketing"],
 
     "@gravito/admin-ui-order": ["@gravito/admin-ui-order@workspace:packages/admin-ui-order"],
 

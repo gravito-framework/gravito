@@ -1,6 +1,8 @@
 import { type Container, ServiceProvider } from 'gravito-core'
 import { CouponService } from './Application/Services/CouponService'
 import { PromotionEngine } from './Application/Services/PromotionEngine'
+import { AdminListCoupons } from './Application/UseCases/AdminListCoupons'
+import { AdminMarketingController } from './Interface/Http/Controllers/AdminMarketingController'
 
 export class MarketingServiceProvider extends ServiceProvider {
   register(container: Container): void {
@@ -10,6 +12,11 @@ export class MarketingServiceProvider extends ServiceProvider {
     container.singleton('marketing.coupon-service', () => {
       return new CouponService(this.core!)
     })
+    container.bind('marketing.usecase.adminListCoupons', () => new AdminListCoupons())
+    container.singleton(
+      'marketing.controller.admin',
+      () => new AdminMarketingController(this.core!)
+    )
   }
 
   getMigrationsPath(): string {
@@ -21,6 +28,13 @@ export class MarketingServiceProvider extends ServiceProvider {
     if (!core) {
       return
     }
+
+    const adminCtrl = core.container.make<AdminMarketingController>('marketing.controller.admin')
+
+    // 管理端路由
+    core.router.prefix('/api/admin/v1/marketing').group((router) => {
+      router.get('/coupons', (ctx) => adminCtrl.coupons(ctx))
+    })
 
     const promoEngine = core.container.make<PromotionEngine>('marketing.promotion-engine')
     const couponService = core.container.make<CouponService>('marketing.coupon-service')
