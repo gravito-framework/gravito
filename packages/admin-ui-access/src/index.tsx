@@ -1,5 +1,6 @@
 import React from 'react';
 import { RoleList } from './pages/RoleList';
+import { AdminUserList } from './pages/AdminUserList';
 import { ShieldCheck } from 'lucide-react';
 import type { IAdminModule } from '@gravito/admin-sdk';
 
@@ -16,7 +17,7 @@ export const AccessModule: IAdminModule = {
     },
     {
       path: '/access/users',
-      component: () => React.createElement('div', null, '管理員帳號列表 (開發中)')
+      component: AdminUserList
     }
   ],
   menu: [
