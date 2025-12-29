@@ -1,11 +1,13 @@
 import { DB } from '@gravito/atlas'
 import type { PlanetCore } from 'gravito-core'
 import type { IPromotionRule } from '../../Domain/Contracts/IPromotionRule'
+import { BuyXGetYRule } from '../Rules/BuyXGetYRule'
 import { CartThresholdRule } from '../Rules/CartThresholdRule'
 
 export class PromotionEngine {
   private rules: Record<string, IPromotionRule> = {
     cart_threshold: new CartThresholdRule(),
+    buy_x_get_y: new BuyXGetYRule(),
   }
 
   constructor(private core: PlanetCore) {}
