@@ -11,10 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "gravito-core": "workspace:*",
-    "@gravito/enterprise": "workspace:*",
     "@gravito/atlas": "workspace:*",
-    "@gravito/stasis": "workspace:*"
+    "@gravito/enterprise": "workspace:*",
+    "@gravito/stasis": "workspace:*",
+    "gravito-core": "workspace:*",
+    "stripe": "^20.1.0"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

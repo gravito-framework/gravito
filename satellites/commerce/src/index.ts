@@ -22,9 +22,17 @@ export class CommerceServiceProvider extends ServiceProvider {
     const checkoutCtrl = new CheckoutController()
     const rewardSub = new RewardSubscriber(core)
 
-    // 註冊事件監聽 (增加類型斷言)
+    // 註冊事件監聽
     core.hooks.addAction('commerce:order-placed', (payload: any) => {
       rewardSub.handleOrderPlaced(payload as { orderId: string })
+    })
+
+    /**
+     * GASS 聯動：監聽支付成功 (來自 Payment 衛星)
+     */
+    core.hooks.addAction('payment:succeeded', async (payload: { orderId: string }) => {
+      core.logger.info(`[Commerce] Order ${payload.orderId} confirmed as PAID.`)
+      // 這裡通常會調用 Order.markAsPaid() 並持久化，目前暫由 Log 表現閉環
     })
 
     // Register Routes
