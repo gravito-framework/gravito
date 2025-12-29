@@ -7,6 +7,9 @@
  * @packageDocumentation
  */
 
+// Main API
+// Core Logic
+export { FileMerger } from './FileMerger'
 // Generators
 export {
   BaseGenerator,
@@ -17,10 +20,10 @@ export { CleanArchitectureGenerator } from './generators/CleanArchitectureGenera
 export { DddGenerator } from './generators/DddGenerator'
 export { EnterpriseMvcGenerator } from './generators/EnterpriseMvcGenerator'
 export { SatelliteGenerator } from './generators/SatelliteGenerator'
-
 // Stub Generator
 export { type StubConfig, StubGenerator, type StubVariables } from './generators/StubGenerator'
-// Main API
+export { type LockFile, LockGenerator } from './LockGenerator'
+export { type ProfileConfig, ProfileResolver, type ProfileType } from './ProfileResolver'
 export { Scaffold } from './Scaffold'
 // Types
 export type { ArchitectureType, ScaffoldOptions } from './types'

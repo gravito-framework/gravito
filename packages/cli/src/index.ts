@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { cancel, intro, isCancel, note, outro, select, spinner, text } from '@clack/prompts'
+import { LockGenerator, ProfileResolver, type ProfileType } from '@gravito/scaffold'
 import cac from 'cac'
 import { downloadTemplate } from 'giget'
 import pc from 'picocolors'
@@ -146,10 +147,31 @@ cli
 cli
   .command('create [name]', 'Create a new Gravito project')
   .option('--template <template>', 'Template to use (basic, inertia-react)')
+  .option('--profile <profile>', 'Profile preset (core, scale, enterprise)', { default: 'core' })
+  .option('--with <features>', 'Feature add-ons (comma-separated, e.g. redis,queue)', {
+    default: '',
+  })
   .action(async (name, options) => {
     console.clear()
 
     intro(pc.bgBlack(pc.white(' 🌌 Gravito CLI ')))
+
+    const profileResolver = new ProfileResolver()
+
+    // 0. Validate Inputs
+    if (options.profile && !profileResolver.isValidProfile(options.profile)) {
+      console.error(pc.red(`❌ Invalid profile: ${options.profile}`))
+      console.log(pc.gray(`Available profiles: core, scale, enterprise`))
+      process.exit(1)
+    }
+
+    const featureList = options.with ? options.with.split(',') : []
+    const invalidFeatures = featureList.filter((f: string) => !profileResolver.isValidFeature(f))
+    if (invalidFeatures.length > 0) {
+      console.error(pc.red(`❌ Invalid features: ${invalidFeatures.join(', ')}`))
+      console.log(pc.gray(`Available features: redis, postgres, mysql, s3, queue, monitor...`))
+      process.exit(1)
+    }
 
     const project = await group<ProjectConfig>({
       name: () => {
@@ -362,7 +384,6 @@ cli
 
       await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2))
 
-      // Create .env file from env.example for static-site template
       if (project.template === 'static-site') {
         const envExamplePath = path.join(process.cwd(), targetDir, 'env.example')
         const envPath = path.join(process.cwd(), targetDir, '.env')
@@ -375,13 +396,36 @@ cli
         }
       }
 
+      // Generate gravito.lock.json
+      try {
+        const features = options.with ? options.with.split(',') : []
+        const profileConfig = profileResolver.resolve(options.profile as ProfileType, features)
+
+        const lockGenerator = new LockGenerator()
+        const lockContent = lockGenerator.generate(
+          options.profile as ProfileType,
+          profileConfig,
+          project.template as string,
+          pkg.version || '1.0.0'
+        )
+
+        const lockPath = path.join(process.cwd(), targetDir, 'gravito.lock.json')
+        await fs.writeFile(lockPath, lockContent)
+        console.log(pc.green('✅ Generated gravito.lock.json'))
+      } catch (err) {
+        console.warn(pc.yellow('⚠️ Failed to generate lock file'), err)
+      }
+
       const frameworkNote =
         project.template === 'static-site' && framework
           ? `\nFramework: ${framework === 'react' ? '⚛️ React' : '🟢 Vue 3'}`
           : ''
 
+      const profileNote = `\nProfile: ${options.profile}`
+      const featuresNote = options.with ? `\nFeatures: ${options.with}` : ''
+
       note(
-        `Project: ${project.name}\nTemplate: ${project.template}${frameworkNote}`,
+        `Project: ${project.name}\nTemplate: ${project.template}${frameworkNote}${profileNote}${featuresNote}`,
         'Mission Successful'
       )
 

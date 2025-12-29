@@ -7,8 +7,25 @@
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { FileMerger } from '../FileMerger'
 import type { ArchitectureType, DirectoryNode } from '../types'
 import { StubGenerator, type StubVariables } from './StubGenerator'
+
+// Helper for recursive directory walking
+async function walk(dir: string): Promise<string[]> {
+  const files = await fs.readdir(dir)
+  const paths: string[] = []
+  for (const file of files) {
+    const filePath = path.join(dir, file)
+    const stat = await fs.stat(filePath)
+    if (stat.isDirectory()) {
+      paths.push(...(await walk(filePath)))
+    } else {
+      paths.push(filePath)
+    }
+  }
+  return paths
+}
 
 /**
  * Context passed to generators during scaffolding.
@@ -79,6 +96,7 @@ export interface GeneratorConfig {
 export abstract class BaseGenerator {
   protected config: GeneratorConfig
   protected stubGenerator: StubGenerator
+  protected fileMerger: FileMerger
   protected filesCreated: string[] = []
 
   constructor(config: GeneratorConfig) {
@@ -87,6 +105,7 @@ export abstract class BaseGenerator {
       stubsDir: config.templatesDir,
       outputDir: '', // Set per-generation
     })
+    this.fileMerger = new FileMerger()
   }
 
   /**
@@ -124,6 +143,12 @@ export abstract class BaseGenerator {
 
     // Generate common files
     await this.generateCommonFiles(context)
+
+    // Apply Profile Overlays
+    await this.applyOverlays(context)
+
+    // Apply Feature Overlays
+    await this.applyFeatureOverlays(context)
 
     return this.filesCreated
   }
@@ -206,6 +231,63 @@ export abstract class BaseGenerator {
   }
 
   /**
+   * Apply profile-specific overlays
+   */
+  protected async applyOverlays(context: GeneratorContext): Promise<void> {
+    const profile = context.profile as string
+    if (!profile) return
+
+    const overlayDir = path.resolve(this.config.templatesDir, 'overlays', profile)
+    await this.copyOverlayDirectory(overlayDir, context)
+  }
+
+  /**
+   * Apply feature-specific overlays
+   */
+  protected async applyFeatureOverlays(context: GeneratorContext): Promise<void> {
+    const features = (context.features as string[]) || []
+    for (const feature of features) {
+      const overlayDir = path.resolve(this.config.templatesDir, 'features', feature)
+      await this.copyOverlayDirectory(overlayDir, context)
+    }
+  }
+
+  /**
+   * Helper to copy/merge an overlay directory into the target
+   */
+  protected async copyOverlayDirectory(
+    sourceDir: string,
+    context: GeneratorContext
+  ): Promise<void> {
+    try {
+      await fs.access(sourceDir)
+    } catch {
+      // Overlay does not exist, skip
+      return
+    }
+
+    const files = await walk(sourceDir)
+    for (const filePath of files) {
+      const relativePath = path.relative(sourceDir, filePath)
+
+      // Read source content
+      let content = await fs.readFile(filePath, 'utf-8')
+
+      // Process if it's a template?
+      // For overlays, we generally assume they might be templates too.
+      // But maybe we keep it simple for now.
+      // If we want templating in overlays, we can use StubGenerator.
+      try {
+        content = this.stubGenerator.render(content, context as unknown as StubVariables)
+      } catch {
+        // Ignore render errors (might not be a template)
+      }
+
+      await this.writeFile(context.targetDir, relativePath, content)
+    }
+  }
+
+  /**
    * Write a file and track it.
    */
   protected async writeFile(
@@ -215,7 +297,21 @@ export abstract class BaseGenerator {
   ): Promise<void> {
     const fullPath = path.resolve(basePath, relativePath)
     await fs.mkdir(path.dirname(fullPath), { recursive: true })
-    await fs.writeFile(fullPath, content, 'utf-8')
+
+    let finalContent = content
+
+    // Check if file exists (merge if so)
+    try {
+      const existingContent = await fs.readFile(fullPath, 'utf-8')
+      finalContent = this.fileMerger.merge(relativePath, existingContent, content)
+      if (finalContent !== content) {
+        this.log(`🔄 Merged file: ${relativePath}`)
+      }
+    } catch {
+      // File doesn't exist, just write
+    }
+
+    await fs.writeFile(fullPath, finalContent, 'utf-8')
     this.filesCreated.push(fullPath)
     this.log(`📄 Created file: ${relativePath}`)
   }
