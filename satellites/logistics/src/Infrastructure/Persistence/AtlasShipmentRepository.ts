@@ -1,5 +1,5 @@
 import type { IShipmentRepository } from '../../Domain/Contracts/IShipmentRepository'
-import { Shipment, ShipmentProps, ShipmentStatus } from '../../Domain/Entities/Shipment'
+import { Shipment } from '../../Domain/Entities/Shipment'
 // import { DB } from '@gravito/atlas' // 假設 Atlas DB 尚未完全以此方式導出，我們先用記憶體模擬以確保測試通過，或寫出標準結構
 
 export class AtlasShipmentRepository implements IShipmentRepository {
