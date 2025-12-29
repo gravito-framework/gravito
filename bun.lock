@@ -1092,6 +1092,20 @@
         "typescript": "^5.0.0",
       },
     },
+    "satellites/payment": {
+      "name": "@gravito/satellite-payment",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "@gravito/stasis": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
+      },
+    },
     "templates/basic": {
       "name": "my-gravito-app",
       "version": "0.1.0",
@@ -1487,6 +1501,8 @@
     "@gravito/satellite-commerce": ["@gravito/satellite-commerce@workspace:satellites/commerce"],
 
     "@gravito/satellite-membership": ["@gravito/satellite-membership@workspace:satellites/membership"],
+
+    "@gravito/satellite-payment": ["@gravito/satellite-payment@workspace:satellites/payment"],
 
     "@gravito/scaffold": ["@gravito/scaffold@workspace:packages/scaffold"],
 
