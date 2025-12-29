@@ -1173,6 +1173,23 @@
         "typescript": "^5.9.3",
       },
     },
+    "packages/support-chat-widget": {
+      "name": "@gravito/support-chat-widget",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/ripple-client": "workspace:*",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.5.2",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "satellites/cart": {
       "name": "@gravito/satellite-cart",
       "version": "0.1.0",
@@ -1742,6 +1759,8 @@
     "@gravito/stasis": ["@gravito/stasis@workspace:packages/stasis"],
 
     "@gravito/stream": ["@gravito/stream@workspace:packages/stream"],
+
+    "@gravito/support-chat-widget": ["@gravito/support-chat-widget@workspace:packages/support-chat-widget"],
 
     "@grpc/grpc-js": ["@grpc/grpc-js@1.14.3", "", { "dependencies": { "@grpc/proto-loader": "^0.8.0", "@js-sdsl/ordered-map": "^4.4.2" } }, "sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA=="],
 
