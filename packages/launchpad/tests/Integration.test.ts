@@ -16,7 +16,7 @@ describe('LaunchPad 集成測試 (真實 Docker)', () => {
     }
   })
 
-  it('應該能成功熱機並在容器內執行指令', async () => {
+  it('應該能成功熱機並在容器內執行指令', { timeout: 20_000 }, async () => {
     try {
       // 1. Warmup
       await manager.warmup(1)
