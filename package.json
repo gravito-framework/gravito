@@ -16,6 +16,7 @@
         "format": "biome format --write .",
         "check": "biome check . --diagnostic-level=error",
         "typecheck": "turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
+        "typecheck:full": "find . -name '*.tsbuildinfo' -delete && turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
         "version:check": "bun run scripts/check-versions.ts",
         "changeset": "changeset",
         "ci:version": "changeset version",
@@ -37,7 +38,7 @@
     },
     "simple-git-hooks": {
         "pre-commit": "export PATH=\"~/.bun/bin:$PATH\" && bunx lint-staged",
-        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && turbo run typecheck test:coverage --filter=[HEAD^1]"
+        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && bun run typecheck:full && turbo run test --filter=[HEAD^1]"
     },
     "lint-staged": {
         "*.{js,ts,cjs,mjs}": [
