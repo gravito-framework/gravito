@@ -89,7 +89,9 @@ import { MembershipServiceProvider } from '@gravito/satellite-membership'
 new MembershipServiceProvider().install(core)
 ```
 
-Configure the relying party metadata under `membership.passkeys`. The provider auto-fills `origin`/`rp_id` from `APP_URL` when you omit them.
+### Configure the relying party
+
+`@gravito/satellite-membership` wires a `PasskeysService` built on `@simplewebauthn/server` and stores challenges in the session adapter. Configure the relying party metadata under `membership.passkeys`. The provider auto-fills `origin`/`rp_id` from `APP_URL` when you omit them.
 
 ```ts
 {
@@ -106,7 +108,25 @@ Configure the relying party metadata under `membership.passkeys`. The provider a
 }
 ```
 
-Passkeys rely on session storage, so ensure you register `OrbitPulsar` (or any session adapter) and call the `/register/options`, `/register/verify`, `/login/options`, and `/login/verify` endpoints with `credentials: 'include'`. For client examples, see [`satellites/membership/docs/PASSKEYS.md`](../../satellites/membership/docs/PASSKEYS.md).
+### Registration and authentication endpoints
+
+The satellite exposes four JSON endpoints under `/api/membership/passkeys`:
+
+- `POST /register/options` – guarded by `auth()` so the member must already be signed in before receiving the registration challenge.
+- `POST /register/verify` – validates the attestation response, persisting the credential (including `displayName`, `transports`, and `id`) while keeping the session active.
+- `POST /login/options` – accepts a member email and returns an authentication challenge for that account.
+- `POST /login/verify` – verifies the assertion and reuses the existing `AuthManager` to sign the member in.
+
+Passkeys rely on session storage, so ensure you register `OrbitPulsar` (or any session adapter) and call the above endpoints with `credentials: 'include'`. The server keeps each challenge in the session so it can compare it with the response.
+
+### Client integration tips
+
+- After authenticating, call `/register/options`, run `startRegistration` from `@simplewebauthn/browser`, and POST the credential payload (optionally including `displayName`) to `/register/verify`.
+- For passkey logins, POST the member’s email to `/login/options`, call `startAuthentication`, and submit the resulting assertion to `/login/verify`.
+- Catch and render JSON errors on the frontend to inform the user when attestation/authentication fails.
+- The backend already saves the credential metadata, so store `credential.id` or `displayName` client-side if you plan to expose a “registered devices” list later.
+
+For client examples and a full roundtrip, see [`satellites/membership/docs/PASSKEYS.md`](../../satellites/membership/docs/PASSKEYS.md).
 
 ## Gate Authorization
 

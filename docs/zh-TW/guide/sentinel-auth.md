@@ -106,8 +106,25 @@ new MembershipServiceProvider().install(core)
 }
 ```
 
-Passkeys 依賴 session 儲存，因此請先註冊 `OrbitPulsar` 或其他提供 `core.adapter.session` 的 orbit，並在呼叫上述四個 API 時帶 `credentials: 'include'`。前端範例可以參考 [`satellites/membership/docs/PASSKEYS.md`](../../satellites/membership/docs/PASSKEYS.md)。
+### 註冊與驗證端點
 
+Satellite 暴露了四個 `/api/membership/passkeys` 的 JSON 端點：
+
+- `POST /register/options` – 由 `auth()` 保護，必須先登入會員才能取得註冊挑戰。
+- `POST /register/verify` – 驗證 attestation 回傳值，儲存 credential（含 `displayName`、`transports`、`id`）並維持登入狀態。
+- `POST /login/options` – 接收會員 email 並產生認證挑戰。
+- `POST /login/verify` – 驗證 assertion 之後透過現有的 `AuthManager` 重新登入會員。
+
+Passkeys 依賴 session 儲存，因此請先註冊 `OrbitPulsar` 或其他提供 `core.adapter.session` 的 orbit，並在呼叫上述端點時帶 `credentials: 'include'`。後端會將每一次挑戰暫存在 session 中以便比對回傳資料。
+
+### 客戶端整合提示
+
+- 使用者登入後，先呼叫 `/register/options` 獲取挑戰，再透過 `@simplewebauthn/browser` 的 `startRegistration`，將回傳的 credential（可額外帶 `displayName`）送到 `/register/verify`。
+- Passkey 登入時先將 member email POST 到 `/login/options`，用 `startAuthentication` 取得 assertion，之後送到 `/login/verify`。
+- 前端應顯示 JSON 錯誤訊息，讓使用者知道 attestation 或 authentication 失敗的原因。
+- 後端已儲存 credential 的 metadata，因此若要在 UI 提供「已註冊裝置」列表，可以在客戶端留存 `credential.id`、`displayName` 等資料。
+
+如需完整示範與 roundtrip，可以參考 [`satellites/membership/docs/PASSKEYS.md`](../../satellites/membership/docs/PASSKEYS.md)。
 ## 授權 Gate
 
 ```ts
