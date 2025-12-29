@@ -1,4 +1,3 @@
-import { DB } from '@gravito/atlas'
 import type { IMarketingRepository } from '../../Domain/Contracts/IMarketingRepository'
 import type { Marketing } from '../../Domain/Entities/Marketing'
 
@@ -9,7 +8,7 @@ export class AtlasMarketingRepository implements IMarketingRepository {
     // await DB.table('marketings').insert({ ... })
   }
 
-  async findById(id: string): Promise<Marketing | null> {
+  async findById(_id: string): Promise<Marketing | null> {
     return null
   }
 
@@ -17,9 +16,9 @@ export class AtlasMarketingRepository implements IMarketingRepository {
     return []
   }
 
-  async delete(id: string): Promise<void> {}
+  async delete(_id: string): Promise<void> {}
 
-  async exists(id: string): Promise<boolean> {
+  async exists(_id: string): Promise<boolean> {
     return false
   }
 }

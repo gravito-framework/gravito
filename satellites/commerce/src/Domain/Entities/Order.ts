@@ -106,13 +106,17 @@ export class Order extends AggregateRoot<string> {
   }
 
   public addItem(item: LineItem): void {
-    if (this.props.status !== 'pending') throw new Error('Order is not in pending state')
+    if (this.props.status !== 'pending') {
+      throw new Error('Order is not in pending state')
+    }
     this.props.items.push(item)
     this.recalculate()
   }
 
   public addAdjustment(adj: Adjustment): void {
-    if (this.props.status !== 'pending') throw new Error('Order is not in pending state')
+    if (this.props.status !== 'pending') {
+      throw new Error('Order is not in pending state')
+    }
     this.props.adjustments.push(adj)
     this.recalculate()
   }
@@ -134,7 +138,9 @@ export class Order extends AggregateRoot<string> {
   }
 
   public markAsPaid(): void {
-    if (this.props.status !== 'pending') throw new Error('Invalid status transition')
+    if (this.props.status !== 'pending') {
+      throw new Error('Invalid status transition')
+    }
     ;(this.props as any).status = 'paid'
     ;(this.props as any).updatedAt = new Date()
   }

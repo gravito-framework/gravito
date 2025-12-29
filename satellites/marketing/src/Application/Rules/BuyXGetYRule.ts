@@ -6,12 +6,16 @@ export class BuyXGetYRule implements IPromotionRule {
    * 意即：買 2 個 IPHONE 送 1 個 (折抵 1 個的價格)
    */
   match(order: any, config: any): MarketingAdjustment | null {
-    if (!order.items || !Array.isArray(order.items)) return null
+    if (!order.items || !Array.isArray(order.items)) {
+      return null
+    }
 
     // 尋找目標商品
     const targetItems = order.items.filter((item: any) => item.props.sku === config.target_sku)
 
-    if (targetItems.length === 0) return null
+    if (targetItems.length === 0) {
+      return null
+    }
 
     // 累計總數量與單價快照
     const totalQty = targetItems.reduce((sum: number, item: any) => sum + item.props.quantity, 0)

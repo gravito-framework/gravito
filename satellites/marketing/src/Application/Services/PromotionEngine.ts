@@ -28,7 +28,9 @@ export class PromotionEngine {
 
     for (const promo of activePromotions) {
       const rule = this.rules[promo.type]
-      if (!rule) continue
+      if (!rule) {
+        continue
+      }
 
       const config = JSON.parse(promo.configuration)
       const adjustment = await rule.match(order, config)

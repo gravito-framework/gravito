@@ -1,0 +1,16 @@
+{
+  "name": "admin",
+  "id": "admin",
+  "version": "0.1.0",
+  "description": "Gravito Admin Control Center",
+  "capabilities": [
+    "rbac",
+    "admin-management"
+  ],
+  "requirements": [
+    "auth"
+  ],
+  "hooks": [
+    "admin:user:registered"
+  ]
+}

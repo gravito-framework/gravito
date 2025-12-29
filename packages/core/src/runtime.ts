@@ -195,13 +195,21 @@ const createNodeAdapter = (): RuntimeAdapter => ({
     const stream = require('node:stream') as typeof import('node:stream')
 
     const stdioMap = (value: RuntimeSpawnOptions['stdout']) => {
-      if (value === 'inherit') return 'inherit'
-      if (value === 'ignore') return 'ignore'
+      if (value === 'inherit') {
+        return 'inherit'
+      }
+      if (value === 'ignore') {
+        return 'ignore'
+      }
       return 'pipe'
     }
     const stdinMap = (value: RuntimeSpawnOptions['stdin']) => {
-      if (value === 'inherit') return 'inherit'
-      if (value === 'ignore') return 'ignore'
+      if (value === 'inherit') {
+        return 'inherit'
+      }
+      if (value === 'ignore') {
+        return 'ignore'
+      }
       return 'pipe'
     }
 
