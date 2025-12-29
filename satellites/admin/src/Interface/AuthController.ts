@@ -1,5 +1,7 @@
 import type { PlanetCore } from 'gravito-core'
+import type { ListAdmins } from '../Application/UseCases/ListAdmins'
 import type { LoginAdmin } from '../Application/UseCases/LoginAdmin'
+import type { UpdateAdmin } from '../Application/UseCases/UpdateAdmin'
 
 export class AuthController {
   constructor(private core: PlanetCore) {}
@@ -20,7 +22,7 @@ export class AuthController {
           id: user.id,
           username: user.username,
           email: user.email,
-          permissions: (user as any).props.permissions || ['*'], // 暫時預設全權限
+          permissions: (user as any).props.permissions || ['*'],
           roles: user.roles,
         },
       })
@@ -33,8 +35,6 @@ export class AuthController {
    * GET /auth/me
    */
   async me(ctx: any) {
-    // 這裡通常會由 Middleware 解析 Token 並注入 User
-    // 暫時返回一個模擬的當前用戶
     return ctx.json({
       id: 'current-admin-id',
       username: 'admin',
@@ -42,5 +42,44 @@ export class AuthController {
       permissions: ['*'],
       roles: ['superadmin'],
     })
+  }
+
+  /**
+   * GET /users
+   */
+  async users(ctx: any) {
+    try {
+      const useCase = this.core.container.make<ListAdmins>('admin.usecase.listAdmins')
+      const users = await useCase.execute()
+
+      return ctx.json(
+        users.map((u) => ({
+          id: u.id,
+          username: u.username,
+          email: u.email,
+          roles: u.roles,
+          isActive: u.isActive,
+        }))
+      )
+    } catch (error: any) {
+      return ctx.json({ message: error.message }, 500)
+    }
+  }
+
+  /**
+   * PATCH /users/:id
+   */
+  async update(ctx: any) {
+    const id = ctx.req.param('id')
+    const body = await ctx.req.json()
+
+    try {
+      const useCase = this.core.container.make<UpdateAdmin>('admin.usecase.updateAdmin')
+      await useCase.execute({ id, ...body })
+
+      return ctx.json({ success: true })
+    } catch (error: any) {
+      return ctx.json({ message: error.message }, 400)
+    }
   }
 }

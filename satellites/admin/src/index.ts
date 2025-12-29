@@ -1,8 +1,10 @@
 import { type Container, ServiceProvider } from 'gravito-core'
 import { CreateRole } from './Application/UseCases/CreateRole'
+import { ListAdmins } from './Application/UseCases/ListAdmins'
 import { ListRoles } from './Application/UseCases/ListRoles'
 import { LoginAdmin } from './Application/UseCases/LoginAdmin'
 import { RegisterAdmin } from './Application/UseCases/RegisterAdmin'
+import { UpdateAdmin } from './Application/UseCases/UpdateAdmin'
 import { AtlasAdminUserRepository } from './Infrastructure/Persistence/AtlasAdminUserRepository'
 import { AtlasPermissionRepository } from './Infrastructure/Persistence/AtlasPermissionRepository'
 import { AtlasRoleRepository } from './Infrastructure/Persistence/AtlasRoleRepository'
@@ -24,6 +26,14 @@ export class AdminServiceProvider extends ServiceProvider {
     container.bind(
       'admin.usecase.login',
       () => new LoginAdmin(container.make('admin.repository.user'))
+    )
+    container.bind(
+      'admin.usecase.listAdmins',
+      () => new ListAdmins(container.make('admin.repository.user'))
+    )
+    container.bind(
+      'admin.usecase.updateAdmin',
+      () => new UpdateAdmin(container.make('admin.repository.user'))
     )
     container.bind(
       'admin.usecase.listRoles',
@@ -50,9 +60,11 @@ export class AdminServiceProvider extends ServiceProvider {
     const rbacController = core.container.make<RbacController>('admin.controller.rbac')
 
     core.router.group({ prefix: '/api/admin/v1' }, (router) => {
-      // Auth 路由
+      // Auth & User 路由
       router.post('/auth/login', (ctx) => authController.login(ctx))
       router.get('/auth/me', (ctx) => authController.me(ctx))
+      router.get('/users', (ctx) => authController.users(ctx))
+      router.patch('/users/:id', (ctx) => authController.update(ctx))
 
       // RBAC 路由
       router.get('/roles', (ctx) => rbacController.index(ctx))
