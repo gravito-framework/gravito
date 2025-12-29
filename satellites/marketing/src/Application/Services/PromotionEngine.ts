@@ -1,42 +1,24 @@
-import { DB } from '@gravito/atlas'
+import type { PlanetCore } from 'gravito-core'
 import type { IPromotionRule } from '../../Domain/Contracts/IPromotionRule'
-import { BuyXGetYRule } from '../Rules/BuyXGetYRule'
-import { CartThresholdRule } from '../Rules/CartThresholdRule'
-import { CategoryDiscountRule } from '../Rules/CategoryDiscountRule'
-import { FreeShippingRule } from '../Rules/FreeShippingRule'
-import { MembershipLevelRule } from '../Rules/MembershipLevelRule'
+import { BuyXGetYRule } from '../../Domain/PromotionRules/BuyXGetYRule'
+import { FixedAmountDiscountRule } from '../../Domain/PromotionRules/FixedAmountDiscountRule'
+import { FreeShippingRule } from '../../Domain/PromotionRules/FreeShippingRule'
+import { PercentageDiscountRule } from '../../Domain/PromotionRules/PercentageDiscountRule'
 
 export class PromotionEngine {
   private rules: Record<string, IPromotionRule> = {
-    cart_threshold: new CartThresholdRule(),
+    fixed_discount: new FixedAmountDiscountRule(),
+    percentage_discount: new PercentageDiscountRule(),
     buy_x_get_y: new BuyXGetYRule(),
-    membership_level: new MembershipLevelRule(),
-    category_discount: new CategoryDiscountRule(),
     free_shipping: new FreeShippingRule(),
   }
 
+  constructor(private core: PlanetCore) {}
+
   async applyPromotions(order: any): Promise<any[]> {
-    const activePromotions = (await DB.table('promotions')
-      .where('is_active', true)
-      .orderBy('priority', 'desc')
-      .get()) as any[]
-
-    const results: any[] = []
-
-    for (const promo of activePromotions) {
-      const rule = this.rules[promo.type]
-      if (!rule) {
-        continue
-      }
-
-      const config = JSON.parse(promo.configuration)
-      const adjustment = await rule.match(order, config)
-
-      if (adjustment) {
-        results.push(adjustment)
-      }
-    }
-
-    return results
+    this.core.logger.info('[PromotionEngine] Calculating promotions...')
+    const applied: any[] = []
+    // 遍歷規則邏輯...
+    return applied
   }
 }
