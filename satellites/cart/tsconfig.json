@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",
@@ -7,7 +7,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["bun-types", "node"]
+    "types": ["bun-types"]
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["dist", "node_modules"]
