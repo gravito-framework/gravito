@@ -96,6 +96,11 @@ export class SatelliteGenerator extends BaseGenerator {
           },
           // Entry Point
           { type: 'file', name: 'index.ts', content: this.generateEntryPoint(name) },
+          {
+            type: 'file',
+            name: 'env.d.ts',
+            content: 'interface ImportMeta {\n  readonly dir: string\n  readonly path: string\n}\n',
+          },
           { type: 'file', name: 'manifest.json', content: this.generateManifest(context) },
         ],
       },
