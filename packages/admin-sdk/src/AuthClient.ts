@@ -40,10 +40,14 @@ export class AuthClient {
    * Fetch the current logged-in user profile
    */
   async me(): Promise<IAdminUser | null> {
-    if (this.user) return this.user
+    if (this.user) {
+      return this.user
+    }
 
     const token = localStorage.getItem('gravito_admin_token')
-    if (!token) return null
+    if (!token) {
+      return null
+    }
 
     try {
       this.user = await this.api.get<IAdminUser>('/auth/me')

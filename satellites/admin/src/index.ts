@@ -51,7 +51,9 @@ export class AdminServiceProvider extends ServiceProvider {
 
   override boot(): void {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     core.logger.info('🏰 Admin Satellite foundation is ready')
 

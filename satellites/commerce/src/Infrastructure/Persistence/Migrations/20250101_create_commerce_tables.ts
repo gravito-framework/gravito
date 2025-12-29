@@ -50,7 +50,7 @@ export default {
       await Schema.table('product_variants', (table: Blueprint) => {
         table.integer('version').default(1)
       })
-    } catch (e) {
+    } catch (_e) {
       // Column might already exist, ignore in review environment
     }
   },

@@ -16,7 +16,9 @@ export class ProductResolver {
 
     if (useCache) {
       const cached = await this.cache.get<ProductSnapshot>(cacheKey)
-      if (cached) return cached
+      if (cached) {
+        return cached
+      }
     }
 
     const variant = (await DB.table('product_variants')
@@ -24,7 +26,9 @@ export class ProductResolver {
       .select('id', 'sku', 'name', 'price')
       .first()) as any
 
-    if (!variant) throw new Error(`Product variant ${variantId} not found`)
+    if (!variant) {
+      throw new Error(`Product variant ${variantId} not found`)
+    }
 
     const snapshot: ProductSnapshot = {
       id: String(variant.id),

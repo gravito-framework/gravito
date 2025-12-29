@@ -14,7 +14,9 @@ export class UpdateAdmin extends UseCase<UpdateAdminInput, void> {
 
   async execute(input: UpdateAdminInput): Promise<void> {
     const admin = await this.repository.findById(input.id)
-    if (!admin) throw new Error('Admin user not found.')
+    if (!admin) {
+      throw new Error('Admin user not found.')
+    }
 
     if (input.isActive !== undefined) {
       ;(admin as any).props.isActive = input.isActive

@@ -14,7 +14,9 @@ export class CreateRole extends UseCase<CreateRoleInput, string> {
 
   async execute(input: CreateRoleInput): Promise<string> {
     const existing = await this.repository.findByName(input.name)
-    if (existing) throw new Error(`Role "${input.name}" already exists.`)
+    if (existing) {
+      throw new Error(`Role "${input.name}" already exists.`)
+    }
 
     const id = crypto.randomUUID()
     const role = Role.create(id, input.name)

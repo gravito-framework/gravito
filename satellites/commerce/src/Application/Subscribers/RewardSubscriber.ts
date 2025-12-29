@@ -8,7 +8,9 @@ export class RewardSubscriber {
     const logger = this.core.logger
     const order = (await DB.table('orders').where('id', payload.orderId).first()) as any
 
-    if (!order || !order.member_id) return
+    if (!order || !order.member_id) {
+      return
+    }
 
     const points = Math.floor(Number(order.total_amount) / 100)
 

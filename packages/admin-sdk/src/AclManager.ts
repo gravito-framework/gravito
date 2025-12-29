@@ -8,10 +8,14 @@ export class AclManager {
    */
   can(permission: string): boolean {
     const user = this.userProvider()
-    if (!user) return false
+    if (!user) {
+      return false
+    }
 
     // SuperAdmin mode: if user has '*' permission
-    if (user.permissions.includes('*')) return true
+    if (user.permissions.includes('*')) {
+      return true
+    }
 
     return user.permissions.includes(permission)
   }

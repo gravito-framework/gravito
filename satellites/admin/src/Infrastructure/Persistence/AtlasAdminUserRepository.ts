@@ -23,14 +23,18 @@ export class AtlasAdminUserRepository implements IAdminUserRepository {
 
   async findByEmail(email: string): Promise<AdminUser | null> {
     for (const data of AtlasAdminUserRepository.storage.values()) {
-      if (data.email === email) return new AdminUser(data.id, data)
+      if (data.email === email) {
+        return new AdminUser(data.id, data)
+      }
     }
     return null
   }
 
   async findByUsername(username: string): Promise<AdminUser | null> {
     for (const data of AtlasAdminUserRepository.storage.values()) {
-      if (data.username === username) return new AdminUser(data.id, data)
+      if (data.username === username) {
+        return new AdminUser(data.id, data)
+      }
     }
     return null
   }

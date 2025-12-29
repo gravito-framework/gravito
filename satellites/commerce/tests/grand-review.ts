@@ -68,7 +68,9 @@ async function grandReview() {
     console.log(
       `✅ 訂單已建立: ${result.orderId}, 剩餘庫存: ${updatedVariant.stock}, 版本: ${updatedVariant.version}`
     )
-    if (updatedVariant.stock !== 8) throw new Error('Stock deduction error')
+    if (updatedVariant.stock !== 8) {
+      throw new Error('Stock deduction error')
+    }
   }
 
   console.log('\n🧪 [Test B] 模擬兩個人同時搶購最後 5 件商品...')
@@ -86,16 +88,18 @@ async function grandReview() {
 
   console.log('🏁 搶購結果:')
   console.log(
-    `👤 用戶 A: ${res1.status === 'fulfilled' ? '✅ 成功' : '❌ 失敗: ' + (res1 as any).reason.message}`
+    `👤 用戶 A: ${res1.status === 'fulfilled' ? '✅ 成功' : `❌ 失敗: ${(res1 as any).reason.message}`}`
   )
   console.log(
-    `👤 用戶 B: ${res2.status === 'fulfilled' ? '✅ 成功' : '❌ 失敗: ' + (res2 as any).reason.message}`
+    `👤 用戶 B: ${res2.status === 'fulfilled' ? '✅ 成功' : `❌ 失敗: ${(res2 as any).reason.message}`}`
   )
 
   const finalVariant = (await DB.table('product_variants').where('id', 'v1').first()) as any
   if (finalVariant) {
     console.log(`📊 最終庫存: ${finalVariant.stock} (預期應為 3, 且無負數)`)
-    if (finalVariant.stock < 0) throw new Error('Overselling detected!')
+    if (finalVariant.stock < 0) {
+      throw new Error('Overselling detected!')
+    }
   }
 
   console.log('\n🧪 [Test C] 驗證 Stage 2 (Sport Mode) 內存加速...')
@@ -135,7 +139,9 @@ async function grandReview() {
     `📊 快取驗證: 訂單內商品名稱 = "${orderItem.name}" (預期應為 "Speed Shoes", 而非 "CLEARED_IN_DB")`
   )
 
-  if (orderItem.name !== 'Speed Shoes') throw new Error('Cache was not utilized in Sport mode!')
+  if (orderItem.name !== 'Speed Shoes') {
+    throw new Error('Cache was not utilized in Sport mode!')
+  }
 
   console.log('\n🎉 [Grand Review] 所有模式 (Standard, Sport, Hooks) 校閱成功！')
   process.exit(0)

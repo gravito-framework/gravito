@@ -70,7 +70,9 @@ export class ApiBridge {
 
       return data as T
     } catch (error) {
-      if (error instanceof ApiError) throw error
+      if (error instanceof ApiError) {
+        throw error
+      }
       throw new ApiError('Network connection failed', 0)
     }
   }

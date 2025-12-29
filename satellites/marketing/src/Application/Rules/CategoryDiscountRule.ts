@@ -5,7 +5,9 @@ export class CategoryDiscountRule implements IPromotionRule {
    * config: { category_id: 'electronics', discount_percent: 20 }
    */
   match(order: any, config: any): MarketingAdjustment | null {
-    if (!order.items || !Array.isArray(order.items)) return null
+    if (!order.items || !Array.isArray(order.items)) {
+      return null
+    }
 
     // 遍歷所有品項，尋找屬於該分類 (或其子分類) 的商品
     // 注意：這裡假設 Order Item 中已經快照了商品的 categoryPath (由 Catalog 提供)
@@ -14,7 +16,9 @@ export class CategoryDiscountRule implements IPromotionRule {
       return path.includes(`/${config.category_id}/`)
     })
 
-    if (eligibleItems.length === 0) return null
+    if (eligibleItems.length === 0) {
+      return null
+    }
 
     const eligibleTotal = eligibleItems.reduce(
       (sum: number, item: any) => sum + item.props.totalPrice,

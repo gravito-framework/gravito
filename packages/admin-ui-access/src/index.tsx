@@ -1,8 +1,6 @@
-import React from 'react';
-import { RoleList } from './pages/RoleList';
-import { AdminUserList } from './pages/AdminUserList';
-import { ShieldCheck } from 'lucide-react';
-import type { IAdminModule } from '@gravito/admin-sdk';
+import type { IAdminModule } from '@gravito/admin-sdk'
+import { AdminUserList } from './pages/AdminUserList'
+import { RoleList } from './pages/RoleList'
 
 /**
  * Access Control Module Definition
@@ -13,12 +11,12 @@ export const AccessModule: IAdminModule = {
   routes: [
     {
       path: '/access/roles',
-      component: RoleList
+      component: RoleList,
     },
     {
       path: '/access/users',
-      component: AdminUserList
-    }
+      component: AdminUserList,
+    },
   ],
   menu: [
     {
@@ -33,18 +31,18 @@ export const AccessModule: IAdminModule = {
           title: '角色管理',
           type: 'item',
           path: '/access/roles',
-          permission: 'access.roles.read'
+          permission: 'access.roles.read',
         },
         {
           id: 'access-admins',
           title: '管理員設定',
           type: 'item',
           path: '/access/users',
-          permission: 'access.users.read'
-        }
-      ]
-    }
-  ]
-};
+          permission: 'access.users.read',
+        },
+      ],
+    },
+  ],
+}
 
-export default AccessModule;
+export default AccessModule

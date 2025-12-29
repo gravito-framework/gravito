@@ -17,7 +17,9 @@ export class CommerceServiceProvider extends ServiceProvider {
 
   override async boot(): Promise<void> {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     const checkoutCtrl = new CheckoutController()
     const rewardSub = new RewardSubscriber(core)

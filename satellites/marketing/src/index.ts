@@ -18,7 +18,9 @@ export class MarketingServiceProvider extends ServiceProvider {
 
   override async boot(): Promise<void> {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     const promoEngine = core.container.make<PromotionEngine>('marketing.promotion-engine')
     const couponService = core.container.make<CouponService>('marketing.coupon-service')
@@ -39,7 +41,9 @@ export class MarketingServiceProvider extends ServiceProvider {
         if (extras?.couponCode) {
           try {
             const couponAdj = await couponService.getAdjustment(extras.couponCode, order)
-            if (couponAdj) results.push(couponAdj)
+            if (couponAdj) {
+              results.push(couponAdj)
+            }
           } catch (e: any) {
             core.logger.warn(`⚠️ [Marketing] 折價券無效: ${e.message}`)
             // 注意：這裡我們不拋出錯誤，讓下單繼續但沒有折扣

@@ -15,7 +15,9 @@ export class RegisterAdmin extends UseCase<RegisterAdminInput, string> {
 
   async execute(input: RegisterAdminInput): Promise<string> {
     const existing = await this.repository.findByEmail(input.email)
-    if (existing) throw new Error('Admin user already exists.')
+    if (existing) {
+      throw new Error('Admin user already exists.')
+    }
 
     const id = crypto.randomUUID()
 

@@ -2,7 +2,7 @@ import { DB } from '@gravito/atlas'
 import { UseCase } from '@gravito/enterprise'
 import type { CacheManager } from '@gravito/stasis'
 import type { PlanetCore } from 'gravito-core'
-import { Adjustment, LineItem, Order } from '../../Domain/Entities/Order'
+import { LineItem, Order } from '../../Domain/Entities/Order'
 import { AdjustmentCalculator } from '../Services/AdjustmentCalculator'
 import { ProductResolver } from '../Services/ProductResolver'
 
@@ -40,8 +40,12 @@ export class PlaceOrder extends UseCase<PlaceOrderInput, any> {
           .select('stock', 'version', 'sku', 'price')
           .first()) as any
 
-        if (!variant) throw new Error(`Variant ${reqItem.variantId} not found`)
-        if (Number(variant.stock) < reqItem.quantity) throw new Error('Insufficient stock')
+        if (!variant) {
+          throw new Error(`Variant ${reqItem.variantId} not found`)
+        }
+        if (Number(variant.stock) < reqItem.quantity) {
+          throw new Error('Insufficient stock')
+        }
 
         const affectedRows = await db
           .table('product_variants')

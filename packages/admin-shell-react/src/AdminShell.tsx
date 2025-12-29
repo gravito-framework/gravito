@@ -1,10 +1,9 @@
-import React from 'react';
-import { Sidebar } from './Sidebar';
-import { Outlet } from 'react-router-dom';
-import { useAdmin } from './AdminContext';
+import { Outlet } from 'react-router-dom'
+import { useAdmin } from './AdminContext'
+import { Sidebar } from './Sidebar'
 
 export function AdminShell() {
-  const { user, isAuthenticated, isLoading } = useAdmin();
+  const { user, isAuthenticated, isLoading } = useAdmin()
 
   if (isLoading) {
     return (
@@ -14,7 +13,7 @@ export function AdminShell() {
           <p className="text-slate-500 font-medium animate-pulse">正在初始化控制台...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!isAuthenticated) {
@@ -22,21 +21,38 @@ export function AdminShell() {
       <div className="min-h-screen flex items-center justify-center bg-slate-100 font-sans p-4">
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
           <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              role="img"
+              aria-label="Security Lock"
+            >
+              <title>安全鎖定</title>
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">安全存取驗證</h1>
           <p className="text-slate-500 mb-8 text-balance">
             此頁面受到受保護，請使用管理員帳號登入以存取 Gravito 控制中心。
           </p>
-          <button 
+          <button
+            type="button"
             className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all hover:-translate-y-0.5 active:translate-y-0"
-            onClick={() => window.location.href = '/login'}
+            onClick={() => (window.location.href = '/login')}
           >
             前往登入
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -69,6 +85,5 @@ export function AdminShell() {
         </section>
       </main>
     </div>
-  );
+  )
 }
-

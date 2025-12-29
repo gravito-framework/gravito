@@ -20,7 +20,9 @@ export class AtlasRoleRepository implements IRoleRepository {
 
   async findByName(name: string): Promise<Role | null> {
     for (const data of AtlasRoleRepository.storage.values()) {
-      if (data.name === name) return new Role(data.id, data)
+      if (data.name === name) {
+        return new Role(data.id, data)
+      }
     }
     return null
   }

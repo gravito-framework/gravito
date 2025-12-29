@@ -20,7 +20,9 @@ export class AtlasPermissionRepository implements IPermissionRepository {
 
   async findByName(name: string): Promise<Permission | null> {
     for (const data of AtlasPermissionRepository.storage.values()) {
-      if (data.name === name) return new Permission(data.id, data)
+      if (data.name === name) {
+        return new Permission(data.id, data)
+      }
     }
     return null
   }
