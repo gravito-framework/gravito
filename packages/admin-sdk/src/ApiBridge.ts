@@ -9,7 +9,7 @@ export interface ApiRequestOptions extends RequestInit {
 
 export class ApiError extends Error {
   constructor(
-    public message: string,
+    public override message: string,
     public status: number,
     public code?: string,
     public errors?: Record<string, string[]>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect, type ReactNode } from 'react';
 import { createAdminSdk, type AdminSdk, type IAdminUser, type IMenuNode, type IAdminModule } from '@gravito/admin-sdk';
 
 interface AdminContextType {
