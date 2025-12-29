@@ -412,6 +412,25 @@
         "typescript": "^5.7.2",
       },
     },
+    "packages/admin-ui-support": {
+      "name": "@gravito/admin-ui-support",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "@gravito/ripple-client": "workspace:*",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.5.2",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/atlas": {
       "name": "@gravito/atlas",
       "version": "1.0.0",
@@ -1272,6 +1291,20 @@
         "typescript": "^5.0.0",
       },
     },
+    "satellites/support": {
+      "name": "@gravito/satellite-support",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "@gravito/ripple": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "templates/basic": {
       "name": "my-gravito-app",
       "version": "0.1.0",
@@ -1606,6 +1639,8 @@
 
     "@gravito/admin-ui-order": ["@gravito/admin-ui-order@workspace:packages/admin-ui-order"],
 
+    "@gravito/admin-ui-support": ["@gravito/admin-ui-support@workspace:packages/admin-ui-support"],
+
     "@gravito/atlas": ["@gravito/atlas@workspace:packages/atlas"],
 
     "@gravito/beam": ["@gravito/beam@workspace:packages/beam"],
@@ -1691,6 +1726,8 @@
     "@gravito/satellite-membership": ["@gravito/satellite-membership@workspace:satellites/membership"],
 
     "@gravito/satellite-payment": ["@gravito/satellite-payment@workspace:satellites/payment"],
+
+    "@gravito/satellite-support": ["@gravito/satellite-support@workspace:satellites/support"],
 
     "@gravito/scaffold": ["@gravito/scaffold@workspace:packages/scaffold"],
 
