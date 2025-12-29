@@ -131,8 +131,8 @@ function OrderVolumeWidget({ period }: { period: string }) {
     async function fetchData() {
       setLoading(true)
       try {
-        const res = await sdk.api.get<any>('/analytics/query', { 
-          params: { metric: 'order_volume', period } 
+        const res = await sdk.api.get<any>('/analytics/query', {
+          params: { metric: 'order_volume', period },
         })
         setData(res.data)
       } finally {
