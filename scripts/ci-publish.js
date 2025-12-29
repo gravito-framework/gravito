@@ -1,25 +1,46 @@
 #!/usr/bin/env node
-const { spawnSync } = require('child_process')
+const { spawn } = require('child_process')
 
-const result = spawnSync('bun', ['run', 'changeset', 'publish'], {
-  stdio: 'inherit',
+const child = spawn('bun', ['run', 'changeset', 'publish'], {
+  stdio: ['inherit', 'pipe', 'pipe'],
 })
 
-if (result.status === 0) {
-  process.exit(0)
-}
+let stdout = ''
+let stderr = ''
 
-const output = `${result.stdout ?? ''}${result.stderr ?? ''}`
-const isRegistryError =
-  /E404 Not Found/.test(output) ||
-  /Access token expired/.test(output) ||
-  /not in this registry/i.test(output)
+child.stdout.on('data', (chunk) => {
+  process.stdout.write(chunk)
+  stdout += chunk?.toString() ?? ''
+})
 
-if (isRegistryError) {
-  console.warn(
-    'Skipping publish because npm registry rejected the request (token missing/expired).'
-  )
-  process.exit(0)
-}
+child.stderr.on('data', (chunk) => {
+  process.stderr.write(chunk)
+  stderr += chunk?.toString() ?? ''
+})
 
-process.exit(result.status ?? 1)
+child.on('error', (error) => {
+  console.error('Failed to run changeset publish:', error)
+  process.exit(1)
+})
+
+child.on('close', (code) => {
+  const exitCode = code ?? 1
+  if (exitCode === 0) {
+    process.exit(0)
+  }
+
+  const output = `${stdout}${stderr}`
+  const isRegistryError =
+    /E404 Not Found/.test(output) ||
+    /Access token expired/.test(output) ||
+    /not in this registry/i.test(output)
+
+  if (isRegistryError) {
+    console.warn(
+      'Skipping publish because npm registry rejected the request (token missing/expired).'
+    )
+    process.exit(0)
+  }
+
+  process.exit(exitCode)
+})
