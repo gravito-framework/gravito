@@ -85,4 +85,21 @@ describe('Marketing Satellite - Advanced Rules', () => {
     expect(adjustments[0].amount).toBe(-1600) // 8000 * 0.2
     expect(adjustments[0].label).toContain('ELECTRONICS')
   })
+
+  it('應該能正確套用滿額免運折扣', async () => {
+    await DB.table('promotions').insert({
+      id: 'p_ship',
+      name: 'Free Shipping over 1000',
+      type: 'free_shipping',
+      configuration: JSON.stringify({ min_amount: 1000 }),
+      is_active: true,
+    })
+
+    const order = { subtotalAmount: 1500 }
+    const adjustments = await engine.applyPromotions(order)
+
+    expect(adjustments).toHaveLength(1)
+    expect(adjustments[0].amount).toBe(-60) // 抵銷 60 元運費
+    expect(adjustments[0].label).toContain('Free Shipping')
+  })
 })

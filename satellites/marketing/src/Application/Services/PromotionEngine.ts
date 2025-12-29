@@ -4,6 +4,7 @@ import type { IPromotionRule } from '../../Domain/Contracts/IPromotionRule'
 import { BuyXGetYRule } from '../Rules/BuyXGetYRule'
 import { CartThresholdRule } from '../Rules/CartThresholdRule'
 import { CategoryDiscountRule } from '../Rules/CategoryDiscountRule'
+import { FreeShippingRule } from '../Rules/FreeShippingRule'
 import { MembershipLevelRule } from '../Rules/MembershipLevelRule'
 
 export class PromotionEngine {
@@ -12,6 +13,7 @@ export class PromotionEngine {
     buy_x_get_y: new BuyXGetYRule(),
     membership_level: new MembershipLevelRule(),
     category_discount: new CategoryDiscountRule(),
+    free_shipping: new FreeShippingRule(),
   }
 
   constructor(private core: PlanetCore) {}
@@ -29,8 +31,6 @@ export class PromotionEngine {
       if (!rule) continue
 
       const config = JSON.parse(promo.configuration)
-
-      // 支援異步匹配 (await)
       const adjustment = await rule.match(order, config)
 
       if (adjustment) {
