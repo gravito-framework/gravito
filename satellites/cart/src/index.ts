@@ -1,4 +1,5 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import type { Container, GravitoContext, PlanetCore } from 'gravito-core'
+import { ServiceProvider } from 'gravito-core'
 import { AddToCart } from './Application/UseCases/AddToCart'
 import { MergeCart } from './Application/UseCases/MergeCart'
 import { AtlasCartRepository } from './Infrastructure/Persistence/Repositories/AtlasCartRepository'
@@ -23,29 +24,28 @@ export class CartServiceProvider extends ServiceProvider {
     return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
   }
 
-  override async boot(): Promise<void> {
-    const core = this.core
-    if (!core) return
-
+  override async boot(core: PlanetCore): Promise<void> {
     const cartCtrl = new CartController()
 
     // 1. 註冊路由
-    core.router.prefix('/api/cart').group((router) => {
-      router.get('/', (c) => cartCtrl.index(c))
-      router.post('/items', (c) => cartCtrl.store(c))
-    })
+    const cartGroup = core.router.prefix('/api/cart')
+    cartGroup.get('/', (c: GravitoContext) => cartCtrl.index(c))
+    cartGroup.post('/items', (c: GravitoContext) => cartCtrl.store(c))
 
     // 2. 🏎️ 絲滑聯動點：監聽會員登入事件執行自動合併
-    core.hooks.addAction('member:logged-in', async (payload: any) => {
-      if (payload.memberId && payload.guestId) {
-        core.logger.info(`🔄 [Cart] 偵測到登入，正在合併訪客 (${payload.guestId}) 購物車...`)
-        const merger = core.container.make<MergeCart>('cart.merge')
-        await merger.execute({
-          memberId: payload.memberId,
-          guestId: payload.guestId,
-        })
+    core.hooks.addAction(
+      'member:logged-in',
+      async (payload: { memberId?: string; guestId?: string }) => {
+        if (payload.memberId && payload.guestId) {
+          core.logger.info(`🔄 [Cart] 偵測到登入，正在合併訪客 (${payload.guestId}) 購物車...`)
+          const merger = core.container.make<MergeCart>('cart.merge')
+          await merger.execute({
+            memberId: payload.memberId,
+            guestId: payload.guestId,
+          })
+        }
       }
-    })
+    )
 
     core.logger.info('🛰️ Satellite Cart is operational')
   }

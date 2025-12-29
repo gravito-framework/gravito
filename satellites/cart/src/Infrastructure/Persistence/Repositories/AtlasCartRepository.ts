@@ -1,3 +1,4 @@
+import type { ConnectionContract } from '@gravito/atlas'
 import { DB } from '@gravito/atlas'
 import type { ICartRepository } from '../../../Domain/Contracts/ICartRepository'
 import { Cart, CartItem } from '../../../Domain/Entities/Cart'
@@ -30,7 +31,7 @@ export class AtlasCartRepository implements ICartRepository {
   }
 
   async save(cart: Cart): Promise<void> {
-    await DB.transaction(async (db) => {
+    await DB.transaction(async (db: ConnectionContract) => {
       const exists = await db.table('carts').where('id', cart.id).exists()
 
       if (exists) {
@@ -62,7 +63,7 @@ export class AtlasCartRepository implements ICartRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await DB.transaction(async (db) => {
+    await DB.transaction(async (db: ConnectionContract) => {
       await db.table('cart_items').where('cart_id', id).delete()
       await db.table('carts').where('id', id).delete()
     })
