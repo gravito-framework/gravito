@@ -133,16 +133,36 @@ describe('DockerAdapter', () => {
   })
 
   test('executeCommand returns stdout and stderr', async () => {
-    const adapter = new DockerAdapter()
     const originalSpawn = Bun.spawn
 
     Bun.spawn = () => makeProcess('ok', 'warn', 0) as any
 
     try {
+      const adapter = new DockerAdapter()
       const result = await adapter.executeCommand('cid', ['echo', 'ok'])
       expect(result.stdout).toBe('ok')
       expect(result.stderr).toBe('warn')
       expect(result.exitCode).toBe(0)
+    } finally {
+      Bun.spawn = originalSpawn
+    }
+  })
+
+  test('removeContainer executes docker rm', async () => {
+    const originalSpawn = Bun.spawn
+    const calls: string[][] = []
+
+    Bun.spawn = ((args: string[]) => {
+      calls.push(args)
+      return makeProcess('', '', 0) as any
+    }) as any
+
+    try {
+      const adapter = new DockerAdapter()
+      await adapter.removeContainer('cid-1')
+      const rmCall = calls.find((call) => call[1] === 'rm')
+      expect(rmCall).toBeTruthy()
+      expect(rmCall).toContain('cid-1')
     } finally {
       Bun.spawn = originalSpawn
     }
