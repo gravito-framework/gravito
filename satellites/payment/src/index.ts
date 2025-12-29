@@ -1,4 +1,5 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import type { Container, GravitoContext } from 'gravito-core'
+import { ServiceProvider } from 'gravito-core'
 import { ProcessPayment } from './Application/UseCases/ProcessPayment'
 import { RefundPayment } from './Application/UseCases/RefundPayment'
 import { StripeGateway } from './Infrastructure/Gateways/StripeGateway'
@@ -20,7 +21,7 @@ export class PaymentServiceProvider extends ServiceProvider {
     })
   }
 
-  boot(): void {
+  override boot(): void {
     const core = this.core
     if (!core) return
 
@@ -34,7 +35,7 @@ export class PaymentServiceProvider extends ServiceProvider {
     })
 
     const webhookCtrl = new StripeWebhookController()
-    core.router.post('/webhooks/payment/stripe', (c) => webhookCtrl.handle(c))
+    core.router.post('/webhooks/payment/stripe', (c: GravitoContext) => webhookCtrl.handle(c))
 
     core.logger.info('🛰️ Satellite Payment is operational (Manager Ready)')
 
