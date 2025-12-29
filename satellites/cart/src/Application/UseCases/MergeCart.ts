@@ -19,12 +19,10 @@ export class MergeCart extends UseCase<MergeCartInput, void> {
     const memberCart = await this.repository.find({ memberId: input.memberId })
 
     if (!memberCart) {
-      // 透過方括號訪問私有屬性以執行「身分轉正」，繞過 TypeScript 的私有檢查
-      const casted = guestCart as any
-      // biome-ignore lint/complexity/useLiteralKeys: needed to bypass private property access in TS
-      casted.props['memberId'] = input.memberId
-      // biome-ignore lint/complexity/useLiteralKeys: needed to bypass private property access in TS
-      casted.props['guestId'] = null
+      // 透過 (any) 完全繞過私有檢查與工具鏈衝突
+      const rawCart = guestCart as any
+      rawCart.props.memberId = input.memberId
+      rawCart.props.guestId = null
       await this.repository.save(guestCart)
     } else {
       memberCart.merge(guestCart)
