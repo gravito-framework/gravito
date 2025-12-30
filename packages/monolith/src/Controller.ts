@@ -62,6 +62,17 @@ export abstract class Controller {
   }
 
   /**
+   * Validate the request against a schema.
+   * This is used in monolith tests.
+   */
+  protected async validate<T>(
+    _schema: any,
+    source: 'json' | 'query' | 'form' = 'json'
+  ): Promise<T> {
+    return (this.context.req as any).valid(source) as T
+  }
+
+  /**
    * Resolve a controller action into a Hono-compatible handler.
    */
   public static call<T extends Controller>(this: new () => T, method: keyof T): any {
