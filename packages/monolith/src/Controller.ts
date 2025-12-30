@@ -1,17 +1,16 @@
 import type { GravitoContext } from 'gravito-core'
-import { Sanitizer } from './Sanitizer'
+import { Sanitizer } from './Sanitizer.js'
 
 export abstract class BaseController {
   protected sanitizer = new Sanitizer()
 
   async call(ctx: GravitoContext, method: string): Promise<Response> {
-    const action = (this as any)[method] as Function
+    const action = (this as any)[method] as (ctx: GravitoContext) => Promise<Response>
     if (typeof action !== 'function') {
       throw new Error(`Method ${method} not found on controller`)
     }
 
-    const response = await action.apply(this, [ctx])
-    return response
+    return await action.apply(this, [ctx])
   }
 }
 
@@ -30,7 +29,6 @@ export abstract class Controller {
    * Return a JSON response.
    */
   protected json(data: any, status = 200) {
-    // 透過 GravitoContext 的標準介面回傳
     return this.context.json(data, status as any)
   }
 
@@ -51,7 +49,7 @@ export abstract class Controller {
   /**
    * Get an item from the context variables.
    */
-  protected get<T>(key: string): T {
+  protected get(key: string): any {
     return this.context.get(key as any)
   }
 
@@ -65,21 +63,19 @@ export abstract class Controller {
   /**
    * Validate the request against a schema.
    */
-  protected async validate<T>(
-    _schema: any,
-    source: 'json' | 'query' | 'form' = 'json'
-  ): Promise<T> {
-    return (this.context.req as any).valid(source) as T
+  protected async validate(_schema: any, source: 'json' | 'query' | 'form' = 'json'): Promise<any> {
+    const req = this.context.req as any
+    return req.valid(source)
   }
 
   /**
-   * Resolve a controller action into a Hono-compatible handler.
+   * Resolve a controller action into a handler compatible with GravitoContext.
    */
-  public static call<T extends Controller>(this: new () => T, method: keyof T): any {
+  public static call(method: string): any {
     return async (c: GravitoContext) => {
-      const instance = new this()
+      const instance = new (this as any)()
       instance.setContext(c)
-      const action = instance[method] as unknown as Function
+      const action = instance[method] as (ctx: GravitoContext) => Promise<Response>
       return action.apply(instance, [c])
     }
   }

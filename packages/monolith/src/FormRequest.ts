@@ -1,6 +1,6 @@
 import { type TSchema, validate } from '@gravito/mass'
-import type { GravitoContext } from 'gravito-core'
-import { Sanitizer } from './Sanitizer'
+import type { GravitoContext, GravitoNext } from 'gravito-core'
+import { Sanitizer } from './Sanitizer.js'
 
 export abstract class FormRequest {
   protected context!: GravitoContext
@@ -46,7 +46,7 @@ export abstract class FormRequest {
   public static middleware(): any {
     const RequestClass = this as any
 
-    return async (c: GravitoContext, next: any) => {
+    return async (c: GravitoContext, next: GravitoNext) => {
       const instance = new RequestClass()
       instance.setContext(c)
 
@@ -55,24 +55,22 @@ export abstract class FormRequest {
         return c.json({ message: 'This action is unauthorized.' }, 403)
       }
 
-      // 2. Validation
-      const validator = validate(instance.source(), instance.schema(), (result: any, c: any) => {
+      // 2. Validation using mass
+      // Note: We cast 'c' as any because mass expects a native Hono Context,
+      // but we use our compatible GravitoContext wrapper.
+      const validator = validate(instance.source(), instance.schema(), (result: any, ctx: any) => {
         if (!result.success) {
           const errors: Record<string, string[]> = {}
           const issues = result.error?.issues || []
 
-          if (issues && issues.length > 0) {
-            for (const issue of issues as any[]) {
-              const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path || ''
-              const key = path.replace(/^\//, '').replace(/\//g, '.') || 'root'
-              if (!errors[key]) {
-                errors[key] = []
-              }
-              errors[key].push(issue.message || 'Validation failed')
-            }
+          for (const issue of issues) {
+            const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path || 'root'
+            const key = path.replace(/^\//, '').replace(/\//g, '.')
+            if (!errors[key]) errors[key] = []
+            errors[key].push(issue.message || 'Validation failed')
           }
 
-          return c.json(
+          return ctx.json(
             {
               message: 'The given data was invalid.',
               errors: Object.keys(errors).length > 0 ? errors : { root: ['Validation failed'] },
@@ -82,7 +80,7 @@ export abstract class FormRequest {
         }
       })
 
-      return validator(c, next)
+      return validator(c as any, next as any)
     }
   }
 }

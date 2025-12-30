@@ -1005,15 +1005,18 @@
       "name": "@gravito/monolith",
       "version": "1.0.0-beta.1",
       "dependencies": {
+        "@gravito/mass": "workspace:*",
         "gray-matter": "^4.0.3",
         "marked": "^11.1.1",
       },
       "devDependencies": {
         "@types/marked": "^5.0.0",
-        "bun-types": "latest",
+        "gravito-core": "workspace:*",
+        "tsup": "^8.5.1",
+        "typescript": "^5.9.3",
       },
       "peerDependencies": {
-        "gravito-core": "1.0.0-beta.6",
+        "gravito-core": "workspace:*",
       },
     },
     "packages/nebula": {

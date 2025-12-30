@@ -1,34 +1,38 @@
 {
   "name": "@gravito/monolith",
   "version": "1.0.0-beta.1",
-  "description": "Content management and Markdown rendering orbit for Gravito",
+  "description": "Enterprise monolith framework for Gravito Galaxy",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
-    "test:ci": "bun test --coverage --coverage-threshold=80"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "gravito",
     "orbit",
-    "content",
-    "markdown",
-    "cms"
+    "monolith",
+    "backend"
   ],
   "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
-  "peerDependencies": {
-    "gravito-core": "1.0.0-beta.6"
-  },
   "dependencies": {
     "marked": "^11.1.1",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "@gravito/mass": "workspace:*"
+  },
+  "peerDependencies": {
+    "gravito-core": "workspace:*"
   },
   "devDependencies": {
-    "bun-types": "latest",
-    "@types/marked": "^5.0.0"
+    "@types/marked": "^5.0.0",
+    "gravito-core": "workspace:*",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
