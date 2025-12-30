@@ -30,28 +30,29 @@ export abstract class Controller {
    * Return a JSON response.
    */
   protected json(data: any, status = 200) {
-    return (this.context as any).json(data, status)
+    // 透過 GravitoContext 的標準介面回傳
+    return this.context.json(data, status as any)
   }
 
   /**
    * Return a text response.
    */
   protected text(text: string, status = 200) {
-    return (this.context as any).text(text, status)
+    return this.context.text(text, status as any)
   }
 
   /**
    * Redirect to a given URL.
    */
   protected redirect(url: string, status = 302) {
-    return (this.context as any).redirect(url, status)
+    return this.context.redirect(url, status as any)
   }
 
   /**
    * Get an item from the context variables.
    */
   protected get<T>(key: string): T {
-    return (this.context as any).get(key)
+    return this.context.get(key as any)
   }
 
   /**
@@ -63,7 +64,6 @@ export abstract class Controller {
 
   /**
    * Validate the request against a schema.
-   * This is used in monolith tests.
    */
   protected async validate<T>(
     _schema: any,
@@ -76,11 +76,11 @@ export abstract class Controller {
    * Resolve a controller action into a Hono-compatible handler.
    */
   public static call<T extends Controller>(this: new () => T, method: keyof T): any {
-    return async (c: any) => {
+    return async (c: GravitoContext) => {
       const instance = new this()
       instance.setContext(c)
       const action = instance[method] as unknown as Function
-      return action.apply(instance)
+      return action.apply(instance, [c])
     }
   }
 }

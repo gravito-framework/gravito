@@ -1,4 +1,3 @@
-import { OrbitMonolith } from '@gravito/monolith'
 import { PhotonAdapter } from './adapters/PhotonAdapter'
 import { type GravitoConfig, PlanetCore } from './PlanetCore'
 import { ServiceProvider } from './ServiceProvider'
@@ -13,17 +12,19 @@ export interface GravitoManifest {
 export type ModuleResolver = () => Promise<any>
 
 /**
- * Gravito 核心啟動引擎
+ * Gravito 核心啟動引擎 (已解耦)
  */
 export class GravitoServer {
   /**
    * 一鍵建立並組裝伺服器
    * @param manifest 站點描述清單
    * @param resolvers 模組解析器字典
+   * @param baseOrbits 基礎軌道模組 (例如 OrbitMonolith)
    */
   static async create(
     manifest: GravitoManifest,
-    resolvers: Record<string, ModuleResolver>
+    resolvers: Record<string, ModuleResolver>,
+    baseOrbits: any[] = []
   ): Promise<PlanetCore> {
     const core = new PlanetCore(
       manifest.config || {
@@ -31,17 +32,17 @@ export class GravitoServer {
       }
     )
 
-    // 修正：使用 orbit() 掛載 Orbit 模組
-    core.orbit(OrbitMonolith)
+    // 掛載基礎設施軌道
+    for (const Orbit of baseOrbits) {
+      core.orbit(Orbit)
+    }
 
-    console.log(`\n🌌 [Gravito Core] 正在點燃: ${manifest.name} v${manifest.version || '1.0.0'}`)
+    console.log(`
+🌌 [Gravito Core] 正在點燃: ${manifest.name} v${manifest.version || '1.0.0'}`)
 
     for (const moduleId of manifest.modules) {
       const resolver = resolvers[moduleId]
-      if (!resolver) {
-        console.warn(`   ⚠️ 找不到模組 ID [${moduleId}] 的解析器，跳過。`)
-        continue
-      }
+      if (!resolver) continue
 
       try {
         const exported = await resolver()
@@ -52,7 +53,6 @@ export class GravitoServer {
         } else if (exported instanceof ServiceProvider) {
           instance = exported
         } else {
-          console.error(`   ❌ 模組 [${moduleId}] 解析出的結果不是有效的 ServiceProvider。`)
           continue
         }
 

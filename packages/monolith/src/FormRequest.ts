@@ -36,20 +36,18 @@ export abstract class FormRequest {
    * Get the validated data.
    */
   public validated(): any {
-    // In Hono, validated data is stored in the request
     const data = (this.context.req as any).valid(this.source())
-
     return Sanitizer.clean(data)
   }
 
   /**
-   * Static helper to create a Hono middleware from this request class.
+   * Static helper to create a middleware from this request class.
    */
   public static middleware(): any {
     const RequestClass = this as any
-    const instance = new RequestClass()
 
-    return async (c: any, next: any) => {
+    return async (c: GravitoContext, next: any) => {
+      const instance = new RequestClass()
       instance.setContext(c)
 
       // 1. Authorization Check
@@ -60,20 +58,11 @@ export abstract class FormRequest {
       // 2. Validation
       const validator = validate(instance.source(), instance.schema(), (result: any, c: any) => {
         if (!result.success) {
-          // Format errors to be user-friendly (Laravel style)
           const errors: Record<string, string[]> = {}
-
-          // Hono TypeBox validator failure result.error is often an Iterable
-          // or has an 'issues' array (StandardSchema)
-          const issues =
-            result.error?.issues ||
-            (typeof result.error?.Errors === 'function'
-              ? Array.from(result.error.Errors())
-              : Array.from(result.error || []))
+          const issues = result.error?.issues || []
 
           if (issues && issues.length > 0) {
             for (const issue of issues as any[]) {
-              // StandardSchema 'path' is array, TypeBox 'path' is string
               const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path || ''
               const key = path.replace(/^\//, '').replace(/\//g, '.') || 'root'
               if (!errors[key]) {
