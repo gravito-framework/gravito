@@ -56,8 +56,7 @@ export abstract class FormRequest {
       }
 
       // 2. Validation using mass
-      // Note: We cast 'c' as any because mass expects a native Hono Context,
-      // but we use our compatible GravitoContext wrapper.
+      // Use double cast to bypass strict Hono Context type matching in CI
       const validator = validate(instance.source(), instance.schema(), (result: any, ctx: any) => {
         if (!result.success) {
           const errors: Record<string, string[]> = {}
@@ -80,7 +79,8 @@ export abstract class FormRequest {
         }
       })
 
-      return validator(c as any, next as any)
+      // Forced cast to any to ensure CI compatibility
+      return (validator as any)(c as any, next as any)
     }
   }
 }
