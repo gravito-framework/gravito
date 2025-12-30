@@ -14,7 +14,7 @@ export class CouponService {
   /**
    * 計算折價券調整金額
    */
-  async getAdjustment(code: string, order: any): Promise<any> {
+  async getAdjustment(code: string, _order: any): Promise<any> {
     this.core.logger.info(`[CouponService] Calculating adjustment for: ${code}`)
     return { type: 'COUPON', amount: -100, description: `Coupon: ${code}` }
   }

@@ -350,6 +350,24 @@
         "typescript": "^5.7.2",
       },
     },
+    "packages/admin-ui-announcement": {
+      "name": "@gravito/admin-ui-announcement",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.5.2",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/admin-ui-catalog": {
       "name": "@gravito/admin-ui-catalog",
       "version": "0.1.0",
@@ -407,6 +425,24 @@
         "lucide-react": "^0.468.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
+    "packages/admin-ui-news": {
+      "name": "@gravito/admin-ui-news",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.5.2",
       },
       "devDependencies": {
         "@types/react": "^19.0.0",
@@ -1219,6 +1255,19 @@
         "typescript": "^5.7.2",
       },
     },
+    "satellites/announcement": {
+      "name": "@gravito/satellite-announcement",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "satellites/cart": {
       "name": "@gravito/satellite-cart",
       "version": "0.1.0",
@@ -1320,6 +1369,19 @@
       "devDependencies": {
         "tsup": "^8.0.0",
         "typescript": "^5.0.0",
+      },
+    },
+    "satellites/news": {
+      "name": "@gravito/satellite-news",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
       },
     },
     "satellites/payment": {
@@ -1677,6 +1739,8 @@
 
     "@gravito/admin-ui-analytics": ["@gravito/admin-ui-analytics@workspace:packages/admin-ui-analytics"],
 
+    "@gravito/admin-ui-announcement": ["@gravito/admin-ui-announcement@workspace:packages/admin-ui-announcement"],
+
     "@gravito/admin-ui-catalog": ["@gravito/admin-ui-catalog@workspace:packages/admin-ui-catalog"],
 
     "@gravito/admin-ui-dashboard": ["@gravito/admin-ui-dashboard@workspace:packages/admin-ui-dashboard"],
@@ -1684,6 +1748,8 @@
     "@gravito/admin-ui-invoice": ["@gravito/admin-ui-invoice@workspace:packages/admin-ui-invoice"],
 
     "@gravito/admin-ui-marketing": ["@gravito/admin-ui-marketing@workspace:packages/admin-ui-marketing"],
+
+    "@gravito/admin-ui-news": ["@gravito/admin-ui-news@workspace:packages/admin-ui-news"],
 
     "@gravito/admin-ui-order": ["@gravito/admin-ui-order@workspace:packages/admin-ui-order"],
 
@@ -1761,6 +1827,8 @@
 
     "@gravito/satellite-analytics": ["@gravito/satellite-analytics@workspace:satellites/analytics"],
 
+    "@gravito/satellite-announcement": ["@gravito/satellite-announcement@workspace:satellites/announcement"],
+
     "@gravito/satellite-cart": ["@gravito/satellite-cart@workspace:satellites/cart"],
 
     "@gravito/satellite-catalog": ["@gravito/satellite-catalog@workspace:satellites/catalog"],
@@ -1774,6 +1842,8 @@
     "@gravito/satellite-marketing": ["@gravito/satellite-marketing@workspace:satellites/marketing"],
 
     "@gravito/satellite-membership": ["@gravito/satellite-membership@workspace:satellites/membership"],
+
+    "@gravito/satellite-news": ["@gravito/satellite-news@workspace:satellites/news"],
 
     "@gravito/satellite-payment": ["@gravito/satellite-payment@workspace:satellites/payment"],
 

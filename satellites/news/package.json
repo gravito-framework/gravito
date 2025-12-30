@@ -1,0 +1,16 @@
+{
+  "name": "@gravito/satellite-news",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@gravito/enterprise": "workspace:*",
+    "@gravito/atlas": "workspace:*",
+    "gravito-core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}
