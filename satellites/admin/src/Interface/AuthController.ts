@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { ListAdmins } from '../Application/UseCases/ListAdmins'
 import type { LoginAdmin } from '../Application/UseCases/LoginAdmin'
 import type { UpdateAdmin } from '../Application/UseCases/UpdateAdmin'

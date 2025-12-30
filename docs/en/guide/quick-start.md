@@ -12,7 +12,7 @@ description: Build your first route and controller in 5 minutes.
 Routes live in `src/routes/web.ts` (or `api.ts`). The API is clean and chainable.
 
 ```typescript
-import { Route } from 'gravito-core'
+import { Route } from '@gravito/core'
 
 Route.get('/hello', () => 'Hello Gravito!')
 ```
@@ -28,7 +28,7 @@ bun gravito make:controller UserController
 Define the handler in `src/controllers/UserController.ts`:
 
 ```typescript
-import { Context } from 'gravito-core'
+import { Context } from '@gravito/core'
 
 export class UserController {
   async index(c: Context) {

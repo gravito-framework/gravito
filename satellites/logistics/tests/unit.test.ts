@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { ArrangeShipment } from '../src/Application/UseCases/ArrangeShipment'
 import { LogisticsManager } from '../src/Infrastructure/LogisticsManager'
 import { AtlasShipmentRepository } from '../src/Infrastructure/Persistence/AtlasShipmentRepository'

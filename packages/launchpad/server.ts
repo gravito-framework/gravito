@@ -1,4 +1,4 @@
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import { bootstrapLaunchpad } from './src/index'
 
 const config = await bootstrapLaunchpad()

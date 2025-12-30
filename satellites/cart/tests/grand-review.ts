@@ -1,5 +1,5 @@
 import { DB } from '@gravito/atlas'
-import { PlanetCore, setApp } from 'gravito-core'
+import { PlanetCore, setApp } from '@gravito/core'
 import { CartServiceProvider } from '../src/index'
 
 async function cartGrandReview() {

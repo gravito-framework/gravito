@@ -1,5 +1,5 @@
+import type { PlanetCore } from '@gravito/core'
 import { UseCase } from '@gravito/enterprise'
-import type { PlanetCore } from 'gravito-core'
 import type { IMemberRepository } from '../../Domain/Contracts/IMemberRepository'
 import { Member } from '../../Domain/Entities/Member'
 import type { MemberDTO } from '../DTOs/MemberDTO'

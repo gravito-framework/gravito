@@ -642,7 +642,7 @@ export class MailService implements IMailService {
  * App Service Provider
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
+import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
 
 export class AppServiceProvider extends ServiceProvider {
   register(_container: Container): void {
@@ -663,7 +663,7 @@ export class AppServiceProvider extends ServiceProvider {
  * Binds repository interfaces to implementations.
  */
 
-import { ServiceProvider, type Container } from 'gravito-core'
+import { ServiceProvider, type Container } from '@gravito/core'
 import { UserRepository } from '../Persistence/Repositories/UserRepository'
 import { MailService } from '../ExternalServices/MailService'
 
@@ -688,7 +688,7 @@ export class RepositoryServiceProvider extends ServiceProvider {
  * User Controller
  */
 
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import { CreateUserUseCase } from '../../../Application/UseCases/User/CreateUser'
 import { GetUserUseCase } from '../../../Application/UseCases/User/GetUser'
 import { UserRepository } from '../../../Infrastructure/Persistence/Repositories/UserRepository'
@@ -770,7 +770,7 @@ export class UserPresenter {
  * Application Bootstrap
  */
 
-import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
+import { bodySizeLimit, PlanetCore, securityHeaders } from '@gravito/core'
 import { AppServiceProvider } from './Infrastructure/Providers/AppServiceProvider'
 import { RepositoryServiceProvider } from './Infrastructure/Providers/RepositoryServiceProvider'
 import { registerApiRoutes } from './Interface/Http/Routes/api'
@@ -904,7 +904,7 @@ Created with ❤️ using Gravito Framework
         'docker:run': `docker run -it -p 3000:3000 ${context.nameKebabCase}`,
       },
       dependencies: {
-        'gravito-core': 'workspace:*',
+        '@gravito/core': 'workspace:*',
         '@gravito/enterprise': 'workspace:*',
         ...(context.withSpectrum ? { '@gravito/spectrum': 'workspace:*' } : {}),
       },

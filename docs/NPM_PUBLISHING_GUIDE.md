@@ -94,7 +94,7 @@ bun run --filter '*' publish
 
 以下套件已進入 Beta 階段，主要用於核心框架和基礎設施 (`1.0.0-beta.*`)：
 
-- `gravito-core` - 核心框架
+- `@gravito/core` - 核心框架
 - `@gravito/horizon` - 路由系統
 - `@gravito/luminosity` - SEO 核心模組
 - `@gravito/luminosity-adapter-photon` - SEO HTTP 適配器
@@ -195,7 +195,7 @@ bun run version:update
 
 安裝時可以指定 tag：
 ```bash
-npm install gravito-core@beta
+npm install @gravito/core@beta
 npm install @gravito/sentinel@alpha
 ```
 
@@ -237,7 +237,7 @@ npm install @gravito/sentinel@alpha
 
 1. **驗證發布**：
    ```bash
-   npm view gravito-core
+   npm view @gravito/core
    npm view @gravito/sentinel
    ```
 
@@ -257,7 +257,7 @@ npm install @gravito/sentinel@alpha
    ```
 
 2. **分批發布**（如果套件很多）：
-   - 先發布核心套件（`gravito-core`）
+   - 先發布核心套件（`@gravito/core`）
    - 再發布依賴它的套件
 
 3. **監控發布狀態**：

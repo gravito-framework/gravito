@@ -1,6 +1,6 @@
+import { bodySizeLimit, PlanetCore, securityHeaders } from '@gravito/core'
 import { MonitorOrbit } from '@gravito/monitor'
 import { Photon } from '@gravito/photon'
-import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
 
 export function createProviderApp() {
   const app = new Photon()

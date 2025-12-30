@@ -1,4 +1,4 @@
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import { DockerAdapter } from './src/Infrastructure/Docker/DockerAdapter'
 import { bootstrapLaunchpad } from './src/index'
 

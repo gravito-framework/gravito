@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { IssueInvoice } from './Application/UseCases/IssueInvoice'
 import { AtlasInvoiceRepository } from './Infrastructure/Persistence/AtlasInvoiceRepository'
 import { AdminInvoiceController } from './Interface/Http/Controllers/AdminInvoiceController'

@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { DB, Migrator } from '@gravito/atlas'
-import { bodySizeLimit, defineConfig, PlanetCore, securityHeaders } from 'gravito-core'
+import { bodySizeLimit, defineConfig, PlanetCore, securityHeaders } from '@gravito/core'
 import { registerRoutes } from './routes'
 
 const DEFAULT_PORT = Number(process.env.PORT ?? '3001')

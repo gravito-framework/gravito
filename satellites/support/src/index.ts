@@ -1,5 +1,5 @@
+import { type Container, ServiceProvider } from '@gravito/core'
 import type { RippleServer } from '@gravito/ripple'
-import { type Container, ServiceProvider } from 'gravito-core'
 
 export class SupportServiceProvider extends ServiceProvider {
   register(_container: Container): void {

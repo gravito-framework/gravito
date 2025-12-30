@@ -1,5 +1,5 @@
 import { DB } from '@gravito/atlas'
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import type { DemoUser } from '../services/AuthService'
 
 export class ProfileController {

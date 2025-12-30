@@ -90,7 +90,7 @@ export class ContentManager {
       }
 
       const fileContent = await readFile(filePath, 'utf-8')
-      const { data, content, exemption } = matter(fileContent)
+      const { data, content, excerpt } = matter(fileContent)
 
       const html = await marked.parse(content, { renderer: this.renderer })
 
@@ -99,7 +99,7 @@ export class ContentManager {
         body: html,
         meta: data,
         raw: content,
-        excerpt: exemption,
+        excerpt: excerpt,
       }
 
       this.cache.set(cacheKey, item)

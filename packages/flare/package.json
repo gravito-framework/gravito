@@ -40,12 +40,12 @@
   "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "gravito-core": "1.0.0-beta.6"
+    "@gravito/core": "workspace:*"
   },
   "peerDependencies": {
-    "@gravito/stream": "1.0.0-beta.1",
-    "@gravito/signal": "1.0.0-beta.1",
-    "@gravito/radiance": "1.0.0-beta.1"
+    "@gravito/stream": "workspace:*",
+    "@gravito/signal": "workspace:*",
+    "@gravito/radiance": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest",

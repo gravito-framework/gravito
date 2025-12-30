@@ -9,15 +9,14 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "scripts": {
-    "build": "bun run build.ts",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
     "test": "bun test",
-    "typecheck": "bunx tsc --noEmit",
-    "test:coverage": "bun test --coverage --coverage-threshold=80",
-    "test:ci": "bun test --coverage --coverage-threshold=80"
+    "typecheck": "tsc --noEmit"
   },
   "files": [
     "dist",

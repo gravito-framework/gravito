@@ -1,4 +1,4 @@
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { CommerceServiceProvider } from '../src/index'
 
 async function launchpadIgnition() {

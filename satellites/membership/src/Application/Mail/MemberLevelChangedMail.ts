@@ -1,5 +1,5 @@
+import { app } from '@gravito/core'
 import { Mailable } from '@gravito/signal'
-import { app } from 'gravito-core'
 
 export class MemberLevelChangedMail extends Mailable {
   constructor(

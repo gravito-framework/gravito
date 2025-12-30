@@ -1,5 +1,5 @@
-import type { CsrfOptions, GravitoContext } from 'gravito-core'
-import { getCsrfToken } from 'gravito-core'
+import type { CsrfOptions, GravitoContext } from '@gravito/core'
+import { getCsrfToken } from '@gravito/core'
 import type { FortifyConfig } from './config'
 
 export function resolveCsrfOptions(config: FortifyConfig): CsrfOptions | null {

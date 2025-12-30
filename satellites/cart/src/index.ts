@@ -1,5 +1,5 @@
-import type { Container, GravitoContext, PlanetCore } from 'gravito-core'
-import { ServiceProvider } from 'gravito-core'
+import type { Container, GravitoContext, PlanetCore } from '@gravito/core'
+import { ServiceProvider } from '@gravito/core'
 import { AddToCart } from './Application/UseCases/AddToCart'
 import { MergeCart } from './Application/UseCases/MergeCart'
 import { AtlasCartRepository } from './Infrastructure/Persistence/Repositories/AtlasCartRepository'

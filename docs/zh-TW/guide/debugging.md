@@ -32,7 +32,7 @@ bun add @gravito/spectrum
 ### 開發環境啟用（推薦）
 
 ```typescript
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { SpectrumOrbit } from '@gravito/spectrum'
 
 const core = new PlanetCore()

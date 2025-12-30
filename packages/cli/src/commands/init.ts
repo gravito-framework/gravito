@@ -7,8 +7,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { cancel, intro, isCancel, note, outro, select, spinner, text } from '@clack/prompts'
+import { getRuntimeAdapter } from '@gravito/core'
 import { type ArchitectureType, Scaffold } from '@gravito/scaffold'
-import { getRuntimeAdapter } from 'gravito-core'
 import pc from 'picocolors'
 
 interface InitOptions {

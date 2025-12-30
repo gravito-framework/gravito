@@ -23,7 +23,7 @@ bun add @gravito/ripple @gravito/ripple-client
 ## Server Setup
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitRipple } from '@gravito/ripple'
 
 const core = new PlanetCore()

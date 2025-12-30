@@ -16,7 +16,7 @@ For 1.0.0-beta, observability focuses on fast startup and low-overhead runtime m
 Built-in `/healthz` and `/readyz` endpoints, perfect for cloud-native environments.
 
 ```typescript
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitMonitor } from '@gravito/monitor'
 
 export default PlanetCore.configure({

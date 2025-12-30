@@ -28,7 +28,7 @@
         "@react-three/postprocessing": "^3.0.4",
         "@tailwindcss/typography": "^0.5.19",
         "framer-motion": "^12.23.26",
-        "gravito-core": "workspace:*",
+        "@gravito/core": "workspace:*",
         "gray-matter": "^4.0.3",
         "@gravito/photon": "workspace:*",
         "lucide-react": "^0.562.0",

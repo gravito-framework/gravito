@@ -1,6 +1,6 @@
+import { bodySizeLimit, PlanetCore, securityHeaders } from '@gravito/core'
 import { OrbitMonolith, Route } from '@gravito/monolith'
 import { OrbitPhoton } from '@gravito/photon'
-import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
 import { ProductController } from './controllers/ProductController'
 import { StoreProductRequest } from './requests/StoreProductRequest'
 

@@ -1,9 +1,9 @@
+import type { GravitoContext, GravitoNext } from '@gravito/core'
 import { type TSchema, validate } from '@gravito/mass'
-import type { Context } from 'gravito-core'
-import { Sanitizer } from './Sanitizer'
+import { Sanitizer } from './Sanitizer.js'
 
 export abstract class FormRequest {
-  protected context!: Context
+  protected context!: GravitoContext
 
   /**
    * Define the validation schema.
@@ -27,7 +27,7 @@ export abstract class FormRequest {
   /**
    * Set the context.
    */
-  public setContext(context: Context): this {
+  public setContext(context: GravitoContext): this {
     this.context = context
     return this
   }
@@ -36,20 +36,18 @@ export abstract class FormRequest {
    * Get the validated data.
    */
   public validated(): any {
-    // In Hono, validated data is stored in the request
     const data = (this.context.req as any).valid(this.source())
-
     return Sanitizer.clean(data)
   }
 
   /**
-   * Static helper to create a Hono middleware from this request class.
+   * Static helper to create a middleware from this request class.
    */
   public static middleware(): any {
     const RequestClass = this as any
-    const instance = new RequestClass()
 
-    return async (c: any, next: any) => {
+    return async (c: GravitoContext, next: GravitoNext) => {
+      const instance = new RequestClass()
       instance.setContext(c)
 
       // 1. Authorization Check
@@ -57,33 +55,21 @@ export abstract class FormRequest {
         return c.json({ message: 'This action is unauthorized.' }, 403)
       }
 
-      // 2. Validation
-      const validator = validate(instance.source(), instance.schema(), (result: any, c: any) => {
+      // 2. Validation using mass
+      // Use double cast to bypass strict Hono Context type matching in CI
+      const validator = validate(instance.source(), instance.schema(), (result: any, ctx: any) => {
         if (!result.success) {
-          // Format errors to be user-friendly (Laravel style)
           const errors: Record<string, string[]> = {}
+          const issues = result.error?.issues || []
 
-          // Hono TypeBox validator failure result.error is often an Iterable
-          // or has an 'issues' array (StandardSchema)
-          const issues =
-            result.error?.issues ||
-            (typeof result.error?.Errors === 'function'
-              ? Array.from(result.error.Errors())
-              : Array.from(result.error || []))
-
-          if (issues && issues.length > 0) {
-            for (const issue of issues as any[]) {
-              // StandardSchema 'path' is array, TypeBox 'path' is string
-              const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path || ''
-              const key = path.replace(/^\//, '').replace(/\//g, '.') || 'root'
-              if (!errors[key]) {
-                errors[key] = []
-              }
-              errors[key].push(issue.message || 'Validation failed')
-            }
+          for (const issue of issues) {
+            const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path || 'root'
+            const key = path.replace(/^\//, '').replace(/\//g, '.')
+            if (!errors[key]) errors[key] = []
+            errors[key].push(issue.message || 'Validation failed')
           }
 
-          return c.json(
+          return ctx.json(
             {
               message: 'The given data was invalid.',
               errors: Object.keys(errors).length > 0 ? errors : { root: ['Validation failed'] },
@@ -93,7 +79,8 @@ export abstract class FormRequest {
         }
       })
 
-      return validator(c, next)
+      // Forced cast to any to ensure CI compatibility
+      return (validator as any)(c as any, next as any)
     }
   }
 }

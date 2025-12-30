@@ -6,7 +6,7 @@ import {
   type GravitoOrbit,
   getRuntimeAdapter,
   type PlanetCore,
-} from 'gravito-core'
+} from '@gravito/core'
 
 export interface StorageProvider {
   put(key: string, data: Blob | Buffer | string): Promise<void>

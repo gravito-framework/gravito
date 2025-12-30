@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'bun:test'
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { MembershipServiceProvider } from '../../satellites/membership/src'
 import { CatalogServiceProvider } from '../../satellites/catalog/src'
 import { CommerceServiceProvider } from '../../satellites/commerce/src'

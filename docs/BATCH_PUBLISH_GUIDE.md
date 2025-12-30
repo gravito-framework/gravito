@@ -66,12 +66,12 @@ bun run publish:dry-run
  Gravito 套件批次發布工具
 
  找到 24 個套件:
-  - gravito-core@1.0.0-beta.1
+  - @gravito/core@1.0.0-beta.1
   - @gravito/stasis@1.0.0-beta.1
   ...
 
  檢查已發布的版本...
-  ⏭  gravito-core@1.0.0-beta.1 已存在於 NPM，跳過發布
+  ⏭  @gravito/core@1.0.0-beta.1 已存在於 NPM，跳過發布
   ⏭  @gravito/stasis@1.0.0-beta.1 已存在於 NPM，跳過發布
   ...
 
@@ -97,7 +97,7 @@ bun run publish:dry-run
 
  發布結果總結:
   ⏭  已存在（跳過）: 20
-     - gravito-core@1.0.0-beta.1
+     - @gravito/core@1.0.0-beta.1
      ...
   [Complete] 成功發布: 4
      - @gravito/luminosity-adapter-photon@1.0.0-beta.1

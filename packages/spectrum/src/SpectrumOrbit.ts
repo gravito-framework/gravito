@@ -8,7 +8,7 @@ import type {
   GravitoOrbit,
   Logger,
   PlanetCore,
-} from 'gravito-core'
+} from '@gravito/core'
 import { MemoryStorage } from './storage/MemoryStorage'
 import type { SpectrumStorage } from './storage/types'
 import type { CapturedLog, CapturedRequest } from './types'

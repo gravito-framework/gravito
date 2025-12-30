@@ -155,7 +155,7 @@ export abstract class Mailable implements Queueable {
     try {
       // biome-ignore lint/suspicious/noTsIgnore: Global access to app() helper from core
       // @ts-ignore
-      const { app } = await import('gravito-core')
+      const { app } = await import('@gravito/core')
       const mail = app().container.make<any>('mail')
       if (mail) {
         return mail.queue(this)

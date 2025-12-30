@@ -7,7 +7,7 @@
     "verify": "bun run verify.ts"
   },
   "dependencies": {
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "@gravito/spectrum": "workspace:*",
     "@gravito/atlas": "workspace:*"
   },

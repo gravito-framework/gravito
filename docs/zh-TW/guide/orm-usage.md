@@ -1106,7 +1106,7 @@ const result = await db.raw
 ## 完整範例
 
 ```typescript
-import { PlanetCore } from 'gravito-core';
+import { PlanetCore } from '@gravito/core';
 import orbitDB from '@gravito/atlas';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';

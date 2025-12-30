@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 
 export class HomeController {
   dashboard = (ctx: GravitoContext) =>

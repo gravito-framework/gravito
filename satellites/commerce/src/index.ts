@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { RewardSubscriber } from './Application/Subscribers/RewardSubscriber'
 import { AdminListOrders } from './Application/UseCases/AdminListOrders'
 import { PlaceOrder } from './Application/UseCases/PlaceOrder'

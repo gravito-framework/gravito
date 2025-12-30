@@ -69,7 +69,7 @@ async queue(job) {
   - 禁止在 `.ts` 檔案中使用 `require()`，這會導致某些打包工具（如 tsup）在處理 CJS/ESM 混用時發生崩潰。
 
 ### C. 依賴規範 (Monorepo)
-- **規範**: 所有的 `@gravito/*` 或 `gravito-core` 依賴必須標註為 `workspace:*`。
+- **規範**: 所有的 `@gravito/*` 或 `@gravito/core` 依賴必須標註為 `workspace:*`。
 - **優點**: 確保測試與建置時始終連結到專案內最新的原始碼，而非 NPM 上的舊版本。
 
 ### D. 類型與值 (Imports)

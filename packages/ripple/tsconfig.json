@@ -7,10 +7,10 @@
         "declarationMap": true,
         "skipLibCheck": true,
         "paths": {
-            "gravito-core": [
+            "@gravito/core": [
                 "../core/src/index.ts"
             ],
-            "gravito-core/*": [
+            "@gravito/core/*": [
                 "../core/src/*"
             ]
         }

@@ -1,5 +1,5 @@
+import { bodySizeLimit, PlanetCore, securityHeaders } from '@gravito/core'
 import { type I18nService, OrbitCosmos } from '@gravito/cosmos'
-import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
 
 const port = parseInt(process.env.PORT || '3007', 10)
 const core = new PlanetCore()

@@ -4,7 +4,7 @@
  * The micro-kernel that orchestrates the entire Galaxy Architecture.
  * Manages HTTP routing, middleware, error handling, and orbit integration.
  *
- * @module gravito-core
+ * @module @gravito/core
  * @since 1.0.0
  */
 

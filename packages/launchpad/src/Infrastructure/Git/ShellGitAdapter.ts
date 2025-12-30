@@ -1,5 +1,5 @@
 import { mkdir } from 'node:fs/promises'
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { IGitAdapter } from '../../Domain/Interfaces'
 
 export class ShellGitAdapter implements IGitAdapter {

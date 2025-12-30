@@ -29,7 +29,7 @@ The recommended way to integrate Spectrum is within your application's entry poi
 For most applications, you only want the debug dashboard available during development.
 
 ```typescript
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { SpectrumOrbit } from '@gravito/spectrum'
 
 const core = new PlanetCore()

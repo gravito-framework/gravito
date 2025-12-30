@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import { ProductService } from '../services/ProductService'
 
 const productService = new ProductService()

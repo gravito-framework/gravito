@@ -9,7 +9,7 @@ await Bun.build({
   splitting: false,
   sourcemap: 'external',
   minify: false,
-  external: ['gravito-core'],
+  external: ['@gravito/core'],
 })
 
 // Generate .cjs version

@@ -5,7 +5,7 @@
 import { randomUUID } from 'node:crypto'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import { FFmpegAdapter } from '../adapters/FFmpegAdapter'
 import type { FileInput, FileOutput, ProcessingProgress, ProcessOptions } from '../types'
 import { BaseProcessor } from './BaseProcessor'

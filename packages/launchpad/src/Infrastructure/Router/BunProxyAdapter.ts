@@ -1,4 +1,4 @@
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { IRouterAdapter } from '../../Domain/Interfaces'
 
 export class BunProxyAdapter implements IRouterAdapter {

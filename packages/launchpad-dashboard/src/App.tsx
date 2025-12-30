@@ -3,6 +3,11 @@ import { useEffect, useState } from 'react'
 import { useTelemetry } from './hooks/useTelemetry'
 import { cn } from './utils'
 
+// React 19 Lucide compatibility wrapper
+const Icon = ({ icon: Component, ...props }: any) => {
+  return <Component {...props} />
+}
+
 /**
  * 工業級數據讀數組件
  */
@@ -42,7 +47,7 @@ function App() {
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-sky-500 flex items-center justify-center rounded-sm rotate-45 shadow-[0_0_15px_rgba(14,165,233,0.4)]">
-              <Rocket className="w-6 h-6 text-black -rotate-45" />
+              <Icon icon={Rocket} className="w-6 h-6 text-black -rotate-45" />
             </div>
             <div>
               <div className="text-sm font-black tracking-widest text-white leading-none">
@@ -93,8 +98,10 @@ function App() {
                 : 'bg-rose-500/5 text-rose-500'
             )}
           >
-            {/* 旋轉陀螺儀細節 */}
-            <Shield className={cn('w-5 h-5', connected && 'animate-[spin_4s_linear_infinite]')} />
+            <Icon
+              icon={Shield}
+              className={cn('w-5 h-5', connected && 'animate-[spin_4s_linear_infinite]')}
+            />
           </div>
         </div>
       </header>
@@ -104,7 +111,7 @@ function App() {
         <aside className="w-64 border-r border-white/5 bg-black/40 p-6 flex flex-col gap-8 hidden lg:flex">
           <section>
             <div className="flex items-center gap-2 mb-4">
-              <Activity className="w-4 h-4 text-slate-500 animate-pulse" />
+              <Icon icon={Activity} className="w-4 h-4 text-slate-500 animate-pulse" />
               <h2 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Telemetry Analysis
               </h2>
@@ -123,7 +130,7 @@ function App() {
 
           <section className="flex-1">
             <div className="flex items-center gap-2 mb-4">
-              <Radio className="w-4 h-4 text-slate-500" />
+              <Icon icon={Radio} className="w-4 h-4 text-slate-500" />
               <h2 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Live Frequency
               </h2>
@@ -149,7 +156,7 @@ function App() {
         <section className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           {rockets.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center opacity-20">
-              <LayoutGrid className="w-24 h-24 mb-6" />
+              <Icon icon={LayoutGrid} className="w-24 h-24 mb-6" />
               <div className="text-xl font-black tracking-[0.5em]">STANDING BY</div>
             </div>
           ) : (
@@ -215,7 +222,7 @@ function App() {
                         </div>
                         <div className="mt-auto pt-4 border-t border-white/5">
                           <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-bold tracking-widest">
-                            <Shield className="w-3 h-3 animate-pulse" />
+                            <Icon icon={Shield} className="w-3 h-3 animate-pulse" />
                             NOMINAL
                           </div>
                         </div>
@@ -259,7 +266,7 @@ function App() {
       {/* 🔴 FOOTER CONSOLE (GLOBAL COMMAND LOG) */}
       <footer className="h-12 border-t border-white/10 bg-black flex items-center px-6 gap-8 z-20">
         <div className="flex items-center gap-2 text-sky-500 shrink-0">
-          <Terminal className="w-4 h-4" />
+          <Icon icon={Terminal} className="w-4 h-4" />
           <span className="text-[10px] font-black uppercase tracking-widest">Global Terminal</span>
         </div>
         <div className="flex-1 overflow-hidden">

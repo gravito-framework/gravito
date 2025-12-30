@@ -1,5 +1,5 @@
 import { afterAll, beforeAll } from 'bun:test'
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import { bootstrap } from '../../src/bootstrap'
 
 if (!process.env.DATABASE_URL) {

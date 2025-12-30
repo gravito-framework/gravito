@@ -2,9 +2,9 @@
  * @fileoverview Process file job for async processing
  */
 
+import { getRuntimeAdapter } from '@gravito/core'
 import type { StorageProvider } from '@gravito/nebula'
 import { Job } from '@gravito/stream'
-import { getRuntimeAdapter } from 'gravito-core'
 import type { ForgeService } from '../ForgeService'
 import { ProcessingStatusManager } from '../status/ProcessingStatus'
 import type { StatusStore } from '../status/StatusStore'

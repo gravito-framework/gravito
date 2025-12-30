@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import { CategoryMapper } from '../../../Application/DTOs/CategoryDTO'
 import type { ICategoryRepository } from '../../../Domain/Contracts/ICatalogRepository'
 

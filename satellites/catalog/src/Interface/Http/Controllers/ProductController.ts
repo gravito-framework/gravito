@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import { ProductMapper } from '../../../Application/DTOs/ProductDTO'
 import type { CreateProduct } from '../../../Application/UseCases/CreateProduct'
 import type { IProductRepository } from '../../../Domain/Contracts/ICatalogRepository'

@@ -332,7 +332,7 @@ export class DddGenerator extends BaseGenerator {
  * Central configuration and initialization of the application.
  */
 
-import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
+import { bodySizeLimit, PlanetCore, securityHeaders } from '@gravito/core'
 import { registerProviders } from './providers'
 import { registerRoutes } from './routes'
 
@@ -393,7 +393,7 @@ export async function createApp(): Promise<PlanetCore> {
  * Register all module service providers here.
  */
 
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import { OrderingServiceProvider } from '../Modules/Ordering/Infrastructure/Providers/OrderingServiceProvider'
 import { CatalogServiceProvider } from '../Modules/Catalog/Infrastructure/Providers/CatalogServiceProvider'
 
@@ -493,7 +493,7 @@ export default {
  * ${name} Service Provider
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
+import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
 import { ${name}Repository } from '../Persistence/${name}Repository'
 
 export class ${name}ServiceProvider extends ServiceProvider {
@@ -526,7 +526,7 @@ export class ${name}ServiceProvider extends ServiceProvider {
         'docker:run': `docker run -it -p 3000:3000 ${context.nameKebabCase}`,
       },
       dependencies: {
-        'gravito-core': '^1.0.0-beta.5',
+        '@gravito/core': '^1.0.0-beta.5',
         '@gravito/enterprise': 'workspace:*',
       },
       devDependencies: {

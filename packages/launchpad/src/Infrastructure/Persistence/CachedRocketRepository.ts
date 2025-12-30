@@ -1,4 +1,4 @@
-import type { CacheService } from 'gravito-core'
+import type { CacheService } from '@gravito/core'
 import type { IRocketRepository } from '../../Domain/Interfaces'
 import { Rocket } from '../../Domain/Rocket'
 

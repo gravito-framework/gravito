@@ -1,5 +1,5 @@
 /**
- * gravito-core
+ * @gravito/core
  *
  * The core micro-kernel for the Galaxy Architecture.
  *
@@ -65,6 +65,7 @@ export {
   type RegisterGlobalErrorHandlersOptions,
   registerGlobalErrorHandlers,
 } from './GlobalErrorHandlers'
+export { type GravitoManifest, GravitoServer } from './GravitoServer'
 // Hooks
 export type { ActionCallback, FilterCallback } from './HookManager'
 export { HookManager } from './HookManager'

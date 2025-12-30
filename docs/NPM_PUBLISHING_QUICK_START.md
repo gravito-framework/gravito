@@ -83,12 +83,12 @@ npm publish --access public --otp=<你的OTP代碼>
 
 2. **發布順序**：
    - 腳本會自動按順序發布
-   - 建議先發布核心套件（`gravito-core`）
+   - 建議先發布核心套件（`@gravito/core`）
    - 再發布依賴它的套件
 
 3. **發布後驗證**：
    ```bash
-   npm view gravito-core@beta
+   npm view @gravito/core@beta
    npm view @gravito/sentinel@alpha
    ```
 
@@ -107,7 +107,7 @@ npm publish --access public --otp=<你的OTP代碼>
 ### Beta 版本（核心穩定）
 
 以下套件發布為 `1.0.0-beta.*`：
-- `gravito-core`
+- `@gravito/core`
 - `@gravito/horizon`
 - `@gravito/luminosity`
 - `@gravito/luminosity-adapter-photon`
@@ -124,7 +124,7 @@ npm publish --access public --otp=<你的OTP代碼>
 
 ```bash
 # 安裝 beta 版本
-npm install gravito-core@beta
+npm install @gravito/core@beta
 
 # 安裝 alpha 版本
 npm install @gravito/sentinel@alpha

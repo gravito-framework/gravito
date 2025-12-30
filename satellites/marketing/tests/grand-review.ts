@@ -1,5 +1,5 @@
 import { DB, Schema } from '@gravito/atlas'
-import { PlanetCore, setApp } from 'gravito-core'
+import { PlanetCore, setApp } from '@gravito/core'
 import { CommerceServiceProvider } from '../../commerce/src/index'
 import { MarketingServiceProvider } from '../src/index'
 

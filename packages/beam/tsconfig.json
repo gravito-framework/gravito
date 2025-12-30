@@ -8,7 +8,7 @@
         "rootDir": "../../",
         "composite": true,
         "paths": {
-            "gravito-core": [
+            "@gravito/core": [
                 "../../packages/core/src/index.ts"
             ],
             "@gravito/photon/client": [

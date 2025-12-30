@@ -1,5 +1,5 @@
+import type { PlanetCore } from '@gravito/core'
 import { UseCase } from '@gravito/enterprise'
-import type { PlanetCore } from 'gravito-core'
 import type { ICategoryRepository } from '../../Domain/Contracts/ICatalogRepository'
 import { type CategoryDTO, CategoryMapper } from '../DTOs/CategoryDTO'
 

@@ -151,7 +151,7 @@ export class SatelliteGenerator extends BaseGenerator {
   // ─────────────────────────────────────────────────────────────
 
   private generateEntryPoint(name: string): string {
-    return `import { ServiceProvider, type Container } from 'gravito-core'\nimport { Atlas${name}Repository } from './Infrastructure/Persistence/Atlas${name}Repository'\n\nexport class ${name}ServiceProvider extends ServiceProvider {\n  register(container: Container): void {\n    // Bind Repository\n    container.singleton('${name.toLowerCase()}.repo', () => new Atlas${name}Repository())\n    \n    // Bind UseCases\n    container.singleton('${name.toLowerCase()}.create', () => {\n        return new (require('./Application/UseCases/Create${name}').Create${name})(\n            container.make('${name.toLowerCase()}.repo')\n        )\n    })\n  }\n\n  boot(): void {\n    this.core?.logger.info('🛰️ Satellite ${name} is operational')\n  }\n}\n`
+    return `import { ServiceProvider, type Container } from '@gravito/core'\nimport { Atlas${name}Repository } from './Infrastructure/Persistence/Atlas${name}Repository'\n\nexport class ${name}ServiceProvider extends ServiceProvider {\n  register(container: Container): void {\n    // Bind Repository\n    container.singleton('${name.toLowerCase()}.repo', () => new Atlas${name}Repository())\n    \n    // Bind UseCases\n    container.singleton('${name.toLowerCase()}.create', () => {\n        return new (require('./Application/UseCases/Create${name}').Create${name})(\n            container.make('${name.toLowerCase()}.repo')\n        )\n    })\n  }\n\n  boot(): void {\n    this.core?.logger.info('🛰️ Satellite ${name} is operational')\n  }\n}\n`
   }
 
   private generateManifest(context: GeneratorContext): string {
@@ -193,7 +193,7 @@ export class SatelliteGenerator extends BaseGenerator {
         typecheck: 'tsc --noEmit',
       },
       dependencies: {
-        'gravito-core': depVersion,
+        '@gravito/core': depVersion,
         '@gravito/enterprise': depVersion,
         '@gravito/atlas': depVersion,
         '@gravito/stasis': depVersion,

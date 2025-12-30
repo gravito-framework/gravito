@@ -1,4 +1,4 @@
-import { app } from 'gravito-core'
+import { app } from '@gravito/core'
 import type { Product, Variant } from '../../Domain/Entities/Product'
 
 export interface VariantDTO {

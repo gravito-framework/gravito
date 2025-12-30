@@ -1,7 +1,7 @@
-import type { GravitoOrbit, PlanetCore } from 'gravito-core'
+import type { GravitoOrbit, PlanetCore } from '@gravito/core'
 import { type CollectionConfig, ContentManager } from './ContentManager'
 
-declare module 'gravito-core' {
+declare module '@gravito/core' {
   interface Variables {
     content: ContentManager
   }

@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { AdminListProducts } from './Application/UseCases/AdminListProducts'
 import { RecoverStock } from './Application/UseCases/RecoverStock'
 import { AtlasProductRepository } from './Infrastructure/Persistence/AtlasProductRepository'

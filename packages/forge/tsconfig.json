@@ -7,7 +7,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "gravito-core": [
+      "@gravito/core": [
         "../../packages/core/src/index.ts"
       ],
       "@gravito/*": [

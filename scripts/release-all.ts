@@ -29,7 +29,7 @@ async function main() {
             const processDeps = (deps: Record<string, string>) => {
                 if (!deps) return;
                 for (const key of Object.keys(deps)) {
-                    if (key.startsWith('@gravito/') || key === 'gravito-core') {
+                    if (key.startsWith('@gravito/') || key === '@gravito/core') {
                         deps[key] = TARGET_VERSION; // Use exact version for internal deps
                     }
                 }

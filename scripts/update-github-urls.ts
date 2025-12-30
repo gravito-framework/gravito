@@ -7,7 +7,7 @@
  * bun run scripts/update-github-urls.ts <組織名稱> <repository名稱>
  * 
  * 範例：
- * bun run scripts/update-github-urls.ts gravito-org gravito-core
+ * bun run scripts/update-github-urls.ts gravito-org @gravito/core
  */
 
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises'
@@ -15,14 +15,14 @@ import { join } from 'node:path'
 
 const OLD_ORG = 'CarlLee1983'
 const OLD_REPO = 'gravito'
-const OLD_REPO_FULL = 'gravito-core'
+const OLD_REPO_FULL = '@gravito/core'
 
 // 從命令列參數取得新組織和 repository 名稱
 const args = process.argv.slice(2)
 if (args.length < 2) {
   console.error('❌ 請提供組織名稱和 repository 名稱')
   console.error('使用方法: bun run scripts/update-github-urls.ts <組織名稱> <repository名稱>')
-  console.error('範例: bun run scripts/update-github-urls.ts gravito-org gravito-core')
+  console.error('範例: bun run scripts/update-github-urls.ts gravito-org @gravito/core')
   process.exit(1)
 }
 

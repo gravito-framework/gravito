@@ -1,4 +1,4 @@
-import { getPasswordAdapter } from 'gravito-core'
+import { getPasswordAdapter } from '@gravito/core'
 
 export type HashAlgorithm = 'bcrypt' | 'argon2id'
 

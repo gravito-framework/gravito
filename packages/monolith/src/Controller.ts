@@ -1,13 +1,26 @@
-import type { Context } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
+import { Sanitizer } from './Sanitizer.js'
+
+export abstract class BaseController {
+  protected sanitizer = new Sanitizer()
+
+  async call(ctx: GravitoContext, method: string): Promise<Response> {
+    const action = (this as any)[method] as (ctx: GravitoContext) => Promise<Response>
+    if (typeof action !== 'function') {
+      throw new Error(`Method ${method} not found on controller`)
+    }
+
+    return await action.apply(this, [ctx])
+  }
+}
 
 export abstract class Controller {
-  protected context!: Context
+  protected context!: GravitoContext
 
   /**
    * Set the request context for this controller instance.
-   * This is usually called by the router adapter.
    */
-  public setContext(context: Context): this {
+  public setContext(context: GravitoContext): this {
     this.context = context
     return this
   }
@@ -36,7 +49,7 @@ export abstract class Controller {
   /**
    * Get an item from the context variables.
    */
-  protected get<T>(key: string): T {
+  protected get(key: string): any {
     return this.context.get(key as any)
   }
 
@@ -49,27 +62,21 @@ export abstract class Controller {
 
   /**
    * Validate the request against a schema.
-   * Throws an exception or returns the validated data.
    */
-  protected async validate<T>(
-    _schema: any,
-    source: 'json' | 'query' | 'form' = 'json'
-  ): Promise<T> {
-    // In our framework, manual validation inside controller is an alternative
-    // but we prefer FormRequest middleware for cleaner DX.
-    // This is a placeholder for future internal validation logic.
-    return (this.context.req as any).valid(source) as T
+  protected async validate(_schema: any, source: 'json' | 'query' | 'form' = 'json'): Promise<any> {
+    const req = this.context.req as any
+    return req.valid(source)
   }
 
   /**
-   * Resolve a controller action into a Hono-compatible handler.
+   * Resolve a controller action into a handler compatible with GravitoContext.
    */
-  public static call<T extends Controller>(this: new () => T, method: keyof T): any {
-    return async (c: any) => {
-      const instance = new this()
+  public static call(method: string): any {
+    return async (c: GravitoContext) => {
+      const instance = new (this as any)()
       instance.setContext(c)
-      const action = instance[method] as unknown as Function
-      return action.apply(instance)
+      const action = instance[method] as (ctx: GravitoContext) => Promise<Response>
+      return action.apply(instance, [c])
     }
   }
 }

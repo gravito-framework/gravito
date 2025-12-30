@@ -45,7 +45,7 @@ bun run generate
 ## 設定範例
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitContent } from '@gravito/monolith'
 import { OrbitI18n } from '@gravito/cosmos'
 import { OrbitSitemap } from '@gravito/constellation'

@@ -56,7 +56,7 @@ npm publish --access public
 1. **NPM 會顯示一個 URL**，例如：
    ```
    Visit this URL to authorize:
-   https://www.npmjs.com/login?next=/org/gravito/package/gravito-core
+   https://www.npmjs.com/login?next=/org/gravito/package/@gravito/core
    ```
 
 2. **瀏覽器會自動打開**（或手動複製 URL）
@@ -70,7 +70,7 @@ npm publish --access public
 ### Beta 版本（核心穩定）
 
 ```bash
-# gravito-core
+# @gravito/core
 cd packages/core
 npm publish --access public --tag beta
 
@@ -107,7 +107,7 @@ npm publish --access public --tag alpha
 
 1. **必須指定 tag**：預發布版本（alpha/beta）必須使用 `--tag` 參數
 2. **瀏覽器驗證**：每次發布都需要在瀏覽器中完成驗證
-3. **發布順序**：建議先發布核心套件（`gravito-core`），再發布依賴它的套件
+3. **發布順序**：建議先發布核心套件（`@gravito/core`），再發布依賴它的套件
 4. **檢查版本**：發布前確認版本號正確
 
 ## 驗證發布

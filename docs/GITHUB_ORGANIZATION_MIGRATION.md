@@ -27,13 +27,13 @@ git push origin backup-before-migration
 ### 步驟 1：在 GitHub 上移轉 Repository
 
 1. 前往您的 repository 設定頁面
-   - `https://github.com/gravito-framework/gravito-core/settings`
+   - `https://github.com/gravito-framework/@gravito/core/settings`
 
 2. 點擊「Transfer ownership」
    - 位於頁面最下方「Danger Zone」
 
 3. 輸入組織名稱和 repository 名稱
-   - 例如：`gravito-org/gravito-core`
+   - 例如：`gravito-org/@gravito/core`
 
 4. 確認移轉
    - 輸入 repository 完整名稱確認
@@ -50,10 +50,10 @@ git push origin backup-before-migration
 git remote -v
 
 # 更新 remote URL
-git remote set-url origin https://github.com/YOUR_ORG/gravito-core.git
+git remote set-url origin https://github.com/YOUR_ORG/@gravito/core.git
 
 # 或使用 SSH
-git remote set-url origin git@github.com:YOUR_ORG/gravito-core.git
+git remote set-url origin git@github.com:YOUR_ORG/@gravito/core.git
 
 # 驗證
 git remote -v
@@ -97,7 +97,7 @@ git remote -v
 
 ```bash
 # 執行更新腳本
-bun run scripts/update-github-urls.ts YOUR_ORG gravito-core
+bun run scripts/update-github-urls.ts YOUR_ORG @gravito/core
 ```
 
 或手動執行：
@@ -107,7 +107,7 @@ bun run scripts/update-github-urls.ts YOUR_ORG gravito-core
 find . -type f \( -name "*.json" -o -name "*.ts" -o -name "*.tsx" -o -name "*.md" -o -name "*.html" \) \
   -not -path "*/node_modules/*" \
   -not -path "*/.git/*" \
-  -exec sed -i '' 's/github\.com\/CarlLee1983\/gravito/github.com\/YOUR_ORG\/gravito-core/g' {} +
+  -exec sed -i '' 's/github\.com\/CarlLee1983\/gravito/github.com\/YOUR_ORG\/@gravito/core/g' {} +
 ```
 
 ## [Complete] 驗證清單
@@ -179,12 +179,12 @@ grep -r "github.com/CarlLee1983" docs/ --include="*.md"
 {
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gravito-org/gravito-core.git"
+    "url": "git+https://github.com/gravito-org/@gravito/core.git"
   },
   "bugs": {
-    "url": "https://github.com/gravito-org/gravito-core/issues"
+    "url": "https://github.com/gravito-org/@gravito/core/issues"
   },
-  "homepage": "https://github.com/gravito-org/gravito-core#readme"
+  "homepage": "https://github.com/gravito-org/@gravito/core#readme"
 }
 ```
 
@@ -192,12 +192,12 @@ grep -r "github.com/CarlLee1983" docs/ --include="*.md"
 
 **更新前**：
 ```typescript
-const editUrl = `https://github.com/gravito-framework/gravito-core/blob/main/docs/${slug}.md`
+const editUrl = `https://github.com/gravito-framework/@gravito/core/blob/main/docs/${slug}.md`
 ```
 
 **更新後**：
 ```typescript
-const editUrl = `https://github.com/gravito-org/gravito-core/blob/main/docs/${slug}.md`
+const editUrl = `https://github.com/gravito-org/@gravito/core/blob/main/docs/${slug}.md`
 ```
 
 ## 組織設定建議

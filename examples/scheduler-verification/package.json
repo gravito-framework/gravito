@@ -7,7 +7,7 @@
     "worker": "bun run src/index.ts"
   },
   "dependencies": {
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "@gravito/horizon": "workspace:*",
     "@gravito/stasis": "workspace:*",
     "@gravito/mass": "workspace:*"

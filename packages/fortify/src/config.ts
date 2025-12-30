@@ -77,7 +77,7 @@ export interface FortifyConfig {
   /**
    * Enable CSRF protection for HTML form flows (default: true)
    */
-  csrf?: boolean | import('gravito-core').CsrfOptions
+  csrf?: boolean | import('@gravito/core').CsrfOptions
 }
 
 /**

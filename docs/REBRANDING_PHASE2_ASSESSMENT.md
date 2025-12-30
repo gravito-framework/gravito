@@ -12,7 +12,7 @@ Phase 2 focuses on renaming data storage and cache modules. This phase involves 
    - **Type**: SQL Database / ORM (Drizzle-based)
    - **Status**:  **DEPRECATED** - Will be phased out
    - **Complexity**: ⚠ **HIGH**
-   - **Dependencies**: `gravito-core`, `drizzle-orm`
+   - **Dependencies**: `@gravito/core`, `drizzle-orm`
    - **Used by**: Some examples, templates, CLI, docs (needs migration)
    - **Note**: Uses Drizzle ORM, provides Eloquent-like Model API
    - **Action**: Mark as deprecated, migrate users to `orbit-database` → `matter`
@@ -43,7 +43,7 @@ Phase 2 focuses on renaming data storage and cache modules. This phase involves 
 5. **`@gravito/stasis` → `@gravito/stasis`**
    - **Type**: Static cache (File/Internal)
    - **Complexity**:  **MEDIUM-HIGH**
-   - **Dependencies**: `gravito-core`, `@gravito/orbit-redis` (peer)
+   - **Dependencies**: `@gravito/core`, `@gravito/orbit-redis` (peer)
    - **Used by**: Many examples, templates, docs
    - **⚠ IMPORTANT**: Has peer dependency on `orbit-redis` → needs to be updated to `@gravito/plasma`
 
@@ -52,13 +52,13 @@ Phase 2 focuses on renaming data storage and cache modules. This phase involves 
 6. **`@gravito/orbit-storage` → `@gravito/nebula`**
    - **Type**: File storage / OSS
    - **Complexity**:  **MEDIUM**
-   - **Dependencies**: `gravito-core`
+   - **Dependencies**: `@gravito/core`
    - **Used by**: Examples, templates, docs
 
 7. **`@gravito/orbit-content` → `@gravito/nebula-content`**
    - **Type**: Content management system
    - **Complexity**:  **MEDIUM**
-   - **Dependencies**: `gravito-core`, `marked`, `gray-matter`
+   - **Dependencies**: `@gravito/core`, `marked`, `gray-matter`
    - **Used by**: Site package, examples
 
 ### Session Module (1 module)
@@ -66,7 +66,7 @@ Phase 2 focuses on renaming data storage and cache modules. This phase involves 
 8. **`@gravito/ion` → `@gravito/orbit`**
    - **Type**: Session management
    - **Complexity**:  **MEDIUM**
-   - **Dependencies**: `gravito-core`, `@gravito/orbit-redis` (optional)
+   - **Dependencies**: `@gravito/core`, `@gravito/orbit-redis` (optional)
    - **Used by**: Examples, templates, docs
    - **⚠ NOTE**: This is a special case - renames to just `@gravito/orbit` (not `@gravito/orbit-*`)
 

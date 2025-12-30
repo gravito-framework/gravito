@@ -1,13 +1,13 @@
-# gravito-core
+# @gravito/core
 
 > The Micro-kernel for Galaxy Architecture. Lightweight, extensible, and built on Photon & Bun.
 
-[![npm version](https://img.shields.io/npm/v/gravito-core.svg)](https://www.npmjs.com/package/gravito-core)
+[![npm version](https://img.shields.io/npm/v/@gravito/core.svg)](https://www.npmjs.com/package/@gravito/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black.svg)](https://bun.sh/)
 
-**gravito-core** is the foundation for building modular backend applications using the **Galaxy Architecture**. It provides a robust Hook system (Filters & Actions) and an Orbit mounting mechanism, allowing you to build loosely coupled, highly extensible systems.
+**@gravito/core** is the foundation for building modular backend applications using the **Galaxy Architecture**. It provides a robust Hook system (Filters & Actions) and an Orbit mounting mechanism, allowing you to build loosely coupled, highly extensible systems.
 
 ## ✨ Features
 
@@ -25,7 +25,7 @@
 ## 📦 Installation
 
 ```bash
-bun add gravito-core
+bun add @gravito/core
 ```
 
 ## 🚀 Quick Start
@@ -33,7 +33,7 @@ bun add gravito-core
 ### 1. Initialize the Core
 
 ```typescript
-import { PlanetCore } from 'gravito-core';
+import { PlanetCore } from '@gravito/core';
 
 // Initialize with options (v0.2.0+)
 const core = new PlanetCore({
@@ -49,7 +49,7 @@ const core = new PlanetCore({
 Use the IoC Container to manage your application services:
 
 ```typescript
-import { ServiceProvider, Container } from 'gravito-core';
+import { ServiceProvider, Container } from '@gravito/core';
 
 class CacheServiceProvider extends ServiceProvider {
   register(container: Container) {

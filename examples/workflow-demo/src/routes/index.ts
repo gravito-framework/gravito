@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import { AuthController } from '../controllers/AuthController'
 import { HomeController } from '../controllers/HomeController'
 import { ProductController } from '../controllers/ProductController'

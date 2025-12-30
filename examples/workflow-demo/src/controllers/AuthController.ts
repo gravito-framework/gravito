@@ -1,5 +1,5 @@
-import type { GravitoContext, GravitoNext } from 'gravito-core'
-import { AuthorizationException } from 'gravito-core'
+import type { GravitoContext, GravitoNext } from '@gravito/core'
+import { AuthorizationException } from '@gravito/core'
 import { AuthService } from '../services/AuthService'
 
 const authService = new AuthService()

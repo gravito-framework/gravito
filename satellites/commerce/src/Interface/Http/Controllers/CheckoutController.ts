@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import type { PlaceOrder } from '../../../Application/UseCases/PlaceOrder'
 
 export class CheckoutController {

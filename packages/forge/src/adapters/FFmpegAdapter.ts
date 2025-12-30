@@ -2,7 +2,7 @@
  * @fileoverview FFmpeg adapter for video processing
  */
 
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { ProcessingProgress } from '../types'
 import type { AdapterOptions, ProcessorAdapter } from './ProcessorAdapter'
 

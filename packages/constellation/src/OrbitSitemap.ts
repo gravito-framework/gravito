@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { GravitoContext, PlanetCore } from 'gravito-core'
+import type { GravitoContext, PlanetCore } from '@gravito/core'
 import { IncrementalGenerator } from './core/IncrementalGenerator'
 import { ProgressTracker } from './core/ProgressTracker'
 import { SitemapGenerator } from './core/SitemapGenerator'

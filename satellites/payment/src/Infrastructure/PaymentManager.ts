@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { IPaymentGateway } from '../Domain/Contracts/IPaymentGateway'
 
 export class PaymentManager {

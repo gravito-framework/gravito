@@ -1,9 +1,9 @@
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import { bodySizeLimit, type GravitoContext, PlanetCore, securityHeaders } from '@gravito/core'
 import { type ForgeService, OrbitForge } from '@gravito/forge'
 import { OrbitStorage, type StorageProvider } from '@gravito/nebula'
 import { Job, OrbitStream } from '@gravito/stream'
-import { bodySizeLimit, type GravitoContext, PlanetCore, securityHeaders } from 'gravito-core'
 
 // Global core reference for Jobs running in the same process
 let appCore: PlanetCore

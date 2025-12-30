@@ -2,7 +2,7 @@
  * @fileoverview ImageMagick adapter for image processing
  */
 
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { AdapterOptions, ProcessorAdapter } from './ProcessorAdapter'
 
 /**

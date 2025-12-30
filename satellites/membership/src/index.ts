@@ -1,5 +1,5 @@
+import { type Container, ServiceProvider } from '@gravito/core'
 import { auth } from '@gravito/sentinel'
-import { type Container, ServiceProvider } from 'gravito-core'
 import { ForgotPasswordMail } from './Application/Mail/ForgotPasswordMail'
 import { MemberLevelChangedMail } from './Application/Mail/MemberLevelChangedMail'
 import { WelcomeMail } from './Application/Mail/WelcomeMail'

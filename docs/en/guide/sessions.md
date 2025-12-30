@@ -16,7 +16,7 @@ bun add @gravito/pulsar
 Enable Pulsar in `src/bootstrap.ts`:
 
 ```typescript
-import { defineConfig } from 'gravito-core';
+import { defineConfig } from '@gravito/core';
 import { OrbitPulsar } from '@gravito/pulsar';
 
 export default defineConfig({

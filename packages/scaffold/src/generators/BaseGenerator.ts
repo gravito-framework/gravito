@@ -334,7 +334,7 @@ export abstract class BaseGenerator {
         'docker:run': `docker run -it -p 3000:3000 ${context.nameKebabCase}`,
       },
       dependencies: {
-        'gravito-core': '^1.0.0-beta.5',
+        '@gravito/core': '^1.0.0-beta.5',
         ...(context.withSpectrum ? { '@gravito/spectrum': '^1.0.0-beta.1' } : {}),
       },
       devDependencies: {

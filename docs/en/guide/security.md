@@ -37,7 +37,7 @@ APP_KEY=base64:YOUR_GENERATED_KEY
 You can generate a key using the `Encrypter` class:
 
 ```ts
-import { Encrypter } from 'gravito-core'
+import { Encrypter } from '@gravito/core'
 
 console.log(Encrypter.generateKey())
 ```
@@ -103,10 +103,10 @@ core.router.get('/read', (c) => {
 
 ## CSRF Protection
 
-CSRF protection is available via `csrfProtection` in `gravito-core`. Fortify enables CSRF automatically for auth routes.
+CSRF protection is available via `csrfProtection` in `@gravito/core`. Fortify enables CSRF automatically for auth routes.
 
 ```ts
-import { csrfProtection } from 'gravito-core'
+import { csrfProtection } from '@gravito/core'
 
 core.router
   .middleware(csrfProtection())
@@ -120,7 +120,7 @@ core.router
 Use the built-in `securityHeaders` middleware to apply CSP and related headers.
 
 ```ts
-import { securityHeaders } from 'gravito-core'
+import { securityHeaders } from '@gravito/core'
 
 core.adapter.use(
   '*',
@@ -151,7 +151,7 @@ core.adapter.use(
 Use `bodySizeLimit` to reject oversized requests early.
 
 ```ts
-import { bodySizeLimit } from 'gravito-core'
+import { bodySizeLimit } from '@gravito/core'
 
 core.adapter.use('*', bodySizeLimit(1_048_576))
 ```
@@ -167,7 +167,7 @@ core.adapter.use('*', bodySizeLimit(1_048_576, { requireContentLength: true }))
 Enable CORS with the built-in middleware and keep origins explicit in production.
 
 ```ts
-import { cors } from 'gravito-core'
+import { cors } from '@gravito/core'
 
 core.adapter.use(
   '*',
@@ -189,7 +189,7 @@ Some developer tools should never be exposed publicly. In production:
 ```ts
 import { OrbitSignal } from '@gravito/signal'
 import { SpectrumOrbit } from '@gravito/spectrum'
-import { createHeaderGate } from 'gravito-core'
+import { createHeaderGate } from '@gravito/core'
 
 const adminGate = createHeaderGate({
   headerName: 'x-admin-token',
