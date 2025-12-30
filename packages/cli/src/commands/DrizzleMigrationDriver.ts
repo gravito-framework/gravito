@@ -21,15 +21,16 @@ export class DrizzleMigrationDriver implements MigrationDriver {
     await fs.mkdir(path.dirname(filepath), { recursive: true })
 
     // Use string concatenation to avoid nested backtick escape issues
-    const content = "import { sql } from 'drizzle-orm'\n\n" +
-      "export async function up(db: any): Promise<void> {\n" +
-      "  // TODO: Implement migration\n" +
-      "  // await db.execute(sql`CREATE TABLE ...`)\n" +
-      "}\n\n" +
-      "export async function down(db: any): Promise<void> {\n" +
-      "  // TODO: Implement rollback\n" +
-      "  // await db.execute(sql`DROP TABLE ...`)\n" +
-      "}\n"
+    const content =
+      "import { sql } from 'drizzle-orm'\n\n" +
+      'export async function up(db: any): Promise<void> {\n' +
+      '  // TODO: Implement migration\n' +
+      '  // await db.execute(sql`CREATE TABLE ...`)\n' +
+      '}\n\n' +
+      'export async function down(db: any): Promise<void> {\n' +
+      '  // TODO: Implement rollback\n' +
+      '  // await db.execute(sql`DROP TABLE ...`)\n' +
+      '}\n'
 
     await fs.writeFile(filepath, content, 'utf-8')
 
