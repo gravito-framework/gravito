@@ -1,0 +1,24 @@
+{
+  "name": "flux-enterprise",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/server.ts",
+    "consumer": "bun run src/consumer.ts",
+    "publish": "bun run scripts/publish-order.ts",
+    "doctor": "bun gravito doctor",
+    "test": "bun test",
+    "flux": "bun run flux-enterprise.ts"
+  },
+  "dependencies": {
+    "@gravito/atlas": "workspace:*",
+    "@gravito/flux": "workspace:*",
+    "amqplib": "^0.10.3",
+    "dotenv": "^16.5.1"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.9.3"
+  }
+}

@@ -267,6 +267,7 @@ export class FluxEngine {
         workflowId: ctx.id,
         workflowName: ctx.name,
         status: ctx.status,
+        input: ctx.input,
         meta,
       })
 
@@ -388,6 +389,7 @@ export class FluxEngine {
         workflowName: ctx.name,
         status: ctx.status,
         duration: Date.now() - startTime,
+        data: ctx.data as Record<string, unknown>,
         meta,
       })
 

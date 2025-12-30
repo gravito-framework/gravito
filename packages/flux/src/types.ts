@@ -254,6 +254,8 @@ export interface FluxTraceEvent {
   duration?: number
   error?: string
   status?: WorkflowStatus | StepExecution['status']
+  input?: unknown
+  data?: Record<string, unknown>
   meta?: Record<string, unknown>
 }
 
