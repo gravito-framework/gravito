@@ -12,7 +12,7 @@
   "dependencies": {
     "@gravito/atlas": "workspace:*",
     "@gravito/pulse": "workspace:*",
-    "gravito-core": "workspace:*"
+    "@gravito/core": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest",

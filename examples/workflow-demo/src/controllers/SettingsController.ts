@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import type { DemoUser } from '../services/AuthService'
 import { SettingsService } from '../services/SettingsService'
 
