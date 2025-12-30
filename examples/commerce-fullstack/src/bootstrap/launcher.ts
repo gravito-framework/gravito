@@ -19,11 +19,13 @@ const SATELLITE_MAP: Record<string, any> = {
 export class MonolithLauncher {
   private core = new PlanetCore({
     adapter: new PhotonAdapter(),
-    providers: [OrbitMonolith],
   })
 
   async ignite() {
     console.log(`🚀 [${config.name}] 正在初始化整合環境...`)
+
+    // 註冊核心 Monolith 支持
+    this.core.orbit(OrbitMonolith)
 
     // 依序啟動模組
     for (const moduleName of config.modules) {

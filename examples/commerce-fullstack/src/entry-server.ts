@@ -11,7 +11,7 @@ const app = await GravitoServer.create(manifest, {
     import('@gravito/satellite-membership').then((m) => m.MembershipServiceProvider),
   analytics: () => import('@gravito/satellite-analytics').then((m) => m.AnalyticsServiceProvider),
   cms: () => import('@gravito/satellite-announcement').then((m) => m.AnnouncementServiceProvider),
-  support: () => import('@gravito/satellite-support').then((m) => m.SupportServiceProvider()),
+  support: () => import('@gravito/satellite-support').then((m) => m.SupportServiceProvider),
 })
 
 app.liftoff(3000)
