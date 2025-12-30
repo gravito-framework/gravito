@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { DB, Schema } from '@gravito/atlas'
+import { PlanetCore, setApp } from '@gravito/core'
 import { OrbitSignal } from '@gravito/signal'
-import { PlanetCore, setApp } from 'gravito-core'
 import type { LoginMember } from '../src/Application/UseCases/LoginMember'
 import type { RegisterMember } from '../src/Application/UseCases/RegisterMember'
 import { verifySingleDevice } from '../src/Interface/Http/Middleware/VerifySingleDevice'

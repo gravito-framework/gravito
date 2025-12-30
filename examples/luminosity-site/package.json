@@ -24,7 +24,7 @@
     "@gravito/prism": "workspace:*",
     "@gravito/stasis": "workspace:*",
     "@inertiajs/vue3": "^1.0.0",
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "gray-matter": "^4.0.3",
     "@gravito/photon": "workspace:*",
     "lucide-vue-next": "^0.300.0",

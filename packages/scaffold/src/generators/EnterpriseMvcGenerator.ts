@@ -383,7 +383,7 @@ export default {
  * can be assigned to specific routes.
  */
 
-import type { GravitoMiddleware } from 'gravito-core'
+import type { GravitoMiddleware } from '@gravito/core'
 
 /**
  * Global middleware stack.
@@ -474,7 +474,7 @@ export abstract class Controller {
  * Home Controller
  */
 
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import { Controller } from './Controller'
 
 export class HomeController extends Controller {
@@ -509,7 +509,7 @@ export class HomeController extends Controller {
  * Protects routes that require authentication.
  */
 
-import type { GravitoContext, GravitoNext } from 'gravito-core'
+import type { GravitoContext, GravitoNext } from '@gravito/core'
 
 export async function Authenticate(c: GravitoContext, next: GravitoNext) {
   // TODO: Implement authentication check
@@ -531,7 +531,7 @@ export async function Authenticate(c: GravitoContext, next: GravitoNext) {
  * Register and bootstrap application services here.
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
+import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
 
 export class AppServiceProvider extends ServiceProvider {
   /**
@@ -560,7 +560,7 @@ export class AppServiceProvider extends ServiceProvider {
  * Configures and registers application routes.
  */
 
-import { ServiceProvider, type Container, type PlanetCore } from 'gravito-core'
+import { ServiceProvider, type Container, type PlanetCore } from '@gravito/core'
 import { registerRoutes } from '../routes'
 
 export class RouteServiceProvider extends ServiceProvider {
@@ -589,7 +589,7 @@ export class RouteServiceProvider extends ServiceProvider {
  * Customize error responses and logging here.
  */
 
-import type { ErrorHandlerContext } from 'gravito-core'
+import type { ErrorHandlerContext } from '@gravito/core'
 
 /**
  * Report an exception (logging, monitoring, etc.)
@@ -646,7 +646,7 @@ if (process.env.APP_DEBUG === 'true') {
  * It initializes the core and registers all providers.
  */
 
-import { bodySizeLimit, PlanetCore, securityHeaders } from 'gravito-core'
+import { bodySizeLimit, PlanetCore, securityHeaders } from '@gravito/core'
 ${spectrumImport}import { AppServiceProvider } from './Providers/AppServiceProvider'
 import { RouteServiceProvider } from './Providers/RouteServiceProvider'
 

@@ -52,7 +52,7 @@
   "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "gravito-core": "1.0.0-beta.6",
+    "@gravito/core": "1.0.0-beta.6",
     "@gravito/nebula": "1.0.0-beta.1",
     "@gravito/stream": "1.0.0-beta.1"
   },
@@ -78,7 +78,7 @@
     "@gravito/stream": "1.0.0-beta.1",
     "@types/react": "^18.0.0",
     "bun-types": "latest",
-    "gravito-core": "1.0.0-beta.6",
+    "@gravito/core": "1.0.0-beta.6",
     "@gravito/photon": "1.0.0-beta.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

@@ -1,7 +1,7 @@
 import { DB } from '@gravito/atlas'
+import type { PlanetCore } from '@gravito/core'
 import { UseCase } from '@gravito/enterprise'
 import type { CacheManager } from '@gravito/stasis'
-import type { PlanetCore } from 'gravito-core'
 import { LineItem, Order } from '../../Domain/Entities/Order'
 import { AdjustmentCalculator } from '../Services/AdjustmentCalculator'
 import { ProductResolver } from '../Services/ProductResolver'

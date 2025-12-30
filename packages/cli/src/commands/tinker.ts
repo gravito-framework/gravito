@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 
 export async function tinker() {
   const bootstrapPath = path.resolve(__dirname, '../../stubs/tinker-bootstrap.ts')

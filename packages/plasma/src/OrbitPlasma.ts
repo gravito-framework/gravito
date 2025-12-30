@@ -3,7 +3,7 @@
  * @description Integrates Redis client with PlanetCore
  */
 
-import type { GravitoOrbit, PlanetCore } from 'gravito-core'
+import type { GravitoOrbit, PlanetCore } from '@gravito/core'
 import { Redis } from './Redis'
 import type { RedisClient } from './RedisClient'
 import type { RedisConfig, RedisManagerConfig } from './types'
@@ -158,7 +158,7 @@ export class OrbitPlasma implements GravitoOrbit {
 }
 
 // Module augmentation for GravitoVariables
-declare module 'gravito-core' {
+declare module '@gravito/core' {
   interface GravitoVariables {
     /** Redis client from OrbitPlasma */
     redis?: RedisClient

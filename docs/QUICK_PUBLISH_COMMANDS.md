@@ -5,7 +5,7 @@
 ### Beta 版本套件（官網使用）
 
 ```bash
-# gravito-core
+# @gravito/core
 cd packages/core && npm publish --access public --tag beta && cd ../..
 
 # @gravito/stasis
@@ -99,7 +99,7 @@ cd packages/cli && npm publish --access public --tag alpha && cd ../..
    ```bash
    # 確認你在正確的目錄
    pwd
-   # 應該顯示類似：/Users/.../gravito-core/packages/core
+   # 應該顯示類似：/Users/.../@gravito/core/packages/core
    
    # 確認 package.json 存在
    ls package.json

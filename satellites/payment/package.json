@@ -14,7 +14,7 @@
     "@gravito/atlas": "workspace:*",
     "@gravito/enterprise": "workspace:*",
     "@gravito/stasis": "workspace:*",
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "stripe": "^20.1.0"
   },
   "devDependencies": {

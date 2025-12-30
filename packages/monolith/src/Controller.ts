@@ -1,4 +1,4 @@
-import type { GravitoContext } from 'gravito-core'
+import type { GravitoContext } from '@gravito/core'
 import { Sanitizer } from './Sanitizer.js'
 
 export abstract class BaseController {

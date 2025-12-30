@@ -408,7 +408,7 @@ cli
 
       // Replace workspace:* with actual versions
       const versionMap: Record<string, string> = {
-        'gravito-core': '^1.0.0-beta.1',
+        '@gravito/core': '^1.0.0-beta.1',
         '@gravito/beam': '^1.0.0-alpha.1',
         '@gravito/prism': '^1.0.0-beta.1',
         '@gravito/stasis': '^1.0.0-beta.1',

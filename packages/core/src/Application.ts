@@ -5,7 +5,7 @@
  * Provides a centralized entry point for enterprise applications with
  * auto-discovery of providers, config loading, and lifecycle management.
  *
- * @module gravito-core
+ * @module @gravito/core
  * @since 2.0.0
  */
 

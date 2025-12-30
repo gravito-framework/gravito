@@ -1,4 +1,4 @@
-import { createSqliteDatabase, type RuntimeSqliteDatabase } from 'gravito-core'
+import { createSqliteDatabase, type RuntimeSqliteDatabase } from '@gravito/core'
 import type { SessionId, SessionRecord, SessionStore } from '../types'
 
 export class SqliteSessionStore implements SessionStore {

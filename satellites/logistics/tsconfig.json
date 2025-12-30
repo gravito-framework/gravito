@@ -5,8 +5,8 @@
     "rootDir": "../..",
     "baseUrl": "../..",
     "paths": {
-      "gravito-core": ["packages/core/src/index.ts"],
-      "gravito-core/*": ["packages/core/src/*"],
+      "@gravito/core": ["packages/core/src/index.ts"],
+      "@gravito/core/*": ["packages/core/src/*"],
       "@gravito/*": [
         "packages/*/src/index.ts",
         "satellites/*/src/index.ts"

@@ -12,7 +12,7 @@ description: 了解 Gravito 提供的字串、陣列、回應、環境與錯誤�
 `Str` 提供了豐富的字串處理方法。
 
 ```typescript
-import { Str } from 'gravito-core'
+import { Str } from '@gravito/core'
 
 // 轉換為蛇形命名 (snake_case)
 Str.snake('FooBar') // 'foo_bar'
@@ -41,7 +41,7 @@ Str.uuid()
 `Arr` 提供了一套處理純陣列與物件陣列的方法。
 
 ```typescript
-import { Arr } from 'gravito-core'
+import { Arr } from '@gravito/core'
 
 // 取得巢狀屬性
 const user = { name: { first: 'Alice' } }
@@ -66,7 +66,7 @@ Arr.except({ a: 1, b: 2, c: 3 }, ['a', 'c']) // { b: 2 }
 底層的路徑解析工具，支援點記號 (`.`) 存取。
 
 ```typescript
-import { dataGet, dataSet, dataHas } from 'gravito-core'
+import { dataGet, dataSet, dataHas } from '@gravito/core'
 
 const data = { posts: [{ title: 'Hello' }] }
 const title = dataGet(data, 'posts.0.title') // 'Hello'
@@ -76,7 +76,7 @@ const exists = dataHas(data, 'posts.0.title') // true
 ## Debug 工具
 
 ```ts
-import { dump, dd } from 'gravito-core'
+import { dump, dd } from '@gravito/core'
 
 dump({ ok: true })
 dd('stop here')
@@ -85,7 +85,7 @@ dd('stop here')
 ## 控制流程工具
 
 ```ts
-import { tap, value } from 'gravito-core'
+import { tap, value } from '@gravito/core'
 
 const result = tap({ id: 1 }, (data) => {
   // side effects
@@ -98,7 +98,7 @@ const computed = value(() => 123)
 ## 狀態與環境
 
 ```ts
-import { env, config, app, logger, router } from 'gravito-core'
+import { env, config, app, logger, router } from '@gravito/core'
 
 const mode = env('NODE_ENV', 'development')
 const baseUrl = config<string>('app.baseUrl', 'http://localhost:3000')
@@ -110,7 +110,7 @@ const core = app()
 ## 中斷請求 (abort)
 
 ```ts
-import { abort, abortIf, abortUnless } from 'gravito-core'
+import { abort, abortIf, abortUnless } from '@gravito/core'
 
 abort(404, 'Not Found')
 abortIf(!user, 401)
@@ -120,7 +120,7 @@ abortUnless(isAdmin, 403)
 ## 回應資料封裝
 
 ```ts
-import { ok, fail, jsonSuccess, jsonFail } from 'gravito-core'
+import { ok, fail, jsonSuccess, jsonFail } from '@gravito/core'
 
 const data = ok({ id: 1 })
 const error = fail('Invalid input', 'VALIDATION_ERROR')
@@ -132,7 +132,7 @@ return jsonFail(c, 'Invalid input', 422)
 ## 表單錯誤與舊值
 
 ```ts
-import { errors, old } from 'gravito-core'
+import { errors, old } from '@gravito/core'
 
 const bag = errors(c)
 const email = old(c, 'email', '')

@@ -1,5 +1,5 @@
 {
-  "name": "gravito-core",
+  "name": "@gravito/core",
   "version": "1.0.0-beta.6",
   "description": "",
   "module": "./dist/index.js",

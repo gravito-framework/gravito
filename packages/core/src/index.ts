@@ -1,5 +1,5 @@
 /**
- * gravito-core
+ * @gravito/core
  *
  * The core micro-kernel for the Galaxy Architecture.
  *

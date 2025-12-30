@@ -1,6 +1,6 @@
+import { type Container, type GravitoOrbit, PlanetCore, ServiceProvider } from '@gravito/core'
 import { OrbitRipple } from '@gravito/ripple'
 import { OrbitCache } from '@gravito/stasis'
-import { type Container, type GravitoOrbit, PlanetCore, ServiceProvider } from 'gravito-core'
 import { MissionControl } from './Application/MissionControl'
 import { PayloadInjector } from './Application/PayloadInjector'
 import { PoolManager } from './Application/PoolManager'

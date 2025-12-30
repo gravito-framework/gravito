@@ -1,5 +1,5 @@
-import type { Router } from 'gravito-core'
-import { csrfProtection } from 'gravito-core'
+import type { Router } from '@gravito/core'
+import { csrfProtection } from '@gravito/core'
 import type { FortifyConfig } from '../config'
 import { ForgotPasswordController } from '../controllers/ForgotPasswordController'
 import { LoginController } from '../controllers/LoginController'

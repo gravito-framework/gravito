@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { ArrangeShipment } from './Application/UseCases/ArrangeShipment'
 import { LogisticsManager } from './Infrastructure/LogisticsManager'
 import { AtlasShipmentRepository } from './Infrastructure/Persistence/AtlasShipmentRepository'

@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { CreateRole } from '../Application/UseCases/CreateRole'
 import type { DeleteRole } from '../Application/UseCases/DeleteRole'
 import type { GetRole } from '../Application/UseCases/GetRole'

@@ -135,7 +135,7 @@ await redis.publish('events', 'workflow:done')
 ## Orbit Integration
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitPlasma } from '@gravito/plasma'
 
 const core = await PlanetCore.boot({

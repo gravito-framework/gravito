@@ -1,9 +1,9 @@
+import type { GravitoContext } from '@gravito/core'
 import {
   HashManager,
   InMemoryPasswordResetTokenRepository,
   PasswordBroker,
 } from '@gravito/sentinel'
-import type { GravitoContext } from 'gravito-core'
 import type { FortifyConfig } from '../config'
 import { ensureCsrfToken } from '../csrf'
 import type { ViewService } from '../types'

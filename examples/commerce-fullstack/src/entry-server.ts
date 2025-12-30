@@ -1,5 +1,5 @@
+import { GravitoServer } from '@gravito/core'
 import { OrbitMonolith } from '@gravito/monolith'
-import { GravitoServer } from 'gravito-core'
 import manifest from './config/gravito.config'
 
 /**

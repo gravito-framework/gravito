@@ -13,7 +13,7 @@ import { join } from 'node:path';
 const PACKAGES_DIR = join(process.cwd(), 'packages');
 
 const OFFICIAL_SITE_PACKAGES = [
-  'gravito-core',
+  '@gravito/core',
   '@gravito/stasis',
   '@gravito/ion',
   '@gravito/prism',
@@ -90,7 +90,7 @@ async function updatePackageVersion(pkg: PackageInfo): Promise<boolean> {
     const processDeps = (deps: Record<string, string>) => {
       if (!deps) return;
       for (const key of Object.keys(deps)) {
-        if (key.startsWith('@gravito/') || key === 'gravito-core') {
+        if (key.startsWith('@gravito/') || key === '@gravito/core') {
           // 查找對應套件的版本
           const depPkg = OFFICIAL_SITE_PACKAGES.includes(key)
             ? VERSION_CONFIG.officialSite

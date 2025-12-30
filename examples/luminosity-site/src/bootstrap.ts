@@ -1,5 +1,3 @@
-import { OrbitIon } from '@gravito/ion'
-import { OrbitPrism } from '@gravito/prism'
 import {
   bodySizeLimit,
   defineConfig,
@@ -7,7 +5,9 @@ import {
   type GravitoContext,
   PlanetCore,
   securityHeaders,
-} from 'gravito-core'
+} from '@gravito/core'
+import { OrbitIon } from '@gravito/ion'
+import { OrbitPrism } from '@gravito/prism'
 import { setupViteProxy } from './utils/vite'
 
 export async function bootstrap(options: { port?: number } = {}) {

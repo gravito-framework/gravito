@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 
 export class CouponService {
   constructor(private core: PlanetCore) {}

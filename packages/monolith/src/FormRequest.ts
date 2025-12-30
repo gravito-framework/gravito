@@ -1,5 +1,5 @@
+import type { GravitoContext, GravitoNext } from '@gravito/core'
 import { type TSchema, validate } from '@gravito/mass'
-import type { GravitoContext, GravitoNext } from 'gravito-core'
 import { Sanitizer } from './Sanitizer.js'
 
 export abstract class FormRequest {

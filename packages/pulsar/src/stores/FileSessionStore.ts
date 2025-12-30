@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { SessionId, SessionRecord, SessionStore } from '../types'
 
 export class FileSessionStore implements SessionStore {

@@ -11,7 +11,7 @@ Photon（`@gravito/photon`）是 Gravito 的 HTTP 核心引擎，提供路由、
 
 - 高效能路由與中介層
 - TypeScript 型別推導
-- 與 gravito-core 深度整合
+- 與 @gravito/core 深度整合
 - Beam RPC、Inertia 的底層基礎
 
 ## 安裝
@@ -20,7 +20,7 @@ Photon（`@gravito/photon`）是 Gravito 的 HTTP 核心引擎，提供路由、
 bun add @gravito/photon
 ```
 
-> 通常不需要手動安裝，`gravito-core` 已內建。
+> 通常不需要手動安裝，`@gravito/core` 已內建。
 
 ## 基本路由
 

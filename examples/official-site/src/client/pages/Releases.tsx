@@ -41,9 +41,9 @@ const releasesZh: ReleaseEntry[] = [
     version: '1.0.0-rc.1',
     title: 'Gravito v1.0.0 Release Candidate',
     description:
-      '所有核心模組進入 RC 階段！包含 gravito-core、@gravito/atlas、@gravito/sentinel、@gravito/fortify 等套件。',
+      '所有核心模組進入 RC 階段！包含 @gravito/core、@gravito/atlas、@gravito/sentinel、@gravito/fortify 等套件。',
     highlights: [
-      'gravito-core: 核心框架穩定',
+      '@gravito/core: 核心框架穩定',
       '@gravito/atlas: ORM 功能完善',
       '@gravito/sentinel: 認證授權系統',
       '@gravito/fortify: 安全防護增強',
@@ -96,9 +96,9 @@ const releasesEn: ReleaseEntry[] = [
     version: '1.0.0-rc.1',
     title: 'Gravito v1.0.0 Release Candidate',
     description:
-      'All core modules enter RC: gravito-core, @gravito/atlas, @gravito/sentinel, @gravito/fortify, and more.',
+      'All core modules enter RC: @gravito/core, @gravito/atlas, @gravito/sentinel, @gravito/fortify, and more.',
     highlights: [
-      'gravito-core: core stability milestone',
+      '@gravito/core: core stability milestone',
       '@gravito/atlas: ORM feature complete',
       '@gravito/sentinel: authentication and authorization',
       '@gravito/fortify: hardened security layer',

@@ -15,7 +15,7 @@
     "@gravito/enterprise": "workspace:*",
     "@gravito/signal": "workspace:*",
     "@gravito/stasis": "workspace:*",
-    "gravito-core": "workspace:*"
+    "@gravito/core": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

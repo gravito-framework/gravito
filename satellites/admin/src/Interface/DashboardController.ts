@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { GetDashboardStats } from '../Application/UseCases/GetDashboardStats'
 
 export class DashboardController {

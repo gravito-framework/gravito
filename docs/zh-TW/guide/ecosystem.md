@@ -17,7 +17,7 @@ Gravito 是一個由眾多 **動力模組 (Kinetic Modules)** 組成的龐大銀
     <div class="card-accent"></div>
     <span class="module-code">SINGULARITY</span>
     <h3 class="module-title">PlanetCore</h3>
-    <code class="module-pkg">gravito-core</code>
+    <code class="module-pkg">@gravito/core</code>
     <p class="module-desc">銀河系的引力中心。提供極致輕量的 IoC 容器、生命週期管理與外掛系統。</p>
   </div>
   

@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 
 export class AdServiceProvider extends ServiceProvider {
   register(_container: Container): void {

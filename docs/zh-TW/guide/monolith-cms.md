@@ -28,7 +28,7 @@ bun add @gravito/monolith
 ## 快速開始
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitContent } from '@gravito/monolith'
 
 const core = await PlanetCore.boot({

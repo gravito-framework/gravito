@@ -17,7 +17,7 @@ Gravito is a vast galaxy composed of numerous **Kinetic Modules**. These modules
     <div class="card-accent"></div>
     <span class="module-code">SINGULARITY</span>
     <h3 class="module-title">PlanetCore</h3>
-    <code class="module-pkg">gravito-core</code>
+    <code class="module-pkg">@gravito/core</code>
     <p class="module-desc">The gravitational center. An ultra-lightweight IoC container and lifecycle manager that hosts all kinetic modules.</p>
   </div>
   

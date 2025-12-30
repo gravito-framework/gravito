@@ -26,11 +26,11 @@
     "@gravito/mass": "workspace:*"
   },
   "peerDependencies": {
-    "gravito-core": "workspace:*"
+    "@gravito/core": "workspace:*"
   },
   "devDependencies": {
     "@types/marked": "^5.0.0",
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },

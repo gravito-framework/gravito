@@ -1,4 +1,4 @@
-import type { GravitoMiddleware, PlanetCore } from 'gravito-core'
+import type { GravitoMiddleware, PlanetCore } from '@gravito/core'
 import { ApiController } from '../controllers/ApiController'
 import { HomeController } from '../controllers/HomeController'
 

@@ -29,7 +29,7 @@ bun add @gravito/pulsar
 ## 基本設定
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitSentinel, CallbackUserProvider } from '@gravito/sentinel'
 import { OrbitPulsar } from '@gravito/pulsar'
 

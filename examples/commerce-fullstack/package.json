@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "@gravito/photon": "workspace:*",
     "@gravito/atlas": "workspace:*",
     "@gravito/monolith": "workspace:*",

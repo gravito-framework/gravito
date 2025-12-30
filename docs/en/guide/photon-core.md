@@ -11,7 +11,7 @@ Photon (`@gravito/photon`) is Gravito's HTTP core engine. It provides routing, m
 
 - High-performance routing and middleware
 - TypeScript inference
-- Deep integration with gravito-core
+- Deep integration with @gravito/core
 - Foundation for Beam RPC and Inertia
 
 ## Installation
@@ -20,7 +20,7 @@ Photon (`@gravito/photon`) is Gravito's HTTP core engine. It provides routing, m
 bun add @gravito/photon
 ```
 
-> Usually you do not install it directly. `gravito-core` ships with Photon built in.
+> Usually you do not install it directly. `@gravito/core` ships with Photon built in.
 
 ## Basic Routing
 

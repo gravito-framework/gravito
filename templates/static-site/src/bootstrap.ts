@@ -1,14 +1,14 @@
-import { OrbitIon } from '@gravito/ion'
-import { serveStatic } from '@gravito/photon/bun'
-import { OrbitPrism } from '@gravito/prism'
-import { OrbitCache } from '@gravito/stasis'
 import {
   bodySizeLimit,
   defineConfig,
   type GravitoMiddleware,
   PlanetCore,
   securityHeaders,
-} from 'gravito-core'
+} from '@gravito/core'
+import { OrbitIon } from '@gravito/ion'
+import { serveStatic } from '@gravito/photon/bun'
+import { OrbitPrism } from '@gravito/prism'
+import { OrbitCache } from '@gravito/stasis'
 import { registerHooks } from './hooks'
 import { registerRoutes } from './routes'
 

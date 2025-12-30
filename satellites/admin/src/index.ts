@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { CreateRole } from './Application/UseCases/CreateRole'
 import { DeleteRole } from './Application/UseCases/DeleteRole'
 import { GetDashboardStats } from './Application/UseCases/GetDashboardStats'

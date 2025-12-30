@@ -49,7 +49,7 @@ Gravito provides a rich set of official modules designed to work together seamle
 ### Foundation Layer
 | Package | Module | Description |
 |---|---|---|
-| `gravito-core` | **PlanetCore** | The micro-kernel with Hooks & IoC Container. |
+| `@gravito/core` | **PlanetCore** | The micro-kernel with Hooks & IoC Container. |
 | `@gravito/photon` | **Photon** | High-performance HTTP engine (Hono-based). |
 | `@gravito/atlas` | **Atlas** | Advanced ORM with migrations & Active Record. |
 | `@gravito/signal` | **Signal** | The central Event Bus for cross-module events. |
@@ -77,7 +77,7 @@ Gravito provides a rich set of official modules designed to work together seamle
 ### Installation
 ```bash
 # In your monorepo or project
-bun add gravito-core @gravito/photon @gravito/monolith
+bun add @gravito/core @gravito/photon @gravito/monolith
 ```
 
 ### Development

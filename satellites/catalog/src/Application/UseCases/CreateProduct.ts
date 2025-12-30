@@ -1,5 +1,5 @@
+import type { PlanetCore } from '@gravito/core'
 import { UseCase } from '@gravito/enterprise'
-import type { PlanetCore } from 'gravito-core'
 import type { IProductRepository } from '../../Domain/Contracts/ICatalogRepository'
 import { Product, Variant } from '../../Domain/Entities/Product'
 import { type ProductDTO, ProductMapper } from '../DTOs/ProductDTO'

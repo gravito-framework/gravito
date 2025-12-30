@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import { Adjustment, type Order } from '../../Domain/Entities/Order'
 
 export class AdjustmentCalculator {

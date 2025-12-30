@@ -8,7 +8,7 @@
     "@gravito/enterprise": "workspace:*",
     "@gravito/atlas": "workspace:*",
     "@gravito/ripple": "workspace:*",
-    "gravito-core": "workspace:*"
+    "@gravito/core": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

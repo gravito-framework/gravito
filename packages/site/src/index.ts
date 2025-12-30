@@ -1,6 +1,6 @@
+import { bodySizeLimit, type GravitoConfig, PlanetCore, securityHeaders } from '@gravito/core'
 import { I18nOrbit } from '@gravito/cosmos'
 import { OrbitMonolith } from '@gravito/monolith'
-import { bodySizeLimit, type GravitoConfig, PlanetCore, securityHeaders } from 'gravito-core'
 
 // Load Translations (Mock for now)
 const translations = {

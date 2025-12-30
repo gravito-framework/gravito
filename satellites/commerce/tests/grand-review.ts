@@ -1,5 +1,5 @@
 import { DB, Schema } from '@gravito/atlas'
-import { PlanetCore, setApp } from 'gravito-core'
+import { PlanetCore, setApp } from '@gravito/core'
 import type { PlaceOrder } from '../src/Application/UseCases/PlaceOrder'
 import { CommerceServiceProvider } from '../src/index'
 

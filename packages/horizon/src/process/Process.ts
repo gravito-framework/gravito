@@ -1,4 +1,4 @@
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 
 export interface ProcessResult {
   exitCode: number

@@ -1,6 +1,6 @@
+import type { GravitoContext } from '@gravito/core'
+import { AuthenticationException } from '@gravito/core'
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server'
-import type { GravitoContext } from 'gravito-core'
-import { AuthenticationException } from 'gravito-core'
 import type { PasskeysService } from '../../../Application/Services/PasskeysService'
 import type { IMemberRepository } from '../../../Domain/Contracts/IMemberRepository'
 import type { Member } from '../../../Domain/Entities/Member'

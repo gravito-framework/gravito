@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { AdminListOrders } from '../../../Application/UseCases/AdminListOrders'
 
 export class AdminOrderController {

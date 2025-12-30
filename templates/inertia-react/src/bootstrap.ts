@@ -1,8 +1,8 @@
+import { bodySizeLimit, defineConfig, PlanetCore, securityHeaders } from '@gravito/core'
 import { OrbitIon } from '@gravito/ion'
 import { serveStatic } from '@gravito/photon/bun'
 import { OrbitPrism } from '@gravito/prism'
 import { OrbitCache } from '@gravito/stasis'
-import { bodySizeLimit, defineConfig, PlanetCore, securityHeaders } from 'gravito-core'
 import { registerHooks } from './hooks'
 import { registerRoutes } from './routes'
 

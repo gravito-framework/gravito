@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { AdminListCoupons } from '../../../Application/UseCases/AdminListCoupons'
 import type { Coupon } from '../../../Domain/Entities/Coupon'
 

@@ -1,16 +1,16 @@
 import { join } from 'node:path'
-import { OrbitIon } from '@gravito/ion'
-import type { Photon } from '@gravito/photon'
-import { serveStatic } from '@gravito/photon/bun'
-import { OrbitPrism } from '@gravito/prism'
-import { OrbitCache } from '@gravito/stasis'
 import {
   bodySizeLimit,
   defineConfig,
   GravitoAdapter,
   PlanetCore,
   securityHeaders,
-} from 'gravito-core'
+} from '@gravito/core'
+import { OrbitIon } from '@gravito/ion'
+import type { Photon } from '@gravito/photon'
+import { serveStatic } from '@gravito/photon/bun'
+import { OrbitPrism } from '@gravito/prism'
+import { OrbitCache } from '@gravito/stasis'
 import { registerHooks } from './hooks'
 import { registerRoutes } from './routes'
 import { setupViteProxy } from './utils/vite'

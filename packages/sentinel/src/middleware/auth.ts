@@ -1,4 +1,4 @@
-import { AuthenticationException } from 'gravito-core'
+import { AuthenticationException } from '@gravito/core'
 import type { AuthManager } from '../AuthManager'
 
 export function auth(guard?: string) {

@@ -1,4 +1,4 @@
-import type { GravitoOrbit, PlanetCore } from 'gravito-core'
+import type { GravitoOrbit, PlanetCore } from '@gravito/core'
 import { DevMailbox } from './dev/DevMailbox'
 import { DevServer } from './dev/DevServer'
 import type { Mailable } from './Mailable'

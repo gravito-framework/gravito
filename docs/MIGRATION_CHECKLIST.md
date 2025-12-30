@@ -16,7 +16,7 @@
 
 - [ ] 更新本地 Git remote
   ```bash
-  git remote set-url origin https://github.com/YOUR_ORG/gravito-core.git
+  git remote set-url origin https://github.com/YOUR_ORG/@gravito/core.git
   git remote -v  # 驗證
   ```
 
@@ -24,7 +24,7 @@
 
 - [ ] 執行自動化更新腳本
   ```bash
-  bun run scripts/update-github-urls.ts YOUR_ORG gravito-core
+  bun run scripts/update-github-urls.ts YOUR_ORG @gravito/core
   ```
 
 - [ ] 手動檢查以下檔案類型：

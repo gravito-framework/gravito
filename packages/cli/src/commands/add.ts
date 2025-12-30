@@ -5,7 +5,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { confirm, note, spinner } from '@clack/prompts'
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import pc from 'picocolors'
 
 export async function addSpectrumCommand() {

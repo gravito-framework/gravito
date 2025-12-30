@@ -6,7 +6,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --external gravito-core --external @gravito/stream --external @gravito/prism",
+    "build": "tsup src/index.ts --format cjs,esm --dts --external @gravito/core --external @gravito/stream --external @gravito/prism",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80"
@@ -26,7 +26,7 @@
     "nodemailer": "^7.0.11"
   },
   "peerDependencies": {
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "@gravito/stream": "workspace:*",
     "@gravito/prism": "workspace:*",
     "react": "^19.0.0",
@@ -54,7 +54,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vue/server-renderer": "^3.0.0",
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "tsup": "8.5.1",
     "typescript": "^5.0.0",
     "vue": "^3.0.0",

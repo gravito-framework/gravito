@@ -1,5 +1,5 @@
+import { PhotonAdapter, PlanetCore } from '@gravito/core'
 import { OrbitMonolith } from '@gravito/monolith'
-import { PhotonAdapter, PlanetCore } from 'gravito-core'
 import config from '../config/gravito.config'
 
 /**

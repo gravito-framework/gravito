@@ -37,7 +37,7 @@ APP_KEY=base64:YOUR_GENERATED_KEY
 您可以使用 `Encrypter` 類別產生金鑰：
 
 ```ts
-import { Encrypter } from 'gravito-core'
+import { Encrypter } from '@gravito/core'
 
 console.log(Encrypter.generateKey())
 ```
@@ -103,10 +103,10 @@ core.router.get('/read', (c) => {
 
 ## CSRF 保護
 
-可透過 `gravito-core` 的 `csrfProtection` 啟用 CSRF 保護，Fortify 的驗證路由已預設啟用。
+可透過 `@gravito/core` 的 `csrfProtection` 啟用 CSRF 保護，Fortify 的驗證路由已預設啟用。
 
 ```ts
-import { csrfProtection } from 'gravito-core'
+import { csrfProtection } from '@gravito/core'
 
 core.router
   .middleware(csrfProtection())
@@ -120,7 +120,7 @@ core.router
 使用 `securityHeaders` 套用 CSP 與相關標頭。
 
 ```ts
-import { securityHeaders } from 'gravito-core'
+import { securityHeaders } from '@gravito/core'
 
 core.adapter.use(
   '*',
@@ -151,7 +151,7 @@ core.adapter.use(
 使用 `bodySizeLimit` 及早拒絕過大的請求。
 
 ```ts
-import { bodySizeLimit } from 'gravito-core'
+import { bodySizeLimit } from '@gravito/core'
 
 core.adapter.use('*', bodySizeLimit(1_048_576))
 ```
@@ -167,7 +167,7 @@ core.adapter.use('*', bodySizeLimit(1_048_576, { requireContentLength: true }))
 使用內建 middleware 啟用 CORS，並在 production 明確限制允許的來源。
 
 ```ts
-import { cors } from 'gravito-core'
+import { cors } from '@gravito/core'
 
 core.adapter.use(
   '*',
@@ -189,7 +189,7 @@ core.adapter.use(
 ```ts
 import { OrbitSignal } from '@gravito/signal'
 import { SpectrumOrbit } from '@gravito/spectrum'
-import { createHeaderGate } from 'gravito-core'
+import { createHeaderGate } from '@gravito/core'
 
 const adminGate = createHeaderGate({
   headerName: 'x-admin-token',

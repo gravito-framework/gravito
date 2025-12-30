@@ -1,4 +1,4 @@
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import type { IssueInvoice } from '../../../Application/UseCases/IssueInvoice'
 import type { Invoice } from '../../../Domain/Entities/Invoice'
 

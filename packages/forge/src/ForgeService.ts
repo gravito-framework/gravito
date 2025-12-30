@@ -3,8 +3,8 @@
  */
 
 import { randomUUID } from 'node:crypto'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { StorageProvider } from '@gravito/nebula'
-import { getRuntimeAdapter } from 'gravito-core'
 import { ImagePipeline } from './pipelines/ImagePipeline'
 import { VideoPipeline } from './pipelines/VideoPipeline'
 import { ImageProcessor } from './processors/ImageProcessor'

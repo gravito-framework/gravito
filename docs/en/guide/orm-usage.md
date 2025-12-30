@@ -768,7 +768,7 @@ core.hooks.addAction('db:transaction:complete', ({ transactionId, duration }) =>
 ## Full Example
 
 ```typescript
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import orbitDB from '@gravito/atlas'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'

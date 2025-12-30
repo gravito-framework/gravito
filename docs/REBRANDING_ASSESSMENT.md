@@ -6,7 +6,7 @@
 - **品牌名稱**：Gravito
 - **核心版本**：1.0.0-beta.1（準備上線 1.0.0）
 - **項目結構**：Monorepo，包含約 30+ 個 packages
-- **引用點統計**：約 596 個 `gravito-core` 或 `@gravito/` 引用
+- **引用點統計**：約 596 個 `@gravito/core` 或 `@gravito/` 引用
 - **重命名映射**：已定義完整的映射表（`scripts/rename-mapping.json`）
 
 ### 影響範圍
@@ -25,7 +25,7 @@
 - 不影響其他模組的核心功能
 
 ### 2. 拆分模組（需要謹慎處理）
-- `gravito-core` → `@gravito/graviton` + `@gravito/horizon`
+- `@gravito/core` → `@gravito/graviton` + `@gravito/horizon`
 - `@gravito/sentinel` → `@gravito/isotope` + `@gravito/charge`
 
 ### 3. 提取模組（未來規劃）
@@ -114,7 +114,7 @@
 ### 階段六：核心模組與工具（最高風險）
 
 1. **核心模組**（需要拆分，影響所有模組）
-   - `gravito-core` → `@gravito/graviton`（核心引擎）+ `@gravito/horizon`（路由）
+   - `@gravito/core` → `@gravito/graviton`（核心引擎）+ `@gravito/horizon`（路由）
    - **注意**：這是最高優先級的重命名，因為：
      - 所有其他模組都依賴 core
      - 需要先完成拆分和遷移
@@ -169,7 +169,7 @@
 **驗證**：完整測試認證和權限功能
 
 ### 第六階段：核心模組拆分（10-14 天）
-1. 分析 `gravito-core` 代碼結構
+1. 分析 `@gravito/core` 代碼結構
 2. 設計拆分方案（graviton + horizon）
 3. 創建新模組結構
 4. 遷移核心引擎代碼

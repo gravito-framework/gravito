@@ -8,7 +8,7 @@
         "start": "bun run src/index.ts"
     },
     "dependencies": {
-        "gravito-core": "workspace:*",
+        "@gravito/core": "workspace:*",
         "@gravito/beam": "workspace:*",
         "@gravito/stasis": "workspace:*",
         "@gravito/prism": "workspace:*",

@@ -16,7 +16,7 @@ description: 了解如何使用 Gravito Monitor 進行健康檢查、計量與�
 內建 `/healthz` 與 `/readyz` 端點，適合雲端原生環境。
 
 ```typescript
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitMonitor } from '@gravito/monitor'
 
 export default PlanetCore.configure({

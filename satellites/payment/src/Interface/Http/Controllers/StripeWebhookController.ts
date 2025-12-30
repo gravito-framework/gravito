@@ -1,4 +1,4 @@
-import type { GravitoContext, PlanetCore } from 'gravito-core'
+import type { GravitoContext, PlanetCore } from '@gravito/core'
 import Stripe from 'stripe'
 
 export class StripeWebhookController {

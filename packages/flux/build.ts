@@ -15,7 +15,7 @@ try {
     outdir: './dist',
     target: 'bun',
     format: 'esm',
-    external: ['gravito-core'],
+    external: ['@gravito/core'],
     splitting: true,
     naming: '[dir]/[name].js',
   })
@@ -26,7 +26,7 @@ try {
     outdir: './dist/node',
     target: 'node',
     format: 'esm',
-    external: ['gravito-core'],
+    external: ['@gravito/core'],
     splitting: false, // Node doesn't handle splitting as gracefully usually for libs unless configured well
     naming: 'index.mjs',
   })

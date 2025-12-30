@@ -1,4 +1,4 @@
-import { getRuntimeAdapter } from 'gravito-core'
+import { getRuntimeAdapter } from '@gravito/core'
 import type { IDockerAdapter } from '../../Domain/Interfaces'
 
 export class DockerAdapter implements IDockerAdapter {

@@ -36,7 +36,7 @@ mock.module('@gravito/sentinel', () => ({
   EmailVerificationService,
 }))
 
-mock.module('gravito-core', () => ({
+mock.module('@gravito/core', () => ({
   csrfProtection: () => async (_c: any, next?: () => Promise<unknown>) =>
     next ? next() : undefined,
   getCsrfToken: () => 'csrf-token',

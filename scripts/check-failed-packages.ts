@@ -12,7 +12,7 @@ import { promisify } from 'node:util';
 const execAsync = promisify(exec);
 
 const FAILED_PACKAGES = [
-  'gravito-core',
+  '@gravito/core',
   '@gravito/luminosity-adapter-photon',
   '@gravito/luminosity-adapter-express',
   '@gravito/luminosity-cli',
@@ -32,7 +32,7 @@ async function checkFileExists(path: string): Promise<boolean> {
 async function getPackageDir(pkgName: string): Promise<string | null> {
   const dirs = ['core', 'luminosity-adapter-photon', 'luminosity-adapter-express', 'luminosity-cli'];
   const nameMap: Record<string, string> = {
-    'gravito-core': 'core',
+    '@gravito/core': 'core',
     '@gravito/luminosity-adapter-photon': 'luminosity-adapter-photon',
     '@gravito/luminosity-adapter-express': 'luminosity-adapter-express',
     '@gravito/luminosity-cli': 'luminosity-cli',

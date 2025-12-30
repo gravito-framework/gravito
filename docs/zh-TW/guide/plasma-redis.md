@@ -135,7 +135,7 @@ await redis.publish('events', 'workflow:done')
 ## 以 Orbit 注入（應用內使用）
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitPlasma } from '@gravito/plasma'
 
 const core = await PlanetCore.boot({

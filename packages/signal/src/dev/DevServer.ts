@@ -1,4 +1,4 @@
-import type { GravitoContext, PlanetCore } from 'gravito-core'
+import type { GravitoContext, PlanetCore } from '@gravito/core'
 import type { DevMailbox } from './DevMailbox'
 import { getMailboxHtml } from './ui/mailbox'
 import { getPreviewHtml } from './ui/preview'

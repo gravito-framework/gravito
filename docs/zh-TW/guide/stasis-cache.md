@@ -23,7 +23,7 @@ bun add @gravito/stasis
 ## 基本設定
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import orbitCache from '@gravito/stasis'
 
 const core = new PlanetCore()

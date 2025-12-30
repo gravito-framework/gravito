@@ -1,5 +1,5 @@
-import type { Container, GravitoContext } from 'gravito-core'
-import { ServiceProvider } from 'gravito-core'
+import type { Container, GravitoContext } from '@gravito/core'
+import { ServiceProvider } from '@gravito/core'
 import { ProcessPayment } from './Application/UseCases/ProcessPayment'
 import { RefundPayment } from './Application/UseCases/RefundPayment'
 import { StripeGateway } from './Infrastructure/Gateways/StripeGateway'

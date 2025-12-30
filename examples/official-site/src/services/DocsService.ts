@@ -11,8 +11,8 @@ import { createHighlighter } from 'shiki'
 // -> /src (1)
 // -> /official-site (2)
 // -> /examples (3)
-// -> /gravito-core (4)
-// -> /gravito-core/docs (Target)
+// -> /@gravito/core (4)
+// -> /@gravito/core/docs (Target)
 const DOCS_ROOT = path.resolve(import.meta.dirname, '../../../../docs')
 
 export interface DocPage {

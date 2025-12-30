@@ -7,7 +7,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "gravito-core": "workspace:*",
+    "@gravito/core": "workspace:*",
     "@gravito/photon": "workspace:*",
     "@gravito/monolith": "workspace:*",
     "@gravito/atlas": "workspace:*",

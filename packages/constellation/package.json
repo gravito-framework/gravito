@@ -19,7 +19,7 @@
     "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "peerDependencies": {
-    "gravito-core": "1.0.0-beta.6"
+    "@gravito/core": "1.0.0-beta.6"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.956.0",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "bun-plugin-dts": "^0.3.0",
     "bun-types": "latest",
-    "gravito-core": "1.0.0-beta.6",
+    "@gravito/core": "1.0.0-beta.6",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },

@@ -38,7 +38,7 @@ brew install ffmpeg imagemagick
 ## Quick Start
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitForge } from '@gravito/forge'
 import { OrbitStorage } from '@gravito/nebula'
 import { OrbitStream } from '@gravito/stream'

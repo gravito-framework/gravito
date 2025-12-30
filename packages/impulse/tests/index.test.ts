@@ -40,7 +40,7 @@ class ValidationException extends GravitoException {
   }
 }
 
-mock.module('gravito-core', () => ({
+mock.module('@gravito/core', () => ({
   AuthorizationException,
   GravitoException,
   ValidationException,

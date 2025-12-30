@@ -1,9 +1,9 @@
 import { open, stat } from 'node:fs/promises'
 import { join } from 'node:path'
+import { PlanetCore } from '@gravito/core'
 import { OrbitEcho } from '@gravito/echo'
 import { type BroadcastManager, OrbitRadiance } from '@gravito/radiance'
 import { OrbitRipple } from '@gravito/ripple'
-import { PlanetCore } from 'gravito-core'
 import { FileSystemDriver } from './broadcaster'
 
 const STORAGE_PATH = join(process.cwd(), 'storage/broadcast_log.jsonl')

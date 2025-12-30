@@ -1,4 +1,4 @@
-import { type Container, ServiceProvider } from 'gravito-core'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { OrderVolumeResolver } from './Application/Resolvers/OrderVolumeResolver'
 import type { IAnalyticsResolver } from './Domain/Contracts/IAnalyticsResolver'
 

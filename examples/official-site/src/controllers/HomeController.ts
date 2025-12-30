@@ -1,6 +1,6 @@
+import type { PlanetCore } from '@gravito/core'
+import type { Context } from '@gravito/core/compat'
 import type { InertiaService } from '@gravito/ion'
-import type { PlanetCore } from 'gravito-core'
-import type { Context } from 'gravito-core/compat'
 import { getTranslation } from '../services/I18nService'
 
 export class HomeController {

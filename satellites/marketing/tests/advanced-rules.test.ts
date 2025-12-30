@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { DB, Schema } from '@gravito/atlas'
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import type { PromotionEngine } from '../src/Application/Services/PromotionEngine'
 import { MarketingServiceProvider } from '../src/index'
 

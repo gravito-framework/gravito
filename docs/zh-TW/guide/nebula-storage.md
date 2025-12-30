@@ -23,7 +23,7 @@ bun add @gravito/nebula
 ## 基本設定（本地儲存）
 
 ```ts
-import { PlanetCore } from 'gravito-core'
+import { PlanetCore } from '@gravito/core'
 import { OrbitStorage } from '@gravito/nebula'
 
 const core = await PlanetCore.boot({

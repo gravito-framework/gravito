@@ -3,7 +3,7 @@ import { cp, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { SitemapStream } from '@gravito/constellation'
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 import { bootstrap } from './src/bootstrap'
 
 console.log('🏗️  Starting Static Site Generation...')

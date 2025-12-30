@@ -11,7 +11,7 @@ const PACKAGES_DIR = join(process.cwd(), 'packages');
 
 // 官網使用的套件（Beta）
 const OFFICIAL_SITE_PACKAGES = [
-  'gravito-core',
+  '@gravito/core',
   '@gravito/stasis',
   '@gravito/orbit-inertia',
   '@gravito/orbit-view',

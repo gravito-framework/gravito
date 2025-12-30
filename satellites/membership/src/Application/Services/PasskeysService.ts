@@ -1,3 +1,4 @@
+import { AuthenticationException } from '@gravito/core'
 import type {
   AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
@@ -10,7 +11,6 @@ import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
 } from '@simplewebauthn/server'
-import { AuthenticationException } from 'gravito-core'
 import type { IMemberPasskeyRepository } from '../../Domain/Contracts/IMemberPasskeyRepository'
 import type { Member } from '../../Domain/Entities/Member'
 import { MemberPasskey } from '../../Domain/Entities/MemberPasskey'

@@ -1,5 +1,5 @@
 import { DB } from '@gravito/atlas'
-import type { PlanetCore } from 'gravito-core'
+import type { PlanetCore } from '@gravito/core'
 
 export class RewardSubscriber {
   constructor(private core: PlanetCore) {}
