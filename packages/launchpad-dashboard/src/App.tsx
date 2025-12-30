@@ -98,7 +98,10 @@ function App() {
                 : 'bg-rose-500/5 text-rose-500'
             )}
           >
-            <Icon icon={Shield} className={cn('w-5 h-5', connected && 'animate-[spin_4s_linear_infinite]')} />
+            <Icon
+              icon={Shield}
+              className={cn('w-5 h-5', connected && 'animate-[spin_4s_linear_infinite]')}
+            />
           </div>
         </div>
       </header>

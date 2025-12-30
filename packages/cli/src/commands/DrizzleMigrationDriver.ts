@@ -1,22 +1,13 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { getRuntimeAdapter } from '@gravito/core'
-
-/**
- * Migration result interface
- */
-export interface MigrationResult {
-  success: boolean
-  message: string
-  migrations?: string[]
-  error?: string
-}
+import type { MigrationDriver, MigrationResult } from './MigrationDriver'
 
 /**
  * Drizzle Kit Migration Driver
  * Wraps drizzle-kit CLI commands
  */
-export class DrizzleMigrationDriver {
+export class DrizzleMigrationDriver implements MigrationDriver {
   constructor(
     private configPath = 'drizzle.config.ts',
     private migrationsDir = 'src/database/migrations'
@@ -33,12 +24,12 @@ export class DrizzleMigrationDriver {
 
 export async function up(db: any): Promise<void> {
   // TODO: Implement migration
-  // await db.execute(sql\`CREATE TABLE ...\`)
+  // await db.execute(sql`CREATE TABLE ...`)
 }
 
 export async function down(db: any): Promise<void> {
   // TODO: Implement rollback
-  // await db.execute(sql\`DROP TABLE ...\`)
+  // await db.execute(sql`DROP TABLE ...`)
 }
 `
 
@@ -66,10 +57,6 @@ export async function down(db: any): Promise<void> {
 
       if (exitCode !== 0) {
         const error = await new Response(proc.stderr ?? null).text()
-        // If migration fails, it might be because migrations folder is empty or not initialized.
-        // Fallback or explicit error?
-        // Standard behavior: migrate fails if something is wrong.
-
         return {
           success: false,
           message: 'Migration failed',
