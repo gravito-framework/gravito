@@ -1,22 +1,13 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { getRuntimeAdapter } from 'gravito-core'
-
-/**
- * Migration result interface
- */
-export interface MigrationResult {
-  success: boolean
-  message: string
-  migrations?: string[]
-  error?: string
-}
+import type { MigrationDriver, MigrationResult } from './MigrationDriver'
 
 /**
  * Drizzle Kit Migration Driver
  * Wraps drizzle-kit CLI commands
  */
-export class DrizzleMigrationDriver {
+export class DrizzleMigrationDriver implements MigrationDriver {
   constructor(
     private configPath = 'drizzle.config.ts',
     private migrationsDir = 'src/database/migrations'

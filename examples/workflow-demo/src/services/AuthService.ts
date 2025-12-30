@@ -1,40 +1,71 @@
 import { randomUUID } from 'node:crypto'
+import { DB } from '@gravito/atlas'
 
 export type DemoUser = {
   id: string
   email: string
   name: string
+}
+
+type UserRow = DemoUser & {
   password: string
 }
 
 export class AuthService {
-  private users = new Map<string, DemoUser>()
-  private tokens = new Map<string, string>()
-
-  register(name: string, email: string, password: string): DemoUser {
+  async register(name: string, email: string, password: string): Promise<DemoUser> {
     const id = randomUUID()
-    const user = { id, name, email, password }
-    this.users.set(email, user)
-    return user
+    await DB.table('users').insert({
+      id,
+      name,
+      email,
+      password,
+    })
+    return { id, name, email }
   }
 
-  login(email: string, password: string): string | null {
-    const user = this.users.get(email)
+  async login(email: string, password: string): Promise<string | null> {
+    const user = await this.findUserByEmail(email)
     if (!user || user.password !== password) {
       return null
     }
     const token = randomUUID()
-    this.tokens.set(token, user.email)
+    await DB.table('api_tokens').insert({
+      id: randomUUID(),
+      user_id: user.id,
+      token,
+    })
     return token
   }
 
-  findByToken(token: string): DemoUser | null {
-    const email = this.tokens.get(token)
-    if (!email) return null
-    return this.users.get(email) ?? null
+  async findByToken(token: string): Promise<DemoUser | null> {
+    const tokenRecord = await DB.table('api_tokens').where('token', token).first()
+    if (!tokenRecord) {
+      return null
+    }
+    const user = await DB.table<UserRow>('users').where('id', tokenRecord.user_id).first()
+    if (!user) {
+      return null
+    }
+    return this.sanitize(user)
   }
 
-  findByEmail(email: string): DemoUser | null {
-    return this.users.get(email) ?? null
+  async findByEmail(email: string): Promise<DemoUser | null> {
+    const user = await this.findUserByEmail(email)
+    if (!user) {
+      return null
+    }
+    return this.sanitize(user)
+  }
+
+  private async findUserByEmail(email: string): Promise<UserRow | null> {
+    return await DB.table<UserRow>('users').where('email', email).first()
+  }
+
+  private sanitize(user: UserRow): DemoUser {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    }
   }
 }

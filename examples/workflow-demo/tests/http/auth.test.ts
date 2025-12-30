@@ -3,9 +3,10 @@ import { tester } from './setup'
 
 describe('Workflow Demo Auth', () => {
   test('register and login flow', async () => {
+    const email = `demo-${Date.now()}@example.com`
     const register = await tester().post('/auth/register', {
       name: 'Demo User',
-      email: 'demo@example.com',
+      email,
       password: 'secret',
     })
     expect(register.status).toBe(200)
@@ -13,7 +14,7 @@ describe('Workflow Demo Auth', () => {
     expect(body.token).toBeDefined()
 
     const login = await tester().post('/auth/login', {
-      email: 'demo@example.com',
+      email,
       password: 'secret',
     })
     expect(login.status).toBe(200)

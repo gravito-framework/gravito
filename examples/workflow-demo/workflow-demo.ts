@@ -17,6 +17,10 @@ const steps: Array<{ name: string; cmd: string[]; cwd?: string }> = [
     cwd: join('..', '..', 'packages', 'cli'),
   },
   {
+    name: 'Run migrations',
+    cmd: ['bun', join('..', '..', 'packages', 'cli', 'dist', 'index.js'), 'db:migrate', '--fresh'],
+  },
+  {
     name: 'Run Gravito Doctor',
     cmd: ['bun', join('..', '..', 'packages', 'cli', 'dist', 'index.js'), 'doctor'],
   },
