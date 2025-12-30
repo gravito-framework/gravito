@@ -17,6 +17,7 @@
         "check": "biome check . --diagnostic-level=error",
         "typecheck": "turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
         "typecheck:full": "find . -name '*.tsbuildinfo' -delete && turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
+        "typecheck:validate": "bun run scripts/check-typecheck-config.ts",
         "version:check": "bun run scripts/check-versions.ts",
         "changeset": "changeset",
         "ci:version": "changeset version",
@@ -24,7 +25,8 @@
         "pub:beta": "changeset publish --tag beta",
         "pub:snapshot": "changeset publish --tag snapshot",
         "launchpad:up": "bun scripts/start-launchpad.ts",
-        "launchpad:compose": "docker-compose -f docker-compose.launchpad.yml up --build -d"
+        "launchpad:compose": "docker-compose -f docker-compose.launchpad.yml up --build -d",
+        "ci:simulate": "bash scripts/ci-simulation.sh"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.3.10",
@@ -38,7 +40,7 @@
     },
     "simple-git-hooks": {
         "pre-commit": "export PATH=\"~/.bun/bin:$PATH\" && bunx lint-staged",
-        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && bun run typecheck:full && turbo run test --filter=[HEAD^1]"
+        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && bun run typecheck:validate && bun run typecheck:full && turbo run test --filter=[HEAD^1]"
     },
     "lint-staged": {
         "*.{js,ts,cjs,mjs}": [
