@@ -332,6 +332,24 @@
         "typescript": "^5.7.2",
       },
     },
+    "packages/admin-ui-ad": {
+      "name": "@gravito/admin-ui-ad",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/admin-sdk": "workspace:*",
+        "@gravito/admin-shell-react": "workspace:*",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.468.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.5.2",
+      },
+      "devDependencies": {
+        "@types/react": "^19.0.0",
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "packages/admin-ui-analytics": {
       "name": "@gravito/admin-ui-analytics",
       "version": "0.1.0",
@@ -1244,6 +1262,19 @@
         "typescript": "^5.7.2",
       },
     },
+    "satellites/ad": {
+      "name": "@gravito/satellite-ad",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gravito/atlas": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
+        "gravito-core": "workspace:*",
+      },
+      "devDependencies": {
+        "tsup": "^8.3.5",
+        "typescript": "^5.7.2",
+      },
+    },
     "satellites/analytics": {
       "name": "@gravito/satellite-analytics",
       "version": "0.1.0",
@@ -1737,6 +1768,8 @@
 
     "@gravito/admin-ui-access": ["@gravito/admin-ui-access@workspace:packages/admin-ui-access"],
 
+    "@gravito/admin-ui-ad": ["@gravito/admin-ui-ad@workspace:packages/admin-ui-ad"],
+
     "@gravito/admin-ui-analytics": ["@gravito/admin-ui-analytics@workspace:packages/admin-ui-analytics"],
 
     "@gravito/admin-ui-announcement": ["@gravito/admin-ui-announcement@workspace:packages/admin-ui-announcement"],
@@ -1824,6 +1857,8 @@
     "@gravito/ripple": ["@gravito/ripple@workspace:packages/ripple"],
 
     "@gravito/ripple-client": ["@gravito/ripple-client@workspace:packages/ripple-client"],
+
+    "@gravito/satellite-ad": ["@gravito/satellite-ad@workspace:satellites/ad"],
 
     "@gravito/satellite-analytics": ["@gravito/satellite-analytics@workspace:satellites/analytics"],
 
