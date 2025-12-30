@@ -6,7 +6,6 @@
         "noEmit": false,
         "declaration": true,
         "declarationMap": true,
-        "emitDeclarationOnly": true,
         "skipLibCheck": true,
         "paths": {
             "@gravito/core": [
