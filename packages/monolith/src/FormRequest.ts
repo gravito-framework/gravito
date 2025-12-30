@@ -1,9 +1,9 @@
 import { type TSchema, validate } from '@gravito/mass'
-import type { Context } from 'gravito-core'
+import type { GravitoContext } from 'gravito-core'
 import { Sanitizer } from './Sanitizer'
 
 export abstract class FormRequest {
-  protected context!: Context
+  protected context!: GravitoContext
 
   /**
    * Define the validation schema.
@@ -27,7 +27,7 @@ export abstract class FormRequest {
   /**
    * Set the context.
    */
-  public setContext(context: Context): this {
+  public setContext(context: GravitoContext): this {
     this.context = context
     return this
   }

@@ -19,7 +19,7 @@ export class GravitoServer {
   /**
    * 一鍵建立並組裝伺服器
    * @param manifest 站點描述清單
-   * @param resolvers 模組解析器字典 (讓應用層決定如何加載套件)
+   * @param resolvers 模組解析器字典
    */
   static async create(
     manifest: GravitoManifest,
@@ -28,12 +28,13 @@ export class GravitoServer {
     const core = new PlanetCore(
       manifest.config || {
         adapter: new PhotonAdapter(),
-        providers: [OrbitMonolith],
       }
     )
 
-    console.log(`
-🌌 [Gravito Core] 正在點燃: ${manifest.name} v${manifest.version || '1.0.0'}`)
+    // 修正：使用 orbit() 掛載 Orbit 模組
+    core.orbit(OrbitMonolith)
+
+    console.log(`\n🌌 [Gravito Core] 正在點燃: ${manifest.name} v${manifest.version || '1.0.0'}`)
 
     for (const moduleId of manifest.modules) {
       const resolver = resolvers[moduleId]
@@ -44,8 +45,6 @@ export class GravitoServer {
 
       try {
         const exported = await resolver()
-        // 如果是 class (ServiceProvider)，則實例化它
-        // 如果已經是實例，則直接註冊
         let instance: ServiceProvider
 
         if (typeof exported === 'function' && exported.prototype instanceof ServiceProvider) {
