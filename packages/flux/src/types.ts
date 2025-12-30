@@ -45,12 +45,12 @@ export interface StepExecution {
 /**
  * Step definition
  */
-export interface StepDefinition<TContext = WorkflowContext> {
+export interface StepDefinition<TInput = any, TData = any> {
   /** Step name (unique within workflow) */
   name: string
 
   /** Step handler function */
-  handler: (ctx: TContext) => Promise<void> | void
+  handler: (ctx: WorkflowContext<TInput, TData>) => Promise<void> | void
 
   /** Number of retries on failure */
   retries?: number
@@ -59,7 +59,7 @@ export interface StepDefinition<TContext = WorkflowContext> {
   timeout?: number
 
   /** Condition to skip this step */
-  when?: (ctx: TContext) => boolean
+  when?: (ctx: WorkflowContext<TInput, TData>) => boolean
 
   /** Mark as commit step (always executes even on replay) */
   commit?: boolean
@@ -104,12 +104,12 @@ export interface WorkflowContext<TInput = unknown, TData = Record<string, unknow
 /**
  * Serializable workflow state for persistence
  */
-export interface WorkflowState {
+export interface WorkflowState<TInput = any, TData = any> {
   id: string
   name: string
   status: WorkflowStatus
-  input: unknown
-  data: Record<string, unknown>
+  input: TInput
+  data: TData
   currentStep: number
   history: StepExecution[]
   createdAt: Date
@@ -125,12 +125,12 @@ export interface WorkflowState {
 /**
  * Workflow definition (immutable blueprint)
  */
-export interface WorkflowDefinition<TInput = unknown> {
+export interface WorkflowDefinition<TInput = unknown, TData = Record<string, unknown>> {
   /** Workflow name */
   name: string
 
   /** Step definitions in order */
-  steps: StepDefinition[]
+  steps: StepDefinition<TInput, TData>[]
 
   /** Input schema validator (optional) */
   validateInput?: (input: unknown) => input is TInput

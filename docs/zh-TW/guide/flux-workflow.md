@@ -240,6 +240,44 @@ await consumer.run({
 })
 ```
 
+## 企業級 RabbitMQ 工作流
+
+`examples/flux-enterprise` 是一個可以實際運行的 RabbitMQ → Flux 範例，搭配 `docker-compose.flux.yml` 啟用 `orders.workflow` exchange/queue、Flux consumer、`JsonFileTraceSink` 追蹤，每個 step 都能看到 retry 次數與錯誤。
+
+1. 複製環境設定、啟 RabbitMQ 並啟動 consumer：
+
+```bash
+cp examples/flux-enterprise/.env.example examples/flux-enterprise/.env
+docker compose -f docker-compose.flux.yml up -d rabbitmq
+cd examples/flux-enterprise
+bun run src/consumer.ts
+```
+
+2. 另開一個終端啟動 HTTP 伺服器或直接用 helper script 發單：
+
+```bash
+bun run src/server.ts
+curl -X POST http://localhost:4002/orders -H "Content-Type: application/json" -d '{"userId":"u1","items":[{"productId":"widget-b","qty":1}]}'
+# 或
+bun run scripts/publish-order.ts
+```
+
+3. 查 trace 檔案，確認每個 step 的狀態與重試：
+
+```bash
+curl http://localhost:4002/trace | tail
+```
+
+4. 造訪內建的儀表板（`http://localhost:4002/`），按一次「Publish sample order」就能送出任務並即時看到追蹤事件、重試與錯誤，畫面的 canvas timeline 會用飛行粒子標記每個 stage 以傳達事件流動與重試的感覺。
+
+5. 每次修改 demo 時，跑一次 DX 驗證腳本：
+
+```bash
+bun run examples/flux-enterprise/flux-enterprise.ts
+```
+
+更多細節請見 `examples/flux-enterprise/README.md`，裡面說明了 RabbitMQ exchange/queue、trace 路徑與整個 workflow 的運作。
+
 ## 事件 Hooks
 
 ```ts

@@ -43,7 +43,7 @@ interface StepOptions {
  *   })
  * ```
  */
-export class WorkflowBuilder<TInput = unknown> {
+export class WorkflowBuilder<TInput = unknown, TData = Record<string, unknown>> {
   private _name: string
   private _steps: StepDefinition[] = []
   private _validateInput?: (input: unknown) => input is TInput
@@ -57,8 +57,17 @@ export class WorkflowBuilder<TInput = unknown> {
    *
    * This method is used for TypeScript type inference.
    */
-  input<T>(): WorkflowBuilder<T> {
-    return this as unknown as WorkflowBuilder<T>
+  input<T>(): WorkflowBuilder<T, TData> {
+    return this as unknown as WorkflowBuilder<T, TData>
+  }
+
+  /**
+   * Define workflow data (state) type
+   *
+   * This method is used for TypeScript type inference.
+   */
+  data<T>(): WorkflowBuilder<TInput, T> {
+    return this as unknown as WorkflowBuilder<TInput, T>
   }
 
   /**
@@ -74,7 +83,7 @@ export class WorkflowBuilder<TInput = unknown> {
    */
   step(
     name: string,
-    handler: (ctx: WorkflowContext<TInput>) => Promise<void> | void,
+    handler: (ctx: WorkflowContext<TInput, TData>) => Promise<void> | void,
     options?: StepOptions
   ): this {
     this._steps.push({
@@ -96,7 +105,7 @@ export class WorkflowBuilder<TInput = unknown> {
    */
   commit(
     name: string,
-    handler: (ctx: WorkflowContext<TInput>) => Promise<void> | void,
+    handler: (ctx: WorkflowContext<TInput, TData>) => Promise<void> | void,
     options?: StepOptions
   ): this {
     this._steps.push({
@@ -113,7 +122,7 @@ export class WorkflowBuilder<TInput = unknown> {
   /**
    * Build the workflow definition
    */
-  build(): WorkflowDefinition<TInput> {
+  build(): WorkflowDefinition<TInput, TData> {
     if (this._steps.length === 0) {
       throw new Error(`Workflow "${this._name}" has no steps`)
     }

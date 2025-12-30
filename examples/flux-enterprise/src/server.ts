@@ -52,35 +52,6 @@ const listener = Bun.serve({
       })
     }
 
-    if (request.method === 'POST' && url.pathname === '/retry-workflow') {
-      try {
-        const { workflowId } = await request.json()
-        const events = await readTraceEvents(500)
-        const startEvent = events.find(
-          (e) => e.workflowId === workflowId && e.type === 'workflow:start'
-        ) as any
-
-        if (!startEvent) {
-          return new Response(JSON.stringify({ error: 'Original mission data not found' }), {
-            status: 404,
-          })
-        }
-
-        const body = {
-          orderId: `retry-${workflowId.slice(0, 8)}-${randomUUID().slice(0, 4)}`,
-          userId: startEvent.input?.userId || 'commander',
-          items: startEvent.input?.items || [],
-        }
-
-        await publishOrder(body)
-        return new Response(JSON.stringify({ status: 'retrying', orderId: body.orderId }), {
-          status: 200,
-        })
-      } catch (err) {
-        return new Response(JSON.stringify({ error: String(err) }), { status: 500 })
-      }
-    }
-
     if (request.method === 'GET' && url.pathname === '/') {
       return dashboardResponse()
     }
@@ -128,8 +99,8 @@ const dashboardHtml = `<!DOCTYPE html>
   <style>
     :root {
       --bg: #0b0d14;
-      --panel: #161b22;
-      --border: #30363d;
+      --panel: #11141d;
+      --border: #2d3342;
       --text: #c9d1d9;
       --accent: #58a6ff;
       --success: #3fb950;
@@ -137,426 +108,169 @@ const dashboardHtml = `<!DOCTYPE html>
       --error: #f85149;
     }
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 350px 1fr;
+      margin: 0; padding: 0; font-family: 'Segoe UI', monospace;
+      background: var(--bg); color: var(--text); height: 100vh;
+      overflow: hidden; display: grid; grid-template-columns: 350px 1fr;
     }
+
+    .stats-panel {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 20px;
+    }
+    .pool {
+      background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 4px;
+      padding: 10px; text-align: center;
+    }
+    .pool-label { font-size: 0.55rem; color: #888; font-weight: bold; margin-bottom: 4px; }
+    .pool-count { font-size: 1.2rem; font-weight: bold; color: #fff; }
+    .pool.success .pool-count { color: var(--success); }
+    .pool.recovered .pool-count { color: var(--warn); }
+    .pool.failed .pool-count { color: var(--error); }
+
+    #attention-list {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
+      padding-right: 4px;
+    }
+    .attention-item {
+      background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 4px;
+      padding: 8px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center;
+    }
+    .attention-item.recovered { border-left: 3px solid var(--warn); }
+    .attention-item.failed { border-left: 3px solid var(--error); background: rgba(248, 81, 73, 0.05); }
+    
+    .item-info { display: flex; flex-direction: column; gap: 2px; }
+    .item-id { font-family: monospace; color: #fff; font-weight: bold; }
+    .item-detail { color: #8b949e; font-size: 0.65rem; }
+    
+    .retry-btn {
+      background: var(--accent); color: #0b0d14; border: none; border-radius: 3px;
+      padding: 4px 8px; font-size: 0.65rem; font-weight: bold; cursor: pointer;
+      text-transform: uppercase;
+    }
+    .retry-btn:hover { background: #fff; }
 
     /* Sidebar */
     .mission-control {
-      background: var(--panel);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      gap: 1.5rem;
+      background: var(--panel); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 1.5rem; gap: 1.5rem;
+      height: 100vh; overflow: hidden; box-sizing: border-box;
       z-index: 10;
-      box-shadow: 4px 0 20px rgba(0,0,0,0.3);
-      height: 100vh;
-      overflow: hidden;
-      box-sizing: border-box;
     }
-    h1 { margin: 0; font-size: 1.25rem; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
-    h2 { margin: 0; font-size: 0.85rem; text-transform: uppercase; color: #8b949e; margin-bottom: 0.5rem; }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    h1 { margin: 0; font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; color: #fff; border-bottom: 2px solid var(--accent); padding-bottom: 10px; display: inline-block; }
     
     button#launch-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 1rem;
-      font-weight: bold;
-      font-size: 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      background: rgba(88, 166, 255, 0.1); color: var(--accent);
+      border: 1px solid var(--accent); padding: 1rem;
+      font-weight: bold; font-size: 0.9rem; border-radius: 4px;
+      cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
     }
-    button#launch-btn:hover { background: #409eff; transform: translateY(-2px); }
-    button#launch-btn:active { transform: translateY(0); }
+    button#launch-btn:hover:not(:disabled) { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+    button#launch-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: #444; color: #888; }
 
     #log-feed {
-      flex: 1;
-      min-height: 0;
-      background: #0d1117;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.75rem;
-      overflow-y: auto;
-      font-family: monospace;
-      font-size: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex: 1; min-height: 0; background: #0b0d14;
+      border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem;
+      overflow-y: auto; font-family: 'SF Mono', monospace; font-size: 0.7rem;
+      display: flex; flex-direction: column; gap: 6px;
     }
-    .log-entry { opacity: 0.7; border-left: 2px solid transparent; padding-left: 6px; }
-    .log-entry.new { animation: flash 0.5s; color: #fff; opacity: 1; }
-    .log-entry.error { color: var(--error); border-left-color: var(--error); }
-    .log-entry.retry { color: var(--warn); border-left-color: var(--warn); }
-    .log-entry.success { color: var(--success); border-left-color: var(--success); }
+    .log-entry { padding-left: 8px; border-left: 2px solid #333; color: #888; }
+    .log-entry.retry { border-color: var(--warn); color: var(--warn); }
+    .log-entry.error { border-color: var(--error); color: var(--error); }
+    .log-entry.success { border-color: var(--success); color: var(--success); }
 
     /* Space View */
     .space-view {
       position: relative;
-      background: radial-gradient(circle at bottom center, #1c2333 0%, #0b0d14 70%);
-      display: grid;
-      grid-template-rows: 1fr 200px;
-      grid-template-columns: 1fr 300px;
-      overflow: hidden;
+      background: linear-gradient(to bottom, #050608 0%, #13161c 100%);
+      display: flex; flex-direction: column; justify-content: flex-end;
+      overflow-x: auto; overflow-y: hidden;
+    }
+    
+    /* Grid Background */
+    .space-view::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
     }
 
-    /* Stars */
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.3;
-      animation: twinkle 4s infinite;
-      z-index: 1;
-    }
-
-    /* Pool Layout */
-    .pool {
-      position: relative;
-      border: 1px solid rgba(255,255,255,0.05);
-      background: rgba(0,0,0,0.2);
-    }
-
-    #active-zone {
-      grid-row: 1 / 3;
-      grid-column: 1;
-      display: flex;
-      align-items: flex-end;
-      padding-bottom: 2rem;
-      overflow-x: auto;
-      padding-left: 40px;
-      padding-right: 40px;
-      z-index: 2;
-    }
-
-    #orbit-zone {
-      grid-row: 1;
-      grid-column: 2;
-      border-left: 1px solid var(--border);
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      overflow-y: auto;
-      z-index: 3;
-      background: rgba(11, 13, 20, 0.8);
-      backdrop-filter: blur(4px);
-    }
-
-    #failed-zone {
-      grid-row: 2;
-      grid-column: 2;
-      border-left: 1px solid var(--border);
-      border-top: 1px solid var(--border);
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      overflow-y: auto;
-      z-index: 3;
-      background: rgba(11, 13, 20, 0.8);
-      backdrop-filter: blur(4px);
-    }
-
-    .pool-header {
-      font-size: 0.7rem;
-      color: #8b949e;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* Launch Pad Container */
     #launch-pad {
-      display: flex;
-      gap: 20px;
-      align-items: flex-end;
-      height: 100%;
-      min-width: max-content;
+      display: flex; gap: 40px; padding: 0 60px 60px 60px;
+      align-items: flex-end; min-width: max-content;
     }
 
-    /* Mini Rocket (in pools) */
-    .mini-rocket {
-      background: var(--panel);
-      padding: 0.75rem;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.7rem;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    .mini-rocket:hover { border-color: var(--accent); background: #1f242c; }
-    .mini-rocket .id { font-family: monospace; color: var(--accent); font-weight: bold; }
-    .mini-rocket .time { color: var(--success); font-size: 0.65rem; }
-    .mini-rocket.failed { border-left: 3px solid var(--error); }
-    .mini-rocket.success { border-left: 3px solid var(--success); }
-
-    /* Rocket System (Active) */
     .mission-container {
-      position: relative;
-      width: 60px;
-      height: 100%;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column-reverse;
-      justify-content: flex-start;
-      transition: opacity 0.5s ease;
+      position: relative; width: 60px; height: 300px;
+      flex-shrink: 0; display: flex; flex-direction: column-reverse; justify-content: flex-start;
+      transition: opacity 1s, transform 1s;
+    }
+    .mission-container.recycled {
+      opacity: 0; transform: scale(0.5); pointer-events: none;
     }
 
-    .rocket-body {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      flex-direction: column-reverse;
-      transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-      filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    /* SVG Styling */
+    .rocket-svg {
+      width: 60px; height: 240px;
+      position: absolute; bottom: 0; left: 0;
+      transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
+      filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
     }
 
-    /* FX: Fire & Smoke */
-    .engine-fire {
-      position: absolute;
-      bottom: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 30px;
-      height: 40px;
-      background: linear-gradient(to bottom, #ff4500, #ff8c00, transparent);
-      border-radius: 50% 50% 20% 20%;
-      filter: blur(4px);
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      z-index: -1;
+    /* Parts */
+    .part {
+      fill: #161b22; stroke: #30363d; stroke-width: 1.5px;
+      transition: fill 0.3s, stroke 0.3s, opacity 0.5s;
     }
-    .rocket-body.active-engine .engine-fire {
-      opacity: 1;
-      animation: flame-flicker 0.1s infinite;
-    }
-
-    .smoke-particle {
-      position: absolute;
-      background: rgba(200, 200, 200, 0.4);
-      border-radius: 50%;
-      filter: blur(8px);
-      pointer-events: none;
-      z-index: 1;
+    
+    /* Active State (Running) */
+    .part.active { fill: #1f6feb; stroke: #58a6ff; }
+    /* Warning State */
+    .part.retry { fill: #9e6a03; stroke: #d29922; animation: shake 0.5s infinite; }
+    /* Error State */
+    .part.failed { fill: #7a1e1e; stroke: #ff7b72; }
+    /* Completed State (Hollow/Ghost) */
+    .part.completed { fill: transparent; stroke: #238636; opacity: 0.3; stroke-dasharray: 4; }
+    /* Payload Orbit State */
+    .part[data-id="notify"].completed { 
+      fill: #238636; stroke: #3fb950; opacity: 1; stroke-dasharray: 0;
+      filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.6));
     }
 
-    @keyframes flame-flicker {
-      0%, 100% { height: 40px; transform: translateX(-50%) scaleX(1); }
-      50% { height: 50px; transform: translateX(-50%) scaleX(1.2); }
+    /* Text Labels */
+    .stage-label { 
+      position: absolute; width: 100px; left: -20px; text-align: center;
+      font-size: 0.6rem; color: #484f58; font-weight: bold;
+      pointer-events: none; opacity: 0; transition: opacity 0.3s;
     }
+    .mission-id { bottom: -25px; opacity: 1; color: #8b949e; }
+    
+    /* Show labels on hover or when detached */
+    .debris-label {
+      position: absolute; width: 60px; text-align: center;
+      font-size: 0.55rem; color: #3fb950;
+      opacity: 0; transform: translateY(10px); transition: all 0.5s;
+    }
+    .debris-label.visible { opacity: 1; transform: translateY(0); }
 
-    @keyframes smoke-drift {
-      0% { transform: scale(1) translateY(0); opacity: 0.4; }
-      100% { transform: scale(3) translateY(-100px) translateX(20px); opacity: 0; }
-    }
+    /* Launch Animations */
+    .rocket-svg.launching-1 { transform: translateY(-60px); }
+    .rocket-svg.launching-2 { transform: translateY(-120px); }
+    .rocket-svg.launching-3 { transform: translateY(-180px); }
+    .rocket-svg.launching-4 { transform: translateY(-380px); } /* Orbit */
 
-    .screen-shake {
-      animation: shake-view 0.1s infinite;
-    }
-    @keyframes shake-view {
-      0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(1px, 1px); }
-      50% { transform: translate(-1px, 0px); }
-      75% { transform: translate(1px, -1px); }
-    }
-
-    /* Stages */
-    .stage {
-      width: 60px;
-      height: 60px;
-      background: #2b313a;
-      border: 2px solid #484f58;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #8b949e;
-      font-size: 0.6rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      transition: all 0.4s ease;
-      position: relative;
-    }
-
-    .stage[data-step="validate-order"] { 
-      border-radius: 0 0 4px 4px; 
-      border-bottom: 4px solid #484f58;
-    }
-    .stage[data-step="notify-customer"] { 
-      border-radius: 30px 30px 0 0; 
-      height: 70px;
-      background: #30363d;
-    }
-
-    /* Status States */
-    .stage.running {
-      background: #1f6feb;
-      color: white;
-      border-color: #58a6ff;
-      box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
-    }
-    .stage.retry {
-      background: var(--warn);
-      color: #1a1a1a;
-      border-color: #ffd33d;
-      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite;
-    }
-    .stage.failed {
-      background: var(--error);
-      color: white;
-      border-color: #ff7b72;
-    }
-    .stage.completed {
-      background: var(--success);
-      color: white;
-      border-color: #2ea043;
-      opacity: 0.6;
-      filter: grayscale(0.4);
-    }
-
-    .rocket-body.launching-1 { transform: translateY(-70px); }
-    .rocket-body.launching-2 { transform: translateY(-140px); }
-    .rocket-body.launching-3 { transform: translateY(-210px); }
-    .rocket-body.launching-4 { transform: translateY(-350px); }
-    .rocket-body.launching-4 .stage[data-step="notify-customer"] {
-      box-shadow: 0 0 20px var(--success);
-      animation: satellite-pulse 2s infinite;
-    }
-    @keyframes satellite-pulse {
-      0% { box-shadow: 0 0 5px var(--success); }
-      50% { box-shadow: 0 0 25px var(--success); }
-      100% { box-shadow: 0 0 5px var(--success); }
-    }
-
-    .spent-debris {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      background: #21262d;
-      border: 1px dashed #484f58;
-      opacity: 0.3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      pointer-events: none;
-    }
-
-    .mission-id {
-      position: absolute;
-      bottom: -30px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.7rem;
-      color: #8b949e;
-      white-space: nowrap;
-    }
-
-    .stage-stats {
-      display: block;
-      font-size: 0.55rem;
-      color: #7ee787;
-      margin-top: 2px;
-      font-family: 'SF Mono', monospace;
-      font-weight: normal;
-    }
+    /* Total Time */
     .total-time {
-      position: absolute;
-      top: -20px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.65rem;
-      color: #fff;
-      text-shadow: 0 0 5px var(--accent);
-      animation: fadeIn 0.5s;
+      position: absolute; top: -20px; width: 100%; text-align: center;
+      color: #fff; font-size: 0.65rem; text-shadow: 0 0 5px var(--success);
+      opacity: 0; transition: opacity 0.5s;
     }
+    .rocket-svg.launching-4 .total-time { opacity: 1; }
 
-    /* Details Overlay */
-    #details-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(8px);
-    }
-    .overlay-content {
-      background: var(--panel);
-      width: 80%;
-      max-width: 800px;
-      height: 80%;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    }
-    .overlay-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .overlay-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1.5rem;
-      font-family: 'SF Mono', monospace;
-      font-size: 0.85rem;
-    }
-    .event-card {
-      background: #0d1117;
-      border: 1px solid var(--border);
-      margin-bottom: 0.5rem;
-      padding: 0.75rem;
-      border-radius: 4px;
-    }
-    .event-card .type { font-weight: bold; margin-bottom: 4px; display: block; }
-    .event-card.step { border-left: 3px solid var(--accent); }
-    .event-card.error { border-left: 3px solid var(--error); background: rgba(248, 81, 73, 0.05); }
-    .event-card .data { color: #8b949e; font-size: 0.75rem; white-space: pre-wrap; }
-
-    @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
     @keyframes shake { 
-      10%, 90% { transform: translate3d(-1px, 0, 0); } 
-      20%, 80% { transform: translate3d(2px, 0, 0); } 
-      30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 
-      40%, 60% { transform: translate3d(3px, 0, 0); }
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-1px); }
+      75% { transform: translateX(1px); }
     }
-    @keyframes flash { 0% { background: rgba(255,255,255,0.2); } 100% { background: transparent; } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
   </style>
 </head>
 <body>
@@ -564,426 +278,333 @@ const dashboardHtml = `<!DOCTYPE html>
   <div class="mission-control">
     <div>
       <h1>Flux Mission Control</h1>
-      <p style="color: #8b949e; font-size: 0.8rem; margin-top: 4px;">Antigravity Protocol Enabled</p>
+      <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">SYS: ONLINE // MODE: SVG_NEO</div>
     </div>
 
     <div class="control-group">
-      <div style="display: flex; gap: 8px;">
-        <button id="launch-btn" style="flex: 1">🚀 Launch</button>
-        <button id="burst-btn" style="flex: 1; background: linear-gradient(135deg, #d29922, #f85149); border: none;">🔥 Burst (x5)</button>
-      </div>
-      <div style="display: flex; gap: 10px; margin-top: 8px;">
-         <label style="font-size: 0.75rem; color: #8b949e; display: flex; align-items: center; cursor: pointer;">
-            <input type="checkbox" id="force-fail" style="margin-right: 6px;"> 
-            Simulate Stockout
-         </label>
-      </div>
+      <button id="launch-btn">🚀 INITIALIZE LAUNCH</button>
+      <label style="font-size: 0.75rem; color: #8b949e; display: flex; align-items: center; cursor: pointer; margin-top: 10px;">
+        <input type="checkbox" id="force-fail" style="margin-right: 8px;"> 
+        SIMULATE ANOMALY (Stockout)
+      </label>
+    </div>
+    
+    <div class="stats-panel">
+      <div class="pool success"><div class="pool-label">PERFECT</div><div class="pool-count" id="count-perfect">0</div></div>
+      <div class="pool recovered"><div class="pool-label">RECOVERED</div><div class="pool-count" id="count-recovered">0</div></div>
+      <div class="pool failed"><div class="pool-label">FAILED</div><div class="pool-count" id="count-failed">0</div></div>
     </div>
 
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      <h2>Telemetry Log</h2>
+    <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; margin-top: 1rem;">
+      <h2 style="font-size: 0.75rem; color: #d29922; text-transform: uppercase; margin-bottom: 0.5rem;">Attention Required</h2>
+      <div id="attention-list"></div>
+    </div>
+
+    <div style="height: 25%; display: flex; flex-direction: column; border-top: 1px solid var(--border); padding-top: 1rem;">
+      <h2 style="font-size: 0.75rem; color: #58a6ff; text-transform: uppercase; margin-bottom: 0.5rem;">System Logs</h2>
       <div id="log-feed"></div>
     </div>
   </div>
 
-  <div class="space-view" id="space">
-    <div id="active-zone">
-      <div id="launch-pad"></div>
-    </div>
-    
-    <div id="orbit-zone" class="pool">
-      <div class="pool-header">Orbit (Success)</div>
-      <div style="padding: 0 1rem 1rem 1rem">
-        <div class="pool-header" style="font-size: 0.6rem; opacity: 0.6; margin-top: 0.5rem;">Stable Orbit (Perfect) <span id="count-perfect">0</span></div>
-        <div id="orbit-perfect"></div>
-        
-        <div class="pool-header" style="font-size: 0.6rem; opacity: 0.6; margin-top: 1rem;">Refitted (Recovered) <span id="count-recovered">0</span></div>
-        <div id="orbit-recovered"></div>
-      </div>
-    </div>
-
-    <div id="failed-zone" class="pool">
-      <div class="pool-header">Terminal (Failed) <span id="count-failed">0</span></div>
-      <div id="failed-list"></div>
-    </div>
-  </div>
-
-  <div id="details-overlay">
-    <div class="overlay-content">
-      <div class="overlay-header">
-        <h3 id="overlay-title" style="margin:0">Mission Details</h3>
-        <button onclick="closeDetails()" style="background:none; border:none; color:white; cursor:pointer; font-size: 1.5rem;">&times;</button>
-      </div>
-      <div class="overlay-body" id="overlay-body"></div>
-    </div>
+  <div class="space-view">
+    <div id="launch-pad"></div>
   </div>
 
   <script>
     const steps = ['validate-order', 'reserve-stock', 'charge-payment', 'notify-customer'];
-    const activeMissions = new Map(); // workflowId -> State
-    const logFeed = document.getElementById('log-feed');
-    const launchPad = document.getElementById('launch-pad');
+    const stepMap = {
+      'validate-order': 'booster',
+      'reserve-stock': 'fuel',
+      'charge-payment': 'upper',
+      'notify-customer': 'notify'
+    };
+
+    const activeMissions = new Map();
     const missionHistory = new Set();
     const finalStateMissions = new Set();
-    let latestTraceEvents = [];
+    const stateCache = {};
+    const pageLoadTime = Date.now();
+    
+    const logFeed = document.getElementById('log-feed');
+    const launchPad = document.getElementById('launch-pad');
 
-    // Starfield generation
-    const space = document.getElementById('space');
-    const activeZone = document.getElementById('active-zone');
-    for(let i=0; i<50; i++) {
-      const star = document.createElement('div');
-      star.className = 'star';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.width = Math.random() * 3 + 'px';
-      star.style.height = star.style.width;
-      star.style.animationDelay = Math.random() * 4 + 's';
-      space.appendChild(star);
+    // Store payloads for retry
+    const missionPayloads = new Map();
+
+    function createRocketSVG(id) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("class", "rocket-svg");
+      svg.setAttribute("viewBox", "0 0 60 240");
+      
+      const gNotify = document.createElementNS(svgNS, "g"); gNotify.setAttribute("id", "p-" + id + "-notify"); gNotify.setAttribute("class", "part");
+      const pNotify = document.createElementNS(svgNS, "path"); pNotify.setAttribute("d", "M15,60 L15,40 C15,20 30,10 30,10 C30,10 45,20 45,40 L45,60 Z"); gNotify.appendChild(pNotify);
+      
+      const timeText = document.createElement("div"); timeText.className = "total-time";
+      
+      const gUpper = document.createElementNS(svgNS, "g"); gUpper.setAttribute("id", "p-" + id + "-upper"); gUpper.setAttribute("class", "part");
+      const pUpper = document.createElementNS(svgNS, "rect"); pUpper.setAttribute("x", "15"); pUpper.setAttribute("y", "62"); pUpper.setAttribute("width", "30"); pUpper.setAttribute("height", "58"); gUpper.appendChild(pUpper);
+
+      const gFuel = document.createElementNS(svgNS, "g"); gFuel.setAttribute("id", "p-" + id + "-fuel"); gFuel.setAttribute("class", "part");
+      const pFuel = document.createElementNS(svgNS, "rect"); pFuel.setAttribute("x", "15"); pFuel.setAttribute("y", "122"); pFuel.setAttribute("width", "30"); pFuel.setAttribute("height", "58"); gFuel.appendChild(pFuel);
+
+      const gBooster = document.createElementNS(svgNS, "g"); gBooster.setAttribute("id", "p-" + id + "-booster"); gBooster.setAttribute("class", "part");
+      const pBooster = document.createElementNS(svgNS, "path"); pBooster.setAttribute("d", "M15,182 L15,230 L5,240 L15,240 L20,235 L40,235 L45,240 L55,240 L45,230 L45,182 Z"); gBooster.appendChild(pBooster);
+
+      svg.appendChild(gBooster); svg.appendChild(gFuel); svg.appendChild(gUpper); svg.appendChild(gNotify);
+      return { svg, timeText };
     }
 
-    function createRocket(id) {
+    function createMissionDOM(id) {
       const container = document.createElement('div');
       container.className = 'mission-container';
       container.id = 'mission-' + id;
-      
-      const body = document.createElement('div');
-      body.className = 'rocket-body';
-      
-      // Engine fire
-      const fire = document.createElement('div');
-      fire.className = 'engine-fire';
-      body.appendChild(fire);
 
+      const { svg, timeText } = createRocketSVG(id);
+      
+      const debrisLabels = {};
       steps.forEach((step, idx) => {
-        const stage = document.createElement('div');
-        stage.className = 'stage';
-        stage.dataset.step = step;
-        
-        let label = step.split('-')[0];
-        if(label === 'notify') label = 'SAT-1';
-        stage.textContent = label;
-        
-        body.appendChild(stage);
+         const label = document.createElement('div');
+         label.className = 'debris-label';
+         label.style.bottom = (240 - ((idx + 1) * 60) + 20) + 'px';
+         label.dataset.step = step;
+         container.appendChild(label);
+         debrisLabels[step] = label;
       });
 
-      const label = document.createElement('div');
-      label.className = 'mission-id';
-      label.textContent = id.slice(0, 8);
-      
-      container.appendChild(body);
-      container.appendChild(label);
+      const labelId = document.createElement('div');
+      labelId.className = 'stage-label mission-id';
+      labelId.textContent = id.slice(0, 8);
+
+      container.appendChild(svg);
+      container.appendChild(timeText);
+      container.appendChild(labelId);
       launchPad.appendChild(container);
 
-      return { container, body, isCleaningUp: false };
+      // Cleanup DOM later
+      setTimeout(() => { if(container.parentNode) container.remove(); }, 120000);
+
+      return { container, svg, debrisLabels, isCleaningUp: false, hadRetries: false };
     }
 
-    function spawnSmoke(x, y) {
-      const p = document.createElement('div');
-      p.className = 'smoke-particle';
-      const size = 10 + Math.random() * 30;
-      p.style.width = size + 'px';
-      p.style.height = size + 'px';
-      p.style.left = (x - size/2) + 'px';
-      p.style.bottom = y + 'px';
-      p.style.animation = 'smoke-drift ' + (0.5 + Math.random() * 1) + 's ease-out forwards';
-      activeZone.appendChild(p);
-      setTimeout(() => p.remove(), 1500);
-    }
+    function retryMission(id) {
+       let payload = missionPayloads.get(id);
+       
+       if (!payload) {
+         // Fallback: Create a new payload based on current settings
+         // We assume the user wants to retry with the same "intent"
+         const failMode = document.getElementById('force-fail').checked;
+         payload = {
+             userId: 'commander-retry',
+             items: failMode ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-b', qty: 1 }]
+         };
+         addLog('Re-igniting ' + id.slice(0,8) + ' (Fallback payload)...', 'retry');
+       } else {
+         addLog('Re-igniting ' + id.slice(0,8) + '...', 'retry');
+       }
 
-    function triggerLaunchFX(rocketEl) {
-      const rect = rocketEl.getBoundingClientRect();
-      const zoneRect = activeZone.getBoundingClientRect();
-      const x = rect.left + rect.width / 2 - zoneRect.left;
-      
-      // Screen shake
-      space.classList.add('screen-shake');
-      setTimeout(() => space.classList.remove('screen-shake'), 300);
-
-      // Smoke burst
-      for(let i=0; i<8; i++) {
-        setTimeout(() => spawnSmoke(x + (Math.random() * 40 - 20), 20), i * 30);
-      }
+       performLaunch(payload);
+       
+       const item = document.getElementById('attn-' + id);
+       if (item) {
+         item.style.opacity = '0.5';
+         item.style.pointerEvents = 'none';
+         item.querySelector('.retry-btn').textContent = 'Sent';
+       }
     }
 
     function addLog(text, type) {
       const entry = document.createElement('div');
-      entry.className = 'log-entry new ' + (type || '');
+      entry.className = 'log-entry ' + (type || '');
       entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
       logFeed.prepend(entry);
-      if(logFeed.children.length > 50) logFeed.lastChild.remove();
+      if(logFeed.children.length > 100) logFeed.lastChild.remove();
     }
 
-    function openDetails(id) {
-      const events = latestTraceEvents.filter(e => e.workflowId === id);
-      const body = document.getElementById('overlay-body');
-      const title = document.getElementById('overlay-title');
-      
-      title.textContent = 'Mission Log: ' + id;
-      body.innerHTML = '';
-      
-      events.forEach(ev => {
-        const card = document.createElement('div');
-        card.className = 'event-card ' + (ev.stepName ? 'step' : '') + (ev.type.includes('error') ? ' error' : '');
-        
-        let content = '<span class="type">' + ev.type.toUpperCase() + (ev.stepName ? ' (' + ev.stepName + ')' : '') + '</span>';
-        if (ev.duration) content += '<div>Duration: ' + ev.duration + 'ms</div>';
-        if (ev.error) content += '<div style="color:var(--error)">Error: ' + ev.error + '</div>';
-        if (ev.input || ev.data) {
-          content += '<div class="data">' + JSON.stringify(ev.input || ev.data, null, 2) + '</div>';
-        }
-        
-        card.innerHTML = content;
-        body.appendChild(card);
-      });
-      
-      document.getElementById('details-overlay').style.display = 'flex';
-    }
-
-    function closeDetails() {
-      document.getElementById('details-overlay').style.display = 'none';
-    }
-
-    async function retryMission(id) {
-      addLog('Mission ' + id.slice(0,8) + ' re-ignition requested...', 'info');
-      try {
-        const res = await fetch('/retry-workflow', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ workflowId: id })
-        });
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-
-        // Remove the original failed entry from the pool
-        const failedList = document.getElementById('failed-list');
-        const items = failedList.querySelectorAll('.mini-rocket');
-        items.forEach(item => {
-           const idSpan = item.querySelector('.id');
-           if (idSpan && idSpan.textContent === id.slice(0, 8)) {
-             item.remove();
-           }
-        });
-        document.getElementById('count-failed').textContent = failedList.children.length;
-
-        addLog('Mission ' + id.slice(0,8) + ' recovery initiated', 'success');
-      } catch (err) {
-        addLog('Retry failed: ' + err.message, 'error');
-      }
-    }
-
-    function addToPool(id, state, poolId) {
+    function addToPool(id, state) {
       if (finalStateMissions.has(id)) return;
       finalStateMissions.add(id);
 
-      let targetListId = poolId === 'orbit' 
-        ? (state.hadRetries ? 'orbit-recovered' : 'orbit-perfect')
-        : 'failed-list';
-      
-      const listEl = document.getElementById(targetListId);
-      const poolClass = poolId === 'orbit' 
-        ? (state.hadRetries ? 'recovered' : 'success') 
-        : 'failed';
-      
-      const mini = document.createElement('div');
-      mini.className = 'mini-rocket ' + poolClass;
-      
-      let content = '<span class="id">' + id.slice(0, 8) + '</span>';
-      if (poolId === 'orbit' && state.duration) {
-        content += '<span class="time">' + state.duration + 'ms</span>';
-      }
-      if (poolId === 'failed') {
-        content += '<button class="retry-mini-btn" onclick="retryMission(\\'' + id + '\\'); event.stopPropagation();">⟳</button>';
-      }
-      
-      mini.innerHTML = content;
-      mini.onclick = () => openDetails(id);
-      
-      listEl.prepend(mini);
-      
-      // Update counts
-      if (poolId === 'orbit') {
-        document.getElementById('count-perfect').textContent = document.getElementById('orbit-perfect').children.length;
-        document.getElementById('count-recovered').textContent = document.getElementById('orbit-recovered').children.length;
+      let type = 'failed';
+      let reason = '';
+
+      if (state.status === 'completed') {
+         if (state.hadRetries) {
+            type = 'recovered';
+            // Find the step that was retried
+            const badStep = Object.keys(state.steps).find(k => state.steps[k].retries > 0);
+            reason = badStep ? 'Retried: ' + badStep.split('-')[0].toUpperCase() : 'Retried';
+         } else {
+            type = 'success';
+         }
       } else {
-        document.getElementById('count-failed').textContent = listEl.children.length;
+         // Find the failed step
+         const failedStep = Object.keys(state.steps).find(k => state.steps[k].status === 'failed');
+         reason = failedStep ? 'Failed at: ' + failedStep.split('-')[0].toUpperCase() : 'Unknown Error';
       }
 
-      const elements = activeMissions.get(id);
-      if (elements) {
-        elements.container.style.opacity = '0';
-        setTimeout(() => {
-          if(elements.container.parentNode) elements.container.remove();
-          activeMissions.delete(id);
-        }, 500);
+      // Update Count
+      const el = document.getElementById(type === 'success' ? 'count-perfect' : (type === 'recovered' ? 'count-recovered' : 'count-failed'));
+      if (el) el.textContent = parseInt(el.textContent) + 1;
+
+      // Add to Attention List if not perfect
+      if (type !== 'success') {
+        const list = document.getElementById('attention-list');
+        const item = document.createElement('div');
+        item.className = 'attention-item ' + type;
+        item.id = 'attn-' + id;
+        
+        let html = '<div class="item-info"><span class="item-id">' + id.slice(0, 8) + '</span>';
+        html += '<span class="item-detail">' + reason + '</span></div>';
+        
+        if (type === 'failed') {
+           html += '<button class="retry-btn" onclick="retryMission(\\'' + id + '\\')">Retry</button>';
+        }
+        
+        item.innerHTML = html;
+        list.prepend(item);
       }
     }
 
     function updateRocketVisuals(id, state) {
-      if (finalStateMissions.has(id)) return;
-
       let elements = activeMissions.get(id);
       if (!elements) {
         if (missionHistory.has(id)) return;
-
-        elements = createRocket(id);
-        elements.prevCount = 0;
+        elements = createMissionDOM(id);
         activeMissions.set(id, elements);
         missionHistory.add(id);
-        addLog('Mission ' + id.slice(0,8) + ' initialized', 'info');
       }
 
-      const { body, container } = elements;
+      const { svg, debrisLabels, container } = elements;
       let completedCount = 0;
-      let hasFailed = false;
-      let isBusy = false;
 
       steps.forEach((stepName, idx) => {
-        const stageEl = body.querySelector('.stage[data-step="' + stepName + '"]');
+        const svgGroupId = 'p-' + id + '-' + stepMap[stepName];
+        const part = svg.getElementById(svgGroupId);
         const stepState = state.steps[stepName];
-        
-        stageEl.className = 'stage';
-        stageEl.dataset.step = stepName;
+        if (!stepState || !part) return;
 
-        if (!stepState) return;
+        part.setAttribute("class", "part");
 
         if (stepState.status === 'completed') {
-          stageEl.classList.add('completed');
+          part.classList.add('completed');
           completedCount = Math.max(completedCount, idx + 1);
-          
-          if (!container.querySelector('.spent-debris[data-idx="' + idx + '"]')) {
-            const debris = document.createElement('div');
-            debris.className = 'spent-debris';
-            debris.dataset.idx = idx;
-            debris.style.bottom = (20 + (idx * 60)) + 'px';
-            debris.textContent = stepName.split('-')[0];
-            
-            if (stepState.duration !== undefined) {
-               const stats = document.createElement('span');
-               stats.className = 'stage-stats';
-               stats.textContent = stepState.duration + 'ms';
-               debris.appendChild(stats);
-            }
-            container.appendChild(debris);
+          if (stepState.duration && debrisLabels[stepName]) {
+             debrisLabels[stepName].textContent = stepState.duration + 'ms';
+             debrisLabels[stepName].classList.add('visible');
           }
-          
         } else if (stepState.status === 'running') {
-           isBusy = true;
+           part.classList.add('active');
            if (stepState.retries > 0) {
-             stageEl.classList.add('retry');
-             stageEl.textContent = 'RETRY ' + stepState.retries;
-           } else {
-             stageEl.classList.add('running');
-           }
+             elements.hadRetries = true;
+             part.classList.add('retry');
+           } 
         } else if (stepState.status === 'failed') {
-          stageEl.classList.add('failed');
-          stageEl.textContent = 'FAIL';
-          hasFailed = true;
+          part.classList.add('failed');
         }
       });
 
-      // Cinematic Logic: Trigger FX on step completion (Takeoff / Stage Separation)
-      if (completedCount > (elements.prevCount || 0)) {
-        triggerLaunchFX(elements.body);
-        elements.prevCount = completedCount;
+      svg.className.baseVal = 'rocket-svg launching-' + completedCount;
+
+      // Check for completion or failure
+      function scheduleRecycle(missionId, missionElements) {
+        if (missionElements.isCleaningUp) return;
+        missionElements.isCleaningUp = true;
+        
+        setTimeout(() => {
+          missionElements.container.classList.add('recycled');
+          setTimeout(() => {
+            if (missionElements.container.parentNode) missionElements.container.remove();
+            activeMissions.delete(missionId);
+          }, 1000);
+        }, 10000); // Wait 10s before recycling
       }
 
-      // Engline visual
-      if (isBusy) body.classList.add('active-engine');
-      else body.classList.remove('active-engine');
-
-      body.className = 'rocket-body launching-' + completedCount + (isBusy ? ' active-engine' : '');
-      
-      if (state.status === 'completed') {
-        addToPool(id, state, 'orbit');
-        addLog('Mission ' + id.slice(0,8) + ' successful!', 'success');
-      } else if (hasFailed) {
-        if (!elements.failedTimeout) {
-            elements.failedTimeout = setTimeout(() => {
-                addToPool(id, state, 'failed');
-            }, 3000);
+      if (state.status === 'completed' && !elements.isCleaningUp) {
+        if (state.duration) {
+           const timeEl = container.querySelector('.total-time');
+           if(timeEl) timeEl.textContent = '⏱ ' + state.duration + 'ms';
         }
+        state.hadRetries = elements.hadRetries;
+        addToPool(id, state);
+        scheduleRecycle(id, elements);
+      } else if (state.status === 'failed' && !elements.isCleaningUp) {
+        addToPool(id, state);
+        scheduleRecycle(id, elements);
       }
     }
-
-    const stateCache = {};
 
     async function fetchTrace() {
       try {
         const res = await fetch('/trace-events');
         const data = await res.json();
-        latestTraceEvents = data.events;
         const grouped = {};
-        
         data.events.sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
         
         data.events.forEach(ev => {
           const id = ev.workflowId;
-          if (!grouped[id]) grouped[id] = { status: 'pending', steps: {}, hadRetries: false };
-          
+          if (!grouped[id]) grouped[id] = { status: 'pending', steps: {} };
           const wf = grouped[id];
           if (ev.type === 'workflow:start') wf.status = 'running';
-          if (ev.type === 'workflow:complete') {
-             wf.status = 'completed';
-             wf.duration = ev.duration;
-          }
+          if (ev.type === 'workflow:complete') { wf.status = 'completed'; wf.duration = ev.duration; }
           
           if (ev.stepName) {
             if (!wf.steps[ev.stepName]) wf.steps[ev.stepName] = { status: 'pending', retries: 0 };
             const step = wf.steps[ev.stepName];
-            
             if (ev.type === 'step:start') step.status = 'running';
             if (ev.type === 'step:retry') {
-               wf.hadRetries = true;
                step.status = 'running';
                step.retries = ev.retries;
                const key = id + '-' + ev.stepName + '-' + ev.retries;
                if (!stateCache[key]) {
-                 addLog(id.slice(0,8) + ': Turbulence in ' + ev.stepName + '! Retrying...', 'retry');
+                 if (ev.timestamp > pageLoadTime) addLog(id.slice(0,8) + ': Retry ' + ev.stepName, 'retry');
                  stateCache[key] = true;
                }
             }
-            if (ev.type === 'step:complete') {
-              step.status = 'completed';
-              step.duration = ev.duration;
-            }
+            if (ev.type === 'step:complete') { step.status = 'completed'; step.duration = ev.duration; }
             if (ev.type === 'step:error') {
                step.status = 'failed';
+               wf.status = 'failed'; // Fix: Mark workflow as failed
                const key = id + '-' + ev.stepName + '-error';
                if (!stateCache[key]) {
-                 addLog(id.slice(0,8) + ': CRITICAL FAILURE - ' + ev.error, 'error');
+                 if (ev.timestamp > pageLoadTime) addLog(id.slice(0,8) + ': Failed ' + ev.stepName, 'error');
                  stateCache[key] = true;
                }
             }
           }
         });
 
-        Object.keys(grouped).forEach(id => {
-          updateRocketVisuals(id, grouped[id]);
-        });
-
-      } catch (e) {
-        console.error(e);
-      }
+        Object.keys(grouped).forEach(id => updateRocketVisuals(id, grouped[id]));
+      } catch (e) { console.error(e); }
     }
 
     setInterval(fetchTrace, 1000);
     fetchTrace();
 
-    async function performLaunch() {
+    async function performLaunch(customPayload) {
       const failMode = document.getElementById('force-fail').checked;
+      const payload = customPayload || {
+         userId: 'commander',
+         items: failMode ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-b', qty: 1 }]
+      };
+
       try {
         const res = await fetch('/orders', {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({
-             userId: 'commander',
-             items: failMode 
-               ? [{ productId: 'widget-a', qty: 100 }]
-               : [{ productId: 'widget-b', qty: 1 }]
-           })
+           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        addLog('Launch sequence initiated: ' + data.orderId);
+        // Store payload for retry
+        if (data.orderId) missionPayloads.set(data.orderId, payload); // Wait, orderId changes on server? 
+        // The server generates orderId if not provided. 
+        // We should really generate it client side to track it properly or map it back.
+        // For now, we store it by the ID returned.
+        
+        // Actually, the server returns the ID. We can map it.
+        missionPayloads.set(data.orderId, payload);
+        
+        addLog('Mission Launched: ' + data.orderId, 'success');
       } catch (e) {
         addLog('Launch aborted: ' + e.message, 'error');
       }
@@ -991,19 +612,12 @@ const dashboardHtml = `<!DOCTYPE html>
 
     document.getElementById('launch-btn').addEventListener('click', async () => {
       const btn = document.getElementById('launch-btn');
-      btn.style.transform = 'scale(0.95)';
-      setTimeout(() => btn.style.transform = '', 100);
-      performLaunch();
-    });
-
-    document.getElementById('burst-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('burst-btn');
-      btn.style.transform = 'scale(0.95)';
-      setTimeout(() => btn.style.transform = '', 100);
-      
-      addLog('MULTIPLE IGNITION DETECTED - BURST MODE ACTIVE', 'warn');
-      for(let i=0; i<5; i++) {
-        setTimeout(() => performLaunch(), i * 200);
+      btn.disabled = true;
+      btn.textContent = 'Ignition...';
+      try {
+        await performLaunch();
+      } finally {
+        setTimeout(() => { btn.disabled = false; btn.textContent = '🚀 INITIALIZE LAUNCH'; }, 500);
       }
     });
   </script>

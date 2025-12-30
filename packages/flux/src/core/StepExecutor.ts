@@ -17,8 +17,8 @@ export class StepExecutor {
   private defaultRetries: number
   private defaultTimeout: number
   private onRetry?: (
-    step: StepDefinition,
-    ctx: WorkflowContext,
+    step: StepDefinition<any, any>,
+    ctx: WorkflowContext<any, any>,
     error: Error,
     attempt: number,
     maxRetries: number
@@ -29,8 +29,8 @@ export class StepExecutor {
       defaultRetries?: number
       defaultTimeout?: number
       onRetry?: (
-        step: StepDefinition,
-        ctx: WorkflowContext,
+        step: StepDefinition<any, any>,
+        ctx: WorkflowContext<any, any>,
         error: Error,
         attempt: number,
         maxRetries: number
@@ -45,9 +45,9 @@ export class StepExecutor {
   /**
    * Execute a step with retry and timeout
    */
-  async execute(
-    step: StepDefinition,
-    ctx: WorkflowContext,
+  async execute<TInput, TData>(
+    step: StepDefinition<TInput, TData>,
+    ctx: WorkflowContext<TInput, TData>,
     execution: StepExecution
   ): Promise<StepResult> {
     const maxRetries = step.retries ?? this.defaultRetries
@@ -111,16 +111,23 @@ export class StepExecutor {
   /**
    * Execute handler with timeout
    */
-  private async executeWithTimeout(
-    handler: (ctx: WorkflowContext) => Promise<void> | void,
-    ctx: WorkflowContext,
+  private async executeWithTimeout<TInput, TData>(
+    handler: (ctx: WorkflowContext<TInput, TData>) => Promise<void> | void,
+    ctx: WorkflowContext<TInput, TData>,
     timeout: number
   ): Promise<void> {
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Step timeout')), timeout)
-    })
+    let timer: ReturnType<typeof setTimeout> | null = null
+    try {
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Step timeout')), timeout)
+      })
 
-    await Promise.race([Promise.resolve(handler(ctx)), timeoutPromise])
+      await Promise.race([Promise.resolve(handler(ctx)), timeoutPromise])
+    } finally {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
   }
 
   /**

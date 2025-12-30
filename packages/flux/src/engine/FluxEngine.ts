@@ -17,6 +17,7 @@ import type {
   FluxTraceEvent,
   WorkflowContext,
   WorkflowDefinition,
+  WorkflowState,
   WorkflowStorage,
 } from '../types'
 
@@ -76,8 +77,8 @@ export class FluxEngine {
    * @param input - Input data for the workflow
    * @returns Execution result
    */
-  async execute<TInput, TData = Record<string, unknown>>(
-    workflow: WorkflowBuilder<TInput> | WorkflowDefinition<TInput>,
+  async execute<TInput, TData = any>(
+    workflow: WorkflowBuilder<TInput, TData> | WorkflowDefinition<TInput, TData>,
     input: TInput
   ): Promise<FluxResult<TData>> {
     const startTime = Date.now()
@@ -89,17 +90,17 @@ export class FluxEngine {
     }
 
     // Create context
-    const ctx = this.contextManager.create(
+    const ctx = this.contextManager.create<TInput, TData>(
       definition.name,
       input,
       definition.steps.length
-    ) as WorkflowContext<TInput>
+    ) as WorkflowContext<TInput, TData>
 
     // Create state machine
     const stateMachine = new StateMachine()
 
     // Save initial state
-    await this.storage.save(this.contextManager.toState(ctx))
+    await this.storage.save(this.contextManager.toState<TInput, TData>(ctx))
 
     return this.runFrom(definition, ctx, stateMachine, startTime, 0)
   }
@@ -110,8 +111,8 @@ export class FluxEngine {
    * @param workflowId - Workflow instance ID
    * @returns Execution result or null if not found
    */
-  async resume<TInput, TData = Record<string, unknown>>(
-    workflow: WorkflowBuilder<TInput> | WorkflowDefinition<TInput>,
+  async resume<TInput, TData = any>(
+    workflow: WorkflowBuilder<TInput, TData> | WorkflowDefinition<TInput, TData>,
     workflowId: string,
     options?: { fromStep?: number | string }
   ): Promise<FluxResult<TData> | null> {
@@ -127,7 +128,7 @@ export class FluxEngine {
       throw new Error('Workflow definition changed; resume is not safe')
     }
 
-    const ctx = this.contextManager.restore<TInput>(state)
+    const ctx = this.contextManager.restore<TInput, TData>(state)
     const stateMachine = new StateMachine()
     stateMachine.forceStatus('pending')
 
@@ -135,7 +136,7 @@ export class FluxEngine {
     this.resetHistoryFrom(ctx, startIndex)
     Object.assign(ctx, { status: 'pending', currentStep: startIndex })
 
-    await this.storage.save(this.contextManager.toState(ctx))
+    await this.storage.save(this.contextManager.toState<TInput, TData>(ctx))
 
     return this.runFrom(definition, ctx, stateMachine, Date.now(), startIndex, {
       resume: true,
@@ -146,8 +147,8 @@ export class FluxEngine {
   /**
    * Retry a specific step (replays from that step onward)
    */
-  async retryStep<TInput, TData = Record<string, unknown>>(
-    workflow: WorkflowBuilder<TInput> | WorkflowDefinition<TInput>,
+  async retryStep<TInput, TData = any>(
+    workflow: WorkflowBuilder<TInput, TData> | WorkflowDefinition<TInput, TData>,
     workflowId: string,
     stepName: string
   ): Promise<FluxResult<TData> | null> {
@@ -163,7 +164,7 @@ export class FluxEngine {
       throw new Error('Workflow definition changed; retry is not safe')
     }
 
-    const ctx = this.contextManager.restore<TInput>(state)
+    const ctx = this.contextManager.restore<TInput, TData>(state)
     const stateMachine = new StateMachine()
     stateMachine.forceStatus('pending')
 
@@ -171,7 +172,7 @@ export class FluxEngine {
     this.resetHistoryFrom(ctx, startIndex)
     Object.assign(ctx, { status: 'pending', currentStep: startIndex })
 
-    await this.storage.save(this.contextManager.toState(ctx))
+    await this.storage.save(this.contextManager.toState<TInput, TData>(ctx))
 
     return this.runFrom(definition, ctx, stateMachine, Date.now(), startIndex, {
       retry: true,
@@ -182,8 +183,17 @@ export class FluxEngine {
   /**
    * Get workflow state by ID
    */
-  async get(workflowId: string) {
-    return this.storage.load(workflowId)
+  async get<TInput = any, TData = any>(
+    workflowId: string
+  ): Promise<WorkflowState<TInput, TData> | null> {
+    return this.storage.load(workflowId) as Promise<WorkflowState<TInput, TData> | null>
+  }
+
+  /**
+   * Save workflow state manually (e.g., for external updates)
+   */
+  async saveState<TInput, TData>(state: WorkflowState<TInput, TData>): Promise<void> {
+    return this.storage.save(state)
   }
 
   /**
@@ -207,14 +217,14 @@ export class FluxEngine {
     await this.storage.close?.()
   }
 
-  private resolveDefinition<TInput>(
-    workflow: WorkflowBuilder<TInput> | WorkflowDefinition<TInput>
-  ): WorkflowDefinition<TInput> {
+  private resolveDefinition<TInput, TData>(
+    workflow: WorkflowBuilder<TInput, TData> | WorkflowDefinition<TInput, TData>
+  ): WorkflowDefinition<TInput, TData> {
     return workflow instanceof WorkflowBuilder ? workflow.build() : workflow
   }
 
-  private resolveStartIndex<TInput>(
-    definition: WorkflowDefinition<TInput>,
+  private resolveStartIndex<TInput, TData>(
+    definition: WorkflowDefinition<TInput, TData>,
     fromStep: number | string | undefined,
     fallback: number
   ): number {
@@ -234,7 +244,10 @@ export class FluxEngine {
     return Math.max(0, Math.min(fallback, definition.steps.length - 1))
   }
 
-  private resetHistoryFrom(ctx: WorkflowContext, startIndex: number): void {
+  private resetHistoryFrom<TInput, TData>(
+    ctx: WorkflowContext<TInput, TData>,
+    startIndex: number
+  ): void {
     for (let i = startIndex; i < ctx.history.length; i++) {
       const entry = ctx.history[i]
       if (!entry) {
@@ -249,9 +262,9 @@ export class FluxEngine {
     }
   }
 
-  private async runFrom<TInput, TData = Record<string, unknown>>(
-    definition: WorkflowDefinition<TInput>,
-    ctx: WorkflowContext<TInput>,
+  private async runFrom<TInput, TData = any>(
+    definition: WorkflowDefinition<TInput, TData>,
+    ctx: WorkflowContext<TInput, TData>,
     stateMachine: StateMachine,
     startTime: number,
     startIndex: number,
@@ -281,7 +294,7 @@ export class FluxEngine {
         Object.assign(ctx, { currentStep: i })
 
         // Emit step start event
-        this.config.on?.stepStart?.(step.name, ctx)
+        this.config.on?.stepStart?.(step.name, ctx as any)
         await this.emitTrace({
           type: 'step:start',
           timestamp: Date.now(),
@@ -300,7 +313,7 @@ export class FluxEngine {
 
         if (result.success) {
           // Emit step complete event
-          this.config.on?.stepComplete?.(step.name, ctx, result)
+          this.config.on?.stepComplete?.(step.name, ctx as any, result)
           if (execution.status === 'skipped') {
             await this.emitTrace({
               type: 'step:skipped',
@@ -332,7 +345,7 @@ export class FluxEngine {
           }
         } else {
           // Emit step error event
-          this.config.on?.stepError?.(step.name, ctx, result.error!)
+          this.config.on?.stepError?.(step.name, ctx as any, result.error!)
           await this.emitTrace({
             type: 'step:error',
             timestamp: Date.now(),
@@ -353,7 +366,7 @@ export class FluxEngine {
           Object.assign(ctx, { status: 'failed' })
 
           await this.storage.save({
-            ...this.contextManager.toState(ctx),
+            ...this.contextManager.toState<TInput, TData>(ctx),
             error: result.error?.message,
           })
 
@@ -368,7 +381,7 @@ export class FluxEngine {
         }
 
         // Save progress after each step
-        await this.storage.save(this.contextManager.toState(ctx))
+        await this.storage.save(this.contextManager.toState<TInput, TData>(ctx))
       }
 
       // Complete workflow
@@ -376,12 +389,12 @@ export class FluxEngine {
       Object.assign(ctx, { status: 'completed' })
 
       await this.storage.save({
-        ...this.contextManager.toState(ctx),
+        ...this.contextManager.toState<TInput, TData>(ctx),
         completedAt: new Date(),
       })
 
       // Emit workflow complete event
-      this.config.on?.workflowComplete?.(ctx)
+      this.config.on?.workflowComplete?.(ctx as any)
       await this.emitTrace({
         type: 'workflow:complete',
         timestamp: Date.now(),
@@ -404,7 +417,7 @@ export class FluxEngine {
       const err = error instanceof Error ? error : new Error(String(error))
 
       // Emit workflow error event
-      this.config.on?.workflowError?.(ctx, err)
+      this.config.on?.workflowError?.(ctx as any, err)
       await this.emitTrace({
         type: 'workflow:error',
         timestamp: Date.now(),
@@ -420,7 +433,7 @@ export class FluxEngine {
       Object.assign(ctx, { status: 'failed' })
 
       await this.storage.save({
-        ...this.contextManager.toState(ctx),
+        ...this.contextManager.toState<TInput, TData>(ctx),
         error: err.message,
       })
 

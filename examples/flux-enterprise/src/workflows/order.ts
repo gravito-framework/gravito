@@ -11,6 +11,17 @@ export interface OrderWorkflowInput {
   items: OrderItem[]
 }
 
+export interface OrderWorkflowData {
+  validatedAt: string
+  reservedItems: Record<string, number>
+  payment: {
+    amount: number
+    captured: boolean
+  }
+  notification: string
+  [key: string]: any
+}
+
 const inventory = new Map<string, number>([
   ['widget-a', 5],
   ['widget-b', 1000],
@@ -21,6 +32,7 @@ const errorTracker = new Map<string, number>()
 
 export const orderWorkflow = createWorkflow('flux-enterprise-order')
   .input<OrderWorkflowInput>()
+  .data<OrderWorkflowData>()
   .step('validate-order', (ctx) => {
     if (!ctx.input.orderId.trim()) {
       throw new Error('orderId is required')
