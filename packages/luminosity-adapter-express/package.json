@@ -24,7 +24,7 @@
     "test:ci": "bun test --coverage --coverage-threshold=80"
   },
   "dependencies": {
-    "@gravito/luminosity": "1.0.0"
+    "@gravito/luminosity": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

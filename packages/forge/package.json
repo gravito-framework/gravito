@@ -52,9 +52,9 @@
   "author": "Carl Lee <carllee0520@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@gravito/core": "1.0.0-beta.6",
-    "@gravito/nebula": "1.0.0-beta.1",
-    "@gravito/stream": "1.0.0-beta.1"
+    "@gravito/core": "workspace:*",
+    "@gravito/nebula": "workspace:*",
+    "@gravito/stream": "workspace:*"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -74,12 +74,12 @@
     }
   },
   "devDependencies": {
-    "@gravito/nebula": "1.0.0-beta.1",
-    "@gravito/stream": "1.0.0-beta.1",
+    "@gravito/nebula": "workspace:*",
+    "@gravito/stream": "workspace:*",
     "@types/react": "^18.0.0",
     "bun-types": "latest",
-    "@gravito/core": "1.0.0-beta.6",
-    "@gravito/photon": "1.0.0-beta.1",
+    "@gravito/core": "workspace:*",
+    "@gravito/photon": "workspace:*",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "tsup": "^8.5.1",
