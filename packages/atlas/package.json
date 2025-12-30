@@ -18,7 +18,7 @@
   "scripts": {
     "build": "bun run build.ts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit --skipLibCheck",
+    "typecheck": "npx tsc --noEmit --skipLibCheck",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80"
   },
