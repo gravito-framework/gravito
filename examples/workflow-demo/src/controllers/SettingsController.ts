@@ -5,16 +5,16 @@ import { SettingsService } from '../services/SettingsService'
 const settingsService = new SettingsService()
 
 export class SettingsController {
-  index = (ctx: GravitoContext) => {
+  index = async (ctx: GravitoContext) => {
     const user = ctx.get('user') as DemoUser
-    const settings = settingsService.get(user.id)
+    const settings = await settingsService.get(user.id)
     return ctx.json({ settings })
   }
 
   update = async (ctx: GravitoContext) => {
     const payload = await ctx.req.json()
     const user = ctx.get('user') as DemoUser
-    const settings = settingsService.update(user.id, payload)
+    const settings = await settingsService.update(user.id, payload)
     return ctx.json({ settings })
   }
 }

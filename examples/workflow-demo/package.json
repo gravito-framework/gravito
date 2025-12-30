@@ -10,12 +10,12 @@
     "workflow": "bun run workflow-demo.ts"
   },
   "dependencies": {
+    "@gravito/atlas": "workspace:*",
     "@gravito/pulse": "workspace:*",
     "gravito-core": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest",
-    "drizzle-orm": "^0.40.0",
     "typescript": "^5.9.3"
   }
 }

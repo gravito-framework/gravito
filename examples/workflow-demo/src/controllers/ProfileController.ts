@@ -1,3 +1,4 @@
+import { DB } from '@gravito/atlas'
 import type { GravitoContext } from 'gravito-core'
 import type { DemoUser } from '../services/AuthService'
 
@@ -14,7 +15,12 @@ export class ProfileController {
     if (!name) {
       return ctx.json({ error: 'name is required' }, 400)
     }
-    user.name = name
-    return ctx.json({ profile: { id: user.id, email: user.email, name: user.name } })
+    if (!user) {
+      return ctx.json({ error: 'missing user' }, 401)
+    }
+    await DB.table('users').where('id', user.id).update({ name })
+    const updated = { ...user, name }
+    ctx.set('user', updated)
+    return ctx.json({ profile: updated })
   }
 }

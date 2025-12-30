@@ -4,7 +4,10 @@ import { ProductService } from '../services/ProductService'
 const productService = new ProductService()
 
 export class ProductController {
-  index = (ctx: GravitoContext) => ctx.json({ products: productService.list() })
+  index = async (ctx: GravitoContext) => {
+    const products = await productService.list()
+    return ctx.json({ products })
+  }
 
   create = async (ctx: GravitoContext) => {
     const payload = await ctx.req.json()
@@ -12,7 +15,7 @@ export class ProductController {
     if (!name || !sku || typeof price !== 'number' || typeof inventory !== 'number') {
       return ctx.json({ error: 'Invalid product payload' }, 400)
     }
-    const product = productService.create({ name, sku, price, inventory })
+    const product = await productService.create({ name, sku, price, inventory })
     return ctx.json({ product }, 201)
   }
 
@@ -22,19 +25,19 @@ export class ProductController {
     if (!id) {
       return ctx.json({ error: 'Product id missing' }, 400)
     }
-    const product = productService.update(id, payload)
+    const product = await productService.update(id, payload)
     if (!product) {
       return ctx.json({ error: 'Product not found' }, 404)
     }
     return ctx.json({ product })
   }
 
-  destroy = (ctx: GravitoContext) => {
+  destroy = async (ctx: GravitoContext) => {
     const id = ctx.req.param('id')
     if (!id) {
       return ctx.json({ error: 'Product id missing' }, 400)
     }
-    const deleted = productService.delete(id as string)
+    const deleted = await productService.delete(id as string)
     if (!deleted) {
       return ctx.json({ error: 'Product not found' }, 404)
     }

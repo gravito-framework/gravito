@@ -13,12 +13,14 @@ description: A hands-on showcase of Dev Loop, Doctor, and testing vitality using
 - 🧪 **Doctor + Health**: `bun gravito doctor` inspects env keys, port, DB, migrations, Redis, and runtime versions, highlighting any actionable fixes.  
 - 🧰 **Presets in action**: `examples/workflow-demo` can be bootstrapped from the Enterprise MVC preset (Auth + Profile + Settings + Products) so we always start from a verified Golden Path.  
 - 🧪 **Testing**: At least two suites—Auth flow + Products CRUD—run via Gravito’s `HttpTester` to safeguard the workflow.
+- 🧱 **Atlas persistence**: `src/database/migrations` contains bills for users, settings, products, and API tokens so the demo runs on real SQL data.
 
 ## Quickstart
 
 ```bash
 cd examples/workflow-demo
 bun install --frozen-lockfile
+bun gravito db:migrate
 bun gravito doctor
 bun run dev
 ```
@@ -39,9 +41,10 @@ bun run workflow-demo.ts
 
 The script performs:
 
-1. `bun install --frozen-lockfile`  
-2. `bun gravito doctor`  
-3. `bun test`
+1. `bun install --frozen-lockfile`
+2. `bun gravito db:migrate --fresh` (resets and reapplies Atlas migrations)
+3. `bun gravito doctor`
+4. `bun test`
 
 If any step fails, the script stops and prints the failing stage.
 

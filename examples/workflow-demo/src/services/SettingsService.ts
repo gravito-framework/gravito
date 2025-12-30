@@ -1,4 +1,5 @@
-import { AuthController } from '../controllers/AuthController'
+import { randomUUID } from 'node:crypto'
+import { DB } from '@gravito/atlas'
 
 type Settings = {
   theme: 'light' | 'dark'
@@ -6,19 +7,27 @@ type Settings = {
 }
 
 export class SettingsService {
-  private store = new Map<string, Settings>()
-
-  get(userId: string): Settings {
-    if (!this.store.has(userId)) {
-      this.store.set(userId, { theme: 'light', notifications: true })
+  async get(userId: string): Promise<Settings> {
+    const record = await DB.table('settings').where('user_id', userId).first()
+    if (record) {
+      return {
+        theme: record.theme as Settings['theme'],
+        notifications: Boolean(record.notifications),
+      }
     }
-    return this.store.get(userId)!
+    const defaults: Settings = { theme: 'light', notifications: true }
+    await DB.table('settings').insert({
+      id: randomUUID(),
+      user_id: userId,
+      ...defaults,
+    })
+    return defaults
   }
 
-  update(userId: string, updates: Partial<Settings>): Settings {
-    const current = this.get(userId)
+  async update(userId: string, updates: Partial<Settings>): Promise<Settings> {
+    const current = await this.get(userId)
     const next = { ...current, ...updates }
-    this.store.set(userId, next)
+    await DB.table('settings').where('user_id', userId).update(next)
     return next
   }
 }

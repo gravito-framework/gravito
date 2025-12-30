@@ -291,18 +291,12 @@ async function checkMigrations(context: DoctorContext): Promise<DoctorResult> {
   const migrationsDir = path.join(context.cwd, 'src', 'database', 'migrations')
   const drizzleConfig = path.join(context.cwd, 'drizzle.config.ts')
 
+  let hasDrizzleConfig = false
   try {
     await fs.access(drizzleConfig)
+    hasDrizzleConfig = true
   } catch {
-    return {
-      name: 'Migration status',
-      ok: false,
-      severity: 'error',
-      summary: '`drizzle.config.ts` is missing',
-      rootCause: 'Drizzle Kit is not configured, so Gravito cannot resolve migration metadata.',
-      impact: 'Running or status-checking migrations will fail.',
-      fixCommand: 'Create `drizzle.config.ts` (re-run `bun gravito init` or copy from a template).',
-    }
+    hasDrizzleConfig = false
   }
 
   try {
@@ -313,20 +307,27 @@ async function checkMigrations(context: DoctorContext): Promise<DoctorResult> {
       return {
         name: 'Migration status',
         ok: false,
-        severity: 'warning',
-        summary: 'No migration files detected',
+        severity: hasDrizzleConfig ? 'warning' : 'error',
+        summary: hasDrizzleConfig ? 'No migration files detected' : 'No migrations found',
         rootCause: 'The migrations folder is empty, so there is nothing to apply.',
         impact: 'Database structure is undefined until at least one migration runs.',
         fixCommand:
-          'Run `bun gravito make:migration create_initial_schema` to add your first migration.',
+          'Run `bun gravito make:migration create_initial_schema` (or add a migration under src/database/migrations).',
       }
+    }
+
+    const summaryParts = [`${migrationFiles.length} migration(s) available`]
+    if (hasDrizzleConfig) {
+      summaryParts.push('(Drizzle)')
+    } else {
+      summaryParts.push('(Atlas)')
     }
 
     return {
       name: 'Migration status',
       ok: true,
       severity: 'info',
-      summary: `${migrationFiles.length} migration(s) available`,
+      summary: summaryParts.join(' '),
     }
   } catch {
     return {
