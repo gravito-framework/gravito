@@ -6,6 +6,7 @@
         "declaration": true,
         "declarationMap": true,
         "skipLibCheck": true,
+        "types": ["bun-types"],
         "paths": {
             "@gravito/core": [
                 "../core/src/index.ts"
