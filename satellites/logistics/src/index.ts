@@ -20,7 +20,9 @@ export class LogisticsServiceProvider extends ServiceProvider {
 
   override boot(): void {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     core.logger.info('🛰️ Satellite Logistics is operational')
 
@@ -67,7 +69,7 @@ export class LogisticsServiceProvider extends ServiceProvider {
      * GASS 聯動：監聽運費計算 Filter
      */
     core.hooks.addFilter('commerce:order:adjustments', async (adjustments: any[], args: any) => {
-      const payload = args as { order: any }
+      const _payload = args as { order: any }
 
       // 預設運費邏輯 (可改為呼叫 Manager 計算)
       const manager = core.container.make<LogisticsManager>('logistics.manager')

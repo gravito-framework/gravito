@@ -54,7 +54,9 @@ export class RbacController {
       const useCase = this.core.container.make<GetRole>('admin.usecase.getRole')
       const role = await useCase.execute(id)
 
-      if (!role) return ctx.json({ message: 'Role not found' }, 404)
+      if (!role) {
+        return ctx.json({ message: 'Role not found' }, 404)
+      }
 
       return ctx.json({
         id: role.id,

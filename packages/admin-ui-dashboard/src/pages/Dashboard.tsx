@@ -1,6 +1,5 @@
 import { useAdmin } from '@gravito/admin-shell-react'
 import {
-  AlertCircle,
   ArrowUpRight,
   BarChart3,
   Clock,
@@ -9,7 +8,7 @@ import {
   Ticket,
   TrendingUp,
 } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function Dashboard() {
   const { sdk } = useAdmin()

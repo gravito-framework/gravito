@@ -14,7 +14,9 @@ export class UpdateRole extends UseCase<UpdateRoleInput, void> {
 
   async execute(input: UpdateRoleInput): Promise<void> {
     const role = await this.repository.findById(input.id)
-    if (!role) throw new Error('Role not found.')
+    if (!role) {
+      throw new Error('Role not found.')
+    }
 
     if (input.name) {
       ;(role as any).props.name = input.name

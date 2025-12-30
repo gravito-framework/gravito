@@ -1,4 +1,3 @@
-import { DB } from '@gravito/atlas'
 import type { IPaymentRepository } from '../../Domain/Contracts/IPaymentRepository'
 import type { Payment } from '../../Domain/Entities/Payment'
 
@@ -9,7 +8,7 @@ export class AtlasPaymentRepository implements IPaymentRepository {
     // await DB.table('payments').insert({ ... })
   }
 
-  async findById(id: string): Promise<Payment | null> {
+  async findById(_id: string): Promise<Payment | null> {
     return null
   }
 
@@ -17,9 +16,9 @@ export class AtlasPaymentRepository implements IPaymentRepository {
     return []
   }
 
-  async delete(id: string): Promise<void> {}
+  async delete(_id: string): Promise<void> {}
 
-  async exists(id: string): Promise<boolean> {
+  async exists(_id: string): Promise<boolean> {
     return false
   }
 }

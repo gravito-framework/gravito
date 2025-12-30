@@ -1,14 +1,6 @@
 import { useAdmin } from '@gravito/admin-shell-react'
-import {
-  AlertTriangle,
-  Edit2,
-  ExternalLink,
-  MoreVertical,
-  Package,
-  Plus,
-  Search,
-} from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { AlertTriangle, Edit2, ExternalLink, Package, Plus, Search } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 export function ProductList() {
   const { sdk } = useAdmin()

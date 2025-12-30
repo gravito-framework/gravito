@@ -7,12 +7,18 @@ export class AtlasCartRepository implements ICartRepository {
   async find(id: { memberId?: string; guestId?: string }): Promise<Cart | null> {
     const query = DB.table('carts')
 
-    if (id.memberId) query.where('member_id', id.memberId)
-    else if (id.guestId) query.where('guest_id', id.guestId)
-    else return null
+    if (id.memberId) {
+      query.where('member_id', id.memberId)
+    } else if (id.guestId) {
+      query.where('guest_id', id.guestId)
+    } else {
+      return null
+    }
 
     const rawCart = (await query.first()) as any
-    if (!rawCart) return null
+    if (!rawCart) {
+      return null
+    }
 
     const cart = Cart.create(rawCart.id, rawCart.member_id, rawCart.guest_id)
 

@@ -9,7 +9,7 @@ import { StripeWebhookController } from './Interface/Http/Controllers/StripeWebh
 export class PaymentServiceProvider extends ServiceProvider {
   register(container: Container): void {
     // 1. 綁定管理器
-    container.singleton('payment.manager', (c) => new PaymentManager(this.core!))
+    container.singleton('payment.manager', (_c) => new PaymentManager(this.core!))
 
     // 2. 綁定 UseCases (傳入 Manager 而非具體 Gateway)
     container.singleton('payment.process', (c) => {
@@ -23,7 +23,9 @@ export class PaymentServiceProvider extends ServiceProvider {
 
   override boot(): void {
     const core = this.core
-    if (!core) return
+    if (!core) {
+      return
+    }
 
     const manager = core.container.make<PaymentManager>('payment.manager')
 

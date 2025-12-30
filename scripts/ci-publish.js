@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { spawn } = require('child_process')
+const { spawn } = require('node:child_process')
 
 const child = spawn('bun', ['run', 'changeset', 'publish'], {
   stdio: ['inherit', 'pipe', 'pipe'],

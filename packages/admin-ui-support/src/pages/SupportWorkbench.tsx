@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
-  FileText,
   MessageSquare,
   MoreVertical,
   Search,
@@ -12,7 +11,7 @@ import {
   Tag,
   User,
 } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 function cn(...inputs: ClassValue[]) {
@@ -30,7 +29,9 @@ export function SupportWorkbench() {
     async function loadInbox() {
       const data = await sdk.api.get<any[]>('/support/inbox')
       setSessions(data)
-      if (data.length > 0) setActiveSession(data[0])
+      if (data.length > 0) {
+        setActiveSession(data[0])
+      }
     }
     loadInbox()
   }, [sdk])
@@ -46,7 +47,9 @@ export function SupportWorkbench() {
   }, [activeSession])
 
   const handleSend = () => {
-    if (!inputText.trim()) return
+    if (!inputText.trim()) {
+      return
+    }
     setMessages((prev) => [
       ...prev,
       { id: Date.now().toString(), sender: 'SUPPORT', content: inputText, at: new Date() },
@@ -171,7 +174,7 @@ export function SupportWorkbench() {
             )}
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/20">
-              {messages.map((msg, i) => (
+              {messages.map((msg, _i) => (
                 <div
                   key={msg.id}
                   className={cn(

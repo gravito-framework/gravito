@@ -155,8 +155,9 @@ export class Order extends AggregateRoot<string> {
   }
 
   public markAsRefunded(): void {
-    if (this.props.status !== 'requested_refund')
+    if (this.props.status !== 'requested_refund') {
       throw new Error('Order must be in requested_refund state')
+    }
     ;(this.props as any).status = 'refunded'
     ;(this.props as any).updatedAt = new Date()
   }
