@@ -3,10 +3,10 @@
 This example proves out the RabbitMQ → Flux workflow outlined in the DX plan. It shows how a queue-based producer, Gravito consumer, and `JsonFileTraceSink` collaborate to deliver retries, traceability, and observability for an order fulfillment flow.
 
 ## Features
-- **RabbitMQ-backed consumer**: `examples/flux-enterprise/src/consumer.ts` listens on `orders.workflow`, executes `orderWorkflow`, and writes trace events in `.flux-enterprise/trace.ndjson`.
-- **HTTP producer**: `examples/flux-enterprise/src/server.ts` exposes `POST /orders`, `GET /trace`, and proxies payloads into the queue so you can verify the workflow end-to-end.
+- **Native RabbitMQ Integration**: Uses `@gravito/stream`'s native `RabbitMQDriver`. The `RabbitBroker` acts as a facade over `QueueManager`, ensuring connection reuse, architectural consistency, and access to advanced enterprise messaging features (nack/reject/manual-ack).
 - **Flux workflow**: `src/workflows/order.ts` models validation, reservation, payment, and notification steps, complete with retries and a simulated reservation conflict on the first attempt.
-- **Verification script**: `flux-enterprise.ts` runs install/build/migrate/doctor/test to ensure the entire stack (including `gravito doctor`) is healthy.
+- **Enterprise Traceability**: Integrated `JsonFileTraceSink` writes trace events in `.flux-enterprise/trace.ndjson`, providing deep observability into the queue-to-workflow lifecycle.
+- **Verification script**: `flux-enterprise.ts` runs install/build/migrate/doctor/test to ensure the entire stack is healthy.
 
 ## Quick start
 1. Copy the environment template: `cp examples/flux-enterprise/.env.example examples/flux-enterprise/.env`.
