@@ -1,4 +1,3 @@
-// @ts-expect-error
 import { createRippleClient } from '@gravito/ripple-client'
 import { useEffect, useState } from 'react'
 
@@ -25,7 +24,7 @@ export function useTelemetry(url = 'ws://localhost:4000/ws') {
     // 1. 注意 URL 通常會加上 /ws (後端 RippleOrbit 預設路徑)
     const client = createRippleClient({
       host: url,
-      autoConnect: false, // 我們手動控制
+      // 客戶端需要手動調用 connect()，不需要 autoConnect 屬性
     })
 
     const start = async () => {
