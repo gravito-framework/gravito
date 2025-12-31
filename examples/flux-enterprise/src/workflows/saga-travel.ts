@@ -127,5 +127,6 @@ export const sagaTravelWorkflow = createWorkflow('saga-travel-reservation')
   .commit('finalize-itinerary', (ctx) => {
     console.log('✅ Itinerary finalized!')
   })
+  .build()
 
 export default sagaTravelWorkflow

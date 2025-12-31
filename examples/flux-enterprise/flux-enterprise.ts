@@ -10,7 +10,7 @@ if (!existsSync(envPath) && existsSync(envExamplePath)) {
   copyFileSync(envExamplePath, envPath)
 }
 
-const steps: Array<{ name: string; cmd: string[]; cwd?: string }> = [
+const steps: Array<{ name: string; cmd: [string, ...string[]]; cwd?: string }> = [
   { name: 'Install dependencies', cmd: ['bun', 'install', '--frozen-lockfile'] },
   {
     name: 'Build Gravito CLI',

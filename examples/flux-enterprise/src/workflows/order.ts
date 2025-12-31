@@ -96,5 +96,6 @@ export const orderWorkflow = createWorkflow('flux-enterprise-order')
     await new Promise((resolve) => setTimeout(resolve, 50))
     ctx.data.notification = `sent to ${ctx.input.userId}`
   })
+  .build()
 
 export default orderWorkflow
