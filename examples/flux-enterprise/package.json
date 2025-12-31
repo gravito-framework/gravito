@@ -16,7 +16,8 @@
     "@gravito/flux": "workspace:*",
     "@gravito/stream": "workspace:*",
     "amqplib": "^0.10.3",
-    "dotenv": "^16.5.1"
+    "dotenv": "^16.5.1",
+    "ioredis": "^5.8.2"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.8",

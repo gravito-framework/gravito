@@ -3,11 +3,17 @@
     "name": "enterprise",
     "version": "1.0.0"
   },
-  "features": ["stream", "nebula", "monitor", "sentinel", "fortify"],
+  "features": [
+    "stream",
+    "nebula",
+    "monitor",
+    "sentinel",
+    "fortify"
+  ],
   "drivers": {
     "database": "postgresql",
     "cache": "redis",
-    "queue": "redis",
+    "queue": "rabbitmq",
     "storage": "s3",
     "session": "redis"
   },

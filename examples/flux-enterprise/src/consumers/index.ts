@@ -13,7 +13,7 @@ export async function startAllConsumers() {
     },
   })
 
-  console.log('🚀 Starting @gravito/stream Consumer with RabbitMQ driver...')
+  console.log(`🚀 Starting @gravito/stream Consumer with ${env.queueDriver} driver...`)
 
   await consumer.start()
 

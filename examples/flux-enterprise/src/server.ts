@@ -3,7 +3,8 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { env } from './env'
 import { traceLocation } from './flux'
-import { publishOrder } from './publisher'
+import { ProcessWorkflowJob } from './jobs/ProcessWorkflowJob'
+import { getQueueManager } from './stream'
 
 const listener = Bun.serve({
   port: env.port,
@@ -13,18 +14,37 @@ const listener = Bun.serve({
     if (request.method === 'POST' && url.pathname === '/orders') {
       try {
         const payload = await request.json()
-        const body = {
-          orderId: payload.orderId ?? `order-${randomUUID()}`,
-          userId: payload.userId ?? 'guest',
-          items: payload.items ?? [{ productId: 'widget-a', qty: 1 }],
+        const workflowName = payload.workflowName || 'flux-enterprise-order'
+
+        // Prepare input based on workflow type or generic fallback
+        const input = { ...payload }
+        delete input.workflowName
+
+        // Ensure we have some ID for tracking
+        if (!input.orderId && !input.id) {
+          input.orderId = `req-${randomUUID()}`
         }
 
-        await publishOrder(body)
+        const queue = await getQueueManager()
 
-        return new Response(JSON.stringify({ status: 'queued', orderId: body.orderId }), {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' },
-        })
+        const job = new ProcessWorkflowJob({
+          workflowName,
+          input,
+        }).onQueue(env.rabbitQueue)
+
+        await queue.push(job)
+
+        return new Response(
+          JSON.stringify({
+            status: 'queued',
+            orderId: input.orderId || input.id,
+            workflow: workflowName,
+          }),
+          {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
       } catch (error) {
         return new Response(JSON.stringify({ error: String(error) }), {
           status: 400,
@@ -106,6 +126,7 @@ const dashboardHtml = `<!DOCTYPE html>
       --success: #3fb950;
       --warn: #d29922;
       --error: #f85149;
+      --purple: #bc8cff;
     }
     body {
       margin: 0; padding: 0; font-family: 'Segoe UI', monospace;
@@ -113,6 +134,7 @@ const dashboardHtml = `<!DOCTYPE html>
       overflow: hidden; display: grid; grid-template-columns: 350px 1fr;
     }
 
+    /* Common UI Elements */
     .stats-panel {
       display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 20px;
     }
@@ -151,15 +173,23 @@ const dashboardHtml = `<!DOCTYPE html>
     /* Sidebar */
     .mission-control {
       background: var(--panel); border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; padding: 1.5rem; gap: 1.5rem;
+      display: flex; flex-direction: column; padding: 1.5rem; gap: 1rem;
       height: 100vh; overflow: hidden; box-sizing: border-box;
       z-index: 10;
     }
     h1 { margin: 0; font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; color: #fff; border-bottom: 2px solid var(--accent); padding-bottom: 10px; display: inline-block; }
     
+    .control-group { display: flex; flex-direction: column; gap: 10px; }
+    
+    select.mission-selector {
+      background: #0b0d14; border: 1px solid var(--border); color: #fff;
+      padding: 8px; border-radius: 4px; font-family: inherit; font-size: 0.8rem;
+      outline: none;
+    }
+    
     button#launch-btn {
       background: rgba(88, 166, 255, 0.1); color: var(--accent);
-      border: 1px solid var(--accent); padding: 1rem;
+      border: 1px solid var(--accent); padding: 0.8rem;
       font-weight: bold; font-size: 0.9rem; border-radius: 4px;
       cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
     }
@@ -177,15 +207,23 @@ const dashboardHtml = `<!DOCTYPE html>
     .log-entry.error { border-color: var(--error); color: var(--error); }
     .log-entry.success { border-color: var(--success); color: var(--success); }
 
-    /* Space View */
+    /* View Container */
+    .view-container {
+      position: relative; width: 100%; height: 100%;
+      overflow: hidden;
+    }
+    .view-section {
+      width: 100%; height: 100%; display: none;
+      position: absolute; top: 0; left: 0;
+    }
+    .view-section.active { display: flex; }
+
+    /* Space View (Order Rocket) */
     .space-view {
-      position: relative;
       background: linear-gradient(to bottom, #050608 0%, #13161c 100%);
-      display: flex; flex-direction: column; justify-content: flex-end;
+      flex-direction: column; justify-content: flex-end;
       overflow-x: auto; overflow-y: hidden;
     }
-    
-    /* Grid Background */
     .space-view::before {
       content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
@@ -198,67 +236,73 @@ const dashboardHtml = `<!DOCTYPE html>
       align-items: flex-end; min-width: max-content;
     }
 
+    /* Network Graph View (Generic / Saga / Supply) */
+    .network-view {
+      background: #050505;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .network-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px; padding: 40px; width: 100%; max-width: 1200px;
+      overflow-y: auto;
+    }
+    
+    .node-card {
+      background: rgba(20, 24, 32, 0.8); border: 1px solid #333;
+      border-radius: 8px; padding: 15px; position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .node-card.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(88, 166, 255, 0.1); transform: scale(1.02); }
+    .node-card.completed { border-color: var(--success); }
+    .node-card.failed { border-color: var(--error); box-shadow: 0 0 10px rgba(248, 81, 73, 0.2); }
+    .node-card.compensated { border-color: var(--purple); opacity: 0.7; }
+    
+    .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .node-id { font-size: 0.8rem; font-weight: bold; color: #fff; font-family: monospace; }
+    .node-status { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: #222; color: #888; text-transform: uppercase; }
+    .node-card.active .node-status { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+    .node-card.completed .node-status { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+    .node-card.failed .node-status { background: rgba(248, 81, 73, 0.2); color: var(--error); }
+    .node-card.compensated .node-status { background: rgba(188, 140, 255, 0.2); color: var(--purple); }
+
+    .node-steps { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+    .step-dot {
+      display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: #666;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; transition: all 0.3s; }
+    .step-dot.active .dot { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
+    .step-dot.completed .dot { background: var(--success); }
+    .step-dot.failed .dot { background: var(--error); }
+    .step-dot.compensated .dot { background: var(--purple); }
+    
+    .step-dot.active { color: #fff; }
+
+    /* Animations and SVGs from before */
     .mission-container {
       position: relative; width: 60px; height: 300px;
       flex-shrink: 0; display: flex; flex-direction: column-reverse; justify-content: flex-start;
       transition: opacity 1s, transform 1s;
     }
-    .mission-container.recycled {
-      opacity: 0; transform: scale(0.5); pointer-events: none;
-    }
-
-    /* SVG Styling */
+    .mission-container.recycled { opacity: 0; transform: scale(0.5); pointer-events: none; }
     .rocket-svg {
-      width: 60px; height: 240px;
-      position: absolute; bottom: 0; left: 0;
+      width: 60px; height: 240px; position: absolute; bottom: 0; left: 0;
       transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
-      will-change: transform;
-      filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+      will-change: transform; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
     }
-
-    /* Parts */
-    .part {
-      fill: #161b22; stroke: #30363d; stroke-width: 1.5px;
-      transition: fill 0.3s, stroke 0.3s, opacity 0.5s;
-    }
-    
-    /* Active State (Running) */
+    .part { fill: #161b22; stroke: #30363d; stroke-width: 1.5px; transition: fill 0.3s, stroke 0.3s, opacity 0.5s; }
     .part.active { fill: #1f6feb; stroke: #58a6ff; }
-    /* Warning State */
     .part.retry { fill: #9e6a03; stroke: #d29922; animation: shake 0.5s infinite; }
-    /* Error State */
     .part.failed { fill: #7a1e1e; stroke: #ff7b72; }
-    /* Completed State (Hollow/Ghost) */
     .part.completed { fill: transparent; stroke: #238636; opacity: 0.3; stroke-dasharray: 4; }
-    /* Payload Orbit State */
-    .part[data-id="notify"].completed { 
-      fill: #238636; stroke: #3fb950; opacity: 1; stroke-dasharray: 0;
-      filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.6));
-    }
-
-    /* Text Labels */
-    .stage-label { 
-      position: absolute; width: 100px; left: -20px; text-align: center;
-      font-size: 0.6rem; color: #484f58; font-weight: bold;
-      pointer-events: none; opacity: 0; transition: opacity 0.3s;
-    }
-    .mission-id { bottom: -25px; opacity: 1; color: #8b949e; }
+    .part[data-id="notify"].completed { fill: #238636; stroke: #3fb950; opacity: 1; stroke-dasharray: 0; filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.6)); }
     
-    /* Show labels on hover or when detached */
-    .debris-label {
-      position: absolute; width: 60px; text-align: center;
-      font-size: 0.55rem; color: #3fb950;
-      opacity: 0; transform: translateY(10px); transition: all 0.5s;
-    }
-    .debris-label.visible { opacity: 1; transform: translateY(0); }
-
-    /* Launch Animations */
     .rocket-svg.launching-1 { transform: translateY(-60px); }
     .rocket-svg.launching-2 { transform: translateY(-120px); }
     .rocket-svg.launching-3 { transform: translateY(-180px); }
-    .rocket-svg.launching-4 { transform: translateY(-380px); } /* Orbit */
-
-    /* Total Time */
+    .rocket-svg.launching-4 { transform: translateY(-380px); }
+    
     .total-time {
       position: absolute; top: -20px; width: 100%; text-align: center;
       color: #fff; font-size: 0.65rem; text-shadow: 0 0 5px var(--success);
@@ -278,19 +322,28 @@ const dashboardHtml = `<!DOCTYPE html>
   <div class="mission-control">
     <div>
       <h1>Flux Mission Control</h1>
-      <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">SYS: ONLINE // MODE: SVG_NEO</div>
+      <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">SYS: ONLINE</div>
     </div>
 
     <div class="control-group">
-      <button id="launch-btn">🚀 INITIALIZE LAUNCH</button>
-      <label style="font-size: 0.75rem; color: #8b949e; display: flex; align-items: center; cursor: pointer; margin-top: 10px;">
+      <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold;">Mission Profile</div>
+      <select id="mission-type" class="mission-selector">
+        <option value="flux-enterprise-order">📦 Order Enrollment (Rocket)</option>
+        <option value="saga-travel-reservation">✈️ Travel Saga (Compensation)</option>
+        <option value="global-supply-chain">🚢 Supply Chain (Parallel)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <button id="launch-btn">🚀 INITIALIZE EVENT</button>
+      <label style="font-size: 0.75rem; color: #8b949e; display: flex; align-items: center; cursor: pointer; margin-top: 4px;">
         <input type="checkbox" id="force-fail" style="margin-right: 8px;"> 
-        SIMULATE ANOMALY (Stockout)
+        SIMULATE ANOMALY / FAIL
       </label>
     </div>
     
     <div class="stats-panel">
-      <div class="pool success"><div class="pool-label">PERFECT</div><div class="pool-count" id="count-perfect">0</div></div>
+      <div class="pool success"><div class="pool-label">SUCCESS</div><div class="pool-count" id="count-perfect">0</div></div>
       <div class="pool recovered"><div class="pool-label">RECOVERED</div><div class="pool-count" id="count-recovered">0</div></div>
       <div class="pool failed"><div class="pool-label">FAILED</div><div class="pool-count" id="count-failed">0</div></div>
     </div>
@@ -306,31 +359,63 @@ const dashboardHtml = `<!DOCTYPE html>
     </div>
   </div>
 
-  <div class="space-view">
-    <div id="launch-pad"></div>
+  <div class="view-container">
+    <div id="view-rocket" class="view-section active space-view">
+      <div id="launch-pad"></div>
+    </div>
+    
+    <div id="view-network" class="view-section network-view">
+      <div class="network-grid" id="network-grid">
+        <!-- Node cards injected here -->
+      </div>
+    </div>
   </div>
 
   <script>
-    const steps = ['validate-order', 'reserve-stock', 'charge-payment', 'notify-customer'];
-    const stepMap = {
+    // Configuration
+    const WORKFLOW_ORDER = 'flux-enterprise-order';
+    const WORKFLOW_SAGA = 'saga-travel-reservation';
+    const WORKFLOW_SUPPLY = 'global-supply-chain';
+
+    // Rocket Steps Mapping
+    const rocketSteps = ['validate-order', 'reserve-stock', 'charge-payment', 'notify-customer'];
+    const rocketStepMap = {
       'validate-order': 'booster',
       'reserve-stock': 'fuel',
       'charge-payment': 'upper',
       'notify-customer': 'notify'
     };
 
-    const activeMissions = new Map();
-    const missionHistory = new Set();
-    const finalStateMissions = new Set();
+    // State
+    const activeMissions = new Map(); // For rockets
+    const networkNodes = new Map(); // For network view
     const stateCache = {};
     const pageLoadTime = Date.now();
-    
+    let currentView = 'rocket';
+
+    // DOM Elements
     const logFeed = document.getElementById('log-feed');
     const launchPad = document.getElementById('launch-pad');
+    const networkGrid = document.getElementById('network-grid');
+    const missionSelector = document.getElementById('mission-type');
 
-    // Store payloads for retry
-    const missionPayloads = new Map();
+    missionSelector.addEventListener('change', (e) => {
+      const type = e.target.value;
+      if (type === WORKFLOW_ORDER) {
+        switchView('rocket');
+      } else {
+        switchView('network');
+      }
+    });
 
+    function switchView(viewName) {
+      if (currentView === viewName) return;
+      currentView = viewName;
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + viewName).classList.add('active');
+    }
+
+    // --- Rocket Logic (Legacy) ---
     function createRocketSVG(id) {
       const svgNS = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(svgNS, "svg");
@@ -339,6 +424,7 @@ const dashboardHtml = `<!DOCTYPE html>
       
       const gNotify = document.createElementNS(svgNS, "g"); gNotify.setAttribute("id", "p-" + id + "-notify"); gNotify.setAttribute("class", "part");
       const pNotify = document.createElementNS(svgNS, "path"); pNotify.setAttribute("d", "M15,60 L15,40 C15,20 30,10 30,10 C30,10 45,20 45,40 L45,60 Z"); gNotify.appendChild(pNotify);
+      gNotify.dataset.id = "notify";
       
       const timeText = document.createElement("div"); timeText.className = "total-time";
       
@@ -349,150 +435,56 @@ const dashboardHtml = `<!DOCTYPE html>
       const pFuel = document.createElementNS(svgNS, "rect"); pFuel.setAttribute("x", "15"); pFuel.setAttribute("y", "122"); pFuel.setAttribute("width", "30"); pFuel.setAttribute("height", "58"); gFuel.appendChild(pFuel);
 
       const gBooster = document.createElementNS(svgNS, "g"); gBooster.setAttribute("id", "p-" + id + "-booster"); gBooster.setAttribute("class", "part");
-      const pBooster = document.createElementNS(svgNS, "path"); pBooster.setAttribute("d", "M15,182 L15,230 L5,240 L15,240 L20,235 L40,235 L45,240 L55,240 L45,230 L45,182 Z"); gBooster.appendChild(pBooster);
+      const pBooster = document.createElementNS(svgNS, "path"); pBooster.setAttribute("d", "M15,182 L15,230 L5,240 L15,240 L15,240 L20,235 L40,235 L45,240 L55,240 L45,230 L45,182 Z"); gBooster.appendChild(pBooster);
 
       svg.appendChild(gBooster); svg.appendChild(gFuel); svg.appendChild(gUpper); svg.appendChild(gNotify);
       return { svg, timeText };
     }
 
-    function createMissionDOM(id) {
+    function createRocketDOM(id) {
       const container = document.createElement('div');
       container.className = 'mission-container';
       container.id = 'mission-' + id;
 
       const { svg, timeText } = createRocketSVG(id);
       
-      const debrisLabels = {};
-      steps.forEach((step, idx) => {
-         const label = document.createElement('div');
-         label.className = 'debris-label';
-         label.style.bottom = (240 - ((idx + 1) * 60) + 20) + 'px';
-         label.dataset.step = step;
-         container.appendChild(label);
-         debrisLabels[step] = label;
-      });
-
       const labelId = document.createElement('div');
       labelId.className = 'stage-label mission-id';
       labelId.textContent = id.slice(0, 8);
+      labelId.style.opacity = "1";
+      labelId.style.bottom = "-25px";
 
       container.appendChild(svg);
       container.appendChild(timeText);
       container.appendChild(labelId);
       launchPad.appendChild(container);
 
-      // Cleanup DOM later
-      setTimeout(() => { if(container.parentNode) container.remove(); }, 120000);
-
-      return { container, svg, debrisLabels, isCleaningUp: false, hadRetries: false };
+      return { container, svg, isCleaningUp: false, hadRetries: false };
     }
 
-    function retryMission(id) {
-       let payload = missionPayloads.get(id);
-       
-       if (!payload) {
-         // Fallback: Create a new payload based on current settings
-         // We assume the user wants to retry with the same "intent"
-         const failMode = document.getElementById('force-fail').checked;
-         payload = {
-             userId: 'commander-retry',
-             items: failMode ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-b', qty: 1 }]
-         };
-         addLog('Re-igniting ' + id.slice(0,8) + ' (Fallback payload)...', 'retry');
-       } else {
-         addLog('Re-igniting ' + id.slice(0,8) + '...', 'retry');
-       }
-
-       performLaunch(payload);
-       
-       const item = document.getElementById('attn-' + id);
-       if (item) {
-         item.style.opacity = '0.5';
-         item.style.pointerEvents = 'none';
-         item.querySelector('.retry-btn').textContent = 'Sent';
-       }
-    }
-
-    function addLog(text, type) {
-      const entry = document.createElement('div');
-      entry.className = 'log-entry ' + (type || '');
-      entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
-      logFeed.prepend(entry);
-      if(logFeed.children.length > 100) logFeed.lastChild.remove();
-    }
-
-    function addToPool(id, state) {
-      if (finalStateMissions.has(id)) return;
-      finalStateMissions.add(id);
-
-      let type = 'failed';
-      let reason = '';
-
-      if (state.status === 'completed') {
-         if (state.hadRetries) {
-            type = 'recovered';
-            // Find the step that was retried
-            const badStep = Object.keys(state.steps).find(k => state.steps[k].retries > 0);
-            reason = badStep ? 'Retried: ' + badStep.split('-')[0].toUpperCase() : 'Retried';
-         } else {
-            type = 'success';
-         }
-      } else {
-         // Find the failed step
-         const failedStep = Object.keys(state.steps).find(k => state.steps[k].status === 'failed');
-         reason = failedStep ? 'Failed at: ' + failedStep.split('-')[0].toUpperCase() : 'Unknown Error';
-      }
-
-      // Update Count
-      const el = document.getElementById(type === 'success' ? 'count-perfect' : (type === 'recovered' ? 'count-recovered' : 'count-failed'));
-      if (el) el.textContent = parseInt(el.textContent) + 1;
-
-      // Add to Attention List if not perfect
-      if (type !== 'success') {
-        const list = document.getElementById('attention-list');
-        const item = document.createElement('div');
-        item.className = 'attention-item ' + type;
-        item.id = 'attn-' + id;
-        
-        let html = '<div class="item-info"><span class="item-id">' + id.slice(0, 8) + '</span>';
-        html += '<span class="item-detail">' + reason + '</span></div>';
-        
-        if (type === 'failed') {
-           html += '<button class="retry-btn" onclick="retryMission(\\'' + id + '\\')">Retry</button>';
-        }
-        
-        item.innerHTML = html;
-        list.prepend(item);
-      }
-    }
-
-    function updateRocketVisuals(id, state) {
+    function updateRocket(id, state) {
       let elements = activeMissions.get(id);
       if (!elements) {
-        if (missionHistory.has(id)) return;
-        elements = createMissionDOM(id);
+        if (state.status === 'completed' || state.status === 'failed') return; // Don't resurrect old ones
+        elements = createRocketDOM(id);
         activeMissions.set(id, elements);
-        missionHistory.add(id);
       }
 
-      const { svg, debrisLabels, container } = elements;
+      const { svg, container } = elements;
       let completedCount = 0;
 
-      steps.forEach((stepName, idx) => {
-        const svgGroupId = 'p-' + id + '-' + stepMap[stepName];
+      rocketSteps.forEach((stepName, idx) => {
+        const svgGroupId = 'p-' + id + '-' + rocketStepMap[stepName];
         const part = svg.getElementById(svgGroupId);
+        if(!part) return;
+
         const stepState = state.steps[stepName];
-        if (!stepState || !part) return;
+        if (!stepState) return;
 
         part.setAttribute("class", "part");
-
         if (stepState.status === 'completed') {
           part.classList.add('completed');
           completedCount = Math.max(completedCount, idx + 1);
-          if (stepState.duration && debrisLabels[stepName]) {
-             debrisLabels[stepName].textContent = stepState.duration + 'ms';
-             debrisLabels[stepName].classList.add('visible');
-          }
         } else if (stepState.status === 'running') {
            part.classList.add('active');
            if (stepState.retries > 0) {
@@ -506,32 +498,138 @@ const dashboardHtml = `<!DOCTYPE html>
 
       svg.className.baseVal = 'rocket-svg launching-' + completedCount;
 
-      // Check for completion or failure
-      function scheduleRecycle(missionId, missionElements) {
-        if (missionElements.isCleaningUp) return;
-        missionElements.isCleaningUp = true;
+      if ((state.status === 'completed' || state.status === 'failed') && !elements.isCleaningUp) {
+        elements.isCleaningUp = true;
+        if(state.duration) {
+           const timeEl = container.querySelector('.total-time');
+           timeEl.textContent = (state.duration) + 'ms';
+        }
         
+        // Log & Cleanup
+        logCompletion(id, state, elements.hadRetries);
         setTimeout(() => {
-          missionElements.container.classList.add('recycled');
+          container.classList.add('recycled');
           setTimeout(() => {
-            if (missionElements.container.parentNode) missionElements.container.remove();
-            activeMissions.delete(missionId);
+             container.remove();
+             activeMissions.delete(id);
           }, 1000);
-        }, 10000); // Wait 10s before recycling
+        }, 8000);
+      }
+    }
+
+    // --- Network View Logic (Generic) ---
+    function createNetworkNode(id, workflowId) {
+       const card = document.createElement('div');
+       card.className = 'node-card';
+       card.id = 'node-' + id;
+       
+       let emoji = '🔮';
+       if(workflowId.includes('saga')) emoji = '✈️';
+       if(workflowId.includes('supply')) emoji = '🚢';
+       
+       card.innerHTML = \`
+         <div class="node-header">
+            <span class="node-id">\${emoji} \${id.slice(0,8)}</span>
+            <span class="node-status">PENDING</span>
+         </div>
+         <div class="node-steps" id="steps-\${id}"></div>
+       \`;
+       networkGrid.prepend(card);
+       // Keep grid size manageable
+       if(networkGrid.children.length > 12) networkGrid.lastChild.remove();
+       
+       return { card, stepsContainer: card.querySelector('.node-steps') };
+    }
+
+    function updateNetworkNode(id, state, workflowId) {
+      let node = networkNodes.get(id);
+      if (!node) {
+        node = createNetworkNode(id, workflowId);
+        networkNodes.set(id, node);
       }
 
-      if (state.status === 'completed' && !elements.isCleaningUp) {
-        if (state.duration) {
-           const timeEl = container.querySelector('.total-time');
-           if(timeEl) timeEl.textContent = '⏱ ' + state.duration + 'ms';
-        }
-        state.hadRetries = elements.hadRetries;
-        addToPool(id, state);
-        scheduleRecycle(id, elements);
-      } else if (state.status === 'failed' && !elements.isCleaningUp) {
-        addToPool(id, state);
-        scheduleRecycle(id, elements);
+      const { card, stepsContainer } = node;
+      const statusEl = card.querySelector('.node-status');
+      
+      statusEl.textContent = state.status;
+      card.className = 'node-card ' + state.status;
+      
+      // Check for compensation/rollback to style accordingly
+      // Saga specific detection
+      const isCompensating = Object.keys(state.steps).some(k => k.includes('compensation') && state.steps[k].status === 'running');
+      if (isCompensating) {
+         card.classList.add('compensated');
+         statusEl.textContent = 'ROLLBACK';
       }
+
+      Object.keys(state.steps).forEach(stepName => {
+        let stepEl = document.getElementById('step-' + id + '-' + stepName);
+        if (!stepEl) {
+           stepEl = document.createElement('div');
+           stepEl.id = 'step-' + id + '-' + stepName;
+           stepEl.className = 'step-dot';
+           // Format step name nicely
+           const label = stepName.replace(/-/g, ' ').toUpperCase();
+           stepEl.innerHTML = \`<div class="dot"></div> \${label}\`;
+           stepsContainer.appendChild(stepEl);
+        }
+
+        const sState = state.steps[stepName];
+        stepEl.className = 'step-dot ' + sState.status;
+        if(stepName.includes('compensation') && sState.status !== 'pending') {
+           stepEl.classList.add('compensated');
+        }
+      });
+
+      if ((state.status === 'completed' || state.status === 'failed') && !node.finished) {
+         node.finished = true;
+         // Handle removal or archiving logic if needed
+         logCompletion(id, state, false); // No "hadRetries" tracking for network graph yet
+      }
+    }
+
+    // --- Shared Logic ---
+    function logCompletion(id, state, hadRetries) {
+      let type = 'failed';
+       if (state.status === 'completed') {
+          type = hadRetries ? 'recovered' : 'success';
+       }
+       
+       const el = document.getElementById(type === 'success' ? 'count-perfect' : (type === 'recovered' ? 'count-recovered' : 'count-failed'));
+       if(el) el.textContent = parseInt(el.textContent) + 1;
+       
+       if (type !== 'success') {
+          const list = document.getElementById('attention-list');
+          const item = document.createElement('div');
+          item.className = 'attention-item ' + type;
+          item.id = 'attn-' + id;
+          
+          let reason = type === 'recovered' ? 'Retried' : 'Failure';
+          // Improve reason finding
+          const steps = Object.entries(state.steps);
+          const failStep = steps.find(([_, s]) => s.status === 'failed');
+          if(failStep) reason = 'Failed: ' + failStep[0];
+          
+          item.innerHTML = \`
+            <div class="item-info">
+              <span class="item-id">\${id.slice(0, 8)}</span>
+              <span class="item-detail">\${reason}</span>
+            </div>\`;
+          
+          if(type === 'failed') {
+             // Retry button implementation omitted for generic types for now
+             item.innerHTML += \`<button class="retry-btn">Review</button>\`; 
+          }
+          list.prepend(item);
+       }
+    }
+
+    function addLog(text, type) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry ' + (type || '');
+      entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
+      logFeed.prepend(entry);
+      if(logFeed.children.length > 50) logFeed.lastChild.remove();
     }
 
     async function fetchTrace() {
@@ -539,13 +637,17 @@ const dashboardHtml = `<!DOCTYPE html>
         const res = await fetch('/trace-events');
         const data = await res.json();
         const grouped = {};
+        
         data.events.sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
         
         data.events.forEach(ev => {
           const id = ev.workflowId;
-          if (!grouped[id]) grouped[id] = { status: 'pending', steps: {} };
+          const wfName = ev.workflowName || 'unknown-workflow';
+          
+          if (!grouped[id]) grouped[id] = { status: 'pending', steps: {}, name: wfName };
           const wf = grouped[id];
-          if (ev.type === 'workflow:start') wf.status = 'running';
+          
+          if (ev.type === 'workflow:start') { wf.status = 'running'; wf.name = ev.workflowName; }
           if (ev.type === 'workflow:complete') { wf.status = 'completed'; wf.duration = ev.duration; }
           
           if (ev.stepName) {
@@ -555,70 +657,96 @@ const dashboardHtml = `<!DOCTYPE html>
             if (ev.type === 'step:retry') {
                step.status = 'running';
                step.retries = ev.retries;
-               const key = id + '-' + ev.stepName + '-' + ev.retries;
-               if (!stateCache[key]) {
-                 if (ev.timestamp > pageLoadTime) addLog(id.slice(0,8) + ': Retry ' + ev.stepName, 'retry');
-                 stateCache[key] = true;
-               }
+               logUnique(id, ev.stepName, 'retry', 'Retry Initiated: ' + ev.stepName);
             }
-            if (ev.type === 'step:complete') { step.status = 'completed'; step.duration = ev.duration; }
+            if (ev.type === 'step:complete') step.status = 'completed';
             if (ev.type === 'step:error') {
                step.status = 'failed';
-               wf.status = 'failed'; // Fix: Mark workflow as failed
-               const key = id + '-' + ev.stepName + '-error';
-               if (!stateCache[key]) {
-                 if (ev.timestamp > pageLoadTime) addLog(id.slice(0,8) + ': Failed ' + ev.stepName, 'error');
-                 stateCache[key] = true;
-               }
+               wf.status = 'failed'; 
+               logUnique(id, ev.stepName, 'error', 'Fault Detected: ' + ev.stepName);
             }
           }
         });
 
-        Object.keys(grouped).forEach(id => updateRocketVisuals(id, grouped[id]));
+        Object.keys(grouped).forEach(id => {
+          const state = grouped[id];
+          if (state.name === WORKFLOW_ORDER) {
+            updateRocket(id, state);
+          } else {
+            updateNetworkNode(id, state, state.name);
+          }
+        });
       } catch (e) { console.error(e); }
     }
 
-    setInterval(fetchTrace, 1000);
-    fetchTrace();
-
-    async function performLaunch(customPayload) {
-      const failMode = document.getElementById('force-fail').checked;
-      const payload = customPayload || {
-         userId: 'commander',
-         items: failMode ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-b', qty: 1 }]
-      };
-
-      try {
-        const res = await fetch('/orders', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        // Store payload for retry
-        if (data.orderId) missionPayloads.set(data.orderId, payload); // Wait, orderId changes on server? 
-        // The server generates orderId if not provided. 
-        // We should really generate it client side to track it properly or map it back.
-        // For now, we store it by the ID returned.
-        
-        // Actually, the server returns the ID. We can map it.
-        missionPayloads.set(data.orderId, payload);
-        
-        addLog('Mission Launched: ' + data.orderId, 'success');
-      } catch (e) {
-        addLog('Launch aborted: ' + e.message, 'error');
-      }
+    function logUnique(id, step, type, msg) {
+       const key = id + step + type;
+       if (!stateCache[key]) {
+          addLog(msg + ' (' + id.slice(0,6) + ')', type);
+          stateCache[key] = true;
+       }
     }
 
+    setInterval(fetchTrace, 500);
+    fetchTrace();
+
+    // Launch Handler
     document.getElementById('launch-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('launch-btn');
-      btn.disabled = true;
-      btn.textContent = 'Ignition...';
-      try {
-        await performLaunch();
-      } finally {
-        setTimeout(() => { btn.disabled = false; btn.textContent = '🚀 INITIALIZE LAUNCH'; }, 500);
-      }
+       const type = document.getElementById('mission-type').value;
+       const fail = document.getElementById('force-fail').checked;
+       const btn = document.getElementById('launch-btn');
+       
+       // Change view if needed
+       if (type === WORKFLOW_ORDER && currentView !== 'rocket') switchView('rocket');
+       if (type !== WORKFLOW_ORDER && currentView !== 'network') switchView('network');
+
+       let payload = {};
+       
+       if (type === WORKFLOW_ORDER) {
+          payload = {
+            userId: 'cmd-user',
+            items: fail ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-a', qty: 1 }]
+          };
+       } else if (type === WORKFLOW_SAGA) {
+          payload = {
+             userId: 'traveler-1',
+             destination: fail ? 'FAIL_CITY' : 'Tokyo', // Trigger Hotel failure
+             budget: 2000,
+             isPremium: true
+          };
+          if(fail) { 
+             // To fail Flight, we need to modify logic, but here "FAIL_CITY" triggers Hotel failure -> Compensation
+             addLog('Simulating Regional Blackout (Hotel Failure)...', 'retry');
+          }
+       } else if (type === WORKFLOW_SUPPLY) {
+          payload = {
+             origin: 'CN',
+             destination: 'US',
+             priority: 'express',
+             items: [{ sku: 'IPHONE-16', quantity: fail ? 1000 : 50, weight: 0.5, value: 999 }] 
+             // Fail condition: Weight > 500kg for Express
+          };
+          if(fail) addLog('Simulating Overweight Cargo...', 'retry');
+       }
+
+       btn.disabled = true;
+       btn.textContent = 'Transmitting...';
+
+       try {
+         await fetch('/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               workflowName: type,
+               ...payload
+            })
+         });
+         addLog('Command Sent: ' + type.split('-')[1].toUpperCase(), 'success');
+       } catch(e) {
+         addLog('Transmission Error', 'error');
+       } finally {
+         setTimeout(() => { btn.disabled = false; btn.textContent = '🚀 INITIALIZE EVENT'; }, 500);
+       }
     });
   </script>
 </body>
