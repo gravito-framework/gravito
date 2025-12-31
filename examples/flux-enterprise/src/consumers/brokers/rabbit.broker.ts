@@ -1,5 +1,5 @@
 import type { Channel, ChannelModel, Connection } from 'amqplib'
-import amqplib from 'amqplib'
+import * as amqplib from 'amqplib'
 import type { BrokerConfig, BrokerMessage, MessageBroker } from '../types'
 
 export class RabbitBroker implements MessageBroker {
