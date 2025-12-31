@@ -1,4 +1,4 @@
-import type { SerializedJob, TopicOptions } from '../types'
+import type { JobPushOptions, SerializedJob, TopicOptions } from '../types'
 
 /**
  * Queue driver interface.
@@ -9,12 +9,16 @@ import type { SerializedJob, TopicOptions } from '../types'
  * @example
  * ```typescript
  * class MyDriver implements QueueDriver {
- *   async push(queue: string, job: SerializedJob): Promise<void> {
+ *   async push(queue: string, job: SerializedJob, options?: JobPushOptions): Promise<void> {
  *     // push a job
  *   }
  *
  *   async pop(queue: string): Promise<SerializedJob | null> {
  *     // pop a job
+ *   }
+ *
+ *   async complete(queue: string, job: SerializedJob): Promise<void> {
+ *     // job completed (for FIFO handling)
  *   }
  *
  *   async size(queue: string): Promise<number> {
@@ -32,8 +36,9 @@ export interface QueueDriver {
    * Push a job to a queue.
    * @param queue - Queue name
    * @param job - Serialized job
+   * @param options - Push options (e.g. groupId)
    */
-  push(queue: string, job: SerializedJob): Promise<void>
+  push(queue: string, job: SerializedJob, options?: JobPushOptions): Promise<void>
 
   /**
    * Pop a job from a queue (non-blocking).
@@ -41,6 +46,13 @@ export interface QueueDriver {
    * @returns Serialized job, or `null` if the queue is empty
    */
   pop(queue: string): Promise<SerializedJob | null>
+
+  /**
+   * Mark a job as completed (used for FIFO/Group handling).
+   * @param queue - Queue name
+   * @param job - Serialized job
+   */
+  complete?(queue: string, job: SerializedJob): Promise<void>
 
   /**
    * Get queue size.

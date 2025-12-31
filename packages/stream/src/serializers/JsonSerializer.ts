@@ -35,6 +35,7 @@ export class JsonSerializer implements JobSerializer {
       ...(job.delaySeconds !== undefined ? { delaySeconds: job.delaySeconds } : {}),
       attempts: job.attempts ?? 0,
       ...(job.maxAttempts !== undefined ? { maxAttempts: job.maxAttempts } : {}),
+      ...(job.groupId ? { groupId: job.groupId } : {}),
     }
   }
 
@@ -53,6 +54,9 @@ export class JsonSerializer implements JobSerializer {
     // Only restores properties, not class instances.
     const job = Object.create({})
     Object.assign(job, parsed.properties)
+    if (serialized.groupId) {
+      job.groupId = serialized.groupId
+    }
     return job as Job
   }
 }

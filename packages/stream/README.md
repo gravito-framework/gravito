@@ -7,7 +7,7 @@ Lightweight, high-performance queueing for Gravito. Supports multiple storage dr
 ## Features
 
 - **Zero runtime overhead**: Thin wrappers that delegate to drivers
-- **Multi-driver support**: Memory, Database, Redis, Kafka, SQS
+- **Multi-driver support**: Memory, Database, Redis, Kafka, SQS, RabbitMQ
 - **Modular**: Install only the driver you need (core < 50KB)
 - **Embedded or standalone workers**: Run in-process during development or standalone in production
 - **AI-friendly**: Strong typing, clear JSDoc, and predictable APIs
@@ -95,6 +95,31 @@ const core = await PlanetCore.boot({
 })
 ```
 
+## RabbitMQ Driver Example
+
+```typescript
+import { OrbitStream } from '@gravito/stream'
+import amqp from 'amqplib'
+
+const connection = await amqp.connect('amqp://localhost')
+
+const core = await PlanetCore.boot({
+  orbits: [
+    OrbitStream.configure({
+      default: 'rabbitmq',
+      connections: {
+        rabbitmq: {
+          driver: 'rabbitmq',
+          client: connection,
+          exchange: 'gravito.events',
+          exchangeType: 'fanout'
+        }
+      }
+    })
+  ]
+})
+```
+
 ## Database Schema
 
 ```sql
@@ -156,6 +181,7 @@ class QueueManager {
 - **RedisDriver** - delayed jobs supported
 - **KafkaDriver** - topics and consumer groups
 - **SQSDriver** - standard/FIFO queues and long polling
+- **RabbitMQDriver** - exchanges, queues, and advanced confirm mode
 
 ## License
 

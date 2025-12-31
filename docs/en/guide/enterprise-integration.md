@@ -37,7 +37,7 @@ The Universal Kinetic Queue is Gravito's solution for infrastructure-agnostic ba
 Gravito aims to support all major message queue drivers out of the box:
 - **Redis & BullMQ**: For high-speed, local processing.
 - **Amazon SQS**: For cloud-native scalability.
-- **RabbitMQ**: For complex routing and enterprise messaging.
+- **RabbitMQ**: (Supported) For complex routing and enterprise messaging.
 - **Apache Kafka**: For massive data streams.
 
 ### Switch Without Friction

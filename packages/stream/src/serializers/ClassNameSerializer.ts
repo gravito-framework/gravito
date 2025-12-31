@@ -74,6 +74,7 @@ export class ClassNameSerializer implements JobSerializer {
       ...(job.delaySeconds !== undefined ? { delaySeconds: job.delaySeconds } : {}),
       attempts: job.attempts ?? 0,
       ...(job.maxAttempts !== undefined ? { maxAttempts: job.maxAttempts } : {}),
+      ...(job.groupId ? { groupId: job.groupId } : {}),
     }
   }
 
@@ -113,6 +114,9 @@ export class ClassNameSerializer implements JobSerializer {
     }
     if (serialized.maxAttempts !== undefined) {
       job.maxAttempts = serialized.maxAttempts
+    }
+    if (serialized.groupId !== undefined) {
+      job.groupId = serialized.groupId
     }
 
     return job

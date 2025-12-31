@@ -224,6 +224,46 @@ await consumer.run({
 })
 ```
 
+## Enterprise RabbitMQ workflow
+
+The `examples/flux-enterprise` folder walks through a runnable RabbitMQ → Flux proof of concept (exchange `orders.workflow`, queue `orders.workflow`, a Gravito consumer, and a `JsonFileTraceSink`). It covers retries, health checks (`bun gravito doctor`), and trace observability in a single package.
+
+1. Copy the environment template, start RabbitMQ, and run the consumer:
+
+```bash
+cp examples/flux-enterprise/.env.example examples/flux-enterprise/.env
+docker compose -f docker-compose.flux.yml up -d rabbitmq
+cd examples/flux-enterprise
+bun run src/consumer.ts
+```
+
+2. Publish an order via the included HTTP producer or helper script:
+
+```bash
+bun run src/server.ts
+curl -X POST http://localhost:4002/orders \\
+  -H "Content-Type: application/json" \\
+  -d '{"userId":"u1","items":[{"productId":"widget-b","qty":1}]}'
+# or
+bun run scripts/publish-order.ts
+```
+
+3. Tail the trace file to follow each workflow step and retry count:
+
+```bash
+curl http://localhost:4002/trace | tail
+```
+
+4. Visit the built-in dashboard at `http://localhost:4002/` to publish orders via a button and see queue + workflow trace updates (the UI polls `/trace-events` and highlights retries/errors, and the animated canvas visualizes each stage as a flying particle so you can intuitively feel retries or forwards movement).
+
+5. Re-run the full DX verification when you change the demo:
+
+```bash
+bun run examples/flux-enterprise/flux-enterprise.ts
+```
+
+The example README explains the RabbitMQ exchange/queue, the `tracePath` location, and the workflow steps in detail.
+
 ## Event Hooks
 
 ```ts

@@ -38,6 +38,12 @@ export { FluxEngine } from './engine/FluxEngine'
 export { FluxConsoleLogger, FluxSilentLogger } from './logger/FluxLogger'
 // Gravito Integration
 export { OrbitFlux, type OrbitFluxOptions } from './orbit/OrbitFlux'
+// Profiler
+export {
+  type ProfileMetrics,
+  type ProfileRecommendation,
+  WorkflowProfiler,
+} from './profiler/WorkflowProfiler'
 export { BunSQLiteStorage, type BunSQLiteStorageOptions } from './storage/BunSQLiteStorage'
 // Storage
 export { MemoryStorage } from './storage/MemoryStorage'

@@ -30,6 +30,8 @@ export { KafkaDriver } from './drivers/KafkaDriver'
 export { MemoryDriver } from './drivers/MemoryDriver'
 // Drivers
 export type { QueueDriver } from './drivers/QueueDriver'
+export type { RabbitMQDriverConfig } from './drivers/RabbitMQDriver'
+export { RabbitMQDriver } from './drivers/RabbitMQDriver'
 export type { RedisDriverConfig } from './drivers/RedisDriver'
 export { RedisDriver } from './drivers/RedisDriver'
 export type { SQSDriverConfig } from './drivers/SQSDriver'

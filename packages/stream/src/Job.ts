@@ -52,6 +52,11 @@ export abstract class Job implements Queueable {
   maxAttempts?: number
 
   /**
+   * Group ID for FIFO.
+   */
+  groupId?: string
+
+  /**
    * Set target queue.
    */
   onQueue(queue: string): this {

@@ -37,7 +37,7 @@ Universal Kinetic Queue 是 Gravito 對基礎設施無關的後台處理方案�
 Gravito 旨在開箱即用地支援所有主流訊息佇列驅動：
 - **Redis & BullMQ**：用於高速、本地處理。
 - **Amazon SQS**：用於雲端原生擴展。
-- **RabbitMQ**：用於複雜路由與企業級訊息傳遞。
+- **RabbitMQ**：(已支援) 用於複雜路由與企業級訊息傳遞。
 - **Apache Kafka**：用於海量資料流。
 
 ### 無縫切換

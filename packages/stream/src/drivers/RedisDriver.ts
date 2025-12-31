@@ -1,4 +1,4 @@
-import type { SerializedJob } from '../types'
+import type { JobPushOptions, SerializedJob } from '../types'
 import type { QueueDriver } from './QueueDriver'
 
 /**
@@ -37,6 +37,7 @@ export interface RedisDriverConfig {
  * import Redis from 'ioredis'
  *
  * const redis = new Redis('redis://localhost:6379')
+ * const redis = new Redis('ioredis://localhost:6379')
  * const driver = new RedisDriver({ client: redis })
  *
  * await driver.push('default', serializedJob)
@@ -46,6 +47,42 @@ export class RedisDriver implements QueueDriver {
   private prefix: string
   private client: RedisDriverConfig['client']
 
+  // Lua Logic:
+  // IF (IS_MEMBER(activeSet, groupId)) -> PUSH(pendingList, job)
+  // ELSE -> SADD(activeSet, groupId) & LPUSH(waitList, job)
+  private static PUSH_SCRIPT = `
+    local waitList = KEYS[1]
+    local activeSet = KEYS[2]
+    local pendingList = KEYS[3]
+    local groupId = ARGV[1]
+    local payload = ARGV[2]
+    
+    if redis.call('SISMEMBER', activeSet, groupId) == 1 then
+      return redis.call('RPUSH', pendingList, payload)
+    else
+      redis.call('SADD', activeSet, groupId)
+      return redis.call('LPUSH', waitList, payload)
+    end
+  `
+
+  // Lua Logic:
+  // local next = LPOP(pendingList)
+  // IF (next) -> LPUSH(waitList, next)
+  // ELSE -> SREM(activeSet, groupId)
+  private static COMPLETE_SCRIPT = `
+    local waitList = KEYS[1]
+    local activeSet = KEYS[2]
+    local pendingList = KEYS[3]
+    local groupId = ARGV[1]
+
+    local nextJob = redis.call('LPOP', pendingList)
+    if nextJob then
+      return redis.call('LPUSH', waitList, nextJob)
+    else
+      return redis.call('SREM', activeSet, groupId)
+    end
+  `
+
   constructor(config: RedisDriverConfig) {
     this.client = config.client
     this.prefix = config.prefix ?? 'queue:'
@@ -54,6 +91,18 @@ export class RedisDriver implements QueueDriver {
       throw new Error(
         '[RedisDriver] Redis client is required. Please install ioredis or redis package.'
       )
+    }
+
+    // Register Lua scripts if defineCommand is available (ioredis)
+    if (typeof (this.client as any).defineCommand === 'function') {
+      ;(this.client as any).defineCommand('pushGroupJob', {
+        numberOfKeys: 3,
+        lua: RedisDriver.PUSH_SCRIPT,
+      })
+      ;(this.client as any).defineCommand('completeGroupJob', {
+        numberOfKeys: 3,
+        lua: RedisDriver.COMPLETE_SCRIPT,
+      })
     }
   }
 
@@ -67,9 +116,12 @@ export class RedisDriver implements QueueDriver {
   /**
    * Push a job (LPUSH).
    */
-  async push(queue: string, job: SerializedJob): Promise<void> {
+  async push(queue: string, job: SerializedJob, options?: JobPushOptions): Promise<void> {
     const key = this.getKey(queue)
-    const payload = JSON.stringify({
+    // Add groupId to payload if provided in options
+    const groupId = options?.groupId
+
+    const payloadObj = {
       id: job.id,
       type: job.type,
       data: job.data,
@@ -78,7 +130,24 @@ export class RedisDriver implements QueueDriver {
       delaySeconds: job.delaySeconds,
       attempts: job.attempts,
       maxAttempts: job.maxAttempts,
-    })
+      groupId: groupId, // Store groupId in payload
+    }
+    const payload = JSON.stringify(payloadObj)
+
+    // Handle Group FIFO logic
+    if (groupId && typeof (this.client as any).pushGroupJob === 'function') {
+      // We use a global active set per queue? No, maybe structure per group?
+      // Let's use:
+      // activeSet: prefix:active (Set of groupIds)
+      // pendingList: prefix:pending:{groupId}
+
+      const activeSetKey = `${this.prefix}active`
+      const pendingListKey = `${this.prefix}pending:${groupId}`
+
+      // Using ioredis custom command
+      await (this.client as any).pushGroupJob(key, activeSetKey, pendingListKey, groupId, payload)
+      return
+    }
 
     // For delayed jobs, prefer Sorted Sets (ZADD) when supported
     if (job.delaySeconds && job.delaySeconds > 0) {
@@ -97,6 +166,21 @@ export class RedisDriver implements QueueDriver {
   }
 
   /**
+   * Complete a job (handle Group FIFO).
+   */
+  async complete(queue: string, job: SerializedJob): Promise<void> {
+    if (!job.groupId) return // Not a grouped job
+
+    const key = this.getKey(queue)
+    const activeSetKey = `${this.prefix}active`
+    const pendingListKey = `${this.prefix}pending:${job.groupId}`
+
+    if (typeof (this.client as any).completeGroupJob === 'function') {
+      await (this.client as any).completeGroupJob(key, activeSetKey, pendingListKey, job.groupId)
+    }
+  }
+
+  /**
    * Pop a job (RPOP, FIFO).
    */
   async pop(queue: string): Promise<SerializedJob | null> {
@@ -106,7 +190,7 @@ export class RedisDriver implements QueueDriver {
     const delayKey = `${key}:delayed`
     if (typeof (this.client as any).zrange === 'function') {
       const now = Date.now()
-      const delayedJobs = await (this.client as any).zrange(delayKey, 0, 0, true)
+      const delayedJobs = await (this.client as any).zrange(delayKey, 0, 0, 'WITHSCORES')
 
       if (delayedJobs && delayedJobs.length >= 2) {
         const score = parseFloat(delayedJobs[1]!)
@@ -141,6 +225,7 @@ export class RedisDriver implements QueueDriver {
       delaySeconds: parsed.delaySeconds,
       attempts: parsed.attempts,
       maxAttempts: parsed.maxAttempts,
+      groupId: parsed.groupId,
     }
   }
 
@@ -158,9 +243,15 @@ export class RedisDriver implements QueueDriver {
   async clear(queue: string): Promise<void> {
     const key = this.getKey(queue)
     const delayKey = `${key}:delayed`
+    const activeSetKey = `${this.prefix}active`
+
     await this.client.del(key)
     if (typeof (this.client as { del: unknown }).del === 'function') {
       await this.client.del(delayKey)
+      // Also clear active set?
+      // Ideally we should scan and clear all pending lists too but that's expensive.
+      // For now just clear the active Set.
+      await this.client.del(activeSetKey)
     }
   }
 
@@ -169,6 +260,16 @@ export class RedisDriver implements QueueDriver {
    */
   async pushMany(queue: string, jobs: SerializedJob[]): Promise<void> {
     if (jobs.length === 0) {
+      return
+    }
+
+    // If any job has groupId, we must fall back to one-by-one to respect Lua logic
+    // Or we could implement a bulk Lua script, but let's keep it simple.
+    const hasGroup = jobs.some((j) => j.groupId)
+    if (hasGroup) {
+      for (const job of jobs) {
+        await this.push(queue, job, { groupId: job.groupId })
+      }
       return
     }
 
@@ -183,12 +284,12 @@ export class RedisDriver implements QueueDriver {
         delaySeconds: job.delaySeconds,
         attempts: job.attempts,
         maxAttempts: job.maxAttempts,
+        groupId: job.groupId,
       })
     )
 
     await this.client.lpush(key, ...payloads)
   }
-
   /**
    * Pop multiple jobs.
    */
