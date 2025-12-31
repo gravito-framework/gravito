@@ -41,6 +41,11 @@ export interface SerializedJob {
    * Maximum attempts.
    */
   maxAttempts?: number
+
+  /**
+   * Group ID for FIFO ordering.
+   */
+  groupId?: string
 }
 
 /**
@@ -96,4 +101,15 @@ export interface QueueConfig {
    * Default serializer type.
    */
   defaultSerializer?: 'json' | 'class'
+}
+
+/**
+ * Options when pushing a job.
+ */
+export interface JobPushOptions {
+  /**
+   * Group ID for FIFO ordering (e.g. userId).
+   * If set, jobs with the same groupId will be processed strictly sequentially.
+   */
+  groupId?: string
 }

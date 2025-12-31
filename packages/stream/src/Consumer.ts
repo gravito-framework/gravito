@@ -91,9 +91,16 @@ export class Consumer {
 
           if (job) {
             processed = true
-            await worker.process(job).catch((error) => {
-              console.error(`[Consumer] Error processing job in queue "${queue}":`, error)
-            })
+            try {
+              await worker.process(job)
+            } catch (err) {
+              console.error(`[Consumer] Error processing job in queue "${queue}":`, err)
+            } finally {
+              // Mark as complete to handle Group FIFO logic (release lock / next job)
+              await this.queueManager.complete(job).catch((err) => {
+                console.error(`[Consumer] Error completing job in queue "${queue}":`, err)
+              })
+            }
           }
         } catch (error) {
           console.error(`[Consumer] Error polling queue "${queue}":`, error)

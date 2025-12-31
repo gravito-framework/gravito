@@ -5,7 +5,7 @@ import type { Queueable } from './Queueable'
 import { ClassNameSerializer } from './serializers/ClassNameSerializer'
 import type { JobSerializer } from './serializers/JobSerializer'
 import { JsonSerializer } from './serializers/JsonSerializer'
-import type { QueueConfig, SerializedJob } from './types'
+import type { JobPushOptions, QueueConfig, SerializedJob } from './types'
 
 /**
  * Queue Manager
@@ -231,6 +231,7 @@ export class QueueManager {
    *
    * @template T - The type of the job.
    * @param job - Job instance to push.
+   * @param options - Push options.
    * @returns The same job instance (for fluent chaining).
    *
    * @example
@@ -238,7 +239,7 @@ export class QueueManager {
    * await manager.push(new SendEmailJob('user@example.com'));
    * ```
    */
-  async push<T extends Job & Queueable>(job: T): Promise<T> {
+  async push<T extends Job & Queueable>(job: T, options?: JobPushOptions): Promise<T> {
     const connection = job.connectionName ?? this.defaultConnection
     const queue = job.queueName ?? 'default'
     const driver = this.getDriver(connection)
@@ -248,7 +249,7 @@ export class QueueManager {
     const serialized = serializer.serialize(job)
 
     // Push to queue
-    await driver.push(queue, serialized)
+    await driver.push(queue, serialized, options)
 
     return job
   }
@@ -356,5 +357,21 @@ export class QueueManager {
   async clear(queue = 'default', connection: string = this.defaultConnection): Promise<void> {
     const driver = this.getDriver(connection)
     await driver.clear(queue)
+  }
+
+  /**
+   * Mark a job as completed.
+   * @param job - Job instance
+   */
+  async complete<T extends Job & Queueable>(job: T): Promise<void> {
+    const connection = job.connectionName ?? this.defaultConnection
+    const queue = job.queueName ?? 'default'
+    const driver = this.getDriver(connection)
+    const serializer = this.getSerializer()
+
+    if (driver.complete) {
+      const serialized = serializer.serialize(job)
+      await driver.complete(queue, serialized)
+    }
   }
 }
