@@ -96,7 +96,7 @@ export class OrbitPlasma implements GravitoOrbit {
     this.client = Redis.connection() as RedisClient
 
     // Connect lazily on first use (or immediately if autoConnect is true)
-    const autoConnect = (this.options as RedisManagerConfig & { autoConnect?: boolean }).autoConnect
+    const autoConnect = this.options.autoConnect
 
     if (autoConnect) {
       Redis.connect().catch((err) => {

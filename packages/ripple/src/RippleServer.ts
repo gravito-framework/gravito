@@ -48,7 +48,7 @@ export class RippleServer {
   private channels: ChannelManager
   private driver: RippleDriver
   private authorizer?: ChannelAuthorizer
-  private pingInterval?: Timer
+  private pingInterval?: ReturnType<typeof setInterval>
 
   readonly config: Required<Pick<RippleConfig, 'path' | 'authEndpoint' | 'pingInterval'>> &
     RippleConfig

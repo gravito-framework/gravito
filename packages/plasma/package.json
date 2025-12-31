@@ -14,9 +14,9 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "build": "node_modules/.bin/tsup src/index.ts --format esm,cjs --dts || bunx tsup src/index.ts --format esm,cjs --dts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "../../node_modules/.bin/tsc --noEmit --skipLibCheck"
   },
   "files": [
     "dist",
