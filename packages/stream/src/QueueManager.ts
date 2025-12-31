@@ -157,9 +157,32 @@ export class QueueManager {
         break
       }
 
+      case 'rabbitmq': {
+        // Lazy-load RabbitMQDriver
+        const { RabbitMQDriver } = require('./drivers/RabbitMQDriver')
+        const client = (config as { client?: unknown }).client
+        if (!client) {
+          throw new Error(
+            '[QueueManager] RabbitMQDriver requires client. Please provide RabbitMQ connection/channel in connection config.'
+          )
+        }
+        this.drivers.set(
+          name,
+          new RabbitMQDriver({
+            // biome-ignore lint/suspicious/noExplicitAny: Dynamic driver loading requires type assertion
+            client: client as any,
+            // biome-ignore lint/suspicious/noExplicitAny: Dynamic driver config type
+            exchange: (config as any).exchange,
+            // biome-ignore lint/suspicious/noExplicitAny: Dynamic driver config type
+            exchangeType: (config as any).exchangeType,
+          })
+        )
+        break
+      }
+
       default:
         throw new Error(
-          `Driver "${driverType}" is not supported. Supported drivers: memory, database, redis, kafka, sqs`
+          `Driver "${driverType}" is not supported. Supported drivers: memory, database, redis, kafka, sqs, rabbitmq`
         )
     }
   }
