@@ -35,7 +35,7 @@ export class MySQLDriver implements DriverContract {
   private pool: Pool | null = null
   private transactionConnection: PoolConnection | null = null
   private connected = false
-  private mysql: typeof import('mysql2/promise') | null = null
+  private mysql: any | null = null
 
   constructor(
     private readonly config: ConnectionConfig,
@@ -98,7 +98,7 @@ export class MySQLDriver implements DriverContract {
   /**
    * Dynamically load mysql2 module
    */
-  private async loadMySQLModule(): Promise<typeof import('mysql2/promise')> {
+  private async loadMySQLModule(): Promise<any> {
     try {
       const mysql2 = await import('mysql2/promise')
       return mysql2
