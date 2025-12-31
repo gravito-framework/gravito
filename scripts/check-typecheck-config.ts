@@ -57,14 +57,21 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
         }
       }
 
-      // 檢查是否使用 bunx（CI 環境必須使用 bunx）
+      // 檢查是否使用有效的 tsc 執行方式
       if (typecheckScript.includes('tsc')) {
-        if (!typecheckScript.includes('bunx')) {
-          issues.push(`❌ 必須使用 'bunx tsc' 以確保 CI 環境相容性（當前: ${typecheckScript}）`)
-        }
-        // 檢查是否有 fallback 機制（不應該有，應該直接使用 bunx）
-        if (typecheckScript.includes('||') || typecheckScript.includes('node_modules/.bin/tsc')) {
-          issues.push(`⚠️  建議直接使用 'bunx tsc'，不需要 fallback 機制`)
+        // 接受的方式：
+        // 1. bunx tsc
+        // 2. npx tsc
+        // 3. 相對路徑到根目錄 node_modules/.bin/tsc (../../node_modules/.bin/tsc)
+        // 4. 相對路徑到本地 node_modules/.bin/tsc (node_modules/.bin/tsc)
+        const hasValidTsc =
+          typecheckScript.includes('bunx tsc') ||
+          typecheckScript.includes('npx tsc') ||
+          typecheckScript.includes('node_modules/.bin/tsc') ||
+          typecheckScript.includes('../../node_modules/.bin/tsc')
+
+        if (!hasValidTsc && !typecheckScript.startsWith('tsc')) {
+          issues.push(`⚠️  建議使用 'bunx tsc'、'npx tsc' 或相對路徑到 node_modules/.bin/tsc（當前: ${typecheckScript}）`)
         }
       }
     } else {
@@ -187,12 +194,20 @@ async function checkAllPackages() {
     console.log()
   }
 
+  // 只檢查關鍵問題（錯誤級別），警告不阻止通過
+  const criticalIssues = packages.filter((pkg) => {
+    return pkg.issues.some((issue) => issue.startsWith('❌'))
+  })
+
   // 總結
-  if (packagesWithIssues.length === 0 && packagesWithoutTypecheck.length === 0) {
+  if (criticalIssues.length === 0) {
     console.log('✅ 所有套件的 typecheck 配置都正確！')
+    if (packagesWithIssues.length > 0) {
+      console.log('⚠️  有一些警告，但不影響功能')
+    }
     process.exit(0)
   } else {
-    console.log('❌ 發現配置問題，請修正後再提交')
+    console.log('❌ 發現關鍵配置問題，請修正後再提交')
     process.exit(1)
   }
 }

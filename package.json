@@ -27,7 +27,9 @@
         "pub:snapshot": "changeset publish --tag snapshot",
         "launchpad:up": "bun scripts/start-launchpad.ts",
         "launchpad:compose": "docker-compose -f docker-compose.launchpad.yml up --build -d",
-        "ci:simulate": "bash scripts/ci-simulation.sh"
+        "ci:simulate": "bash scripts/ci-simulation.sh",
+        "ci:test": "bash scripts/test-ci-local-direct.sh",
+        "ci:test:act": "bash scripts/test-ci-local.sh"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.3.10",
