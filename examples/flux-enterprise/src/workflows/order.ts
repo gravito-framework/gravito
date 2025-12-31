@@ -9,6 +9,7 @@ export interface OrderWorkflowInput {
   orderId: string
   userId: string
   items: OrderItem[]
+  isRetry?: boolean
 }
 
 export interface OrderWorkflowData {
@@ -23,9 +24,9 @@ export interface OrderWorkflowData {
 }
 
 const inventory = new Map<string, number>([
-  ['widget-a', 5],
+  ['widget-a', 1000],
   ['widget-b', 1000],
-  ['widget-c', 8],
+  ['widget-c', 1000],
 ])
 
 const errorTracker = new Map<string, number>()
@@ -60,14 +61,12 @@ export const orderWorkflow = createWorkflow('flux-enterprise-order')
       const attempt = (errorTracker.get(ctx.input.orderId) ?? 0) + 1
       errorTracker.set(ctx.input.orderId, attempt)
 
-      // Always fail first attempt to show retry UI
-      if (attempt === 1) {
-        throw new Error('simulated reservation conflict to exercise retry')
-      }
-
-      // 30% chance to fail subsequent attempts (simulating persistent outage)
-      if (Math.random() < 0.6) {
-        throw new Error('Random system instability detected')
+      // Only simulate failures if this is NOT a manual retry from dashboard
+      if (!ctx.input.isRetry) {
+        // 60% chance to fail subsequent attempts (simulating persistent outage)
+        if (Math.random() < 0.6) {
+          throw new Error('Random system instability detected')
+        }
       }
 
       const reserved: Record<string, number> = {}
@@ -83,7 +82,7 @@ export const orderWorkflow = createWorkflow('flux-enterprise-order')
 
       ctx.data.reservedItems = reserved
     },
-    { retries: 2, timeout: 5000 }
+    { retries: 10, timeout: 5000 }
   )
   .commit('charge-payment', async (ctx) => {
     await new Promise((resolve) => setTimeout(resolve, 150))

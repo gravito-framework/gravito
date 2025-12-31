@@ -12,6 +12,7 @@ export class ProcessWorkflowJob extends Job {
   }
 
   async handle(): Promise<void> {
+    console.log(`[Job] Processing workflow: ${this.payload.workflowName}`, this.payload.input)
     const { workflows } = await import('../workflows') // Dynamic import to avoid circular dep
     const workflow = workflows[this.payload.workflowName]
     if (!workflow) {

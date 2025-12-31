@@ -88,6 +88,8 @@
       "dependencies": {
         "@gravito/atlas": "workspace:*",
         "@gravito/flux": "workspace:*",
+        "@gravito/ripple": "workspace:*",
+        "@gravito/ripple-client": "workspace:*",
         "@gravito/stream": "workspace:*",
         "amqplib": "^0.10.3",
         "dotenv": "^16.5.1",

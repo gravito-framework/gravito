@@ -108,9 +108,11 @@ export class RabbitMQDriver implements QueueDriver {
    */
   async pop(queue: string): Promise<SerializedJob | null> {
     const channel = await this.ensureChannel()
+    await channel.assertQueue(queue, { durable: true })
     const msg = await channel.get(queue, { noAck: false })
-
-    if (!msg) return null
+    if (!msg) {
+      return null
+    }
 
     const job = JSON.parse(msg.content.toString()) as SerializedJob
     // Attach raw message for acknowledgement if needed

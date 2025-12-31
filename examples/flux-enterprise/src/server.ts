@@ -1,15 +1,69 @@
 import { randomUUID } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { existsSync, watch } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { RippleServer } from '@gravito/ripple'
 import { env } from './env'
 import { traceLocation } from './flux'
 import { ProcessWorkflowJob } from './jobs/ProcessWorkflowJob'
 import { getQueueManager } from './stream'
 
+// Initialize Ripple
+const ripple = new RippleServer({ path: '/ws' })
+await ripple.init()
+
+// File Watcher for Trace Logic
+let traceWatcherSetup = false
+function setupTraceWatcher() {
+  if (traceWatcherSetup) return
+
+  // Poll until file exists, then watch
+  const checkInterval = setInterval(() => {
+    if (existsSync(traceLocation)) {
+      clearInterval(checkInterval)
+      traceWatcherSetup = true
+      console.log(`👀 Watching trace file at: ${traceLocation}`)
+
+      watch(traceLocation, async (eventType) => {
+        console.log(`📁 File event: ${eventType}`)
+        // Handle both change and rename (some editors/writers do atomic replace)
+        if (eventType === 'change' || eventType === 'rename') {
+          // Broadcast latest events
+          try {
+            // Small delay to ensure write flush
+            await new Promise((r) => setTimeout(r, 50))
+            const events = await readTraceEvents(50)
+            console.log(`📡 Broadcasting ${events.length} trace events`)
+            ripple.broadcast('trace-updates', 'update', { events })
+          } catch (err) {
+            console.error('Error reading/broadcasting trace:', err)
+          }
+        }
+      })
+    }
+  }, 1000)
+}
+
+setupTraceWatcher()
+
 const listener = Bun.serve({
   port: env.port,
-  async fetch(request) {
+  websocket: ripple.getHandler(),
+  async fetch(request, server) {
+    // 1. Handle WebSocket Upgrade
+    const success = ripple.upgrade(request, server)
+    if (success) {
+      console.log('connection upgraded')
+      return undefined
+    }
+
     const url = new URL(request.url)
+
+    // 2. Serve Ripple Client
+    if (url.pathname === '/ripple-client.js') {
+      return new Response(Bun.file('../../packages/ripple-client/dist/index.mjs'), {
+        headers: { 'Content-Type': 'application/javascript' },
+      })
+    }
 
     if (request.method === 'POST' && url.pathname === '/orders') {
       try {
@@ -53,6 +107,36 @@ const listener = Bun.serve({
       }
     }
 
+    if (request.method === 'POST' && url.pathname === '/retry') {
+      try {
+        const payload = await request.json()
+        const { id } = payload
+        const newId = `retry-${id.slice(0, 8)}`
+        const workflowName = 'flux-enterprise-order'
+
+        const input = {
+          orderId: newId,
+          userId: 'cmd-user',
+          items: [{ productId: 'widget-a', qty: 1 }],
+          isRetry: true,
+          originalId: id,
+        }
+
+        const queue = await getQueueManager()
+        const job = new ProcessWorkflowJob({ workflowName, input }).onQueue(env.rabbitQueue)
+        await queue.push(job)
+
+        return new Response(JSON.stringify({ status: 'queued', id: newId }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e) }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
     if (request.method === 'GET' && url.pathname === '/trace') {
       if (!existsSync(traceLocation)) {
         return new Response('Trace file not found', { status: 404 })
@@ -70,6 +154,29 @@ const listener = Bun.serve({
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       })
+    }
+
+    if (request.method === 'GET' && url.pathname === '/metrics') {
+      try {
+        const queue = await getQueueManager()
+        // Get queue depth for the configured queue
+        const depth = await queue.size(env.rabbitQueue)
+
+        // Simple metric: Count total lines in trace specific to completed/failed
+        // For performance, we'll just check if file exists, if not 0.
+        // A real app would use a DB count or cached metric.
+        // For now, we return the Queue Depth which is the critical requested metric.
+        return new Response(JSON.stringify({ backlog: depth }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch (e) {
+        // If queue is down or other error
+        return new Response(JSON.stringify({ backlog: -1, error: String(e) }), {
+          status: 200, // Return 200 so UI handles it gracefully
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     if (request.method === 'GET' && url.pathname === '/') {
@@ -136,8 +243,9 @@ const dashboardHtml = `<!DOCTYPE html>
 
     /* Common UI Elements */
     .stats-panel {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 20px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 20px;
     }
+    .pool.backlog .pool-count { color: var(--purple); }
     .pool {
       background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 4px;
       padding: 10px; text-align: center;
@@ -315,6 +423,47 @@ const dashboardHtml = `<!DOCTYPE html>
       25% { transform: translateX(-1px); }
       75% { transform: translateX(1px); }
     }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+      z-index: 100; display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open { display: flex; opacity: 1; }
+    
+    .modal {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+      width: 500px; max-width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      align-items: center;
+      transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    
+    .modal-header {
+      padding: 15px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255,255,255,0.02);
+    }
+    .modal-title { font-size: 1rem; color: #fff; font-weight: bold; }
+    .modal-close { background: none; border: none; color: #666; font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: #fff; }
+    
+    .modal-body { padding: 20px; color: var(--text); font-size: 0.9rem; line-height: 1.5; }
+    .modal-field { margin-bottom: 15px; }
+    .modal-label { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 5px; display: block; }
+    .modal-value { background: #000; padding: 10px; border-radius: 4px; font-family: monospace; border: 1px solid #333; }
+    .modal-value.error { color: var(--error); border-color: rgba(248, 81, 73, 0.3); background: rgba(248, 81, 73, 0.05); }
+
+    .modal-footer {
+      padding: 15px 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .btn { padding: 8px 16px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; border: none; font-weight: bold; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.8; }
+    .btn-secondary { background: #333; color: #fff; }
+    .btn-primary { background: var(--accent); color: #000; }
   </style>
 </head>
 <body>
@@ -343,6 +492,7 @@ const dashboardHtml = `<!DOCTYPE html>
     </div>
     
     <div class="stats-panel">
+      <div class="pool backlog" style="border-color: var(--purple);"><div class="pool-label" style="color: var(--purple);">QUEUE BACKLOG</div><div class="pool-count" id="count-backlog">-</div></div>
       <div class="pool success"><div class="pool-label">SUCCESS</div><div class="pool-count" id="count-perfect">0</div></div>
       <div class="pool recovered"><div class="pool-label">RECOVERED</div><div class="pool-count" id="count-recovered">0</div></div>
       <div class="pool failed"><div class="pool-label">FAILED</div><div class="pool-count" id="count-failed">0</div></div>
@@ -371,7 +521,40 @@ const dashboardHtml = `<!DOCTYPE html>
     </div>
   </div>
 
-  <script>
+  <!-- Review Modal -->
+  <div class="modal-overlay" id="review-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Order Anomaly Review</div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+         <div class="modal-field">
+            <label class="modal-label">Transaction ID</label>
+            <div class="modal-value" id="modal-id"></div>
+         </div>
+         <div class="modal-field">
+            <label class="modal-label">Failure Reason</label>
+            <div class="modal-value error" id="modal-reason"></div>
+         </div>
+         <div class="modal-field">
+            <label class="modal-label">Recommended Action</label>
+            <div style="font-size: 0.85rem; color: #888;">
+               The system has halted processing for this order. Review the error trace above. 
+               You can choose to retry the step or discard the transaction.
+            </div>
+         </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Dismiss</button>
+        <button class="btn btn-primary" onclick="retryTransaction()">Retry Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createRippleClient } from '/ripple-client.js';
+
     // Configuration
     const WORKFLOW_ORDER = 'flux-enterprise-order';
     const WORKFLOW_SAGA = 'saga-travel-reservation';
@@ -390,6 +573,7 @@ const dashboardHtml = `<!DOCTYPE html>
     const activeMissions = new Map(); // For rockets
     const networkNodes = new Map(); // For network view
     const stateCache = {};
+    const loggedMissions = new Set(); // Prevent double counting
     const pageLoadTime = Date.now();
     let currentView = 'rocket';
 
@@ -465,7 +649,12 @@ const dashboardHtml = `<!DOCTYPE html>
     function updateRocket(id, state) {
       let elements = activeMissions.get(id);
       if (!elements) {
-        if (state.status === 'completed' || state.status === 'failed') return; // Don't resurrect old ones
+        // If it's already done when we first see it (e.g. page reload)
+        if (state.status === 'completed' || state.status === 'failed') {
+             // Ensure it's logged in stats/attention list, then ignore
+             logCompletion(id, state, false); 
+             return; 
+        }
         elements = createRocketDOM(id);
         activeMissions.set(id, elements);
       }
@@ -524,6 +713,7 @@ const dashboardHtml = `<!DOCTYPE html>
        card.id = 'node-' + id;
        
        let emoji = '🔮';
+       if(workflowId.includes('order')) emoji = '🚀';
        if(workflowId.includes('saga')) emoji = '✈️';
        if(workflowId.includes('supply')) emoji = '🚢';
        
@@ -535,8 +725,15 @@ const dashboardHtml = `<!DOCTYPE html>
          <div class="node-steps" id="steps-\${id}"></div>
        \`;
        networkGrid.prepend(card);
-       // Keep grid size manageable
-       if(networkGrid.children.length > 12) networkGrid.lastChild.remove();
+       // Keep grid size manageable (16 items = 4x4 grid)
+       if(networkGrid.children.length > 16) {
+           const removed = networkGrid.lastChild;
+           if(removed && removed.id) {
+               const removedId = removed.id.replace('node-', '');
+               networkNodes.delete(removedId);
+           }
+           removed.remove();
+       }
        
        return { card, stepsContainer: card.querySelector('.node-steps') };
     }
@@ -588,169 +785,282 @@ const dashboardHtml = `<!DOCTYPE html>
       }
     }
 
-    // --- Shared Logic ---
-    function logCompletion(id, state, hadRetries) {
-      let type = 'failed';
-       if (state.status === 'completed') {
-          type = hadRetries ? 'recovered' : 'success';
-       }
-       
-       const el = document.getElementById(type === 'success' ? 'count-perfect' : (type === 'recovered' ? 'count-recovered' : 'count-failed'));
-       if(el) el.textContent = parseInt(el.textContent) + 1;
-       
-       if (type !== 'success') {
-          const list = document.getElementById('attention-list');
-          const item = document.createElement('div');
-          item.className = 'attention-item ' + type;
-          item.id = 'attn-' + id;
-          
-          let reason = type === 'recovered' ? 'Retried' : 'Failure';
-          // Improve reason finding
-          const steps = Object.entries(state.steps);
-          const failStep = steps.find(([_, s]) => s.status === 'failed');
-          if(failStep) reason = 'Failed: ' + failStep[0];
-          
-          item.innerHTML = \`
+// --- Shared Logic ---
+function logCompletion(id, state, hadRetries) {
+  if (loggedMissions.has(id)) return;
+  loggedMissions.add(id);
+
+  let type = 'failed';
+  if (state.status === 'completed') {
+    type = hadRetries ? 'recovered' : 'success';
+  }
+
+  const el = document.getElementById(type === 'success' ? 'count-perfect' : (type === 'recovered' ? 'count-recovered' : 'count-failed'));
+  if (el) el.textContent = parseInt(el.textContent) + 1;
+
+  if (type !== 'success') {
+    const list = document.getElementById('attention-list');
+    const item = document.createElement('div');
+    item.className = 'attention-item ' + type;
+    item.id = 'attn-' + id;
+
+    let reason = type === 'recovered' ? 'Retried' : 'Failure';
+    // Improve reason finding
+    const steps = Object.entries(state.steps);
+    const failStep = steps.find(([_, s]) => s.status === 'failed');
+    if (failStep) {
+        reason = 'Failed: ' + failStep[0];
+        if (failStep[1].error) {
+            // Add the specific error message details
+            reason += ' — ' + failStep[1].error;
+        }
+    }
+
+    item.innerHTML = \`
             <div class="item-info">
               <span class="item-id">\${id.slice(0, 8)}</span>
               <span class="item-detail">\${reason}</span>
             </div>\`;
-          
-          if(type === 'failed') {
-             // Retry button implementation omitted for generic types for now
-             item.innerHTML += \`<button class="retry-btn">Review</button>\`; 
-          }
-          list.prepend(item);
-       }
+
+    if (type === 'failed') {
+      const btn = document.createElement('button');
+      btn.className = 'retry-btn';
+      btn.textContent = 'Review';
+      btn.onclick = () => openModal(id, reason);
+      item.appendChild(btn);
     }
+    list.prepend(item);
+  }
+}
 
-    function addLog(text, type) {
-      const entry = document.createElement('div');
-      entry.className = 'log-entry ' + (type || '');
-      entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
-      logFeed.prepend(entry);
-      if(logFeed.children.length > 50) logFeed.lastChild.remove();
+  function addLog(text, type) {
+  const entry = document.createElement('div');
+  entry.className = 'log-entry ' + (type || '');
+  entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
+  logFeed.prepend(entry);
+  if (logFeed.children.length > 50) logFeed.lastChild.remove();
+}
+
+    // Poll Metrics
+    async function updateMetrics() {
+        try {
+            const res = await fetch('/metrics');
+            const data = await res.json();
+            const backlogEl = document.getElementById('count-backlog');
+            if(backlogEl) backlogEl.textContent = data.backlog >= 0 ? data.backlog : 'ERR';
+        } catch(e) { console.error(e); }
     }
+    setInterval(updateMetrics, 1000);
+    updateMetrics();
 
-    async function fetchTrace() {
-      try {
-        const res = await fetch('/trace-events');
-        const data = await res.json();
-        const grouped = {};
-        
-        data.events.sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
-        
-        data.events.forEach(ev => {
-          const id = ev.workflowId;
-          const wfName = ev.workflowName || 'unknown-workflow';
-          
-          if (!grouped[id]) grouped[id] = { status: 'pending', steps: {}, name: wfName };
-          const wf = grouped[id];
-          
-          if (ev.type === 'workflow:start') { wf.status = 'running'; wf.name = ev.workflowName; }
-          if (ev.type === 'workflow:complete') { wf.status = 'completed'; wf.duration = ev.duration; }
-          
-          if (ev.stepName) {
-            if (!wf.steps[ev.stepName]) wf.steps[ev.stepName] = { status: 'pending', retries: 0 };
-            const step = wf.steps[ev.stepName];
-            if (ev.type === 'step:start') step.status = 'running';
-            if (ev.type === 'step:retry') {
-               step.status = 'running';
-               step.retries = ev.retries;
-               logUnique(id, ev.stepName, 'retry', 'Retry Initiated: ' + ev.stepName);
-            }
-            if (ev.type === 'step:complete') step.status = 'completed';
-            if (ev.type === 'step:error') {
-               step.status = 'failed';
-               wf.status = 'failed'; 
-               logUnique(id, ev.stepName, 'error', 'Fault Detected: ' + ev.stepName);
-            }
-          }
-        });
+function processEvents(events) {
+  try {
+    const grouped = {};
+    if (!events || !Array.isArray(events)) return;
 
-        Object.keys(grouped).forEach(id => {
-          const state = grouped[id];
-          if (state.name === WORKFLOW_ORDER) {
-            updateRocket(id, state);
-          } else {
-            updateNetworkNode(id, state, state.name);
-          }
-        });
-      } catch (e) { console.error(e); }
-    }
+    events.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
-    function logUnique(id, step, type, msg) {
-       const key = id + step + type;
-       if (!stateCache[key]) {
-          addLog(msg + ' (' + id.slice(0,6) + ')', type);
-          stateCache[key] = true;
-       }
-    }
+    events.forEach(ev => {
+      const id = ev.workflowId;
+      const wfName = ev.workflowName || 'unknown-workflow';
 
-    setInterval(fetchTrace, 500);
-    fetchTrace();
+      if (!grouped[id]) grouped[id] = { status: 'pending', steps: {}, name: wfName };
+      const wf = grouped[id];
 
-    // Launch Handler
-    document.getElementById('launch-btn').addEventListener('click', async () => {
-       const type = document.getElementById('mission-type').value;
-       const fail = document.getElementById('force-fail').checked;
-       const btn = document.getElementById('launch-btn');
-       
-       // Change view if needed
-       if (type === WORKFLOW_ORDER && currentView !== 'rocket') switchView('rocket');
-       if (type !== WORKFLOW_ORDER && currentView !== 'network') switchView('network');
+      if (ev.type === 'workflow:start') { wf.status = 'running'; wf.name = ev.workflowName; }
+      if (ev.type === 'workflow:complete') { wf.status = 'completed'; wf.duration = ev.duration; }
 
-       let payload = {};
-       
-       if (type === WORKFLOW_ORDER) {
-          payload = {
-            userId: 'cmd-user',
-            items: fail ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-a', qty: 1 }]
-          };
-       } else if (type === WORKFLOW_SAGA) {
-          payload = {
-             userId: 'traveler-1',
-             destination: fail ? 'FAIL_CITY' : 'Tokyo', // Trigger Hotel failure
-             budget: 2000,
-             isPremium: true
-          };
-          if(fail) { 
-             // To fail Flight, we need to modify logic, but here "FAIL_CITY" triggers Hotel failure -> Compensation
-             addLog('Simulating Regional Blackout (Hotel Failure)...', 'retry');
-          }
-       } else if (type === WORKFLOW_SUPPLY) {
-          payload = {
-             origin: 'CN',
-             destination: 'US',
-             priority: 'express',
-             items: [{ sku: 'IPHONE-16', quantity: fail ? 1000 : 50, weight: 0.5, value: 999 }] 
-             // Fail condition: Weight > 500kg for Express
-          };
-          if(fail) addLog('Simulating Overweight Cargo...', 'retry');
-       }
-
-       btn.disabled = true;
-       btn.textContent = 'Transmitting...';
-
-       try {
-         await fetch('/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-               workflowName: type,
-               ...payload
-            })
-         });
-         addLog('Command Sent: ' + type.split('-')[1].toUpperCase(), 'success');
-       } catch(e) {
-         addLog('Transmission Error', 'error');
-       } finally {
-         setTimeout(() => { btn.disabled = false; btn.textContent = '🚀 INITIALIZE EVENT'; }, 500);
-       }
+      if (ev.stepName) {
+        if (!wf.steps[ev.stepName]) wf.steps[ev.stepName] = { status: 'pending', retries: 0 };
+        const step = wf.steps[ev.stepName];
+        if (ev.type === 'step:start') step.status = 'running';
+        if (ev.type === 'step:retry') {
+          step.status = 'running';
+          step.retries = ev.retries;
+          logUnique(id, ev.stepName, 'retry', 'Retry Initiated: ' + ev.stepName);
+        }
+        if (ev.type === 'step:complete') step.status = 'completed';
+        if (ev.type === 'step:error') {
+          step.status = 'failed';
+          wf.status = 'failed';
+          step.error = ev.error; // Store the error message
+          logUnique(id, ev.stepName, 'error', 'Fault Detected: ' + ev.stepName);
+        }
+      }
     });
-  </script>
-</body>
-</html>`
+
+    Object.keys(grouped).forEach(id => {
+      const state = grouped[id];
+      // Always update network view (history card)
+      updateNetworkNode(id, state, state.name);
+
+      // Special visualization for Order
+      if (state.name === WORKFLOW_ORDER) {
+        updateRocket(id, state);
+      }
+    });
+  } catch (e) { console.error('Error processing events', e); }
+}
+
+function logUnique(id, step, type, msg) {
+  const key = id + step + type;
+  if (!stateCache[key]) {
+    addLog(msg + ' (' + id.slice(0, 6) + ')', type);
+    stateCache[key] = true;
+  }
+}
+
+// --- Init ---
+
+// 1. Initial Load
+fetch('/trace-events')
+  .then(res => res.json())
+  .then(data => processEvents(data.events))
+  .catch(err => console.error('Initial load failed', err));
+
+    // 2. Setup Ripple WebSocket
+    console.log('🌊 Connecting to Ripple...');
+    
+    // Construct WebSocket URL
+    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = proto + '://' + window.location.host + '/ws';
+
+    const ripple = createRippleClient({
+      host: wsUrl
+    });
+
+ripple.connect();
+
+const channel = ripple.channel('trace-updates');
+channel.listen('update', (data) => {
+  // data.events contains the new events
+  addLog('⚡ Ripple Update Received', 'success');
+  processEvents(data.events);
+});
+
+// Launch Handler
+document.getElementById('launch-btn').addEventListener('click', async () => {
+  const type = document.getElementById('mission-type').value;
+  const fail = document.getElementById('force-fail').checked;
+  const btn = document.getElementById('launch-btn');
+
+  // Change view if needed
+  if (type === WORKFLOW_ORDER && currentView !== 'rocket') switchView('rocket');
+  if (type !== WORKFLOW_ORDER && currentView !== 'network') switchView('network');
+
+  let payload = {};
+
+  if (type === WORKFLOW_ORDER) {
+    payload = {
+      userId: 'cmd-user',
+      items: fail ? [{ productId: 'widget-a', qty: 100 }] : [{ productId: 'widget-a', qty: 1 }]
+    };
+  } else if (type === WORKFLOW_SAGA) {
+    payload = {
+      userId: 'traveler-1',
+      destination: fail ? 'FAIL_CITY' : 'Tokyo', // Trigger Hotel failure
+      budget: 2000,
+      isPremium: true
+    };
+    if (fail) {
+      // To fail Flight, we need to modify logic, but here "FAIL_CITY" triggers Hotel failure -> Compensation
+      addLog('Simulating Regional Blackout (Hotel Failure)...', 'retry');
+    }
+  } else if (type === WORKFLOW_SUPPLY) {
+    payload = {
+      origin: 'CN',
+      destination: 'US',
+      priority: 'express',
+      items: [{ sku: 'IPHONE-16', quantity: fail ? 1000 : 50, weight: 0.5, value: 999 }]
+      // Fail condition: Weight > 500kg for Express
+    };
+    if (fail) addLog('Simulating Overweight Cargo...', 'retry');
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Transmitting...';
+
+  try {
+    await fetch('/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        workflowName: type,
+        ...payload
+      })
+    });
+    addLog('Command Sent: ' + type.split('-')[1].toUpperCase(), 'success');
+  } catch (e) {
+    addLog('Transmission Error', 'error');
+  } finally {
+    setTimeout(() => { btn.disabled = false; btn.textContent = '🚀 INITIALIZE EVENT'; }, 500);
+  }
+});
+
+window.retryTransaction = async function() {
+   const modal = document.getElementById('review-modal');
+   const id = modal.dataset.currentId;
+   if(!id) return;
+   
+   addLog('Initiating Retry for ' + id.slice(0,8), 'retry');
+   const btn = modal.querySelector('.btn-primary');
+   const originalText = btn.textContent;
+   btn.disabled = true;
+   btn.textContent = 'Retrying...';
+   
+   try {
+     const res = await fetch('/retry', { 
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+     });
+     const data = await res.json();
+     addLog('Retry Queued: ' + data.id, 'success');
+     
+     // Update Stats
+     const failedEl = document.getElementById('count-failed');
+     const recoveredEl = document.getElementById('count-recovered');
+     if (failedEl) failedEl.textContent = Math.max(0, parseInt(failedEl.textContent) - 1);
+     if (recoveredEl) recoveredEl.textContent = parseInt(recoveredEl.textContent) + 1;
+
+     const originalItem = document.getElementById('attn-' + id);
+     if(originalItem) {
+        originalItem.innerHTML += ' <span style="margin-left:5px; color:#3fb950">✔</span>';
+        setTimeout(() => originalItem.remove(), 2000);
+     }
+     
+     closeModal();
+   } catch(e) {
+     console.error(e);
+     addLog('Retry Failed', 'error');
+   } finally {
+     btn.disabled = false;
+     btn.textContent = originalText;
+   }
+};
+
+window.closeModal = function() {
+       const modal = document.getElementById('review-modal');
+       modal.classList.remove('open');
+       setTimeout(() => modal.style.display = 'none', 300);
+    };
+
+    window.openModal = function(id, reason) {
+       const modal = document.getElementById('review-modal');
+       modal.dataset.currentId = id; 
+       document.getElementById('modal-id').textContent = id;
+       document.getElementById('modal-reason').textContent = reason || 'Unknown Error';
+       
+       modal.style.display = 'flex';
+       // Force reflow
+       modal.offsetHeight;
+       modal.classList.add('open');
+    };
+
+window.switchView = switchView; // Expose for debug
+</script>
+  </body>
+  </html>`
 
 console.log(`${env.appName} HTTP server running on port ${env.port}`)
 console.log(
