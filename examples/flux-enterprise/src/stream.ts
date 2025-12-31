@@ -1,5 +1,5 @@
 import { QueueManager } from '@gravito/stream'
-import amqplib from 'amqplib'
+import * as amqplib from 'amqplib'
 import { env } from './env'
 import { ProcessWorkflowJob } from './jobs/ProcessWorkflowJob'
 

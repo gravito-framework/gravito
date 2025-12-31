@@ -61,7 +61,7 @@ export class RabbitMQDriver implements QueueDriver {
   /**
    * Ensure channel is created.
    */
-  private async ensureChannel(): Promise<any> {
+  public async ensureChannel(): Promise<any> {
     if (this.channel) return this.channel
 
     // If client is a connection, create channel
@@ -77,6 +77,13 @@ export class RabbitMQDriver implements QueueDriver {
     }
 
     return this.channel
+  }
+
+  /**
+   * Get the underlying connection.
+   */
+  public getRawConnection() {
+    return this.connection
   }
 
   /**
@@ -129,9 +136,29 @@ export class RabbitMQDriver implements QueueDriver {
   }
 
   /**
+   * Negative acknowledge a message.
+   */
+  async nack(message: any, requeue = true): Promise<void> {
+    const channel = await this.ensureChannel()
+    channel.nack(message, false, requeue)
+  }
+
+  /**
+   * Reject a message.
+   */
+  async reject(message: any, requeue = true): Promise<void> {
+    const channel = await this.ensureChannel()
+    channel.reject(message, requeue)
+  }
+
+  /**
    * Subscribe to a queue.
    */
-  async subscribe(queue: string, callback: (job: SerializedJob) => Promise<void>): Promise<void> {
+  async subscribe(
+    queue: string,
+    callback: (job: SerializedJob) => Promise<void>,
+    options: { autoAck?: boolean } = {}
+  ): Promise<void> {
     const channel = await this.ensureChannel()
     await channel.assertQueue(queue, { durable: true })
 
@@ -139,13 +166,25 @@ export class RabbitMQDriver implements QueueDriver {
       await channel.bindQueue(queue, this.exchange, '')
     }
 
-    await channel.consume(queue, async (msg: any) => {
-      if (!msg) return
+    const { autoAck = true } = options
 
-      const job = JSON.parse(msg.content.toString()) as SerializedJob
-      await callback(job)
-      channel.ack(msg)
-    })
+    await channel.consume(
+      queue,
+      async (msg: any) => {
+        if (!msg) return
+
+        const job = JSON.parse(msg.content.toString()) as SerializedJob
+        // Attach raw message for manual control
+        ;(job as any)._raw = msg
+
+        await callback(job)
+
+        if (autoAck) {
+          channel.ack(msg)
+        }
+      },
+      { noAck: false }
+    )
   }
 
   /**
