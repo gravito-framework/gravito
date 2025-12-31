@@ -1,33 +1,15 @@
-import amqplib from 'amqplib'
 import { env } from './env'
+import { ProcessWorkflowJob } from './jobs/ProcessWorkflowJob'
+import { getQueueManager } from './stream'
 import type { OrderWorkflowInput } from './workflows/order'
 
-async function assertTopology(channel: amqplib.Channel) {
-  await channel.assertExchange(env.rabbitExchange, 'fanout', { durable: true })
-  await channel.assertQueue(env.rabbitQueue, { durable: true })
-  await channel.bindQueue(env.rabbitQueue, env.rabbitExchange, '')
-}
-
 export async function publishOrder(payload: OrderWorkflowInput) {
-  const connection = await amqplib.connect(env.rabbitUrl)
-  const channel = await connection.createChannel()
+  const queue = await getQueueManager()
 
-  try {
-    await assertTopology(channel)
-    const published = channel.publish(
-      env.rabbitExchange,
-      '',
-      Buffer.from(JSON.stringify(payload)),
-      {
-        persistent: true,
-      }
-    )
+  const job = new ProcessWorkflowJob({
+    workflowName: 'flux-enterprise-order',
+    input: payload,
+  }).onQueue(env.rabbitQueue)
 
-    if (!published) {
-      throw new Error('RabbitMQ rejected the publish')
-    }
-  } finally {
-    await channel.close()
-    await connection.close()
-  }
+  await queue.push(job)
 }

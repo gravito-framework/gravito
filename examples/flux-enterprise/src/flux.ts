@@ -1,6 +1,8 @@
 import { FluxEngine, JsonFileTraceSink, MemoryStorage } from '@gravito/flux'
 import { env } from './env'
 import { orderWorkflow } from './workflows/order'
+import { sagaTravelWorkflow } from './workflows/saga-travel'
+import { supplyChainWorkflow } from './workflows/supply-chain'
 
 export interface FluxEngineOptions {
   tracePath?: string
@@ -14,5 +16,6 @@ export function createFluxEngine(options?: FluxEngineOptions) {
   return new FluxEngine({ storage: new MemoryStorage(), trace: sink })
 }
 
-export { orderWorkflow }
+export { orderWorkflow, sagaTravelWorkflow, supplyChainWorkflow }
 export const traceLocation = env.tracePath
+export const engine = createFluxEngine()
