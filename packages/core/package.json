@@ -34,7 +34,7 @@
     "format:check": "biome format ./src ./tests",
     "check": "biome check ./src ./tests",
     "check:fix": "biome check --write ./src ./tests",
-    "typecheck": "node_modules/.bin/tsc --noEmit --skipLibCheck",
+    "typecheck": "../../node_modules/.bin/tsc --noEmit --skipLibCheck",
     "prepublishOnly": "bun run typecheck && bun run test && bun run build"
   },
   "keywords": [],
