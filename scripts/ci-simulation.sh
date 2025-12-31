@@ -50,8 +50,17 @@ else
     exit 1
 fi
 
-# 步驟 5: 驗證建置輸出
-echo -e "${YELLOW}步驟 5: 驗證建置輸出...${NC}"
+# 步驟 5: 執行測試
+echo -e "${YELLOW}步驟 5: 執行測試...${NC}"
+if bun run test:coverage; then
+    echo -e "${GREEN}✅ 所有測試通過${NC}\n"
+else
+    echo -e "${RED}❌ 測試失敗${NC}\n"
+    exit 1
+fi
+
+# 步驟 6: 驗證建置輸出
+echo -e "${YELLOW}步驟 6: 驗證建置輸出...${NC}"
 if [ -f packages/core/dist/index.js ] && [ -f packages/core/dist/index.cjs ] && [ -f packages/core/dist/index.d.ts ]; then
     echo -e "${GREEN}✅ 所有建置輸出驗證通過${NC}\n"
 else

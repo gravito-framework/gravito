@@ -57,9 +57,15 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
         }
       }
 
-      // 檢查是否使用 bunx（推薦用於 CI 環境）
-      if (typecheckScript.includes('tsc') && !typecheckScript.includes('bunx') && !typecheckScript.includes('npx')) {
-        issues.push(`⚠️  建議使用 'bunx tsc' 或 'npx tsc' 以確保 CI 環境相容性`)
+      // 檢查是否使用 bunx（CI 環境必須使用 bunx）
+      if (typecheckScript.includes('tsc')) {
+        if (!typecheckScript.includes('bunx')) {
+          issues.push(`❌ 必須使用 'bunx tsc' 以確保 CI 環境相容性（當前: ${typecheckScript}）`)
+        }
+        // 檢查是否有 fallback 機制（不應該有，應該直接使用 bunx）
+        if (typecheckScript.includes('||') || typecheckScript.includes('node_modules/.bin/tsc')) {
+          issues.push(`⚠️  建議直接使用 'bunx tsc'，不需要 fallback 機制`)
+        }
       }
     } else {
       issues.push(`⚠️  缺少 typecheck 腳本`)

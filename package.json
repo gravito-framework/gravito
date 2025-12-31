@@ -18,6 +18,7 @@
         "typecheck": "turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
         "typecheck:full": "find . -name '*.tsbuildinfo' -delete && turbo run typecheck --filter='./packages/*' --filter='./satellites/*'",
         "typecheck:validate": "bun run scripts/check-typecheck-config.ts",
+        "typecheck:verify": "bun run scripts/verify-bunx-typecheck.ts",
         "version:check": "bun run scripts/check-versions.ts",
         "changeset": "changeset",
         "ci:version": "changeset version",
@@ -40,7 +41,7 @@
     },
     "simple-git-hooks": {
         "pre-commit": "export PATH=\"~/.bun/bin:$PATH\" && bunx lint-staged",
-        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && bun run typecheck:validate && bun run typecheck:full && turbo run test --filter=[HEAD^1]"
+        "pre-push": "export PATH=\"~/.bun/bin:$PATH\" && bun run check && bun run typecheck:validate && bun run typecheck:verify && bun run typecheck:full && turbo run test --filter=[HEAD^1]"
     },
     "lint-staged": {
         "*.{js,ts,cjs,mjs}": [
