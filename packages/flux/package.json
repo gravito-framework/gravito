@@ -58,7 +58,7 @@
     "bun-types": "latest",
     "@gravito/core": "workspace:*",
     "tsup": "^8.5.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   },
   "keywords": [
     "gravito",

@@ -41,8 +41,11 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
       typecheckScript = pkg.scripts.typecheck
 
       // 檢查是否使用正確的命令
-      if (typecheckScript !== 'bun tsc --noEmit --skipLibCheck') {
-        issues.push(`⚠️  typecheck 腳本建議標準化為 'bun tsc --noEmit --skipLibCheck'（當前: ${typecheckScript}）`)
+      const isStdTsc = typecheckScript === 'bun tsc --noEmit --skipLibCheck'
+      const isNodeTsc = typecheckScript?.includes('node --max-old-space-size') && typecheckScript?.includes('tsc')
+      
+      if (!isStdTsc && !isNodeTsc) {
+        issues.push(`⚠️  typecheck 腳本建議標準化為 'bun tsc --noEmit --skipLibCheck' 或指定記憶體限制（當前: ${typecheckScript}）`)
       }
 
       // 檢查是否有 --skipLibCheck

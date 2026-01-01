@@ -56,7 +56,7 @@
     "@vue/server-renderer": "^3.0.0",
     "@gravito/core": "workspace:*",
     "tsup": "8.5.1",
-    "typescript": "^5.0.0",
+    "typescript": "^5.9.3",
     "vue": "^3.0.0",
     "bun-types": "latest"
   },

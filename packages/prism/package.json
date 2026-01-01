@@ -70,7 +70,7 @@
     "@gravito/core": "workspace:*",
     "@gravito/photon": "workspace:*",
     "tsup": "^8.5.1",
-    "typescript": "latest",
+    "typescript": "^5.9.3",
     "vue": "^3.5.26"
   },
   "homepage": "https://github.com/gravito-framework/gravito#readme",
