@@ -1,3 +1,4 @@
+// ... imports ...
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -16,8 +17,9 @@ import {
   ShieldCheck,
   Sun,
   Trash2,
+  Zap,
 } from 'lucide-react'
-import type React from 'react'
+import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NotificationBell } from './components/NotificationBell'
@@ -54,8 +56,9 @@ export function Layout({ children }: LayoutProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [health, setHealth] = useState(99.9)
-
   const [systemStatus, setSystemStatus] = useState<Record<string, any>>({})
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+
 
   // Initial System Status Fetch
   useEffect(() => {
@@ -67,7 +70,7 @@ export function Layout({ children }: LayoutProps) {
 
   // Global SSE Stream Manager
   useEffect(() => {
-    console.log('[FluxConsole] Establishing Global Event Stream...')
+    console.log('[Zenith] Establishing Global Event Stream...')
     const ev = new EventSource('/api/logs/stream')
 
     ev.addEventListener('log', (e) => {
@@ -89,13 +92,12 @@ export function Layout({ children }: LayoutProps) {
     })
 
     ev.onerror = (err) => {
-      console.error('[FluxConsole] SSE Connection Error', err)
+      console.error('[Zenith] SSE Connection Error', err)
       ev.close()
-      // Simple reconnect logic could go here, but EventSource usually auto-reconnects
     }
 
     return () => {
-      console.log('[FluxConsole] Closing Global Event Stream')
+      console.log('[Zenith] Closing Global Event Stream')
       ev.close()
     }
   }, [])
@@ -346,7 +348,34 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden transition-colors duration-300">
-      <Sidebar />
+      <motion.aside
+        initial={false}
+        animate={{ width: isSidebarOpen ? 260 : 80 }}
+        className="border-r border-border/40 bg-card/50 backdrop-blur-xl flex flex-col z-50 transition-all duration-300 ease-[0.22, 1, 0.36, 1]"
+      >
+        <div className="h-16 flex items-center px-6 border-b border-border/40 bg-card/80">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+              <Zap className="text-primary-foreground fill-current" size={18} />
+            </div>
+            <motion.div
+              animate={{ opacity: isSidebarOpen ? 1 : 0 }}
+              className="flex flex-col min-w-[140px]"
+            >
+              <span className="font-extrabold text-lg tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+                Zenith
+              </span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                Control Plane
+              </span>
+            </motion.div>
+          </div>
+        </div>
+        <Sidebar
+          collapsed={!isSidebarOpen}
+          toggleCollapse={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      </motion.aside>
 
       <main className="flex-1 flex flex-col relative overflow-hidden scanline">
         {/* Top Header */}
@@ -603,7 +632,7 @@ export function Layout({ children }: LayoutProps) {
                   </div>
                 </div>
                 <span className="text-[9px] font-black text-primary/40 uppercase tracking-[0.2em]">
-                  Gravito Command Sys v1.0
+                  Gravito Zenith v1.0
                 </span>
               </div>
             </motion.div>
