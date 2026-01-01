@@ -41,11 +41,8 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
       typecheckScript = pkg.scripts.typecheck
 
       // 檢查是否使用正確的命令
-      const isStdTsc = typecheckScript?.includes('tsc') && typecheckScript?.includes('--noEmit')
-      const hasIncrementalFalse = typecheckScript?.includes('--incremental false')
-      
-      if (!isStdTsc || !hasIncrementalFalse) {
-        issues.push(`⚠️  typecheck 腳本建議標準化並包含 '--incremental false'（當前: ${typecheckScript}）`)
+      if (typecheckScript !== 'bun tsc -p tsconfig.json --noEmit --skipLibCheck') {
+        issues.push(`⚠️  typecheck 腳本建議標準化為 'bun tsc -p tsconfig.json --noEmit --skipLibCheck'（當前: ${typecheckScript}）`)
       }
 
       // 檢查是否有 --skipLibCheck

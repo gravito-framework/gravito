@@ -16,7 +16,7 @@
   "scripts": {
     "build": "node_modules/.bin/tsup src/index.ts --format esm,cjs --dts || bunx tsup src/index.ts --format esm,cjs --dts",
     "test": "bun test",
-    "typecheck": "bun tsc --noEmit --skipLibCheck --incremental false"
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "files": [
     "dist",

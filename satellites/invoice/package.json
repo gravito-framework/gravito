@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "typecheck": "bun tsc --noEmit --skipLibCheck --incremental false"
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@gravito/enterprise": "workspace:*",

@@ -41,7 +41,7 @@
   "scripts": {
     "build": "bun run build.ts",
     "dev:viewer": "node ./bin/flux.js dev --trace ./.flux/trace.ndjson --port 4280",
-    "typecheck": "bun tsc --noEmit --skipLibCheck --incremental false",
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80"
