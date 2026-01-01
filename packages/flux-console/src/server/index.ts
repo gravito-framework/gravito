@@ -122,6 +122,26 @@ api.post('/queues/:name/retry-all-failed', async (c) => {
   }
 })
 
+api.post('/queues/:name/pause', async (c) => {
+  const name = c.req.param('name')
+  try {
+    await queueService.pauseQueue(name)
+    return c.json({ success: true, paused: true })
+  } catch (err) {
+    return c.json({ error: 'Failed to pause queue' }, 500)
+  }
+})
+
+api.post('/queues/:name/resume', async (c) => {
+  const name = c.req.param('name')
+  try {
+    await queueService.resumeQueue(name)
+    return c.json({ success: true, paused: false })
+  } catch (err) {
+    return c.json({ error: 'Failed to resume queue' }, 500)
+  }
+})
+
 api.get('/queues/:name/jobs', async (c) => {
   const name = c.req.param('name')
   const type = (c.req.query('type') as 'waiting' | 'delayed' | 'failed') || 'waiting'

@@ -76,13 +76,39 @@ export class QueueService {
           const waiting = await this.redis.llen(`${this.prefix}${name}`)
           const delayed = await this.redis.zcard(`${this.prefix}${name}:delayed`)
           const failed = await this.redis.llen(`${this.prefix}${name}:failed`)
-          return { name, waiting, delayed, failed }
+          const active = await this.redis.scard(`${this.prefix}${name}:active`)
+          const paused = await this.redis.get(`${this.prefix}${name}:paused`)
+          return { name, waiting, delayed, failed, active, paused: paused === '1' }
         })
       )
       stats.push(...batchResults)
     }
 
     return stats
+  }
+
+  /**
+   * Pause a queue (workers will stop processing new jobs)
+   */
+  async pauseQueue(queueName: string): Promise<boolean> {
+    await this.redis.set(`${this.prefix}${queueName}:paused`, '1')
+    return true
+  }
+
+  /**
+   * Resume a paused queue
+   */
+  async resumeQueue(queueName: string): Promise<boolean> {
+    await this.redis.del(`${this.prefix}${queueName}:paused`)
+    return true
+  }
+
+  /**
+   * Check if a queue is paused
+   */
+  async isQueuePaused(queueName: string): Promise<boolean> {
+    const paused = await this.redis.get(`${this.prefix}${queueName}:paused`)
+    return paused === '1'
   }
 
   async retryDelayedJob(queueName: string): Promise<number> {

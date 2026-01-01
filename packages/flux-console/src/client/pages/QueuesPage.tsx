@@ -10,7 +10,9 @@ import {
     AlertCircle,
     Clock,
     Activity,
-    CheckCircle2
+    CheckCircle2,
+    Pause,
+    Play
 } from 'lucide-react'
 import { cn } from '../utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -21,6 +23,7 @@ interface QueueStats {
     delayed: number
     active: number
     failed: number
+    paused?: boolean
 }
 
 interface Job {
@@ -324,15 +327,33 @@ export function QueuesPage() {
                                         <td className="px-6 py-5 text-center">
                                             <span className={cn(
                                                 "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                                                status === 'critical' ? "bg-red-500 text-white border-red-600" :
-                                                    status === 'active' ? "bg-green-500/10 text-green-500 border-green-500/20" :
-                                                        "bg-muted/40 text-muted-foreground border-transparent"
+                                                queue.paused ? "bg-amber-500/20 text-amber-500 border-amber-500/30" :
+                                                    status === 'critical' ? "bg-red-500 text-white border-red-600" :
+                                                        status === 'active' ? "bg-green-500/10 text-green-500 border-green-500/20" :
+                                                            "bg-muted/40 text-muted-foreground border-transparent"
                                             )}>
-                                                {status}
+                                                {queue.paused ? 'paused' : status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex justify-end gap-2 items-center">
+                                                {/* Pause/Resume button */}
+                                                <button
+                                                    onClick={async () => {
+                                                        const action = queue.paused ? 'resume' : 'pause'
+                                                        await fetch(`/api/queues/${queue.name}/${action}`, { method: 'POST' })
+                                                        queryClient.invalidateQueries({ queryKey: ['queues'] })
+                                                    }}
+                                                    className={cn(
+                                                        "p-2 rounded-lg transition-all",
+                                                        queue.paused
+                                                            ? "text-green-500 hover:bg-green-500/10"
+                                                            : "text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500"
+                                                    )}
+                                                    title={queue.paused ? 'Resume Queue' : 'Pause Queue'}
+                                                >
+                                                    {queue.paused ? <Play size={16} /> : <Pause size={16} />}
+                                                </button>
                                                 {queue.delayed > 0 && (
                                                     <button
                                                         onClick={() => fetch(`/api/queues/${queue.name}/retry-all`, { method: 'POST' }).then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))}
