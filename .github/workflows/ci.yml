@@ -40,7 +40,7 @@ jobs:
         run: bun run check
 
       - name: Run Typecheck
-        run: bun run typecheck -- --concurrency=2
+        run: bun run typecheck -- --concurrency=1
 
       - name: Run Tests with Coverage
         run: bun run test:coverage -- --concurrency=2
