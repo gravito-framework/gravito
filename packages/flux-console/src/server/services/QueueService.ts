@@ -355,4 +355,61 @@ export class QueueService {
     const logs = await this.redis.lrange('flux_console:logs:history', 0, -1)
     return logs.map((l) => JSON.parse(l)).reverse()
   }
+
+  /**
+   * Search jobs across all queues by ID or data content.
+   */
+  async searchJobs(
+    query: string,
+    options: { limit?: number; type?: 'all' | 'waiting' | 'delayed' | 'failed' } = {}
+  ): Promise<any[]> {
+    const { limit = 20, type = 'all' } = options
+    const results: any[] = []
+    const queryLower = query.toLowerCase()
+
+    // Get all queues
+    const queues = await this.listQueues()
+
+    for (const queue of queues) {
+      if (results.length >= limit) break
+
+      const types = type === 'all' ? ['waiting', 'delayed', 'failed'] : [type]
+
+      for (const jobType of types) {
+        if (results.length >= limit) break
+
+        const jobs = await this.getJobs(queue.name, jobType as any, 0, 99)
+
+        for (const job of jobs) {
+          if (results.length >= limit) break
+
+          // Search in job ID
+          const idMatch = job.id && String(job.id).toLowerCase().includes(queryLower)
+
+          // Search in job name
+          const nameMatch = job.name && String(job.name).toLowerCase().includes(queryLower)
+
+          // Search in job data (stringify and search)
+          let dataMatch = false
+          try {
+            const dataStr = JSON.stringify(job.data || job).toLowerCase()
+            dataMatch = dataStr.includes(queryLower)
+          } catch (e) {
+            // Ignore stringify errors
+          }
+
+          if (idMatch || nameMatch || dataMatch) {
+            results.push({
+              ...job,
+              _queue: queue.name,
+              _type: jobType,
+              _matchType: idMatch ? 'id' : nameMatch ? 'name' : 'data',
+            })
+          }
+        }
+      }
+    }
+
+    return results
+  }
 }

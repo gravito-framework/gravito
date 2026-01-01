@@ -84,6 +84,24 @@ api.get('/queues', async (c) => {
   }
 })
 
+api.get('/search', async (c) => {
+  const query = c.req.query('q') || ''
+  const type = (c.req.query('type') as 'all' | 'waiting' | 'delayed' | 'failed') || 'all'
+  const limit = parseInt(c.req.query('limit') || '20')
+
+  if (!query || query.length < 2) {
+    return c.json({ results: [], message: 'Query must be at least 2 characters' })
+  }
+
+  try {
+    const results = await queueService.searchJobs(query, { type, limit })
+    return c.json({ results, query, count: results.length })
+  } catch (err) {
+    console.error(err)
+    return c.json({ error: 'Search failed' }, 500)
+  }
+})
+
 api.post('/queues/:name/retry-all', async (c) => {
   const name = c.req.param('name')
   try {

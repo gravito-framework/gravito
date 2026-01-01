@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { NotificationBell } from './components/NotificationBell'
 import { UserProfileDropdown } from './components/UserProfileDropdown'
-import { Search, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut } from 'lucide-react'
+import { Search, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut, FileSearch, Briefcase } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from './utils'
@@ -49,6 +49,28 @@ export function Layout({ children }: LayoutProps) {
         queryKey: ['queues'],
         queryFn: () => fetch('/api/queues').then(res => res.json()),
         refetchInterval: 30000
+    })
+
+    // Debounced job search
+    const [debouncedQuery, setDebouncedQuery] = useState('')
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery.length >= 2) {
+                setDebouncedQuery(searchQuery)
+            } else {
+                setDebouncedQuery('')
+            }
+        }, 300)
+        return () => clearTimeout(timer)
+    }, [searchQuery])
+
+    // Search jobs dynamically
+    const { data: searchResults } = useQuery<any>({
+        queryKey: ['job-search', debouncedQuery],
+        queryFn: () => fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&limit=10`).then(res => res.json()),
+        enabled: debouncedQuery.length >= 2,
+        staleTime: 5000
     })
 
     useEffect(() => {
@@ -177,7 +199,25 @@ export function Layout({ children }: LayoutProps) {
         }
     ]
 
-    const commands = [...baseCommands, ...actionCommands, ...queueCommands]
+    // Dynamic job search results
+    const jobCommands: CommandItem[] = useMemo(() => {
+        if (!searchResults?.results?.length) return []
+        return searchResults.results.map((job: any) => ({
+            id: `job-${job._queue}-${job.id}`,
+            title: `Job: ${job.id || 'Unknown'}`,
+            description: `${job._queue} • ${job._type} • ${job.name || 'No name'}`,
+            icon: <Briefcase size={18} />,
+            category: 'Action' as const,
+            action: () => {
+                navigate('/queues')
+                setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('select-queue', { detail: job._queue }))
+                }, 100)
+            }
+        }))
+    }, [searchResults, navigate])
+
+    const commands = [...baseCommands, ...actionCommands, ...queueCommands, ...jobCommands]
 
     const filteredCommands = commands.filter(cmd =>
         cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
