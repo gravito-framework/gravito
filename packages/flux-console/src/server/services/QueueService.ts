@@ -5,8 +5,7 @@ export interface QueueStats {
   name: string
   waiting: number
   delayed: number
-  // Active and Failed are tricky without explicit support in Driver,
-  // we will support them if the schema allows.
+  failed: number
 }
 
 export class QueueService {
@@ -76,7 +75,8 @@ export class QueueService {
         batch.map(async (name) => {
           const waiting = await this.redis.llen(`${this.prefix}${name}`)
           const delayed = await this.redis.zcard(`${this.prefix}${name}:delayed`)
-          return { name, waiting, delayed }
+          const failed = await this.redis.llen(`${this.prefix}${name}:failed`)
+          return { name, waiting, delayed, failed }
         })
       )
       stats.push(...batchResults)
@@ -108,7 +108,7 @@ export class QueueService {
 
   async getJobs(
     queueName: string,
-    type: 'waiting' | 'delayed' = 'waiting',
+    type: 'waiting' | 'delayed' | 'failed' = 'waiting',
     start = 0,
     stop = 49
   ): Promise<any[]> {
@@ -116,19 +116,35 @@ export class QueueService {
     let rawJobs: string[] = []
 
     if (type === 'delayed') {
-      rawJobs = await this.redis.zrange(`${key}:delayed`, start, stop)
-    } else {
-      rawJobs = await this.redis.lrange(key, start, stop)
-    }
-
-    return rawJobs.map((jobStr) => {
-      try {
-        const parsed = JSON.parse(jobStr)
-        return { ...parsed, _raw: jobStr }
-      } catch (e) {
-        return { _raw: jobStr, _error: 'Failed to parse JSON' }
+      const results = await this.redis.zrange(`${key}:delayed`, start, stop, 'WITHSCORES')
+      const formatted = []
+      for (let i = 0; i < results.length; i += 2) {
+        const jobStr = results[i]!
+        const score = results[i + 1]!
+        try {
+          const parsed = JSON.parse(jobStr)
+          formatted.push({
+            ...parsed,
+            _raw: jobStr,
+            scheduledAt: new Date(parseInt(score)).toISOString(),
+          })
+        } catch (e) {
+          formatted.push({ _raw: jobStr, _error: 'Failed to parse JSON' })
+        }
       }
-    })
+      return formatted
+    } else {
+      const listKey = type === 'failed' ? `${key}:failed` : key
+      rawJobs = await this.redis.lrange(listKey, start, stop)
+      return rawJobs.map((jobStr) => {
+        try {
+          const parsed = JSON.parse(jobStr)
+          return { ...parsed, _raw: jobStr }
+        } catch (e) {
+          return { _raw: jobStr, _error: 'Failed to parse JSON' }
+        }
+      })
+    }
   }
 
   /**
@@ -184,11 +200,15 @@ export class QueueService {
    */
   async deleteJob(
     queueName: string,
-    type: 'waiting' | 'delayed',
+    type: 'waiting' | 'delayed' | 'failed',
     jobRaw: string
   ): Promise<boolean> {
     const key =
-      type === 'delayed' ? `${this.prefix}${queueName}:delayed` : `${this.prefix}${queueName}`
+      type === 'delayed'
+        ? `${this.prefix}${queueName}:delayed`
+        : type === 'failed'
+          ? `${this.prefix}${queueName}:failed`
+          : `${this.prefix}${queueName}`
     const result =
       type === 'delayed'
         ? await this.redis.zrem(key, jobRaw)
@@ -227,8 +247,29 @@ export class QueueService {
     const pipe = this.redis.pipeline()
     pipe.del(`${this.prefix}${queueName}`)
     pipe.del(`${this.prefix}${queueName}:delayed`)
-    pipe.del(`${this.prefix}${queueName}:active`) // just in case
+    pipe.del(`${this.prefix}${queueName}:failed`)
+    pipe.del(`${this.prefix}${queueName}:active`)
     await pipe.exec()
+  }
+
+  /**
+   * Retries all failed jobs in a queue.
+   */
+  async retryAllFailedJobs(queueName: string): Promise<number> {
+    const failedKey = `${this.prefix}${queueName}:failed`
+    const queueKey = `${this.prefix}${queueName}`
+
+    const script = `
+        local failedKey = KEYS[1]
+        local queueKey = KEYS[2]
+        local jobs = redis.call('LRANGE', failedKey, 0, -1)
+        if #jobs > 0 then
+          redis.call('LPUSH', queueKey, unpack(jobs))
+          redis.call('DEL', failedKey)
+        end
+        return #jobs
+      `
+    return (await this.redis.eval(script, 2, failedKey, queueKey)) as number
   }
 
   /**

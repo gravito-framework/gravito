@@ -11,6 +11,8 @@ Lightweight, high-performance queueing for Gravito. Supports multiple storage dr
 - **Modular**: Install only the driver you need (core < 50KB)
 - **Embedded or standalone workers**: Run in-process during development or standalone in production
 - **AI-friendly**: Strong typing, clear JSDoc, and predictable APIs
+- **Custom Retry Strategies**: Built-in exponential backoff with per-job overrides
+- **Dead Letter Queue (DLQ)**: Automatic handling of permanently failed jobs
 
 ## Installation
 
@@ -158,6 +160,13 @@ abstract class Job implements Queueable {
   onQueue(queue: string): this
   onConnection(connection: string): this
   delay(seconds: number): this
+  
+  /**
+   * Set retry backoff strategy.
+   * @param seconds - Initial delay in seconds
+   * @param multiplier - Multiplier for each subsequent attempt (default: 2)
+   */
+  backoff(seconds: number, multiplier = 2): this
 }
 ```
 
@@ -170,6 +179,8 @@ class QueueManager {
   async pop(queue?: string, connection?: string): Promise<Job | null>
   async size(queue?: string, connection?: string): Promise<number>
   async clear(queue?: string, connection?: string): Promise<void>
+  async complete(job: Job): Promise<void>
+  async fail(job: Job, error: Error): Promise<void>
   registerJobClasses(jobClasses: Array<new (...args: unknown[]) => Job>): void
 }
 ```

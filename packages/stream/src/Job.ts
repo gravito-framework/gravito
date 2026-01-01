@@ -62,6 +62,16 @@ export abstract class Job implements Queueable {
   groupId?: string
 
   /**
+   * Initial retry delay (seconds).
+   */
+  retryAfterSeconds?: number
+
+  /**
+   * Retry delay multiplier.
+   */
+  retryMultiplier?: number
+
+  /**
    * Set target queue.
    */
   onQueue(queue: string): this {
@@ -83,6 +93,30 @@ export abstract class Job implements Queueable {
   delay(delay: number): this {
     this.delaySeconds = delay
     return this
+  }
+
+  /**
+   * Set retry backoff strategy.
+   * @param seconds - Initial delay in seconds
+   * @param multiplier - Multiplier for each subsequent attempt (default: 2)
+   */
+  backoff(seconds: number, multiplier = 2): this {
+    this.retryAfterSeconds = seconds
+    this.retryMultiplier = multiplier
+    return this
+  }
+
+  /**
+   * Calculate retry delay for the next attempt.
+   * @param attempt - Current attempt number (1-based)
+   * @returns Delay in milliseconds
+   */
+  getRetryDelay(attempt: number): number {
+    const initialDelay = (this.retryAfterSeconds ?? 1) * 1000
+    const multiplier = this.retryMultiplier ?? 2
+    // Exponential backoff: initial * multiplier^(attempt-1)
+    // capped at 1 hour for safety
+    return Math.min(initialDelay * multiplier ** (attempt - 1), 3600000)
   }
 
   /**

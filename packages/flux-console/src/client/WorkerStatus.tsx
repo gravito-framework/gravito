@@ -36,9 +36,21 @@ export function WorkerStatus() {
                                 <p className="text-[10px] text-muted-foreground uppercase">{worker.status} • PID {worker.pid}</p>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-xs font-black">{worker.uptime}s</p>
-                            <p className="text-[10px] text-muted-foreground uppercase">UPTIME</p>
+                        <div className="flex flex-col items-end gap-1">
+                            {worker.metrics && (
+                                <div className="flex gap-2">
+                                    <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded text-muted-foreground flex items-center gap-1">
+                                        CPU: {(worker.metrics.cpu * 100).toFixed(0)}%
+                                    </span>
+                                    <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded text-muted-foreground flex items-center gap-1">
+                                        RAM: {worker.metrics.ram.rss}MB
+                                    </span>
+                                </div>
+                            )}
+                            <div className="text-right">
+                                <p className="text-xs font-black">{worker.uptime}s</p>
+                                <p className="text-[10px] text-muted-foreground uppercase">UPTIME</p>
+                            </div>
                         </div>
                     </div>
                 ))}

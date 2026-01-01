@@ -68,6 +68,13 @@ export interface QueueDriver {
   clear(queue: string): Promise<void>
 
   /**
+   * Mark a job as permanently failed (move to DLQ).
+   * @param queue - Queue name
+   * @param job - Serialized job with error info
+   */
+  fail?(queue: string, job: SerializedJob): Promise<void>
+
+  /**
    * Push multiple jobs (optional, higher throughput).
    * @param queue - Queue name
    * @param jobs - Serialized job array

@@ -12,7 +12,6 @@ import {
     ArrowRight,
     Search,
     ChevronRight,
-    Activity,
     ListTree,
     Trash2,
     Terminal
@@ -38,13 +37,16 @@ interface Job {
     data?: any
     status?: string
     timestamp?: number
+    scheduledAt?: string
+    error?: string
+    failedAt?: number
     _raw?: string
     _error?: string
 }
 
 
 function JobInspector({ queueName, onClose }: { queueName: string, onClose: () => void }) {
-    const [view, setView] = React.useState<'waiting' | 'delayed'>('waiting')
+    const [view, setView] = React.useState<'waiting' | 'delayed' | 'failed'>('waiting')
     const queryClient = useQueryClient()
 
     const { isPending, error, data } = useQuery<{ jobs: Job[] }>({
@@ -103,6 +105,15 @@ function JobInspector({ queueName, onClose }: { queueName: string, onClose: () =
                                 >
                                     Delayed
                                 </button>
+                                <button
+                                    onClick={() => setView('failed')}
+                                    className={cn(
+                                        "text-xs font-bold px-3 py-1 rounded-full transition-all border",
+                                        view === 'failed' ? "bg-red-500 text-white border-red-500" : "bg-muted text-muted-foreground border-transparent"
+                                    )}
+                                >
+                                    Failed
+                                </button>
                             </div>
                         </div>
                         <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
@@ -136,11 +147,29 @@ function JobInspector({ queueName, onClose }: { queueName: string, onClose: () =
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="text-[10px] text-muted-foreground font-medium">
+                                            <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-2">
+                                                {view === 'delayed' && job.scheduledAt && (
+                                                    <span className="text-amber-600 font-bold flex items-center gap-1">
+                                                        <Clock size={12} />
+                                                        Runs {new Date(job.scheduledAt).toLocaleString()}
+                                                    </span>
+                                                )}
+                                                {view === 'failed' && job.failedAt && (
+                                                    <span className="text-red-600 font-bold flex items-center gap-1">
+                                                        <AlertCircle size={12} />
+                                                        Failed {new Date(job.failedAt).toLocaleString()}
+                                                    </span>
+                                                )}
                                                 {job.timestamp ? new Date(job.timestamp).toLocaleString() : ''}
                                             </span>
                                         </div>
                                         <div className="p-0">
+                                            {job.error && (
+                                                <div className="p-4 bg-red-50 text-red-700 text-xs font-medium border-b border-red-100 flex items-start gap-2">
+                                                    <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                                                    <p>{job.error}</p>
+                                                </div>
+                                            )}
                                             <pre className="text-xs font-mono p-4 overflow-x-auto text-foreground leading-relaxed">
                                                 {JSON.stringify(job, null, 2)}
                                             </pre>
@@ -152,12 +181,15 @@ function JobInspector({ queueName, onClose }: { queueName: string, onClose: () =
                                             >
                                                 Terminate
                                             </button>
-                                            {view === 'delayed' && (
+                                            {(view === 'delayed' || view === 'failed') && (
                                                 <button
                                                     onClick={() => handleAction('retry', job)}
-                                                    className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-all"
+                                                    className={cn(
+                                                        "text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg text-white shadow-sm transition-all",
+                                                        view === 'delayed' ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-500 hover:bg-blue-600"
+                                                    )}
                                                 >
-                                                    Retry Now
+                                                    {view === 'delayed' ? 'Process Now' : 'Retry Job'}
                                                 </button>
                                             )}
                                         </div>
@@ -274,6 +306,7 @@ function Dashboard() {
     const queues = data?.queues || []
     const totalWaiting = queues.reduce((acc: number, q: QueueStats) => acc + q.waiting, 0)
     const totalDelayed = queues.reduce((acc: number, q: QueueStats) => acc + q.delayed, 0)
+    const totalFailed = queues.reduce((acc: number, q: QueueStats) => acc + q.failed, 0)
 
     const activeWorkers = workerData?.workers?.length || 0
 
@@ -319,6 +352,13 @@ function Dashboard() {
                         trend="No change"
                     />
                     <MetricCard
+                        title="Failed Jobs"
+                        value={totalFailed}
+                        icon={<AlertCircle size={20} />}
+                        color="text-red-500"
+                        trend={totalFailed > 0 ? 'Action focus' : 'Clean'}
+                    />
+                    <MetricCard
                         title="Active Workers"
                         value={activeWorkers}
                         icon={<Cpu size={20} />}
@@ -352,6 +392,7 @@ function Dashboard() {
                                 <th className="px-8 py-5">Pipeline Name</th>
                                 <th className="px-8 py-5">Waiting</th>
                                 <th className="px-8 py-5">Delayed</th>
+                                <th className="px-8 py-5">Failed</th>
                                 <th className="px-8 py-5">Status</th>
                                 <th className="px-8 py-5 text-right">Operations</th>
                             </tr>
@@ -378,13 +419,25 @@ function Dashboard() {
                                     </td>
                                     <td className="px-8 py-6 text-muted-foreground font-medium">{queue.delayed}</td>
                                     <td className="px-8 py-6">
-                                        {queue.waiting > 1000 ?
+                                        <span className={cn(
+                                            "font-mono font-bold",
+                                            queue.failed > 0 ? "text-red-500" : "text-muted-foreground"
+                                        )}>
+                                            {queue.failed}
+                                        </span>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        {queue.failed > 0 ?
                                             <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100 w-fit">
-                                                <AlertCircle size={14} /> Backlog
+                                                <AlertCircle size={14} /> Critical
                                             </div> :
-                                            <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100 w-fit">
-                                                <CheckCircle2 size={14} /> Healthy
-                                            </div>
+                                            queue.waiting > 1000 ?
+                                                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100 w-fit">
+                                                    <AlertCircle size={14} /> Backlog
+                                                </div> :
+                                                <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100 w-fit">
+                                                    <CheckCircle2 size={14} /> Healthy
+                                                </div>
                                         }
                                     </td>
                                     <td className="px-8 py-6 text-right">
@@ -409,8 +462,20 @@ function Dashboard() {
                                                         fetch(`/api/queues/${queue.name}/retry-all`, { method: 'POST' })
                                                             .then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))
                                                     }}
-                                                    className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold"
-                                                    title="Flush Delayed"
+                                                    className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                                    title="Retry All Delayed"
+                                                >
+                                                    <RefreshCcw size={16} />
+                                                </button>
+                                            )}
+                                            {queue.failed > 0 && (
+                                                <button
+                                                    onClick={() => {
+                                                        fetch(`/api/queues/${queue.name}/retry-all-failed`, { method: 'POST' })
+                                                            .then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))
+                                                    }}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Retry All Failed"
                                                 >
                                                     <RefreshCcw size={16} />
                                                 </button>

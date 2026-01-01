@@ -374,4 +374,23 @@ export class QueueManager {
       await driver.complete(queue, serialized)
     }
   }
+
+  /**
+   * Mark a job as permanently failed.
+   * @param job - Job instance
+   * @param error - Error object
+   */
+  async fail<T extends Job & Queueable>(job: T, error: Error): Promise<void> {
+    const connection = job.connectionName ?? this.defaultConnection
+    const queue = job.queueName ?? 'default'
+    const driver = this.getDriver(connection)
+    const serializer = this.getSerializer()
+
+    if (driver.fail) {
+      const serialized = serializer.serialize(job)
+      serialized.error = error.message
+      serialized.failedAt = Date.now()
+      await driver.fail(queue, serialized)
+    }
+  }
 }

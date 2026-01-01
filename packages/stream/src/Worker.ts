@@ -44,7 +44,7 @@ export class Worker {
    * @param job - Job instance
    */
   async process(job: Job): Promise<void> {
-    const maxAttempts = this.options.maxAttempts ?? 3
+    const maxAttempts = job.maxAttempts ?? this.options.maxAttempts ?? 3
     const timeout = this.options.timeout
 
     let lastError: Error | null = null
@@ -80,8 +80,8 @@ export class Worker {
           throw lastError
         }
 
-        // Retry with exponential backoff
-        const delay = Math.min(1000 * 2 ** (attempt - 1), 30000)
+        // Retry with dynamic backoff
+        const delay = job.getRetryDelay(attempt)
         await new Promise((resolve) => setTimeout(resolve, delay))
       }
     }

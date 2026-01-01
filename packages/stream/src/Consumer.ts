@@ -138,6 +138,10 @@ export class Consumer {
               if (this.options.monitor) {
                 await this.publishLog('error', `Job failed: ${job.id} - ${err.message}`, job.id)
               }
+              // Move to DLQ (Dead Letter Queue)
+              await this.queueManager.fail(job, err).catch((dlqErr) => {
+                console.error(`[Consumer] Error moving job to DLQ:`, dlqErr)
+              })
             } finally {
               // Mark as complete to handle Group FIFO logic (release lock / next job)
               await this.queueManager.complete(job).catch((err) => {
@@ -181,6 +185,15 @@ export class Consumer {
           const monitorPrefix =
             typeof this.options.monitor === 'object' ? this.options.monitor.prefix : undefined
           const os = require('os')
+          const mem = process.memoryUsage()
+          const metrics = {
+            cpu: os.loadavg()[0], // 1m load avg
+            ram: {
+              rss: Math.floor(mem.rss / 1024 / 1024),
+              heapUsed: Math.floor(mem.heapUsed / 1024 / 1024),
+            },
+          }
+
           await driver.reportHeartbeat(
             {
               id: this.workerId,
@@ -190,6 +203,7 @@ export class Consumer {
               uptime: Math.floor(process.uptime()),
               last_ping: new Date().toISOString(),
               queues: this.options.queues,
+              metrics,
               ...(monitorOptions.extraInfo || {}),
             },
             monitorPrefix

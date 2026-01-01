@@ -130,7 +130,9 @@ export class RedisDriver implements QueueDriver {
       delaySeconds: job.delaySeconds,
       attempts: job.attempts,
       maxAttempts: job.maxAttempts,
-      groupId: groupId, // Store groupId in payload
+      groupId: groupId,
+      error: job.error,
+      failedAt: job.failedAt,
     }
     const payload = JSON.stringify(payloadObj)
 
@@ -226,6 +228,8 @@ export class RedisDriver implements QueueDriver {
       attempts: parsed.attempts,
       maxAttempts: parsed.maxAttempts,
       groupId: parsed.groupId,
+      error: parsed.error,
+      failedAt: parsed.failedAt,
     }
   }
 
@@ -235,6 +239,23 @@ export class RedisDriver implements QueueDriver {
   async size(queue: string): Promise<number> {
     const key = this.getKey(queue)
     return this.client.llen(key)
+  }
+
+  /**
+   * Mark a job as permanently failed (DLQ).
+   */
+  async fail(queue: string, job: SerializedJob): Promise<void> {
+    const key = `${this.getKey(queue)}:failed`
+    const payload = JSON.stringify({
+      ...job,
+      failedAt: Date.now(),
+    })
+    await this.client.lpush(key, payload)
+
+    // Optional: Keep DLQ capped at 1000 items to avoid bloat
+    if (typeof (this.client as any).ltrim === 'function') {
+      await (this.client as any).ltrim(key, 0, 999)
+    }
   }
 
   /**

@@ -48,7 +48,7 @@ export class ClassNameSerializer implements JobSerializer {
    * Serialize a Job.
    */
   serialize(job: Job): SerializedJob {
-    const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+    const id = job.id || `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
     const className = job.constructor.name
 
     // Extract properties (exclude methods)
@@ -75,6 +75,8 @@ export class ClassNameSerializer implements JobSerializer {
       attempts: job.attempts ?? 0,
       ...(job.maxAttempts !== undefined ? { maxAttempts: job.maxAttempts } : {}),
       ...(job.groupId ? { groupId: job.groupId } : {}),
+      ...(job.retryAfterSeconds !== undefined ? { retryAfterSeconds: job.retryAfterSeconds } : {}),
+      ...(job.retryMultiplier !== undefined ? { retryMultiplier: job.retryMultiplier } : {}),
     }
   }
 
@@ -120,6 +122,12 @@ export class ClassNameSerializer implements JobSerializer {
     }
     if (serialized.groupId !== undefined) {
       job.groupId = serialized.groupId
+    }
+    if (serialized.retryAfterSeconds !== undefined) {
+      job.retryAfterSeconds = serialized.retryAfterSeconds
+    }
+    if (serialized.retryMultiplier !== undefined) {
+      job.retryMultiplier = serialized.retryMultiplier
     }
 
     return job

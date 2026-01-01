@@ -46,9 +46,19 @@ api.post('/queues/:name/retry-all', async (c) => {
   }
 })
 
+api.post('/queues/:name/retry-all-failed', async (c) => {
+  const name = c.req.param('name')
+  try {
+    const count = await queueService.retryAllFailedJobs(name)
+    return c.json({ success: true, count })
+  } catch (err) {
+    return c.json({ error: 'Failed to retry failed jobs' }, 500)
+  }
+})
+
 api.get('/queues/:name/jobs', async (c) => {
   const name = c.req.param('name')
-  const type = (c.req.query('type') as 'waiting' | 'delayed') || 'waiting'
+  const type = (c.req.query('type') as 'waiting' | 'delayed' | 'failed') || 'waiting'
   try {
     const jobs = await queueService.getJobs(name, type)
     return c.json({ jobs })

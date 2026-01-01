@@ -5,11 +5,19 @@ import Redis from 'ioredis'
 class TestJob extends Job {
   constructor(public payload: any) {
     super()
+    if (payload?.id) this.id = payload.id
   }
 
   async handle() {
-    // Note: We no longer need manual publishLog here
-    // as the framework handles it via { monitor: true }
+    console.log(`[Demo] Handling job ${this.id || 'unknown'} (Attempt: ${this.attempts})`)
+
+    // Example: Custom Backoff (2s initial, 3x multiplier)
+    this.backoff(2, 3)
+
+    // Simulate Failure for DLQ testing
+    if (this.id?.includes('fail')) {
+      throw new Error(`Simulated permanent failure for ${this.id}`)
+    }
 
     // Report throughput to Flux Console
     const now = Math.floor(Date.now() / 60000)

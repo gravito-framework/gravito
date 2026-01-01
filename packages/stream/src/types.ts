@@ -46,6 +46,26 @@ export interface SerializedJob {
    * Group ID for FIFO ordering.
    */
   groupId?: string
+
+  /**
+   * Initial retry delay (seconds).
+   */
+  retryAfterSeconds?: number
+
+  /**
+   * Retry delay multiplier.
+   */
+  retryMultiplier?: number
+
+  /**
+   * Last error message.
+   */
+  error?: string
+
+  /**
+   * Timestamp when the job failed permanently.
+   */
+  failedAt?: number
 }
 
 /**
