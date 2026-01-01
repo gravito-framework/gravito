@@ -31,6 +31,9 @@ jobs:
         env:
           SKIP_INSTALL_SIMPLE_GIT_HOOKS: 1
 
+      - name: Build Core Dependencies
+        run: bunx turbo run build --filter=@gravito/atlas --filter=@gravito/photon
+
       - name: Build Atlas site
         working-directory: examples/atlas-site
         run: |
