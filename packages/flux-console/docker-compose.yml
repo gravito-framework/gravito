@@ -1,0 +1,46 @@
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
+
+  mysql:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=flux
+    ports:
+      - "3306:3306"
+    restart: always
+
+  flux-console:
+    build:
+      context: ../..
+      dockerfile: packages/flux-console/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+      - AUTH_PASSWORD=gravito-admin
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=flux
+    depends_on:
+      - redis
+      - mysql
+    restart: always
+
+  # Demo Worker to show things in action
+  demo-worker:
+    build:
+      context: ../..
+      dockerfile: packages/flux-console/Dockerfile.demo-worker
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - flux-console
+    restart: always

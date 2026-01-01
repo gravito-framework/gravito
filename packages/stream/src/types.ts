@@ -121,6 +121,55 @@ export interface QueueConfig {
    * Default serializer type.
    */
   defaultSerializer?: 'json' | 'class'
+
+  /**
+   * Persistence configuration (SQL Archive).
+   */
+  persistence?: {
+    /**
+     * Persistence adapter instance or config.
+     */
+    adapter: PersistenceAdapter
+
+    /**
+     * Whether to automatically archive completed jobs.
+     */
+    archiveCompleted?: boolean
+
+    /**
+     * Whether to automatically archive failed jobs.
+     */
+    archiveFailed?: boolean
+  }
+}
+
+/**
+ * Persistence Adapter Interface
+ * Used for long-term archiving of jobs in a SQL database.
+ */
+export interface PersistenceAdapter {
+  /**
+   * Archive a job.
+   */
+  archive(queue: string, job: SerializedJob, status: 'completed' | 'failed'): Promise<void>
+
+  /**
+   * Find a job in the archive.
+   */
+  find(queue: string, id: string): Promise<SerializedJob | null>
+
+  /**
+   * List jobs from the archive.
+   */
+  list(
+    queue: string,
+    options?: { limit?: number; offset?: number; status?: 'completed' | 'failed' }
+  ): Promise<SerializedJob[]>
+
+  /**
+   * Remove old data from the archive.
+   */
+  cleanup(days: number): Promise<number>
 }
 
 /**

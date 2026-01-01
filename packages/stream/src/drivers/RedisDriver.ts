@@ -171,7 +171,9 @@ export class RedisDriver implements QueueDriver {
    * Complete a job (handle Group FIFO).
    */
   async complete(queue: string, job: SerializedJob): Promise<void> {
-    if (!job.groupId) return // Not a grouped job
+    if (!job.groupId) {
+      return // Not a grouped job
+    }
 
     const key = this.getKey(queue)
     const activeSetKey = `${this.prefix}active`

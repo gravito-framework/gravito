@@ -8,17 +8,17 @@ This document outlines the future development plan for Flux Console, moving from
 **Goal**: Enable "One-Click Deployment" for any environment (local, EC2, K8s).
 - **Current Blocker**: Local workspace dependencies (`workspace:*`) cause build failures in standard Docker contexts.
 - **Tasks**:
-    - Fix `Dockerfile` dependency resolution (possibly via multi-stage builds or npm packing).
-    - Create `docker-compose.yml` for a full stack setup (Console + Redis + Demo Worker).
-    - (Optional) Create a Helm Chart for K8s deployment.
+- [x] Fix `Dockerfile` dependency resolution (via multi-stage builds).
+- [x] Create `docker-compose.yml` for a full stack setup (Console + Redis + Demo Worker).
+- [ ] (Optional) Create a Helm Chart for K8s deployment.
 
 ### 2. History Persistence (SQL Archive) (P1)
 **Goal**: Store job history permanently for auditing and long-term analysis.
 - **Problem**: Redis data is ephemeral and sets a TTL. History is lost after a few days.
 - **Solution**: "Framework-Level Auto-Persistence".
-    - Implement a `PersistenceAdapter` in `@gravito/stream`.
-    - Automatically archive completed/failed jobs to a SQL database (MySQL/PostgreSQL).
-    - **Fallback Query**: If Redis query returns null, automatically fallback to query the SQL archive.
+    - [x] Implement a `PersistenceAdapter` in `@gravito/stream`.
+    - [x] Automatically archive completed/failed jobs to a SQL database (MySQL/PostgreSQL via Atlas).
+    - [x] **Fallback Query**: If Redis query returns null, automatically fallback to query the SQL archive.
 - **Value**: Allows developers to trace "What happened to that order 3 months ago?" without writing custom logging code.
 
 ## ✨ Feature Enhancements (Mid-Term)

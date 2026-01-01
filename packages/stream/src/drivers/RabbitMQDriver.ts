@@ -62,7 +62,9 @@ export class RabbitMQDriver implements QueueDriver {
    * Ensure channel is created.
    */
   public async ensureChannel(): Promise<any> {
-    if (this.channel) return this.channel
+    if (this.channel) {
+      return this.channel
+    }
 
     // If client is a connection, create channel
     if (typeof this.connection.createChannel === 'function') {
@@ -173,7 +175,9 @@ export class RabbitMQDriver implements QueueDriver {
     await channel.consume(
       queue,
       async (msg: any) => {
-        if (!msg) return
+        if (!msg) {
+          return
+        }
 
         const job = JSON.parse(msg.content.toString()) as SerializedJob
         // Attach raw message for manual control

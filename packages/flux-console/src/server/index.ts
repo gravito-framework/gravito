@@ -1,4 +1,6 @@
+import { DB } from '@gravito/atlas'
 import { Photon } from '@gravito/photon'
+import { MySQLPersistence } from '@gravito/stream'
 import { serveStatic } from 'hono/bun'
 import { getCookie } from 'hono/cookie'
 import { streamSSE } from 'hono/streaming'
@@ -14,12 +16,35 @@ import { QueueService } from './services/QueueService'
 const app = new Photon()
 
 // Configuration
-const PORT = parseInt(process.env.PORT || '3000')
+const PORT = parseInt(process.env.PORT || '3000', 10)
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 const QUEUE_PREFIX = process.env.QUEUE_PREFIX || 'queue:'
 
+// Persistence Initialize
+let persistence: { adapter: MySQLPersistence; archiveCompleted: boolean; archiveFailed: boolean } | undefined
+if (process.env.DB_HOST) {
+  DB.addConnection('default', {
+    driver: (process.env.DB_DRIVER as any) || 'mysql',
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    database: process.env.DB_NAME || 'flux',
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+  })
+
+  const adapter = new MySQLPersistence(DB)
+  adapter.setupTable().catch((err) => console.error('[FluxConsole] SQL Archive Setup Error:', err))
+
+  persistence = {
+    adapter,
+    archiveCompleted: process.env.PERSIST_ARCHIVE_COMPLETED === 'true',
+    archiveFailed: process.env.PERSIST_ARCHIVE_FAILED !== 'false',
+  }
+  console.log('[FluxConsole] SQL Archive enabled via', process.env.DB_DRIVER || 'mysql')
+}
+
 // Service Initialization
-const queueService = new QueueService(REDIS_URL, QUEUE_PREFIX)
+const queueService = new QueueService(REDIS_URL, QUEUE_PREFIX, persistence)
 
 queueService
   .connect()
@@ -29,6 +54,12 @@ queueService
     setInterval(() => {
       queueService.recordStatusMetrics().catch(console.error)
     }, 5000)
+
+    // Start Scheduler Tick (every 10 seconds)
+    setInterval(() => {
+      queueService.tickScheduler().catch(console.error)
+    }, 10000)
+
     // Record initial snapshot
     queueService.recordStatusMetrics().catch(console.error)
   })
@@ -61,7 +92,7 @@ api.post('/auth/login', async (c) => {
 
     createSession(c)
     return c.json({ success: true })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ success: false, error: 'Login failed' }, 500)
   }
 })
@@ -87,7 +118,7 @@ api.get('/queues', async (c) => {
 api.get('/search', async (c) => {
   const query = c.req.query('q') || ''
   const type = (c.req.query('type') as 'all' | 'waiting' | 'delayed' | 'failed') || 'all'
-  const limit = parseInt(c.req.query('limit') || '20')
+  const limit = parseInt(c.req.query('limit') || '20', 10)
 
   if (!query || query.length < 2) {
     return c.json({ results: [], message: 'Query must be at least 2 characters' })
@@ -107,7 +138,7 @@ api.post('/queues/:name/retry-all', async (c) => {
   try {
     const count = await queueService.retryDelayedJob(name)
     return c.json({ success: true, count })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to retry jobs' }, 500)
   }
 })
@@ -117,7 +148,7 @@ api.post('/queues/:name/retry-all-failed', async (c) => {
   try {
     const count = await queueService.retryAllFailedJobs(name)
     return c.json({ success: true, count })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to retry failed jobs' }, 500)
   }
 })
@@ -127,7 +158,7 @@ api.post('/queues/:name/pause', async (c) => {
   try {
     await queueService.pauseQueue(name)
     return c.json({ success: true, paused: true })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to pause queue' }, 500)
   }
 })
@@ -137,7 +168,7 @@ api.post('/queues/:name/resume', async (c) => {
   try {
     await queueService.resumeQueue(name)
     return c.json({ success: true, paused: false })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to resume queue' }, 500)
   }
 })
@@ -158,7 +189,7 @@ api.get('/throughput', async (c) => {
   try {
     const data = await queueService.getThroughputData()
     return c.json({ data })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to fetch throughput' }, 500)
   }
 })
@@ -167,7 +198,7 @@ api.get('/workers', async (c) => {
   try {
     const workers = await queueService.listWorkers()
     return c.json({ workers })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to fetch workers' }, 500)
   }
 })
@@ -184,7 +215,7 @@ api.get('/metrics/history', async (c) => {
     )
 
     return c.json({ history })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to fetch metrics history' }, 500)
   }
 })
@@ -194,8 +225,8 @@ api.get('/system/status', (c) => {
   return c.json({
     node: process.version,
     memory: {
-      rss: (mem.rss / 1024 / 1024).toFixed(2) + ' MB',
-      heapUsed: (mem.heapUsed / 1024 / 1024).toFixed(2) + ' MB',
+      rss: `${(mem.rss / 1024 / 1024).toFixed(2)} MB`,
+      heapUsed: `${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB`,
       total: '4.00 GB', // Hardcoded limit for demo aesthetic
     },
     engine: 'v0.1.0-beta.1',
@@ -210,7 +241,7 @@ api.post('/queues/:name/jobs/delete', async (c) => {
   try {
     const success = await queueService.deleteJob(queueName, type, raw)
     return c.json({ success })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to delete job' }, 500)
   }
 })
@@ -221,8 +252,54 @@ api.post('/queues/:name/jobs/retry', async (c) => {
   try {
     const success = await queueService.retryJob(queueName, raw)
     return c.json({ success })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to retry job' }, 500)
+  }
+})
+
+api.post('/queues/:name/jobs/bulk-delete', async (c) => {
+  const queueName = c.req.param('name')
+  const { type, raws } = await c.req.json()
+  try {
+    const deleted = await queueService.deleteJobs(queueName, type, raws)
+    return c.json({ success: true, count: deleted })
+  } catch (_err) {
+    return c.json({ error: 'Failed to bulk delete' }, 500)
+  }
+})
+
+api.post('/queues/:name/jobs/bulk-retry', async (c) => {
+  const queueName = c.req.param('name')
+  const { type, raws } = await c.req.json()
+  try {
+    const retried = await queueService.retryJobs(queueName, type, raws)
+    return c.json({ success: true, count: retried })
+  } catch (_err) {
+    return c.json({ error: 'Failed to bulk retry' }, 500)
+  }
+})
+
+api.post('/maintenance/cleanup-archive', async (c) => {
+  const { days = 30 } = await c.req.json()
+  try {
+    const deleted = await queueService.cleanupArchive(days)
+    return c.json({ success: true, deleted })
+  } catch (_err) {
+    return c.json({ error: 'Failed to cleanup archive' }, 500)
+  }
+})
+
+api.get('/search', async (c) => {
+  const query = c.req.query('q') || ''
+  if (!query) {
+    return c.json({ results: [] })
+  }
+
+  try {
+    const results = await queueService.searchJobs(query)
+    return c.json({ results })
+  } catch (_err) {
+    return c.json({ error: 'Search failed' }, 500)
   }
 })
 
@@ -231,7 +308,7 @@ api.post('/queues/:name/purge', async (c) => {
   try {
     await queueService.purgeQueue(name)
     return c.json({ success: true })
-  } catch (err) {
+  } catch (_err) {
     return c.json({ error: 'Failed to purge queue' }, 500)
   }
 })
@@ -274,6 +351,46 @@ api.get('/logs/stream', async (c) => {
       await stream.writeSSE({ data: 'heartbeat', event: 'ping' })
     }
   })
+})
+
+// --- Schedules ---
+api.get('/schedules', async (c) => {
+  try {
+    const schedules = await queueService.listSchedules()
+    return c.json({ schedules })
+  } catch (_err) {
+    return c.json({ error: 'Failed to list schedules' }, 500)
+  }
+})
+
+api.post('/schedules', async (c) => {
+  const body = await c.req.json()
+  try {
+    await queueService.registerSchedule(body)
+    return c.json({ success: true })
+  } catch (_err) {
+    return c.json({ error: 'Failed to register schedule' }, 500)
+  }
+})
+
+api.post('/schedules/run/:id', async (c) => {
+  const id = c.req.param('id')
+  try {
+    await queueService.runScheduleNow(id)
+    return c.json({ success: true })
+  } catch (_err) {
+    return c.json({ error: 'Failed to run schedule' }, 500)
+  }
+})
+
+api.delete('/schedules/:id', async (c) => {
+  const id = c.req.param('id')
+  try {
+    await queueService.removeSchedule(id)
+    return c.json({ success: true })
+  } catch (_err) {
+    return c.json({ error: 'Failed to remove schedule' }, 500)
+  }
 })
 
 app.route('/api', api)

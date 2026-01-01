@@ -29,7 +29,9 @@ export function isAuthEnabled(): boolean {
  */
 export function verifyPassword(password: string): boolean {
   const authPassword = process.env.AUTH_PASSWORD
-  if (!authPassword) return true // No password set, allow access
+  if (!authPassword) {
+    return true // No password set, allow access
+  }
   return password === authPassword
 }
 
@@ -61,7 +63,9 @@ export function createSession(c: Context): string {
  */
 export function validateSession(token: string): boolean {
   const session = sessions.get(token)
-  if (!session) return false
+  if (!session) {
+    return false
+  }
 
   if (Date.now() > session.expiresAt) {
     sessions.delete(token)

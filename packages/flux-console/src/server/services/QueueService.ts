@@ -1,5 +1,5 @@
-import { QueueManager } from '@gravito/stream'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
+import { type MySQLPersistence, QueueManager } from '@gravito/stream'
 import { Redis } from 'ioredis'
 
 export interface QueueStats {
@@ -19,8 +19,13 @@ export class QueueService {
   private logThrottleCount = 0
   private logThrottleReset = Date.now()
   private readonly MAX_LOGS_PER_SEC = 50
+  private manager: QueueManager
 
-  constructor(redisUrl: string, prefix = 'queue:') {
+  constructor(
+    redisUrl: string,
+    prefix = 'queue:',
+    persistence?: { adapter: MySQLPersistence; archiveCompleted?: boolean; archiveFailed?: boolean }
+  ) {
     this.redis = new Redis(redisUrl, {
       lazyConnect: true,
     })
@@ -31,7 +36,7 @@ export class QueueService {
     this.logEmitter.setMaxListeners(1000)
 
     // Initialized for potential use
-    new QueueManager({
+    this.manager = new QueueManager({
       default: 'redis',
       connections: {
         redis: {
@@ -40,6 +45,7 @@ export class QueueService {
           prefix,
         },
       },
+      persistence,
     })
   }
 
@@ -63,7 +69,7 @@ export class QueueService {
             this.logThrottleCount++
             this.logEmitter.emit('log', JSON.parse(message))
           }
-        } catch (e) {
+        } catch (_e) {
           // Ignore
         }
       }
@@ -194,9 +200,9 @@ export class QueueService {
           formatted.push({
             ...parsed,
             _raw: jobStr,
-            scheduledAt: new Date(parseInt(score)).toISOString(),
+            scheduledAt: new Date(parseInt(score, 10)).toISOString(),
           })
-        } catch (e) {
+        } catch (_e) {
           formatted.push({ _raw: jobStr, _error: 'Failed to parse JSON' })
         }
       }
@@ -204,14 +210,27 @@ export class QueueService {
     } else {
       const listKey = type === 'failed' ? `${key}:failed` : key
       rawJobs = await this.redis.lrange(listKey, start, stop)
-      return rawJobs.map((jobStr) => {
+
+      const jobs = rawJobs.map((jobStr) => {
         try {
           const parsed = JSON.parse(jobStr)
           return { ...parsed, _raw: jobStr }
-        } catch (e) {
+        } catch (_e) {
           return { _raw: jobStr, _error: 'Failed to parse JSON' }
         }
       })
+
+      // If we got few results and have persistence, merge with archive
+      const persistence = this.manager.getPersistence()
+      if (jobs.length < stop - start + 1 && persistence && type === 'failed') {
+        const archived = await persistence.list(queueName, {
+          limit: stop - start + 1 - jobs.length,
+          status: type as 'failed',
+        })
+        return [...jobs, ...archived.map((a: any) => ({ ...a, _archived: true }))]
+      }
+
+      return jobs
     }
   }
 
@@ -273,7 +292,7 @@ export class QueueService {
     }
 
     const values = await this.redis.mget(...keys)
-    return values.map((v) => parseInt(v || '0'))
+    return values.map((v) => parseInt(v || '0', 10))
   }
 
   /**
@@ -289,7 +308,7 @@ export class QueueService {
       const date = new Date(t * 60000)
       results.push({
         timestamp: `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`,
-        count: parseInt(count || '0'),
+        count: parseInt(count || '0', 10),
       })
     }
 
@@ -313,7 +332,7 @@ export class QueueService {
           if (v) {
             try {
               workers.push(JSON.parse(v))
-            } catch (e) {
+            } catch (_e) {
               // Ignore malformed
             }
           }
@@ -402,6 +421,69 @@ export class QueueService {
   }
 
   /**
+   * Bulk deletes jobs (works for waiting, delayed, failed).
+   */
+  async deleteJobs(
+    queueName: string,
+    type: 'waiting' | 'delayed' | 'failed',
+    jobRaws: string[]
+  ): Promise<number> {
+    const key =
+      type === 'delayed'
+        ? `${this.prefix}${queueName}:delayed`
+        : type === 'failed'
+          ? `${this.prefix}${queueName}:failed`
+          : `${this.prefix}${queueName}`
+
+    const pipe = this.redis.pipeline()
+    for (const raw of jobRaws) {
+      if (type === 'delayed') {
+        pipe.zrem(key, raw)
+      } else {
+        pipe.lrem(key, 0, raw)
+      }
+    }
+    const results = await pipe.exec()
+    return results?.reduce((acc, [_, res]) => acc + ((res as number) || 0), 0) || 0
+  }
+
+  /**
+   * Bulk retries jobs (moves from failed/delayed to waiting).
+   */
+  async retryJobs(
+    queueName: string,
+    type: 'delayed' | 'failed',
+    jobRaws: string[]
+  ): Promise<number> {
+    const key = `${this.prefix}${queueName}`
+    const sourceKey = type === 'delayed' ? `${key}:delayed` : `${key}:failed`
+
+    const pipe = this.redis.pipeline()
+    for (const raw of jobRaws) {
+      if (type === 'delayed') {
+        pipe.zrem(sourceKey, raw)
+        pipe.lpush(key, raw)
+      } else {
+        pipe.lrem(sourceKey, 0, raw)
+        pipe.lpush(key, raw)
+      }
+    }
+    const results = await pipe.exec()
+    // Each successful retry is 2 operations in pipeline (remove + push),
+    // but we count the successfully removed jobs.
+    let count = 0
+    if (results) {
+      for (let i = 0; i < results.length; i += 2) {
+        const result = results[i]
+        if (result && !result[0] && (result[1] as number) > 0) {
+          count++
+        }
+      }
+    }
+    return count
+  }
+
+  /**
    * Publishes a log message (used by workers).
    */
   async publishLog(log: { level: string; message: string; workerId: string; queue?: string }) {
@@ -447,17 +529,23 @@ export class QueueService {
     const queues = await this.listQueues()
 
     for (const queue of queues) {
-      if (results.length >= limit) break
+      if (results.length >= limit) {
+        break
+      }
 
       const types = type === 'all' ? ['waiting', 'delayed', 'failed'] : [type]
 
       for (const jobType of types) {
-        if (results.length >= limit) break
+        if (results.length >= limit) {
+          break
+        }
 
         const jobs = await this.getJobs(queue.name, jobType as any, 0, 99)
 
         for (const job of jobs) {
-          if (results.length >= limit) break
+          if (results.length >= limit) {
+            break
+          }
 
           // Search in job ID
           const idMatch = job.id && String(job.id).toLowerCase().includes(queryLower)
@@ -470,7 +558,7 @@ export class QueueService {
           try {
             const dataStr = JSON.stringify(job.data || job).toLowerCase()
             dataMatch = dataStr.includes(queryLower)
-          } catch (e) {
+          } catch (_e) {
             // Ignore stringify errors
           }
 
@@ -487,5 +575,61 @@ export class QueueService {
     }
 
     return results
+  }
+
+  /**
+   * Cleans up old archived jobs from SQL.
+   */
+  async cleanupArchive(days: number): Promise<number> {
+    const persistence = this.manager.getPersistence()
+    if (!persistence) {
+      return 0
+    }
+    return await persistence.cleanup(days)
+  }
+
+  /**
+   * List all recurring schedules.
+   */
+  async listSchedules(): Promise<any[]> {
+    const scheduler = this.manager.getScheduler()
+    return await scheduler.list()
+  }
+
+  /**
+   * Register a new recurring schedule.
+   */
+  async registerSchedule(config: {
+    id: string
+    cron: string
+    queue: string
+    job: any
+  }): Promise<void> {
+    const scheduler = this.manager.getScheduler()
+    await scheduler.register(config)
+  }
+
+  /**
+   * Remove a recurring schedule.
+   */
+  async removeSchedule(id: string): Promise<void> {
+    const scheduler = this.manager.getScheduler()
+    await scheduler.remove(id)
+  }
+
+  /**
+   * Run a scheduled job immediately.
+   */
+  async runScheduleNow(id: string): Promise<void> {
+    const scheduler = this.manager.getScheduler()
+    await scheduler.runNow(id)
+  }
+
+  /**
+   * Tick the scheduler to process due jobs.
+   */
+  async tickScheduler(): Promise<void> {
+    const scheduler = this.manager.getScheduler()
+    await scheduler.tick()
   }
 }

@@ -173,7 +173,7 @@ export class DatabaseDriver implements QueueDriver {
       } else {
         throw new Error('Fallback')
       }
-    } catch (e) {
+    } catch (_e) {
       // Fallback for old format
       job = {
         id: row.id,
@@ -256,7 +256,9 @@ export class DatabaseDriver implements QueueDriver {
    * Acknowledge/Complete a job.
    */
   async complete(_queue: string, job: SerializedJob): Promise<void> {
-    if (!job.id) return
+    if (!job.id) {
+      return
+    }
     await this.dbService.execute(`DELETE FROM ${this.tableName} WHERE id = $1`, [job.id])
   }
 }

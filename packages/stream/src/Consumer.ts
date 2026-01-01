@@ -184,7 +184,7 @@ export class Consumer {
         if (driver.reportHeartbeat) {
           const monitorPrefix =
             typeof this.options.monitor === 'object' ? this.options.monitor.prefix : undefined
-          const os = require('os')
+          const os = require('node:os')
           const mem = process.memoryUsage()
           const metrics = {
             cpu: os.loadavg()[0], // 1m load avg
@@ -211,7 +211,7 @@ export class Consumer {
             monitorPrefix
           )
         }
-      } catch (e) {
+      } catch (_e) {
         // Ignore heartbeat errors
       }
     }, interval)
@@ -241,7 +241,7 @@ export class Consumer {
           monitorPrefix
         )
       }
-    } catch (e) {
+    } catch (_e) {
       // Ignore log errors
     }
   }

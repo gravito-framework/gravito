@@ -31,8 +31,11 @@ export class QueueManager {
   private serializers = new Map<string, JobSerializer>()
   private defaultConnection: string
   private defaultSerializer: JobSerializer
+  private persistence?: QueueConfig['persistence']
+  private scheduler?: any // Using any to avoid circular dependency or import issues for now
 
   constructor(config: QueueConfig = {}) {
+    this.persistence = config.persistence
     this.defaultConnection = config.default ?? 'default'
 
     // Initialize default serializer
@@ -372,6 +375,13 @@ export class QueueManager {
     if (driver.complete) {
       const serialized = serializer.serialize(job)
       await driver.complete(queue, serialized)
+
+      // Auto-archive
+      if (this.persistence?.archiveCompleted) {
+        await this.persistence.adapter.archive(queue, serialized, 'completed').catch((err) => {
+          console.error('[QueueManager] Persistence archive failed (completed):', err)
+        })
+      }
     }
   }
 
@@ -391,6 +401,31 @@ export class QueueManager {
       serialized.error = error.message
       serialized.failedAt = Date.now()
       await driver.fail(queue, serialized)
+
+      // Auto-archive
+      if (this.persistence?.archiveFailed) {
+        await this.persistence.adapter.archive(queue, serialized, 'failed').catch((err) => {
+          console.error('[QueueManager] Persistence archive failed (failed):', err)
+        })
+      }
     }
+  }
+
+  /**
+   * Get the persistence adapter if configured.
+   */
+  getPersistence(): any {
+    return this.persistence?.adapter
+  }
+
+  /**
+   * Get the scheduler if configured.
+   */
+  getScheduler(): any {
+    if (!this.scheduler) {
+      const { Scheduler } = require('./Scheduler')
+      this.scheduler = new Scheduler(this)
+    }
+    return this.scheduler
   }
 }
