@@ -35,13 +35,16 @@ This document outlines the future development plan for Flux Console, moving from
 - [x] Ability to Pause/Resume (Delete/Register) specific Cron schedules.
 - [x] Real-time ticking via the Console server.
 
-### 4. Batch Operations (P1)
+### 4. Batch Operations (Completed ✅)
 **Goal**: Bulk management actions.
 - **Problem**: Can only retry/delete one job or "all" jobs. Hard to handle "the 50 jobs that failed due to the bug yesterday".
 - **Tasks**:
-    - [ ] Multi-select checkboxes in job lists.
-    - [ ] Bulk Retry / Bulk Delete.
-    - [ ] Select All Matching Query.
+    - [x] Multi-select checkboxes in job lists.
+    - [x] Bulk Retry / Bulk Delete.
+    - [x] Select All Matching Query (Delete/Retry ALL jobs of a type).
+    - [x] Confirmation dialogs with loading states.
+    - [x] Keyboard shortcuts (Ctrl+A, Escape).
+    - [x] Visual feedback and total count display.
 
 ## 🔮 Enterprise Features (Long-Term)
 

@@ -214,6 +214,18 @@ api.get('/queues/:name/jobs', async (c) => {
   }
 })
 
+api.get('/queues/:name/jobs/count', async (c) => {
+  const name = c.req.param('name')
+  const type = (c.req.query('type') as 'waiting' | 'delayed' | 'failed') || 'waiting'
+  try {
+    const count = await queueService.getJobCount(name, type)
+    return c.json({ count })
+  } catch (err) {
+    console.error(err)
+    return c.json({ error: 'Failed to count jobs' }, 500)
+  }
+})
+
 api.get('/queues/:name/archive', async (c) => {
   const name = c.req.param('name')
   const page = parseInt(c.req.query('page') || '1', 10)
@@ -320,6 +332,28 @@ api.post('/queues/:name/jobs/bulk-retry', async (c) => {
     return c.json({ success: true, count: retried })
   } catch (_err) {
     return c.json({ error: 'Failed to bulk retry' }, 500)
+  }
+})
+
+api.post('/queues/:name/jobs/bulk-delete-all', async (c) => {
+  const queueName = c.req.param('name')
+  const { type } = await c.req.json()
+  try {
+    const deleted = await queueService.deleteAllJobs(queueName, type)
+    return c.json({ success: true, count: deleted })
+  } catch (_err) {
+    return c.json({ error: 'Failed to bulk delete all' }, 500)
+  }
+})
+
+api.post('/queues/:name/jobs/bulk-retry-all', async (c) => {
+  const queueName = c.req.param('name')
+  const { type } = await c.req.json()
+  try {
+    const retried = await queueService.retryAllJobs(queueName, type)
+    return c.json({ success: true, count: retried })
+  } catch (_err) {
+    return c.json({ error: 'Failed to bulk retry all' }, 500)
   }
 })
 

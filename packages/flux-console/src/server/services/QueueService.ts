@@ -462,6 +462,47 @@ export class QueueService {
   }
 
   /**
+   * Get total count of jobs in a queue by type.
+   */
+  async getJobCount(queueName: string, type: 'waiting' | 'delayed' | 'failed'): Promise<number> {
+    const key =
+      type === 'delayed'
+        ? `${this.prefix}${queueName}:delayed`
+        : type === 'failed'
+          ? `${this.prefix}${queueName}:failed`
+          : `${this.prefix}${queueName}`
+
+    return type === 'delayed' ? await this.redis.zcard(key) : await this.redis.llen(key)
+  }
+
+  /**
+   * Delete ALL jobs of a specific type from a queue.
+   */
+  async deleteAllJobs(queueName: string, type: 'waiting' | 'delayed' | 'failed'): Promise<number> {
+    const key =
+      type === 'delayed'
+        ? `${this.prefix}${queueName}:delayed`
+        : type === 'failed'
+          ? `${this.prefix}${queueName}:failed`
+          : `${this.prefix}${queueName}`
+
+    const count = await this.getJobCount(queueName, type)
+    await this.redis.del(key)
+    return count
+  }
+
+  /**
+   * Retry ALL jobs of a specific type (delayed or failed).
+   */
+  async retryAllJobs(queueName: string, type: 'delayed' | 'failed'): Promise<number> {
+    if (type === 'delayed') {
+      return await this.retryDelayedJob(queueName)
+    } else {
+      return await this.retryAllFailedJobs(queueName)
+    }
+  }
+
+  /**
    * Bulk deletes jobs (works for waiting, delayed, failed).
    */
   async deleteJobs(

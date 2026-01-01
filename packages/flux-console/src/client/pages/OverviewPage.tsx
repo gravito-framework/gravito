@@ -4,18 +4,17 @@ import {
   Activity,
   AlertCircle,
   ArrowRight,
-  CheckCircle2,
   ChevronRight,
   Clock,
   Cpu,
   Hourglass,
   ListTree,
   RefreshCcw,
-  Search,
   Terminal,
   Trash2,
 } from 'lucide-react'
 import React from 'react'
+import { JobInspector } from '../components/JobInspector'
 import { ThroughputChart } from '../ThroughputChart'
 import { cn } from '../utils'
 import { WorkerStatus } from '../WorkerStatus'
@@ -26,195 +25,6 @@ interface QueueStats {
   delayed: number
   active: number
   failed: number
-}
-
-interface Job {
-  id: string
-  name?: string
-  data?: any
-  status?: string
-  timestamp?: number
-  scheduledAt?: string
-  error?: string
-  failedAt?: number
-  _raw?: string
-  _archived?: boolean
-  _type?: string
-  _queue?: string
-}
-
-function JobInspector({ queueName, onClose }: { queueName: string; onClose: () => void }) {
-  const [view, setView] = React.useState<'waiting' | 'delayed' | 'failed'>('waiting')
-  const queryClient = useQueryClient()
-
-  const { isPending, error, data } = useQuery<{ jobs: Job[] }>({
-    queryKey: ['jobs', queueName, view],
-    queryFn: () => fetch(`/api/queues/${queueName}/jobs?type=${view}`).then((res) => res.json()),
-  })
-
-  const handleAction = async (action: 'delete' | 'retry', job: Job) => {
-    const endpoint = action === 'delete' ? 'delete' : 'retry'
-    const body: Record<string, string | undefined> = { raw: job._raw }
-    if (action === 'delete') {
-      body.type = view
-    }
-
-    await fetch(`/api/queues/${queueName}/jobs/${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    queryClient.invalidateQueries({ queryKey: ['jobs', queueName] })
-    queryClient.invalidateQueries({ queryKey: ['queues'] })
-  }
-
-  return (
-    <AnimatePresence>
-      <button
-        type="button"
-        className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-end z-[100] w-full h-full border-none outline-none appearance-none cursor-default"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="bg-card border-l h-full w-full max-w-2xl shadow-2xl flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-6 border-b flex justify-between items-center bg-muted/20">
-            <div>
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Search className="text-primary" size={20} />
-                Queue Insight
-              </h2>
-              <div className="flex items-center gap-4 mt-2">
-                {(['waiting', 'delayed', 'failed'] as const).map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setView(v)}
-                    className={cn(
-                      'text-xs font-bold px-3 py-1 rounded-full transition-all border shrink-0 uppercase tracking-widest',
-                      view === v
-                        ? v === 'failed'
-                          ? 'bg-red-500 text-white border-red-500'
-                          : v === 'delayed'
-                            ? 'bg-amber-500 text-white border-amber-500'
-                            : 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-muted text-muted-foreground border-transparent hover:bg-muted/80'
-                    )}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-          <div className="p-0 overflow-y-auto flex-1 bg-muted/5">
-            {isPending && (
-              <div className="p-12 text-center text-muted-foreground font-medium animate-pulse">
-                Loading jobs...
-              </div>
-            )}
-            {error && (
-              <div className="p-12 text-center text-red-500 font-bold">Error loading jobs</div>
-            )}
-            {data?.jobs && data.jobs.length === 0 && (
-              <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center text-muted-foreground/30">
-                  <CheckCircle2 size={32} />
-                </div>
-                <p className="text-lg font-bold">Clear Sky!</p>
-                <p className="text-sm opacity-60">No jobs found in this queue.</p>
-              </div>
-            )}
-            {data?.jobs && (
-              <div className="p-6 space-y-4">
-                {data.jobs.map((job, i) => (
-                  <div
-                    key={i}
-                    className="bg-card border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group border-border/50"
-                  >
-                    <div className="p-4 border-b bg-muted/10 flex justify-between items-center text-[10px]">
-                      <span className="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md font-bold uppercase tracking-wider flex items-center gap-2">
-                        ID: {job.id || 'N/A'}
-                        {job._archived && (
-                          <span className="bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded text-[8px] border border-amber-500/20">
-                            Archived
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-muted-foreground font-semibold flex items-center gap-3">
-                        {view === 'delayed' && job.scheduledAt && (
-                          <span className="text-amber-500 flex items-center gap-1 font-bold">
-                            <Clock size={12} /> {new Date(job.scheduledAt).toLocaleString()}
-                          </span>
-                        )}
-                        {view === 'failed' && job.failedAt && (
-                          <span className="text-red-500 flex items-center gap-1 font-bold">
-                            <AlertCircle size={12} /> {new Date(job.failedAt).toLocaleString()}
-                          </span>
-                        )}
-                        {job.timestamp && new Date(job.timestamp).toLocaleString()}
-                      </span>
-                    </div>
-                    <div>
-                      {job.error && (
-                        <div className="p-4 bg-red-500/10 text-red-500 text-xs font-semibold border-b border-red-500/10 flex items-start gap-2">
-                          <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                          <p>{job.error}</p>
-                        </div>
-                      )}
-                      <pre className="text-[11px] font-mono p-4 overflow-x-auto text-foreground/80 leading-relaxed bg-muted/5">
-                        {JSON.stringify(job, null, 2)}
-                      </pre>
-                    </div>
-                    <div className="p-3 bg-muted/5 border-t border-border/50 flex justify-end gap-2">
-                      <button
-                        onClick={() => handleAction('delete', job)}
-                        className="text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors"
-                      >
-                        Terminate
-                      </button>
-                      {(view === 'delayed' || view === 'failed') && (
-                        <button
-                          onClick={() => handleAction('retry', job)}
-                          className={cn(
-                            'text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg text-white shadow-sm transition-all',
-                            view === 'delayed'
-                              ? 'bg-amber-500 hover:bg-amber-600'
-                              : 'bg-blue-500 hover:bg-blue-600'
-                          )}
-                        >
-                          {view === 'delayed' ? 'Process Now' : 'Retry Job'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="p-4 border-t bg-card text-right">
-            <button
-              onClick={onClose}
-              className="px-8 py-3 bg-muted text-foreground rounded-xl hover:bg-muted/80 text-sm font-bold transition-all active:scale-95 uppercase tracking-widest"
-            >
-              Dismiss
-            </button>
-          </div>
-        </motion.div>
-      </button>
-    </AnimatePresence>
-  )
 }
 
 function LiveLogs({ onWorkerHover }: { onWorkerHover?: (id: string | null) => void }) {
@@ -547,9 +357,11 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-12">
-      {selectedQueue && (
-        <JobInspector queueName={selectedQueue} onClose={() => setSelectedQueue(null)} />
-      )}
+      <AnimatePresence>
+        {selectedQueue && (
+          <JobInspector queueName={selectedQueue} onClose={() => setSelectedQueue(null)} />
+        )}
+      </AnimatePresence>
 
       <div className="flex justify-between items-end">
         <div>

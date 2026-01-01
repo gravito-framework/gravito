@@ -204,6 +204,14 @@ export class QueueManager {
   }
 
   /**
+   * Get the default connection name.
+   * @returns Default connection name
+   */
+  getDefaultConnection(): string {
+    return this.defaultConnection
+  }
+
+  /**
    * Get a serializer.
    * @param type - Serializer type
    * @returns Serializer instance

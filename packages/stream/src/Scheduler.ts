@@ -28,7 +28,7 @@ export class Scheduler {
   }
 
   private get client(): any {
-    const driver = this.manager.getDriver('default')
+    const driver = this.manager.getDriver(this.manager.getDefaultConnection())
     return (driver as any).client
   }
 
