@@ -198,6 +198,12 @@ function LiveLogs({ onWorkerHover }: { onWorkerHover?: (id: string | null) => vo
     }, [])
 
     React.useEffect(() => {
+        const handler = () => setLogs([])
+        window.addEventListener('clear-logs', handler)
+        return () => window.removeEventListener('clear-logs', handler)
+    }, [])
+
+    React.useEffect(() => {
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [logs])
 
@@ -309,6 +315,12 @@ function Dashboard() {
     const [selectedQueue, setSelectedQueue] = React.useState<string | null>(null)
     const [hoveredWorkerId, setHoveredWorkerId] = React.useState<string | null>(null)
     const queryClient = useQueryClient()
+
+    React.useEffect(() => {
+        const handler = (e: any) => setSelectedQueue(e.detail)
+        window.addEventListener('select-queue', handler)
+        return () => window.removeEventListener('select-queue', handler)
+    }, [])
 
     const { isPending, error, data } = useQuery<{ queues: QueueStats[] }>({
         queryKey: ['queues'],
@@ -438,6 +450,18 @@ function Dashboard() {
                                                 {queue.failed > 0 && (
                                                     <button onClick={() => fetch(`/api/queues/${queue.name}/retry-all-failed`, { method: 'POST' }).then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))} className="p-2.5 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all hover:scale-110 active:scale-90" title="Retry All Failed"><RefreshCcw size={18} /></button>
                                                 )}
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm(`Are you sure you want to purge all jobs in queue "${queue.name}"?`)) {
+                                                            await fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
+                                                            queryClient.invalidateQueries({ queryKey: ['queues'] })
+                                                        }
+                                                    }}
+                                                    className="p-2.5 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-all hover:scale-110 active:scale-90"
+                                                    title="Purge Queue"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
                                                 <button onClick={() => setSelectedQueue(queue.name)} className="px-5 py-2.5 bg-muted text-foreground rounded-xl transition-all flex items-center gap-2 text-[11px] font-black uppercase tracking-widest border border-border/50 hover:border-primary/50 hover:bg-background shadow-sm active:scale-95">Inspect <ArrowRight size={14} /></button>
                                             </div>
                                         </td>

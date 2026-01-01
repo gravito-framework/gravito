@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Sidebar } from './Sidebar'
-import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw } from 'lucide-react'
+import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from './utils'
 
 interface LayoutProps {
@@ -18,6 +19,7 @@ interface CommandItem {
 }
 
 export function Layout({ children }: LayoutProps) {
+    const queryClient = useQueryClient()
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
         if (typeof window !== 'undefined') {
             return (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
@@ -28,6 +30,20 @@ export function Layout({ children }: LayoutProps) {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [health, setHealth] = useState(99.9)
+
+    // Fetch System Status
+    const { data: systemStatus } = useQuery<any>({
+        queryKey: ['system-status'],
+        queryFn: () => fetch('/api/system/status').then(res => res.json()),
+        refetchInterval: 10000
+    })
+
+    // Fetch Queues for search
+    const { data: queueData } = useQuery<any>({
+        queryKey: ['queues'],
+        queryFn: () => fetch('/api/queues').then(res => res.json()),
+        refetchInterval: 30000
+    })
 
     useEffect(() => {
         const root = window.document.documentElement
@@ -51,30 +67,35 @@ export function Layout({ children }: LayoutProps) {
 
     const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light')
 
-    const commands: CommandItem[] = [
+    const retryAllFailed = async () => {
+        const queues = queueData?.queues || []
+        for (const q of queues) {
+            if (q.failed > 0) {
+                await fetch(`/api/queues/${q.name}/retry-all-failed`, { method: 'POST' })
+            }
+        }
+        queryClient.invalidateQueries({ queryKey: ['queues'] })
+    }
+
+    const baseCommands: CommandItem[] = [
         {
             id: 'nav-overview',
             title: 'Go to Overview',
             description: 'Navigate to system dashboard',
             icon: <LayoutDashboard size={18} />,
             category: 'Navigation',
-            action: () => console.log('Navigating to Overview...')
+            action: () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                console.log('Navigating to Overview...')
+            }
         },
         {
-            id: 'nav-queues',
-            title: 'Manage Queues',
-            description: 'Inspect processing pipelines',
-            icon: <ListTree size={18} />,
-            category: 'Navigation',
-            action: () => console.log('Navigating to Queues...')
-        },
-        {
-            id: 'nav-workers',
-            title: 'Worker Cluster',
-            description: 'Check active node health',
-            icon: <HardDrive size={18} />,
-            category: 'Navigation',
-            action: () => console.log('Navigating to Workers...')
+            id: 'act-retry-all',
+            title: 'Retry All Failed Jobs',
+            description: 'Recover all critical failures across all queues',
+            icon: <RefreshCcw size={18} />,
+            category: 'Action',
+            action: retryAllFailed
         },
         {
             id: 'sys-theme',
@@ -83,16 +104,34 @@ export function Layout({ children }: LayoutProps) {
             icon: theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />,
             category: 'System',
             action: toggleTheme
-        },
-        {
-            id: 'act-retry',
-            title: 'Retry All Failed Jobs',
-            description: 'Recover all critical failures across queues',
-            icon: <RefreshCcw size={18} />,
-            category: 'Action',
-            action: () => console.log('Retrying all failed jobs...')
         }
     ]
+
+    const queueCommands: CommandItem[] = (queueData?.queues || []).map((q: any) => ({
+        id: `queue-${q.name}`,
+        title: `Queue: ${q.name}`,
+        description: `${q.waiting} waiting, ${q.failed} failed`,
+        icon: <ListTree size={18} />,
+        category: 'Navigation',
+        action: () => {
+            window.dispatchEvent(new CustomEvent('select-queue', { detail: q.name }))
+        }
+    }))
+
+    const actionCommands: CommandItem[] = [
+        {
+            id: 'act-clear-logs',
+            title: 'Clear All Logs',
+            description: 'Flush temporary log buffer in UI',
+            icon: <Trash2 size={18} />,
+            category: 'Action',
+            action: () => {
+                window.dispatchEvent(new CustomEvent('clear-logs'))
+            }
+        }
+    ]
+
+    const commands = [...baseCommands, ...actionCommands, ...queueCommands]
 
     const filteredCommands = commands.filter(cmd =>
         cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -202,12 +241,13 @@ export function Layout({ children }: LayoutProps) {
                     <div className="flex items-center gap-6 overflow-hidden">
                         <div className="flex items-center gap-2 border-r border-border/50 pr-4">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
-                            <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest whitespace-nowrap">Node: production-east-1</span>
+                            <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest whitespace-nowrap">Node: {systemStatus?.env || 'production-east-1'}</span>
                         </div>
                         <div className="flex items-center gap-4 text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] animate-in fade-in slide-in-from-left duration-1000">
                             <span className="flex items-center gap-1.5"><Activity size={10} className="text-primary/40" /> Latency: 4ms</span>
-                            <span className="hidden sm:inline border-l border-border/30 pl-4">Memory: 1.24GB / 4.00GB</span>
-                            <span className="hidden md:inline border-l border-border/30 pl-4">Engine: v2.4.1-beta</span>
+                            <span className="hidden sm:inline border-l border-border/30 pl-4 text-primary">RAM: {systemStatus?.memory?.rss || '...'} / {systemStatus?.memory?.total || '4.00 GB'}</span>
+                            <span className="hidden md:inline border-l border-border/30 pl-4 uppercase">Engine: {systemStatus?.engine || 'v2.4.1-beta'}</span>
+                            <span className="hidden lg:inline border-l border-border/30 pl-4 lowercase">v: {systemStatus?.node || '...'}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 pl-4 bg-gradient-to-l from-card via-card to-transparent text-right">
@@ -221,7 +261,7 @@ export function Layout({ children }: LayoutProps) {
                             </div>
                             <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest">Bus Traffic</span>
                         </div>
-                        <span className="font-mono text-[10px] text-muted-foreground/60 tabular-nums">11:14:58.24 UTC</span>
+                        <span className="font-mono text-[10px] text-muted-foreground/60 tabular-nums lowercase">{new Date().toISOString().split('T')[1].split('.')[0]} utc</span>
                     </div>
                 </footer>
             </main>

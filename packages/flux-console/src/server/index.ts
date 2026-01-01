@@ -109,6 +109,21 @@ api.get('/metrics/history', async (c) => {
   }
 })
 
+api.get('/system/status', (c) => {
+  const mem = process.memoryUsage()
+  return c.json({
+    node: process.version,
+    memory: {
+      rss: (mem.rss / 1024 / 1024).toFixed(2) + ' MB',
+      heapUsed: (mem.heapUsed / 1024 / 1024).toFixed(2) + ' MB',
+      total: '4.00 GB', // Hardcoded limit for demo aesthetic
+    },
+    engine: 'v2.4.1-beta',
+    uptime: process.uptime(),
+    env: process.env.NODE_ENV || 'production-east-1',
+  })
+})
+
 api.post('/queues/:name/jobs/delete', async (c) => {
   const queueName = c.req.param('name')
   const { type, raw } = await c.req.json()
