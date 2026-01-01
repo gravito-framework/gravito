@@ -1,10 +1,17 @@
-# Flux Console Roadmap
+# Gravito Zenith Roadmap (Control Plane)
 
-This document outlines the future development plan for Flux Console, moving from a basic monitoring tool to a comprehensive enterprise-grade job orchestration platform.
+This document outlines the future development plan for **Gravito Zenith**, moving from a basic monitoring tool to a comprehensive polyglot control plane for any job processing system.
 
 ## 🚀 High Priority (Immediate Next Steps)
 
-### 1. Docker & Cloud-Native Deployment (P0)
+### 1. Polyglot & Framework Integration (P0)
+**Goal**: Official support for non-Node.js workers, making Zenith a universal dashboard.
+- **Tasks**:
+    - [x] **Protocol Specification**: Defined standard Redis structures for Heartbeat and Logs.
+    - [x] **Laravel Integration**: Blueprint for `ZenithServiceProvider` and `ZenithConnector` defined.
+    - [ ] **Go/Python SDK**: Create lightweight client libraries for other languages.
+
+### 2. Docker & Cloud-Native Deployment (P1)
 **Goal**: Enable "One-Click Deployment" for any environment (local, EC2, K8s).
 - **Current Blocker**: Local workspace dependencies (`workspace:*`) cause build failures in standard Docker contexts.
 - **Tasks**:
@@ -12,30 +19,30 @@ This document outlines the future development plan for Flux Console, moving from
 - [x] Create `docker-compose.yml` for a full stack setup (Console + Redis + Demo Worker).
 - [x] Implementation of Scheduled Jobs (Cron) Management.
 
-### 2. History Persistence (SQL Archive) (Completed ✅)
+### 3. History Persistence (SQL Archive) (Completed ✅)
 **Goal**: Store job history permanently for auditing and long-term analysis.
 - [x] Implement a `PersistenceAdapter` in `@gravito/stream`.
 - [x] Automatically archive completed/failed jobs to a SQL database.
 - [x] **Zero-Config (SQLite)**: Integrated support for local testing.
-- [x] **Fallback Query**: Integrated archive search into UI and command palette.
+- [x] **Time Travel Audit**: comprehensive UI for tracing job history.
 
 ## ✨ Feature Enhancements (Mid-Term)
 
-### 3. Alerting & Notifications (Completed ✅)
+### 4. Alerting & Notifications (Completed ✅)
 **Goal**: Proactive issue notification system.
 - [x] **AlertService**: Lightweight rules for failure spikes, backlog, and worker loss.
 - [x] **Cooldown Mechanism**: Prevents alerting storms.
 - [x] **Slack Integration**: Webhook support with test notification UI.
 - [x] **Real-time Monitoring**: Integrated directly into server metrics loop.
 
-### 4. Scheduled Jobs (Cron) Management (Completed ✅)
+### 5. Scheduled Jobs (Cron) Management (Completed ✅)
 **Goal**: UI-based management for recurring tasks.
 - [x] Dashboard to view all registered Cron jobs.
 - [x] Ability to "Trigger Now" manually.
 - [x] Ability to Pause/Resume (Delete/Register) specific Cron schedules.
 - [x] Real-time ticking via the Console server.
 
-### 4. Batch Operations (Completed ✅)
+### 6. Batch Operations (Completed ✅)
 **Goal**: Bulk management actions.
 - **Problem**: Can only retry/delete one job or "all" jobs. Hard to handle "the 50 jobs that failed due to the bug yesterday".
 - **Tasks**:
@@ -48,21 +55,21 @@ This document outlines the future development plan for Flux Console, moving from
 
 ## 🔮 Enterprise Features (Long-Term)
 
-### 6. Role-Based Access Control (RBAC)
+### 7. Role-Based Access Control (RBAC)
 **Goal**: Granular permission management for teams.
 - **Problem**: Single password for everyone. Risky for junior devs to have "Delete Queue" power.
 - **Features**:
     - Roles: `Viewer` (Read-only), `Operator` (Retry/Pause), `Admin` (Delete/Purge).
     - User Management system (potentially integrated with OAuth/SSO).
 
-### 7. Multi-Cluster Management
+### 8. Multi-Cluster Management
 **Goal**: Centralized control pane for multiple environments.
 - **Problem**: Need to open 3 different tabs for Dev, Staging, and Prop.
 - **Features**:
     - Connection Switcher in the UI header.
     - Unified view of multiple Redis instances.
 
-### 8. Enhanced Search (Indexer)
+### 9. Enhanced Search (Indexer)
 **Goal**: Full-text search on Job Payloads.
 - **Problem**: Can only search by Job ID. Cannot search by "email: user@example.com".
 - **Solution**: Implement a lightweight search index (RedisSearch or external engine) to index payloads.
