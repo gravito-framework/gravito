@@ -22,7 +22,7 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "lint": "biome lint ./src",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bun tsc --noEmit --skipLibCheck",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80"
   },

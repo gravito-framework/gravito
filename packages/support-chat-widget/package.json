@@ -19,6 +19,6 @@
   },
   "scripts": {
     "build": "tsup src/index.tsx --format esm --dts",
-    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
+    "typecheck": "bun tsc --noEmit --skipLibCheck"
   }
 }

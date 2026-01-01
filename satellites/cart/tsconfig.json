@@ -2,22 +2,29 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "../..",
-    "baseUrl": "../..",
+    "baseUrl": ".",
     "paths": {
-      "@gravito/core": ["packages/core/src/index.ts"],
-      "@gravito/core/*": ["packages/core/src/*"],
-      "@gravito/atlas": ["packages/atlas/src/index.ts"],
-      "@gravito/enterprise": ["packages/enterprise/src/index.ts"],
-      "@gravito/stasis": ["packages/stasis/src/index.ts"],
-      "@gravito/*": [
-        "packages/*/src/index.ts",
-        "satellites/*/src/index.ts"
+      "@/*": [
+        "./src/*"
       ],
-      "@gravito/photon/*": ["packages/photon/src/*"],
-      "@/*": ["satellites/cart/src/*"]
+      "@gravito/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@gravito/core/*": [
+        "../../packages/core/src/*"
+      ],
+      "@gravito/*": [
+        "../../packages/*/src/index.ts",
+        "../../satellites/*/src/index.ts"
+      ]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "tests"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts"
+  ]
 }

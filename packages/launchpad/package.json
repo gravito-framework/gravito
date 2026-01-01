@@ -10,7 +10,7 @@
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80",
-    "typecheck": "../../node_modules/.bin/tsc --noEmit --skipLibCheck"
+    "typecheck": "bun tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@gravito/enterprise": "workspace:*",

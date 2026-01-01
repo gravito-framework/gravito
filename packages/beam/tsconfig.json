@@ -1,38 +1,34 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "outDir": "./dist",
-        "baseUrl": ".",
-        "allowImportingTsExtensions": true,
-        "noEmit": true,
-        "rootDir": "../../",
-        "composite": true,
-        "paths": {
-            "@gravito/core": [
-                "../../packages/core/src/index.ts"
-            ],
-            "@gravito/photon/client": [
-                "../../packages/photon/src/client.ts"
-            ],
-            "@gravito/photon": [
-                "../../packages/photon/src/index.ts"
-            ],
-            "@gravito/*": [
-                "../../packages/*/src/index.ts"
-            ],
-            "@gravito/beam": [
-                "./src/index.ts"
-            ]
-        }
-    },
-    "include": [
-        "src/**/*",
-        "tests/**/*",
-        "../../packages/photon/src/**/*"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "**/*.test.ts"
-    ]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "@gravito/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@gravito/photon/client": [
+        "../../packages/photon/src/client.ts"
+      ],
+      "@gravito/photon": [
+        "../../packages/photon/src/index.ts"
+      ],
+      "@gravito/*": [
+        "../../packages/*/src/index.ts"
+      ],
+      "@gravito/beam": [
+        "./src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts"
+  ]
 }

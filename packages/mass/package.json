@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "bun run build.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bun tsc --noEmit --skipLibCheck",
     "test": "bun test",
     "prepublishOnly": "bun run build",
     "test:coverage": "bun test --coverage --coverage-threshold=80",

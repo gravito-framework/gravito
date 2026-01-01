@@ -80,8 +80,8 @@ async function verifyPackageTypecheck(pkg: PackageInfo): Promise<{ success: bool
   console.log(`🔍 驗證 ${pkg.name}...`)
 
   try {
-    // 使用 bunx 執行 typecheck（與 CI 環境一致）
-    const result = await $`cd ${pkg.path} && bunx tsc --noEmit --skipLibCheck`.quiet()
+    // 使用 bun 執行 tsc（與 CI 環境一致）
+    const result = await $`cd ${pkg.path} && bun tsc --noEmit --skipLibCheck`.quiet()
     if (result.exitCode === 0) {
       console.log(`  ✅ ${pkg.name} typecheck 通過`)
       return { success: true }
@@ -119,7 +119,7 @@ async function main() {
         console.log(`   - ${packages[i].name}: ${results[i].error}`)
       }
     }
-    console.log(`\n💡 提示: 請確保使用 'bunx tsc --noEmit --skipLibCheck' 執行 typecheck`)
+    console.log(`\n💡 提示: 請確保使用 'bun tsc --noEmit --skipLibCheck' 執行 typecheck`)
     process.exit(1)
   } else {
     console.log(`\n✅ 所有套件的 typecheck 都通過！`)

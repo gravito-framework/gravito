@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "bun tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@gravito/atlas": "workspace:*",

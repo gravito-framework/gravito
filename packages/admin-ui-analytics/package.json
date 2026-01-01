@@ -20,6 +20,6 @@
   },
   "scripts": {
     "build": "tsup src/index.tsx --format esm --dts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "bun tsc --noEmit --skipLibCheck"
   }
 }

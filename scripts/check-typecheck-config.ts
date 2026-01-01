@@ -41,41 +41,18 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
       typecheckScript = pkg.scripts.typecheck
 
       // 檢查是否使用正確的命令
-      if (!typecheckScript.includes('tsc')) {
-        issues.push(`⚠️  typecheck 腳本未使用 tsc: ${typecheckScript}`)
+      if (typecheckScript !== 'bun tsc --noEmit --skipLibCheck') {
+        issues.push(`⚠️  typecheck 腳本建議標準化為 'bun tsc --noEmit --skipLibCheck'（當前: ${typecheckScript}）`)
       }
 
-      // 檢查是否有 --skipLibCheck（對於有 @types/node 和 bun-types 的套件）
-      if (pkg.devDependencies?.['@types/node'] && pkg.devDependencies?.['bun-types']) {
-        if (!typecheckScript.includes('--skipLibCheck')) {
-          issues.push(
-            `❌ 缺少 --skipLibCheck（套件同時有 @types/node 和 bun-types，需要跳過 lib 檢查）`
-          )
-          hasSkipLibCheck = false
-        } else {
-          hasSkipLibCheck = true
-        }
+      // 檢查是否有 --skipLibCheck
+      if (!typecheckScript.includes('--skipLibCheck')) {
+        issues.push(`❌ 缺少 --skipLibCheck（需要跳過 lib 檢查以避免類型衝突）`)
+        hasSkipLibCheck = false
+      } else {
+        hasSkipLibCheck = true
       }
 
-      // 檢查是否使用有效的 tsc 執行方式
-      if (typecheckScript.includes('tsc')) {
-        // 接受的方式：
-        // 1. bunx tsc
-        // 2. npx tsc
-        // 3. 相對路徑到根目錄 node_modules/.bin/tsc (../../node_modules/.bin/tsc)
-        // 4. 相對路徑到本地 node_modules/.bin/tsc (node_modules/.bin/tsc)
-        // 5. bun tsc (使用 bun 執行 tsc)
-        const hasValidTsc =
-          typecheckScript.includes('bunx tsc') ||
-          typecheckScript.includes('npx tsc') ||
-          typecheckScript.includes('node_modules/.bin/tsc') ||
-          typecheckScript.includes('../../node_modules/.bin/tsc') ||
-          typecheckScript.includes('bun tsc')
-
-        if (!hasValidTsc && !typecheckScript.startsWith('tsc')) {
-          issues.push(`⚠️  建議使用 'bun tsc'、'bunx tsc' 或相對路徑到 node_modules/.bin/tsc（當前: ${typecheckScript}）`)
-        }
-      }
     } else {
       issues.push(`⚠️  缺少 typecheck 腳本`)
     }

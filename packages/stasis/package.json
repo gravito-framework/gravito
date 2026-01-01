@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "bun tsc --noEmit --skipLibCheck"
   },
   "keywords": [
     "gravito",

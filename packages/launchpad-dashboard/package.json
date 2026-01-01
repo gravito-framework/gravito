@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "bun tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80",
-    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck",
+    "typecheck": "bun tsc --noEmit --skipLibCheck",
     "lint": "biome check ."
   },
   "dependencies": {
