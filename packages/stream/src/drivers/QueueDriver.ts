@@ -136,4 +136,27 @@ export interface QueueDriver {
    * @returns true if allowed, false if limited
    */
   checkRateLimit?(queue: string, config: { max: number; duration: number }): Promise<boolean>
+
+  /**
+   * Retry failed jobs from DLQ.
+   * @param queue - Queue name
+   * @param count - Optional count (default: all)
+   * @returns Number of jobs retried
+   */
+  retryFailed?(queue: string, count?: number): Promise<number>
+
+  /**
+   * Get failed jobs from DLQ.
+   * @param queue - Queue name
+   * @param start - Start index
+   * @param end - End index
+   * @returns Array of failed jobs
+   */
+  getFailed?(queue: string, start?: number, end?: number): Promise<SerializedJob[]>
+
+  /**
+   * Clear failed jobs from DLQ.
+   * @param queue - Queue name
+   */
+  clearFailed?(queue: string): Promise<void>
 }

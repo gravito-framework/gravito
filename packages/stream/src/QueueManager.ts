@@ -447,4 +447,45 @@ export class QueueManager {
     }
     return this.scheduler
   }
+
+  /**
+   * Get failed jobs from DLQ (if driver supports it).
+   */
+  async getFailed(
+    queue: string,
+    start = 0,
+    end = -1,
+    connection: string = this.defaultConnection
+  ): Promise<SerializedJob[]> {
+    const driver = this.getDriver(connection)
+    if (driver.getFailed) {
+      return driver.getFailed(queue, start, end)
+    }
+    return []
+  }
+
+  /**
+   * Retry failed jobs from DLQ (if driver supports it).
+   */
+  async retryFailed(
+    queue: string,
+    count = 1,
+    connection: string = this.defaultConnection
+  ): Promise<number> {
+    const driver = this.getDriver(connection)
+    if (driver.retryFailed) {
+      return driver.retryFailed(queue, count)
+    }
+    return 0
+  }
+
+  /**
+   * Clear failed jobs from DLQ (if driver supports it).
+   */
+  async clearFailed(queue: string, connection: string = this.defaultConnection): Promise<void> {
+    const driver = this.getDriver(connection)
+    if (driver.clearFailed) {
+      await driver.clearFailed(queue)
+    }
+  }
 }

@@ -158,13 +158,40 @@ export class Consumer {
               }
             } catch (err: any) {
               console.error(`[Consumer] Error processing job in queue "${queue}":`, err)
+
               if (this.options.monitor) {
                 await this.publishLog('error', `Job failed: ${job.id} - ${err.message}`, job.id)
               }
-              // Move to DLQ (Dead Letter Queue)
-              await this.queueManager.fail(job, err).catch((dlqErr) => {
-                console.error(`[Consumer] Error moving job to DLQ:`, dlqErr)
-              })
+
+              // Retry Logic with Exponential Backoff
+              const attempts = job.attempts ?? 1
+              const maxAttempts = job.maxAttempts ?? this.options.workerOptions?.maxAttempts ?? 3
+
+              if (attempts < maxAttempts) {
+                // Retryable
+                job.attempts = attempts + 1
+                const delayMs = job.getRetryDelay(job.attempts)
+                const delaySec = Math.ceil(delayMs / 1000)
+
+                // Update job properties
+                job.delay(delaySec)
+
+                // Re-queue
+                await this.queueManager.push(job)
+
+                if (this.options.monitor) {
+                  await this.publishLog(
+                    'warning',
+                    `Job retrying in ${delaySec}s (Attempt ${job.attempts}/${maxAttempts})`,
+                    job.id
+                  )
+                }
+              } else {
+                // Max attempts reached: Move to DLQ
+                await this.queueManager.fail(job, err).catch((dlqErr) => {
+                  console.error(`[Consumer] Error moving job to DLQ:`, dlqErr)
+                })
+              }
             } finally {
               // Mark as complete to handle Group FIFO logic (release lock / next job)
               await this.queueManager.complete(job).catch((err) => {

@@ -47,43 +47,37 @@ export class Worker {
     const maxAttempts = job.maxAttempts ?? this.options.maxAttempts ?? 3
     const timeout = this.options.timeout
 
-    let lastError: Error | null = null
+    // Ensure attempts is initialized
+    if (!job.attempts) {
+      job.attempts = 1
+    }
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        job.attempts = attempt
-        job.maxAttempts = maxAttempts
-
-        // Execute job (with optional timeout)
-        if (timeout) {
-          await Promise.race([
-            job.handle(),
-            new Promise<never>((_, reject) =>
-              setTimeout(
-                () => reject(new Error(`Job timeout after ${timeout} seconds`)),
-                timeout * 1000
-              )
-            ),
-          ])
-        } else {
-          await job.handle()
-        }
-
-        // Success
-        return
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error))
-
-        // Last attempt: run failure handling
-        if (attempt === maxAttempts) {
-          await this.handleFailure(job, lastError)
-          throw lastError
-        }
-
-        // Retry with dynamic backoff
-        const delay = job.getRetryDelay(attempt)
-        await new Promise((resolve) => setTimeout(resolve, delay))
+    try {
+      // Execute job (with optional timeout)
+      if (timeout) {
+        await Promise.race([
+          job.handle(),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error(`Job timeout after ${timeout} seconds`)),
+              timeout * 1000
+            )
+          ),
+        ])
+      } else {
+        await job.handle()
       }
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error))
+
+      // Check if this was the last attempt
+      // Note: Consumer is responsible for incrementing attempts and re-queueing if needed.
+      // Here we just check if we SHOULD have failed.
+      if (job.attempts >= maxAttempts) {
+        await this.handleFailure(job, err)
+      }
+
+      throw err
     }
   }
 

@@ -436,4 +436,58 @@ export class RedisDriver implements QueueDriver {
 
     return true // Fallback if INCR not supported
   }
+
+  /**
+   * Get failed jobs from DLQ.
+   */
+  async getFailed(queue: string, start = 0, end = -1): Promise<SerializedJob[]> {
+    const key = `${this.getKey(queue)}:failed`
+    const payloads = await (this.client as any).lrange(key, start, end)
+    return payloads.map((p: string) => this.parsePayload(p))
+  }
+
+  /**
+   * Retry failed jobs from DLQ.
+   * Moves jobs from failed list back to the main queue.
+   */
+  async retryFailed(queue: string, count = 1): Promise<number> {
+    const failedKey = `${this.getKey(queue)}:failed`
+    const queueKey = this.getKey(queue)
+    let retried = 0
+
+    for (let i = 0; i < count; i++) {
+      // RPOPLPUSH source destination
+      // We pop from the RIGHT (assuming failures are pushed to LEFT, so oldest are on RIGHT)
+      const payload = await (this.client as any).rpop(failedKey)
+      if (!payload) {
+        break
+      }
+
+      // We should ideally update attempts/error fields before pushing back.
+      // But standard RPOPLPUSH doesn't allow modification.
+      // So we RPOP, Modify, LPUSH.
+      // Limitation: Not atomic if process crashes in between.
+      // But acceptable for this "Manual Retry" operation.
+
+      const job: SerializedJob = this.parsePayload(payload)
+
+      // Reset attempts and error
+      job.attempts = 0
+      delete job.error
+      delete job.failedAt
+
+      await this.push(queue, job, { priority: job.priority, groupId: job.groupId })
+      retried++
+    }
+
+    return retried
+  }
+
+  /**
+   * Clear failed jobs from DLQ.
+   */
+  async clearFailed(queue: string): Promise<void> {
+    const key = `${this.getKey(queue)}:failed`
+    await this.client.del(key)
+  }
 }
