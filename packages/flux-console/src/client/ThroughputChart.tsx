@@ -26,7 +26,7 @@ export function ThroughputChart() {
         value: d.count
     })) || []
     return (
-        <div className="h-[350px] w-full bg-card border rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden group">
+        <div className="card-premium h-[350px] w-full p-6 flex flex-col relative overflow-hidden group">
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
 
