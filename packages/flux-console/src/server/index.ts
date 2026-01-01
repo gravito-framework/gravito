@@ -198,7 +198,7 @@ api.get('/system/status', (c) => {
       heapUsed: (mem.heapUsed / 1024 / 1024).toFixed(2) + ' MB',
       total: '4.00 GB', // Hardcoded limit for demo aesthetic
     },
-    engine: 'v2.4.1-beta',
+    engine: 'v0.1.0-beta.1',
     uptime: process.uptime(),
     env: process.env.NODE_ENV || 'production-east-1',
   })

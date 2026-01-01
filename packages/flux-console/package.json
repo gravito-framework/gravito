@@ -1,6 +1,6 @@
 {
     "name": "@gravito/flux-console",
-    "version": "0.1.0-alpha.1",
+    "version": "0.1.0-beta.1",
     "description": "Zero-config management console for Gravito Flux & Stream",
     "type": "module",
     "bin": {
