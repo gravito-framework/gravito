@@ -1,4 +1,5 @@
 import React from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
     LayoutDashboard,
     ListTree,
@@ -17,13 +18,14 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
     const [collapsed, setCollapsed] = React.useState(false)
+    const location = useLocation()
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Overview', active: true },
-        { icon: ListTree, label: 'Queues', active: false },
-        { icon: HardDrive, label: 'Workers', active: false },
-        { icon: Activity, label: 'Metrics', active: false },
-        { icon: Settings, label: 'Settings', active: false },
+        { icon: LayoutDashboard, label: 'Overview', path: '/' },
+        { icon: ListTree, label: 'Queues', path: '/queues' },
+        { icon: HardDrive, label: 'Workers', path: '/workers' },
+        { icon: Activity, label: 'Metrics', path: '/metrics' },
+        { icon: Settings, label: 'Settings', path: '/settings' },
     ]
 
     return (
@@ -54,29 +56,33 @@ export function Sidebar({ className }: SidebarProps) {
 
             {/* Nav Items */}
             <nav className="flex-1 px-4 py-6 space-y-2">
-                {navItems.map((item, i) => (
-                    <button
-                        key={i}
-                        className={cn(
-                            "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-muted-foreground group/item relative overflow-hidden",
-                            item.active
-                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02]"
-                                : "hover:bg-muted font-medium hover:text-foreground active:scale-95"
-                        )}
-                    >
-                        <item.icon size={22} className={cn(
-                            "transition-all",
-                            item.active ? "scale-110" : "group-hover/item:scale-110"
-                        )} />
-                        {!collapsed && <span className="font-semibold whitespace-nowrap tracking-tight">{item.label}</span>}
-                        {item.active && (
-                            <motion.div
-                                layoutId="active-pill"
-                                className="absolute left-0 w-1 h-6 bg-primary-foreground rounded-r-full"
-                            />
-                        )}
-                    </button>
-                ))}
+                {navItems.map((item, i) => {
+                    const isActive = location.pathname === item.path
+                    return (
+                        <NavLink
+                            key={i}
+                            to={item.path}
+                            className={cn(
+                                "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-muted-foreground group/item relative overflow-hidden",
+                                isActive
+                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02]"
+                                    : "hover:bg-muted font-medium hover:text-foreground active:scale-95"
+                            )}
+                        >
+                            <item.icon size={22} className={cn(
+                                "transition-all",
+                                isActive ? "scale-110" : "group-hover/item:scale-110"
+                            )} />
+                            {!collapsed && <span className="font-semibold whitespace-nowrap tracking-tight">{item.label}</span>}
+                            {isActive && (
+                                <motion.div
+                                    layoutId="active-pill"
+                                    className="absolute left-0 w-1 h-6 bg-primary-foreground rounded-r-full"
+                                />
+                            )}
+                        </NavLink>
+                    )
+                })}
             </nav>
 
             {/* Footer / Toggle */}

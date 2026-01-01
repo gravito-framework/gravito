@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
-import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2 } from 'lucide-react'
+import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from './utils'
@@ -19,6 +20,7 @@ interface CommandItem {
 }
 
 export function Layout({ children }: LayoutProps) {
+    const navigate = useNavigate()
     const queryClient = useQueryClient()
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
         if (typeof window !== 'undefined') {
@@ -84,10 +86,39 @@ export function Layout({ children }: LayoutProps) {
             description: 'Navigate to system dashboard',
             icon: <LayoutDashboard size={18} />,
             category: 'Navigation',
-            action: () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-                console.log('Navigating to Overview...')
-            }
+            action: () => navigate('/')
+        },
+        {
+            id: 'nav-queues',
+            title: 'Go to Queues',
+            description: 'Manage processing queues',
+            icon: <ListTree size={18} />,
+            category: 'Navigation',
+            action: () => navigate('/queues')
+        },
+        {
+            id: 'nav-workers',
+            title: 'Go to Workers',
+            description: 'Monitor worker nodes',
+            icon: <HardDrive size={18} />,
+            category: 'Navigation',
+            action: () => navigate('/workers')
+        },
+        {
+            id: 'nav-metrics',
+            title: 'Go to Metrics',
+            description: 'View system analytics',
+            icon: <BarChart3 size={18} />,
+            category: 'Navigation',
+            action: () => navigate('/metrics')
+        },
+        {
+            id: 'nav-settings',
+            title: 'Go to Settings',
+            description: 'Configure console preferences',
+            icon: <Settings size={18} />,
+            category: 'Navigation',
+            action: () => navigate('/settings')
         },
         {
             id: 'act-retry-all',
@@ -114,7 +145,10 @@ export function Layout({ children }: LayoutProps) {
         icon: <ListTree size={18} />,
         category: 'Navigation',
         action: () => {
-            window.dispatchEvent(new CustomEvent('select-queue', { detail: q.name }))
+            navigate('/queues')
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('select-queue', { detail: q.name }))
+            }, 100)
         }
     }))
 
