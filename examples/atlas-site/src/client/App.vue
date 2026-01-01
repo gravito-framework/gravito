@@ -43,7 +43,7 @@
             <StaticLink v-if="link.external" :href="link.path" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t(link.name) }}</StaticLink>
             <StaticLink v-else :to="link.path" class="hover:text-atlas-cyan transition-colors" active-class="text-atlas-cyan">{{ t(link.name) }}</StaticLink>
         </template>
-        <StaticLink href="https://gravito.dev/docs" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t('nav.docs') }}</StaticLink>
+        <StaticLink href="https://gravito.dev/en/docs/guide/orm-usage" target="_blank" class="hover:text-atlas-cyan transition-colors">{{ t('nav.docs') }}</StaticLink>
       </div>
       <div class="flex items-center gap-6">
           <button @click="toggleLang" class="text-gray-400 hover:text-white font-mono text-xs border border-white/20 px-3 py-1 rounded transition-colors uppercase">
