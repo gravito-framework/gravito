@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
-    "typecheck": "tsc --noEmit --skipLibCheck"
+    "typecheck": "node --max-old-space-size=4096 node_modules/.bin/tsc --noEmit --skipLibCheck"
   },
   "devDependencies": {
     "tsup": "^8.3.5",
