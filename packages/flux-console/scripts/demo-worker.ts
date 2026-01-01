@@ -46,7 +46,7 @@ manager.registerJobClasses([TestJob])
 
 // 4. Start Consumer with Framework Monitoring
 const consumer = new Consumer(manager, {
-  queues: ['orders', 'notifications'],
+  queues: ['orders', 'notifications', 'billing', 'reports', 'email', 'analytics', 'default'],
   pollInterval: 500,
   monitor: {
     prefix: 'flux_console:',

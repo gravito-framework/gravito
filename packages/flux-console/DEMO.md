@@ -51,13 +51,43 @@ bun run scripts/generate-random-traffic.ts
 ```
 
 This script will:
-- Push **50 jobs** randomly distribute to different queues.
+- Push **50 jobs** randomly distributed to different queues.
 - Some jobs are designed to **fail** (to test error handling).
 - Some jobs are **delayed**.
 
 > **Pro Tip**: Run this command multiple times rapidly to simulate a higher load spike!
 
-### Step 4: The Showcase (What to show in the UI) ✨
+---
+
+## 🧪 Understanding Test Job Behavior
+
+The demo worker uses a special `TestJob` class that simulates different real-world scenarios:
+
+### Intentional Failures (DLQ Testing)
+Jobs with IDs containing `"fail"` (e.g., `job-fail-1767244949663-25`) are **designed to always throw an error**. This is intentional and serves to demonstrate:
+
+1.  **Retry Mechanism**: You'll see these jobs attempt multiple times (`Attempt: 1, 2, 3...`).
+2.  **Exponential Backoff**: Each retry waits longer than the previous one (2s, 6s, 18s...).
+3.  **Dead Letter Queue (DLQ)**: After max attempts (default: 3), the job moves to the **Failed** queue.
+4.  **Error Handling UI**: You can see these in the Console's "Failed" tab with full error stack traces.
+
+**This is expected behavior!** These jobs represent scenarios like:
+- Invalid order IDs
+- Malformed email addresses
+- External API permanently rejecting a request
+
+### Normal Jobs
+Jobs without `"fail"` in their ID will:
+- Process successfully after a simulated 50ms delay
+- Update the throughput metrics
+- Disappear from the queue
+
+### The `default` Queue
+When you click **"Retry All Failed"** in the Console, failed jobs are moved back to the queue. Due to how the retry mechanism works, they may be placed in the `default` queue instead of their original queue. This is why the worker monitors both specific queues (`orders`, `email`, etc.) **and** the `default` queue.
+
+---
+
+## 🎬 Step 4: The Showcase (What to show in the UI) ✨
 
 Now, switch to the browser window and walk through these views:
 
