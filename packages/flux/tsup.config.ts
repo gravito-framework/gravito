@@ -7,6 +7,6 @@ export default defineConfig({
   splitting: true,
   sourcemap: true,
   clean: true,
-  external: ['@gravito/core'],
-  target: 'node18', // 確保廣泛兼容性
+  external: ['@gravito/core', 'bun:sqlite', 'bun'],
+  target: 'node18',
 })

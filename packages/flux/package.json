@@ -8,23 +8,22 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "bun": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "import": "./dist/index.js"
       },
       "node": {
-        "import": "./dist/node/index.mjs",
-        "require": "./dist/node/index.cjs",
+        "import": "./dist/index.node.js",
+        "require": "./dist/index.node.cjs",
         "types": "./dist/index.node.d.ts"
       },
-      "import": "./dist/node/index.mjs",
-      "require": "./dist/node/index.cjs",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./bun": {
+      "types": "./dist/bun.d.ts",
       "bun": {
-        "import": "./dist/bun.js",
-        "types": "./dist/bun.d.ts"
+        "import": "./dist/bun.js"
       }
     }
   },
