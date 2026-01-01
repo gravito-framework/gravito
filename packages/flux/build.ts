@@ -33,7 +33,7 @@ try {
 
   // 3. Types
   console.log('Generating Types...')
-  await $`npx tsc --emitDeclarationOnly --declaration --declarationMap --declarationDir ./dist`
+  await $`../../node_modules/.bin/tsc --emitDeclarationOnly --declaration --declarationMap --declarationDir ./dist`
 
   console.log('✅ @gravito/flux built successfully')
 } catch (err) {

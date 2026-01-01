@@ -5,7 +5,10 @@
         "rootDir": "./src",
         "declaration": true,
         "declarationMap": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "types": [
+            "bun-types"
+        ]
     },
     "include": [
         "src/**/*"

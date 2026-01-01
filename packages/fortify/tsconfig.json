@@ -16,7 +16,10 @@
             "@gravito/photon/*": [
                 "../../packages/photon/src/*"
             ]
-        }
+        },
+        "types": [
+            "bun-types"
+        ]
     },
     "include": [
         "src/**/*"
