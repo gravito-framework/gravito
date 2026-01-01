@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Layout } from './Layout'
 import {
     Clock,
@@ -13,7 +13,9 @@ import {
     Search,
     ChevronRight,
     Activity,
-    ListTree
+    ListTree,
+    Trash2,
+    Terminal
 } from 'lucide-react'
 import { cn } from './utils'
 import { ThroughputChart } from './ThroughputChart'
@@ -36,16 +38,34 @@ interface Job {
     data?: any
     status?: string
     timestamp?: number
-    raw?: string
-    error?: string
+    _raw?: string
+    _error?: string
 }
 
+
 function JobInspector({ queueName, onClose }: { queueName: string, onClose: () => void }) {
+    const [view, setView] = React.useState<'waiting' | 'delayed'>('waiting')
+    const queryClient = useQueryClient()
 
     const { isPending, error, data } = useQuery<{ jobs: Job[] }>({
-        queryKey: ['jobs', queueName],
-        queryFn: () => fetch(`/api/queues/${queueName}/jobs`).then(res => res.json()),
+        queryKey: ['jobs', queueName, view],
+        queryFn: () => fetch(`/api/queues/${queueName}/jobs?type=${view}`).then(res => res.json()),
     })
+
+    const handleAction = async (action: 'delete' | 'retry', job: Job) => {
+        const endpoint = action === 'delete' ? 'delete' : 'retry'
+        const body: any = { raw: job._raw }
+        if (action === 'delete') body.type = view
+
+        await fetch(`/api/queues/${queueName}/jobs/${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+
+        queryClient.invalidateQueries({ queryKey: ['jobs', queueName] })
+        queryClient.invalidateQueries({ queryKey: ['queues'] })
+    }
 
     return (
         <AnimatePresence>
@@ -64,7 +84,26 @@ function JobInspector({ queueName, onClose }: { queueName: string, onClose: () =
                                 <Search className="text-primary" size={20} />
                                 Queue Insight
                             </h2>
-                            <p className="text-sm text-muted-foreground mt-1">Viewing jobs in <span className="font-mono font-medium text-foreground">{queueName}</span></p>
+                            <div className="flex items-center gap-4 mt-2">
+                                <button
+                                    onClick={() => setView('waiting')}
+                                    className={cn(
+                                        "text-xs font-bold px-3 py-1 rounded-full transition-all border",
+                                        view === 'waiting' ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-transparent"
+                                    )}
+                                >
+                                    Waiting
+                                </button>
+                                <button
+                                    onClick={() => setView('delayed')}
+                                    className={cn(
+                                        "text-xs font-bold px-3 py-1 rounded-full transition-all border",
+                                        view === 'delayed' ? "bg-amber-500 text-white border-amber-500" : "bg-muted text-muted-foreground border-transparent"
+                                    )}
+                                >
+                                    Delayed
+                                </button>
+                            </div>
                         </div>
                         <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
                             ✕
@@ -107,8 +146,20 @@ function JobInspector({ queueName, onClose }: { queueName: string, onClose: () =
                                             </pre>
                                         </div>
                                         <div className="p-3 bg-muted/10 border-t flex justify-end gap-2">
-                                            <button className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-red-50 text-red-600 transition-colors">Terminate</button>
-                                            <button className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-all">Retry Now</button>
+                                            <button
+                                                onClick={() => handleAction('delete', job)}
+                                                className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+                                            >
+                                                Terminate
+                                            </button>
+                                            {view === 'delayed' && (
+                                                <button
+                                                    onClick={() => handleAction('retry', job)}
+                                                    className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-all"
+                                                >
+                                                    Retry Now
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -126,8 +177,60 @@ function JobInspector({ queueName, onClose }: { queueName: string, onClose: () =
     )
 }
 
+function LiveLogs() {
+    const [logs, setLogs] = React.useState<any[]>([])
+    const logEndRef = React.useRef<HTMLDivElement>(null)
+
+    React.useEffect(() => {
+        const ev = new EventSource('/api/logs/stream')
+        ev.addEventListener('log', (e) => {
+            const data = JSON.parse(e.data)
+            setLogs(prev => [...prev.slice(-99), data])
+        })
+        return () => ev.close()
+    }, [])
+
+    React.useEffect(() => {
+        logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [logs])
+
+    return (
+        <div className="bg-card border rounded-2xl overflow-hidden shadow-sm flex flex-col h-[300px]">
+            <div className="p-4 border-b bg-muted/30 flex justify-between items-center">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                    <Terminal size={16} className="text-primary" />
+                    Operational Logs
+                </h3>
+                <span className="text-[10px] font-mono bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20 animate-pulse uppercase">Live</span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-1.5 selection:bg-primary/30">
+                {logs.length === 0 && (
+                    <div className="h-full flex items-center justify-center text-muted-foreground italic">
+                        Awaiting system messages...
+                    </div>
+                )}
+                {logs.map((log, i) => (
+                    <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
+                        <span className="text-muted-foreground shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                        <span className={cn(
+                            "font-bold uppercase tracking-tighter shrink-0 w-12",
+                            log.level === 'error' ? 'text-red-500' :
+                                log.level === 'success' ? 'text-green-500' : 'text-primary'
+                        )}>
+                            [{log.level}]
+                        </span>
+                        <span className="text-foreground break-all">{log.message}</span>
+                    </div>
+                ))}
+                <div ref={logEndRef} />
+            </div>
+        </div>
+    )
+}
+
 function Dashboard() {
     const [selectedQueue, setSelectedQueue] = React.useState<string | null>(null)
+    const queryClient = useQueryClient()
 
     const { isPending, error, data } = useQuery<{ queues: QueueStats[] }>({
         queryKey: ['queues'],
@@ -230,16 +333,7 @@ function Dashboard() {
                     <WorkerStatus />
                 </div>
                 <div className="lg:col-span-2">
-                    <div className="bg-card border rounded-2xl p-6 shadow-sm h-full flex flex-col justify-center items-center text-center space-y-4 min-h-[200px]">
-                        <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-                            <Activity size={32} />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-bold">Operational Logs</h3>
-                            <p className="text-sm text-muted-foreground max-w-xs">Detailed audit trails and system event logs will appear here.</p>
-                        </div>
-                        <button className="px-4 py-2 bg-muted text-xs font-bold rounded-lg hover:bg-muted/80 transition-all uppercase tracking-widest">Open Log Viewer</button>
-                    </div>
+                    <LiveLogs />
                 </div>
             </div>
 
@@ -295,6 +389,20 @@ function Dashboard() {
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            {(queue.waiting > 0 || queue.delayed > 0) && (
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(`Purge all jobs in ${queue.name}?`)) {
+                                                            fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
+                                                                .then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))
+                                                        }
+                                                    }}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Purge Queue"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
                                             {queue.delayed > 0 && (
                                                 <button
                                                     onClick={() => {
