@@ -21,9 +21,11 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 const QUEUE_PREFIX = process.env.QUEUE_PREFIX || 'queue:'
 
 // Persistence Initialize
-let persistence: { adapter: any; archiveCompleted: boolean; archiveFailed: boolean } | undefined
+let persistence:
+  | { adapter: any; archiveCompleted: boolean; archiveFailed: boolean; archiveEnqueued: boolean }
+  | undefined
 
-const dbDriver = process.env.DB_DRIVER || 'mysql'
+const dbDriver = process.env.DB_DRIVER || (process.env.DB_HOST ? 'mysql' : 'sqlite')
 
 if (dbDriver === 'sqlite' || process.env.DB_HOST) {
   if (dbDriver === 'sqlite') {
@@ -49,6 +51,7 @@ if (dbDriver === 'sqlite' || process.env.DB_HOST) {
     adapter,
     archiveCompleted: process.env.PERSIST_ARCHIVE_COMPLETED === 'true',
     archiveFailed: process.env.PERSIST_ARCHIVE_FAILED !== 'false',
+    archiveEnqueued: process.env.PERSIST_ARCHIVE_ENQUEUED === 'true',
   }
   console.log(`[FluxConsole] SQL Archive enabled via ${dbDriver}`)
 }
@@ -167,6 +170,9 @@ api.get('/logs/archive', async (c) => {
   const workerId = c.req.query('workerId')
   const queue = c.req.query('queue')
   const search = c.req.query('search')
+
+  const startTime = c.req.query('startTime') ? new Date(c.req.query('startTime')!) : undefined
+  const endTime = c.req.query('endTime') ? new Date(c.req.query('endTime')!) : undefined
   const page = parseInt(c.req.query('page') || '1', 10)
   const limit = parseInt(c.req.query('limit') || '50', 10)
 
@@ -176,6 +182,8 @@ api.get('/logs/archive', async (c) => {
       workerId,
       queue,
       search,
+      startTime,
+      endTime,
       page,
       limit,
     })
@@ -254,10 +262,18 @@ api.get('/queues/:name/archive', async (c) => {
   const name = c.req.param('name')
   const page = parseInt(c.req.query('page') || '1', 10)
   const limit = parseInt(c.req.query('limit') || '50', 10)
+
   const status = c.req.query('status') as 'completed' | 'failed' | undefined
+  const jobId = c.req.query('jobId')
+  const startTime = c.req.query('startTime') ? new Date(c.req.query('startTime')!) : undefined
+  const endTime = c.req.query('endTime') ? new Date(c.req.query('endTime')!) : undefined
 
   try {
-    const { jobs, total } = await queueService.getArchiveJobs(name, page, limit, status)
+    const { jobs, total } = await queueService.getArchiveJobs(name, page, limit, status, {
+      jobId,
+      startTime,
+      endTime,
+    })
     return c.json({ jobs, total })
   } catch (err) {
     console.error(err)

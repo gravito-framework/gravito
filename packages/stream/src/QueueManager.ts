@@ -262,6 +262,13 @@ export class QueueManager {
     // Push to queue
     await driver.push(queue, serialized, options)
 
+    // Auto-archive (Audit Mode) - Fire and forget
+    if (this.persistence?.archiveEnqueued) {
+      this.persistence.adapter.archive(queue, serialized, 'waiting').catch((err) => {
+        console.error('[QueueManager] Persistence archive failed (waiting):', err)
+      })
+    }
+
     return job
   }
 

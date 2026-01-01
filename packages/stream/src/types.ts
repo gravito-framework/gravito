@@ -140,6 +140,12 @@ export interface QueueConfig {
      * Whether to automatically archive failed jobs.
      */
     archiveFailed?: boolean
+
+    /**
+     * Whether to archive jobs immediately upon enqueue (Audit Mode).
+     * @default false
+     */
+    archiveEnqueued?: boolean
   }
 }
 
@@ -151,7 +157,11 @@ export interface PersistenceAdapter {
   /**
    * Archive a job.
    */
-  archive(queue: string, job: SerializedJob, status: 'completed' | 'failed'): Promise<void>
+  archive(
+    queue: string,
+    job: SerializedJob,
+    status: 'completed' | 'failed' | 'waiting' | string
+  ): Promise<void>
 
   /**
    * Find a job in the archive.
@@ -161,9 +171,19 @@ export interface PersistenceAdapter {
   /**
    * List jobs from the archive.
    */
+  /**
+   * List jobs from the archive.
+   */
   list(
     queue: string,
-    options?: { limit?: number; offset?: number; status?: 'completed' | 'failed' }
+    options?: {
+      limit?: number
+      offset?: number
+      status?: 'completed' | 'failed' | 'waiting' | string
+      jobId?: string
+      startTime?: Date
+      endTime?: Date
+    }
   ): Promise<SerializedJob[]>
 
   /**
@@ -174,7 +194,15 @@ export interface PersistenceAdapter {
   /**
    * Count jobs in the archive.
    */
-  count(queue: string, options?: { status?: 'completed' | 'failed' }): Promise<number>
+  count(
+    queue: string,
+    options?: {
+      status?: 'completed' | 'failed' | 'waiting' | string
+      jobId?: string
+      startTime?: Date
+      endTime?: Date
+    }
+  ): Promise<number>
 
   /**
    * Archive a system log message.
@@ -197,6 +225,8 @@ export interface PersistenceAdapter {
     workerId?: string
     queue?: string
     search?: string
+    startTime?: Date
+    endTime?: Date
   }): Promise<any[]>
 
   /**
@@ -207,6 +237,8 @@ export interface PersistenceAdapter {
     workerId?: string
     queue?: string
     search?: string
+    startTime?: Date
+    endTime?: Date
   }): Promise<number>
 }
 

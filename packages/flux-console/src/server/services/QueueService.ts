@@ -56,7 +56,12 @@ export class QueueService {
   constructor(
     redisUrl: string,
     prefix = 'queue:',
-    persistence?: { adapter: MySQLPersistence; archiveCompleted?: boolean; archiveFailed?: boolean }
+    persistence?: {
+      adapter: MySQLPersistence
+      archiveCompleted?: boolean
+      archiveFailed?: boolean
+      archiveEnqueued?: boolean
+    }
   ) {
     this.redis = new Redis(redisUrl, {
       lazyConnect: true,
@@ -694,7 +699,8 @@ export class QueueService {
     queue: string,
     page = 1,
     limit = 50,
-    status?: 'completed' | 'failed'
+    status?: 'completed' | 'failed',
+    filter: { jobId?: string; startTime?: Date; endTime?: Date } = {}
   ): Promise<{ jobs: any[]; total: number }> {
     const persistence = this.manager.getPersistence()
     if (!persistence) {
@@ -703,8 +709,8 @@ export class QueueService {
 
     const offset = (page - 1) * limit
     const [jobs, total] = await Promise.all([
-      persistence.list(queue, { limit, offset, status }),
-      persistence.count(queue, { status }),
+      persistence.list(queue, { limit, offset, status, ...filter }),
+      persistence.count(queue, { status, ...filter }),
     ])
 
     return {
@@ -748,6 +754,8 @@ export class QueueService {
       workerId?: string
       queue?: string
       search?: string
+      startTime?: Date
+      endTime?: Date
     } = {}
   ): Promise<{ logs: any[]; total: number }> {
     const persistence = this.manager.getPersistence()

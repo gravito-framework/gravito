@@ -19,7 +19,11 @@ export class SQLitePersistence implements PersistenceAdapter {
   /**
    * Archive a job.
    */
-  async archive(queue: string, job: SerializedJob, status: 'completed' | 'failed'): Promise<void> {
+  async archive(
+    queue: string,
+    job: SerializedJob,
+    status: 'completed' | 'failed' | 'waiting' | string
+  ): Promise<void> {
     try {
       await this.db.table(this.table).insert({
         job_id: job.id,
@@ -58,12 +62,31 @@ export class SQLitePersistence implements PersistenceAdapter {
    */
   async list(
     queue: string,
-    options: { limit?: number; offset?: number; status?: 'completed' | 'failed' } = {}
+    options: {
+      limit?: number
+      offset?: number
+      status?: 'completed' | 'failed' | 'waiting' | string
+      jobId?: string
+      startTime?: Date
+      endTime?: Date
+    } = {}
   ): Promise<SerializedJob[]> {
     let query = this.db.table(this.table).where('queue', queue)
 
     if (options.status) {
       query = query.where('status', options.status)
+    }
+
+    if (options.jobId) {
+      query = query.where('job_id', options.jobId)
+    }
+
+    if (options.startTime) {
+      query = query.where('archived_at', '>=', options.startTime)
+    }
+
+    if (options.endTime) {
+      query = query.where('archived_at', '<=', options.endTime)
     }
 
     const rows = await query
@@ -155,6 +178,8 @@ export class SQLitePersistence implements PersistenceAdapter {
       workerId?: string
       queue?: string
       search?: string
+      startTime?: Date
+      endTime?: Date
     } = {}
   ): Promise<any[]> {
     let query = this.db.table(this.logsTable)
@@ -164,6 +189,14 @@ export class SQLitePersistence implements PersistenceAdapter {
     if (options.queue) query = query.where('queue', options.queue)
     if (options.search) {
       query = query.where('message', 'like', `%${options.search}%`)
+    }
+
+    if (options.startTime) {
+      query = query.where('timestamp', '>=', options.startTime)
+    }
+
+    if (options.endTime) {
+      query = query.where('timestamp', '<=', options.endTime)
     }
 
     return await query
@@ -177,7 +210,14 @@ export class SQLitePersistence implements PersistenceAdapter {
    * Count system logs in the archive.
    */
   async countLogs(
-    options: { level?: string; workerId?: string; queue?: string; search?: string } = {}
+    options: {
+      level?: string
+      workerId?: string
+      queue?: string
+      search?: string
+      startTime?: Date
+      endTime?: Date
+    } = {}
   ): Promise<number> {
     let query = this.db.table(this.logsTable)
 
@@ -186,6 +226,14 @@ export class SQLitePersistence implements PersistenceAdapter {
     if (options.queue) query = query.where('queue', options.queue)
     if (options.search) {
       query = query.where('message', 'like', `%${options.search}%`)
+    }
+
+    if (options.startTime) {
+      query = query.where('timestamp', '>=', options.startTime)
+    }
+
+    if (options.endTime) {
+      query = query.where('timestamp', '<=', options.endTime)
     }
 
     const result = await query.count('id as total').first()
@@ -210,11 +258,31 @@ export class SQLitePersistence implements PersistenceAdapter {
   /**
    * Count jobs in the archive.
    */
-  async count(queue: string, options: { status?: 'completed' | 'failed' } = {}): Promise<number> {
+  async count(
+    queue: string,
+    options: {
+      status?: 'completed' | 'failed' | 'waiting' | string
+      jobId?: string
+      startTime?: Date
+      endTime?: Date
+    } = {}
+  ): Promise<number> {
     let query = this.db.table(this.table).where('queue', queue)
 
     if (options.status) {
       query = query.where('status', options.status)
+    }
+
+    if (options.jobId) {
+      query = query.where('job_id', options.jobId)
+    }
+
+    if (options.startTime) {
+      query = query.where('archived_at', '>=', options.startTime)
+    }
+
+    if (options.endTime) {
+      query = query.where('archived_at', '<=', options.endTime)
     }
 
     const result = await query.count('id as total').first()

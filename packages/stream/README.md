@@ -137,7 +137,34 @@ CREATE TABLE jobs (
 
 CREATE INDEX idx_jobs_queue_available ON jobs(queue, available_at);
 CREATE INDEX idx_jobs_reserved ON jobs(reserved_at);
+CREATE INDEX idx_jobs_queue_available ON jobs(queue, available_at);
+CREATE INDEX idx_jobs_reserved ON jobs(reserved_at);
 ```
+
+## Persistence and Audit Mode
+
+The `@gravito/stream` package supports an optional persistence layer (using SQLite or MySQL) for archiving job history and providing an audit trail.
+
+### Configuration
+
+```typescript
+OrbitStream.configure({
+  // ... other config
+  persistence: {
+    adapter: new SQLitePersistence(DB), // or MySQLPersistence
+    archiveCompleted: true, // Archive jobs when they complete successfully
+    archiveFailed: true,    // Archive jobs when they fail permanently
+    archiveEnqueued: true   // (Audit Mode) Archive jobs immediately when pushed
+  }
+})
+```
+
+### Audit Mode (`archiveEnqueued: true`)
+
+When Audit Mode is enabled, every job pushed to the queue is immediately written to the SQL archive with a `waiting` status. This happens in parallel with the main queue operation (Fire-and-Forget).
+
+- **Benefit**: Provides a complete audit trail. Even if the queue driver (e.g., Redis) crashes and loses data, the SQL archive will contain the record of the job being enqueued.
+- **Performance**: Designed to be non-blocking. The SQL write happens asynchronously and does not delay the `push()` operation.
 
 ## Standalone Worker
 

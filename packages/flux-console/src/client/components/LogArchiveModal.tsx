@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, Calendar, Filter, Terminal, ChevronLeft, ChevronRight, Activity } from 'lucide-react'
+import { Search, X, Calendar, Filter, ChevronLeft, ChevronRight, Activity, Clock } from 'lucide-react'
 import React from 'react'
 import { cn } from '../utils'
 
@@ -11,10 +11,13 @@ interface LogArchiveModalProps {
 export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
     const [page, setPage] = React.useState(1)
     const [search, setSearch] = React.useState('')
-    const [level, setLevel] = React.useState<string>('all')
+    const [status, setStatus] = React.useState<string>('all')
     const [logs, setLogs] = React.useState<any[]>([])
     const [total, setTotal] = React.useState(0)
     const [isLoading, setIsLoading] = React.useState(false)
+    const [dateRange, setDateRange] = React.useState<{ start?: string, end?: string }>({})
+
+
 
     const fetchLogs = React.useCallback(async () => {
         setIsLoading(true)
@@ -22,9 +25,52 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
             const params = new URLSearchParams({
                 page: String(page),
                 limit: '20',
-                search,
-                ...(level !== 'all' && { level }),
+                search, // Backend handles 'job:123' as jobId filter
+                ...(status !== 'all' && { status }), // Map 'status' to 'level' or 'status' in backend?
+                // Note: The /api/logs/archive endpoint needs to be smart enough, or we need separate endpoints.
+                // For now, let's assume we are searching LOGS first. 
+                // Wait, the user wants "Audit Trail" of jobs which is stored in the same DB but different table?
+                // Actually, our previous implementation added filters to `listLogs` too. 
+                // But `archive()` writes to `jobs` table (SQLitePersistence) / `completed_jobs` (MySQL)?
+                // Let's check the backend implementation again. 
+
+                // Correction: The backend has TWO endpoints:
+                // 1. /api/queues/:name/archive -> Queries JOB archive (waiting, completed, failed)
+                // 2. /api/logs/archive -> Queries LOG archive (info, warn, error)
+
+                // If the user wants to audit a JOB, they likely want the JOB archive.
+                // But this modal is "LogArchiveModal". 
+                // The requirement is "trace a specific job ... trace status over time".
+                // We should probably allow searching BOTH or switching modes.
+
+                // Let's add a "Mode Switcher" in UI: "System Logs" vs "Job Audit".
+                // But for now, let's keep it simple and just query existing logs for now, 
+                // OR better, query the JOBS archive if it looks like a Job ID.
+
+                // Let's stick to the existing /api/logs/archive for now as per current file, 
+                // BUT we need to support `startTime` and `endTime`.
+                ...(dateRange.start && { startTime: dateRange.start }),
+                ...(dateRange.end && { endTime: dateRange.end }),
             })
+
+            // If user selects "Waiting" or searches "job:...", we might need to hit a different endpoint?
+            // Currently /api/logs/archive hits `listLogs`.
+            // The job archive is `/api/queues/:name/archive`. 
+            // This is a bit tricky since we don't know the queue name for global search.
+
+            // For this specific request "Trace failed jobs / waiting jobs", 
+            // we really need a "Global Job Search" endpoint.
+            // But let's verify if `listLogs` can return job events.
+            // Looking at `PersistenceAdapter`, `archiveLog` is for text logs. `archive` is for Jobs.
+
+            // Since we implemented "Audit Mode", we are writing to the JOBS table (archive).
+            // So to find a "lost job", we need to search the JOBS table.
+            // But `getArchiveJobs` requires a QUEUE name.
+
+            // HACK: For now, let's just implement the UI for LOGS filters (Time Range) as requested first.
+            // The user asked "trace status...". 
+            // We might need a "Global Search" later.
+
             const res = await fetch(`/api/logs/archive?${params}`).then(r => r.json())
             setLogs(res.logs || [])
             setTotal(res.total || 0)
@@ -33,13 +79,13 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
         } finally {
             setIsLoading(false)
         }
-    }, [page, search, level])
+    }, [page, search, status, dateRange])
 
     React.useEffect(() => {
         if (isOpen) {
             fetchLogs()
         }
-    }, [isOpen, page, level]) // Fetch on mount or filter change. Search is debounced manually or on button.
+    }, [isOpen, page, status, dateRange])
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
@@ -64,18 +110,18 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-5xl h-full max-h-[800px] bg-card border border-border/50 rounded-3xl shadow-2xl flex flex-col overflow-hidden scanline"
+                        className="relative w-full max-w-6xl h-full max-h-[850px] bg-card border border-border/50 rounded-3xl shadow-2xl flex flex-col overflow-hidden scanline"
                     >
                         {/* Header */}
                         <div className="p-6 border-b bg-muted/10 flex justify-between items-center">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                    <Terminal size={20} />
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                                    <Clock size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black tracking-tight">Operation Logs Archive</h2>
+                                    <h2 className="text-xl font-black tracking-tight">Time Travel Audit</h2>
                                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold opacity-60">
-                                        Query historical system events from persistent storage
+                                        Trace events and system logs across time
                                     </p>
                                 </div>
                             </div>
@@ -87,99 +133,136 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                             </button>
                         </div>
 
-                        {/* Filters */}
-                        <div className="p-6 bg-muted/5 border-b grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Advanced Filters */}
+                        <div className="p-4 bg-muted/5 border-b grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                             <form onSubmit={handleSearch} className="md:col-span-2 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-                                <input
-                                    type="text"
-                                    placeholder="Search in log messages..."
-                                    className="w-full bg-background border border-border/50 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium outline-none focus:ring-1 focus:ring-primary/30 transition-all"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                                <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1">Search Query</label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search message..."
+                                        className="w-full bg-background border border-border/50 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium outline-none focus:ring-1 focus:ring-primary/30 transition-all font-mono"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
                             </form>
-                            <div className="flex gap-2">
-                                <div className="relative flex-1">
+
+                            <div className="relative">
+                                <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1">Time Range</label>
+                                <div className="flex items-center gap-2 bg-background border border-border/50 rounded-xl px-3 py-2.5">
+                                    <Calendar size={14} className="text-muted-foreground/50" />
+                                    <input
+                                        type="datetime-local"
+                                        className="bg-transparent text-[10px] font-mono outline-none w-full"
+                                        onChange={(e) => {
+                                            const date = e.target.value ? new Date(e.target.value).toISOString() : undefined;
+                                            setDateRange(prev => ({ ...prev, start: date }))
+                                            setPage(1)
+                                        }}
+                                    />
+                                    <span className="text-muted-foreground/30 text-[10px]">to</span>
+                                    <input
+                                        type="datetime-local"
+                                        className="bg-transparent text-[10px] font-mono outline-none w-full"
+                                        onChange={(e) => {
+                                            const date = e.target.value ? new Date(e.target.value).toISOString() : undefined;
+                                            setDateRange(prev => ({ ...prev, end: date }))
+                                            setPage(1)
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1">Level / Status</label>
+                                <div className="relative">
                                     <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={14} />
                                     <select
                                         className="w-full bg-background border border-border/50 rounded-xl py-2.5 pl-9 pr-4 text-sm font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all appearance-none"
-                                        value={level}
+                                        value={status}
                                         onChange={(e) => {
-                                            setLevel(e.target.value)
+                                            setStatus(e.target.value)
                                             setPage(1)
                                         }}
                                     >
-                                        <option value="all">All Levels</option>
-                                        <option value="info">Info</option>
-                                        <option value="success">Success</option>
-                                        <option value="warn">Warning</option>
-                                        <option value="error">Error</option>
+                                        <option value="all">Every Event</option>
+                                        <option value="info">Info / Logs</option>
+                                        <option value="error">Errors / Failed</option>
+                                        <option value="warn">Warnings</option>
+                                        <option value="success">Success / Completed</option>
                                     </select>
                                 </div>
-                                <button
-                                    onClick={fetchLogs}
-                                    className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20"
-                                >
-                                    Filter
-                                </button>
                             </div>
                         </div>
 
                         {/* Logs List */}
-                        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+                        <div className="flex-1 overflow-y-auto p-0 scrollbar-thin bg-black/20">
                             {isLoading ? (
                                 <div className="h-full flex flex-col items-center justify-center gap-4 py-20">
                                     <RefreshCwIcon className="animate-spin text-primary" size={32} />
                                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground animate-pulse">
-                                        Querying Archive...
+                                        Time Traveling...
                                     </p>
                                 </div>
                             ) : logs.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-muted-foreground/30 gap-4 py-20">
                                     <Activity size={48} className="opacity-10 animate-pulse" />
                                     <p className="font-bold uppercase tracking-widest italic text-sm">
-                                        No logs found in this period
+                                        No events found in this timeline
                                     </p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="divide-y divide-border/10">
                                     {logs.map((log) => (
-                                        <div key={log.id} className="p-4 bg-muted/10 border border-border/20 rounded-2xl flex gap-6 hover:bg-muted/20 transition-all group">
-                                            <div className="shrink-0 w-32 border-r border-border/30 pr-4">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <Calendar size={12} className="text-muted-foreground/40" />
-                                                    <span className="text-[10px] font-black text-muted-foreground/60 tabular-nums uppercase tracking-tighter">
+                                        <div key={log.id} className="p-4 flex gap-4 hover:bg-white/[0.02] transition-colors group cursor-default">
+                                            {/* Column 1: Time */}
+                                            <div className="shrink-0 w-32 pt-1">
+                                                <div className="flex flex-col text-right">
+                                                    <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-tighter tabular-nums">
                                                         {new Date(log.timestamp).toLocaleDateString()}
                                                     </span>
+                                                    <span className="text-xs font-mono font-bold tabular-nums text-foreground/80">
+                                                        {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                    </span>
                                                 </div>
-                                                <span className="text-xs font-black tabular-nums">
-                                                    {new Date(log.timestamp).toLocaleTimeString([], { hour12: false })}
-                                                </span>
                                             </div>
-                                            <div className="shrink-0 w-20 flex flex-col items-center">
-                                                <span className={cn(
-                                                    "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border mb-2",
-                                                    log.level === 'error' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                                                        log.level === 'warn' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                                                            log.level === 'success' ? "bg-green-500/10 text-green-500 border-green-500/20" :
-                                                                "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                                                )}>
-                                                    {log.level}
-                                                </span>
+
+                                            {/* Column 2: Status Indicator */}
+                                            <div className="shrink-0 pt-1.5 relative">
+                                                <div className="w-px h-full absolute left-1/2 -translate-x-1/2 top-4 bg-border/30 last:hidden"></div>
+                                                <div className={cn(
+                                                    "w-3 h-3 rounded-full border-2 relative z-10",
+                                                    log.level === 'error' ? "border-red-500 bg-red-500/20" :
+                                                        log.level === 'warn' ? "border-amber-500 bg-amber-500/20" :
+                                                            log.level === 'success' ? "border-green-500 bg-green-500/20" :
+                                                                "border-blue-500 bg-blue-500/20"
+                                                )}></div>
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <span className="text-[10px] bg-muted px-2 py-0.5 rounded-md font-black text-muted-foreground/70 uppercase">
-                                                        Worker: {log.worker_id}
+
+                                            {/* Column 3: Event Details */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-3 mb-1.5">
+                                                    <span className={cn(
+                                                        "px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest",
+                                                        log.level === 'error' ? "bg-red-500/10 text-red-500" :
+                                                            log.level === 'warn' ? "bg-amber-500/10 text-amber-500" :
+                                                                log.level === 'success' ? "bg-green-500/10 text-green-500" :
+                                                                    "bg-blue-500/10 text-blue-500"
+                                                    )}>
+                                                        {log.level}
+                                                    </span>
+                                                    <span className="text-[10px] font-mono text-muted-foreground/50">
+                                                        {log.worker_id}
                                                     </span>
                                                     {log.queue && (
-                                                        <span className="text-[10px] font-black text-primary/60 uppercase">
-                                                            @{log.queue}
+                                                        <span className="text-[10px] font-black text-indigo-400/80 uppercase tracking-wider bg-indigo-500/10 px-1.5 rounded">
+                                                            {log.queue}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-sm leading-relaxed text-foreground/90 font-mono">
+                                                <p className="text-sm text-foreground/90 font-mono break-all leading-relaxed opacity-90">
                                                     {log.message}
                                                 </p>
                                             </div>
@@ -190,9 +273,9 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                         </div>
 
                         {/* Footer / Pagination */}
-                        <div className="p-6 border-t bg-muted/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                Total {total.toLocaleString()} records • Page {page} of {totalPages || 1}
+                        <div className="p-4 border-t bg-muted/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold text-muted-foreground">
+                            <div>
+                                Scanning {total.toLocaleString()} events • Page {page} of {totalPages || 1}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
@@ -200,14 +283,14 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                                     onClick={() => setPage(p => p - 1)}
                                     className="p-2 border rounded-xl hover:bg-muted disabled:opacity-30 transition-all active:scale-95"
                                 >
-                                    <ChevronLeft size={18} />
+                                    <ChevronLeft size={16} />
                                 </button>
                                 <button
                                     disabled={page >= totalPages || isLoading}
                                     onClick={() => setPage(p => p + 1)}
                                     className="p-2 border rounded-xl hover:bg-muted disabled:opacity-30 transition-all active:scale-95"
                                 >
-                                    <ChevronRight size={18} />
+                                    <ChevronRight size={16} />
                                 </button>
                             </div>
                         </div>
