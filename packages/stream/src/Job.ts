@@ -27,6 +27,11 @@ import type { Queueable } from './Queueable'
  */
 export abstract class Job implements Queueable {
   /**
+   * Unique job identifier.
+   */
+  id?: string
+
+  /**
    * Queue name.
    */
   queueName?: string

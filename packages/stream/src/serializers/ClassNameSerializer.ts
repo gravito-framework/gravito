@@ -105,6 +105,9 @@ export class ClassNameSerializer implements JobSerializer {
       Object.assign(job, parsed.properties)
     }
 
+    // Restore metadata
+    job.id = serialized.id
+
     // Restore Queueable fields
     if (serialized.delaySeconds !== undefined) {
       job.delaySeconds = serialized.delaySeconds

@@ -308,4 +308,39 @@ export class RedisDriver implements QueueDriver {
 
     return results
   }
+
+  /**
+   * Report worker heartbeat for monitoring.
+   */
+  async reportHeartbeat(workerInfo: any, prefix?: string): Promise<void> {
+    const key = `${prefix ?? this.prefix}worker:${workerInfo.id}`
+    // Support ioredis/node-redis style SET with EX
+    if (typeof (this.client as any).set === 'function') {
+      await (this.client as any).set(key, JSON.stringify(workerInfo), 'EX', 10)
+    }
+  }
+
+  /**
+   * Publish a log message for monitoring.
+   */
+  async publishLog(logPayload: any, prefix?: string): Promise<void> {
+    const payload = JSON.stringify(logPayload)
+    const monitorPrefix = prefix ?? this.prefix
+
+    // 1. PubSub
+    if (typeof (this.client as any).publish === 'function') {
+      await (this.client as any).publish(`${monitorPrefix}logs`, payload)
+    }
+
+    // 2. History (Capped List)
+    const historyKey = `${monitorPrefix}logs:history`
+    if (typeof (this.client as any).pipeline === 'function') {
+      const pipe = (this.client as any).pipeline()
+      pipe.lpush(historyKey, payload)
+      pipe.ltrim(historyKey, 0, 99)
+      await pipe.exec()
+    } else {
+      await this.client.lpush(historyKey, payload)
+    }
+  }
 }

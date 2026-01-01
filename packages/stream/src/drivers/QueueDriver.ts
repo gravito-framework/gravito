@@ -107,4 +107,18 @@ export interface QueueDriver {
    * @param topic - Topic name
    */
   deleteTopic?(topic: string): Promise<void>
+
+  /**
+   * Report worker heartbeat for monitoring.
+   * @param workerInfo - Worker information
+   * @param prefix - Optional prefix for monitoring keys
+   */
+  reportHeartbeat?(workerInfo: any, prefix?: string): Promise<void>
+
+  /**
+   * Publish a log message for monitoring.
+   * @param logPayload - Log payload
+   * @param prefix - Optional prefix for monitoring channels/keys
+   */
+  publishLog?(logPayload: any, prefix?: string): Promise<void>
 }
