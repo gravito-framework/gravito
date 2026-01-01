@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
+    "build": "tsup src/index.ts --format esm --dts --clean --external @gravito/atlas --external @gravito/enterprise --external @gravito/stasis --external @gravito/core --external @gravito/impulse",
     "test": "bun test",
     "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
@@ -14,7 +14,8 @@
     "@gravito/atlas": "workspace:*",
     "@gravito/enterprise": "workspace:*",
     "@gravito/stasis": "workspace:*",
-    "@gravito/core": "workspace:*"
+    "@gravito/core": "workspace:*",
+    "@gravito/impulse": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

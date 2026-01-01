@@ -1400,6 +1400,7 @@
         "@gravito/atlas": "workspace:*",
         "@gravito/core": "workspace:*",
         "@gravito/enterprise": "workspace:*",
+        "@gravito/impulse": "workspace:*",
         "@gravito/stasis": "workspace:*",
       },
       "devDependencies": {
@@ -1439,7 +1440,9 @@
       "name": "@gravito/satellite-marketing",
       "version": "0.1.0",
       "dependencies": {
+        "@gravito/atlas": "workspace:*",
         "@gravito/core": "workspace:*",
+        "@gravito/enterprise": "workspace:*",
         "stripe": "^20.1.0",
       },
       "devDependencies": {

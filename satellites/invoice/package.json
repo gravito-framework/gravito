@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "build": "tsup src/index.ts --format esm --dts --clean --external @gravito/enterprise --external @gravito/atlas --external @gravito/core",
     "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "dependencies": {
@@ -16,5 +16,6 @@
   "devDependencies": {
     "tsup": "^8.3.5",
     "typescript": "^5.9.3"
-  }
+  },
+  "module": "dist/index.js"
 }
