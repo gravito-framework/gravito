@@ -64,14 +64,16 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
         // 2. npx tsc
         // 3. 相對路徑到根目錄 node_modules/.bin/tsc (../../node_modules/.bin/tsc)
         // 4. 相對路徑到本地 node_modules/.bin/tsc (node_modules/.bin/tsc)
+        // 5. bun tsc (使用 bun 執行 tsc)
         const hasValidTsc =
           typecheckScript.includes('bunx tsc') ||
           typecheckScript.includes('npx tsc') ||
           typecheckScript.includes('node_modules/.bin/tsc') ||
-          typecheckScript.includes('../../node_modules/.bin/tsc')
+          typecheckScript.includes('../../node_modules/.bin/tsc') ||
+          typecheckScript.includes('bun tsc')
 
         if (!hasValidTsc && !typecheckScript.startsWith('tsc')) {
-          issues.push(`⚠️  建議使用 'bunx tsc'、'npx tsc' 或相對路徑到 node_modules/.bin/tsc（當前: ${typecheckScript}）`)
+          issues.push(`⚠️  建議使用 'bun tsc'、'bunx tsc' 或相對路徑到 node_modules/.bin/tsc（當前: ${typecheckScript}）`)
         }
       }
     } else {
