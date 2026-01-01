@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { type Container, ServiceProvider } from '@gravito/core'
@@ -111,9 +112,9 @@ export class MembershipServiceProvider extends ServiceProvider {
 
     if (i18n) {
       try {
-        // Bun-native JSON loading
-        const en = await Bun.file(`${__dirname}/../locales/en.json`).json()
-        const zhTW = await Bun.file(`${__dirname}/../locales/zh-TW.json`).json()
+        // Standard Node.js compatible JSON loading
+        const en = JSON.parse(readFileSync(join(__dirname, '../locales/en.json'), 'utf-8'))
+        const zhTW = JSON.parse(readFileSync(join(__dirname, '../locales/zh-TW.json'), 'utf-8'))
 
         i18n.addResource('en', 'membership', en)
         i18n.addResource('zh-TW', 'membership', zhTW)
