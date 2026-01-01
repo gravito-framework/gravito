@@ -6,6 +6,8 @@
     "outDir": "./dist",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "types": ["bun-types"],
     "noEmit": true
   },
   "include": ["src/**/*"],
