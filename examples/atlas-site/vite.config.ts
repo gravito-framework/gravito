@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/atlas-site-dist/',
+  base: process.env.GITHUB_PAGES === 'true' ? '/' : '/', // Standardize to root for custom domain
   plugins: [vue()],
   resolve: {
     alias: {
