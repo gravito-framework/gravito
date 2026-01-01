@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/</loc>
+    <loc>https://atlas.gravito.dev/</loc>
   </url>
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/features</loc>
+    <loc>https://atlas.gravito.dev/features</loc>
   </url>
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/docs/benchmark</loc>
+    <loc>https://atlas.gravito.dev/docs/benchmark</loc>
   </url>
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/docs/mongodb</loc>
+    <loc>https://atlas.gravito.dev/docs/mongodb</loc>
   </url>
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/docs/cli</loc>
+    <loc>https://atlas.gravito.dev/docs/cli</loc>
   </url>
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/docs/redis</loc>
+    <loc>https://atlas.gravito.dev/docs/redis</loc>
   </url>
   <url>
-    <loc>https://gravito-framework.github.io/atlas-site-dist/docs/legal</loc>
+    <loc>https://atlas.gravito.dev/docs/legal</loc>
   </url>
 </urlset>
