@@ -5,8 +5,11 @@
         "baseUrl": ".",
         "jsx": "react-jsx",
         "paths": {
+            "@gravito/core": [
+                "../../packages/core/src/index.ts"
+            ],
             "@gravito/*": [
-                "../*/src/index.ts"
+                "../../packages/*/src/index.ts"
             ]
         }
     },
