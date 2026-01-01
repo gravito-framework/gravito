@@ -43,7 +43,13 @@ jobs:
         run: bun run check
 
       - name: Run Typecheck
-        run: bun run typecheck -- --concurrency=1
+        run: |
+          for dir in packages/* satellites/*; do
+            if [ -f "$dir/package.json" ] && grep -q "\"typecheck\":" "$dir/package.json"; then
+              echo "🔍 Typechecking $dir..."
+              (cd "$dir" && bun run typecheck)
+            fi
+          done
 
       - name: Run Tests with Coverage
         run: bun run test:coverage -- --concurrency=2
