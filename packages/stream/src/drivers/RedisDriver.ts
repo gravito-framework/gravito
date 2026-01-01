@@ -204,6 +204,14 @@ export class RedisDriver implements QueueDriver {
       }
     }
 
+    // Check if queue is paused
+    if (typeof (this.client as any).get === 'function') {
+      const isPaused = await (this.client as any).get(`${key}:paused`)
+      if (isPaused === '1') {
+        return null
+      }
+    }
+
     // Pop from main queue
     const payload = await this.client.rpop(key)
     if (!payload) {
