@@ -1,5 +1,5 @@
-import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { type Container, ServiceProvider } from '@gravito/core'
 import { auth } from '@gravito/sentinel'
 import { ForgotPasswordMail } from './Application/Mail/ForgotPasswordMail'

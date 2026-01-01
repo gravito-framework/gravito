@@ -1,6 +1,6 @@
-import { type Container, ServiceProvider } from '@gravito/core'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { type Container, ServiceProvider } from '@gravito/core'
 import { CouponService } from './Application/Services/CouponService'
 import { PromotionEngine } from './Application/Services/PromotionEngine'
 import { AdminListCoupons } from './Application/UseCases/AdminListCoupons'
