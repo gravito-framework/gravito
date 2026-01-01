@@ -214,6 +214,16 @@ api.post('/queues/:name/retry-all-failed', async (c) => {
   }
 })
 
+api.post('/queues/:name/clear-failed', async (c) => {
+  const name = c.req.param('name')
+  try {
+    await queueService.clearFailedJobs(name)
+    return c.json({ success: true })
+  } catch (_err) {
+    return c.json({ error: 'Failed to clear failed jobs' }, 500)
+  }
+})
+
 api.post('/queues/:name/pause', async (c) => {
   const name = c.req.param('name')
   try {

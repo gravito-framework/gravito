@@ -467,20 +467,16 @@ export class QueueService {
    * Retries all failed jobs in a queue.
    */
   async retryAllFailedJobs(queueName: string): Promise<number> {
-    const failedKey = `${this.prefix}${queueName}:failed`
-    const queueKey = `${this.prefix}${queueName}`
+    // Navigate via QueueManager -> Driver to use safe RPOPLPUSH (avoids Lua stack overflow)
+    // We pass a large number to retry "all" (effectively batch processing)
+    return await this.manager.retryFailed(queueName, 10000)
+  }
 
-    const script = `
-        local failedKey = KEYS[1]
-        local queueKey = KEYS[2]
-        local jobs = redis.call('LRANGE', failedKey, 0, -1)
-        if #jobs > 0 then
-            redis.call('LPUSH', queueKey, unpack(jobs))
-            redis.call('DEL', failedKey)
-        end
-        return #jobs
-      `
-    return (await this.redis.eval(script, 2, failedKey, queueKey)) as number
+  /**
+   * Clears all failed jobs (DLQ).
+   */
+  async clearFailedJobs(queueName: string): Promise<void> {
+    await this.manager.clearFailed(queueName)
   }
 
   /**
