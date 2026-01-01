@@ -10,7 +10,7 @@
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
     "test:ci": "bun test --coverage --coverage-threshold=80",
-    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc -p tsconfig.json --noEmit --skipLibCheck",
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck",
     "lint": "biome check ."
   },
   "dependencies": {
