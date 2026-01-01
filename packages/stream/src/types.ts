@@ -66,6 +66,11 @@ export interface SerializedJob {
    * Timestamp when the job failed permanently.
    */
   failedAt?: number
+
+  /**
+   * Job priority.
+   */
+  priority?: string | number
 }
 
 /**
@@ -251,4 +256,11 @@ export interface JobPushOptions {
    * If set, jobs with the same groupId will be processed strictly sequentially.
    */
   groupId?: string
+
+  /**
+   * Job priority.
+   * Higher priority jobs are processed first (if supported by driver).
+   * Example: 'high', 'low', 'critical'
+   */
+  priority?: string | number
 }

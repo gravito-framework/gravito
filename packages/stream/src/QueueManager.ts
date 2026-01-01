@@ -260,7 +260,11 @@ export class QueueManager {
     const serialized = serializer.serialize(job)
 
     // Push to queue
-    await driver.push(queue, serialized, options)
+    const pushOptions = { ...options }
+    if (job.priority) {
+      pushOptions.priority = job.priority
+    }
+    await driver.push(queue, serialized, pushOptions)
 
     // Auto-archive (Audit Mode) - Fire and forget
     if (this.persistence?.archiveEnqueued) {

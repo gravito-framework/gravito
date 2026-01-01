@@ -77,6 +77,7 @@ export class ClassNameSerializer implements JobSerializer {
       ...(job.groupId ? { groupId: job.groupId } : {}),
       ...(job.retryAfterSeconds !== undefined ? { retryAfterSeconds: job.retryAfterSeconds } : {}),
       ...(job.retryMultiplier !== undefined ? { retryMultiplier: job.retryMultiplier } : {}),
+      ...(job.priority !== undefined ? { priority: job.priority } : {}),
     }
   }
 
@@ -128,6 +129,9 @@ export class ClassNameSerializer implements JobSerializer {
     }
     if (serialized.retryMultiplier !== undefined) {
       job.retryMultiplier = serialized.retryMultiplier
+    }
+    if (serialized.priority !== undefined) {
+      job.priority = serialized.priority
     }
 
     return job

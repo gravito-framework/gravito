@@ -52,6 +52,12 @@ export interface ConsumerOptions {
          */
         prefix?: string
       }
+
+  /**
+   * Rate limits per queue.
+   * Example: { 'emails': { max: 10, duration: 1000 } }
+   */
+  rateLimits?: Record<string, { max: number; duration: number }>
 }
 
 /**
@@ -86,7 +92,7 @@ export class Consumer {
   ) {}
 
   private get connectionName(): string {
-    return this.options.connection ?? (this.queueManager as any).defaultConnection ?? 'default'
+    return this.options.connection ?? this.queueManager.getDefaultConnection()
   }
 
   /**
@@ -120,6 +126,23 @@ export class Consumer {
       let processed = false
 
       for (const queue of this.options.queues) {
+        // Check Rate Limits
+        if (this.options.rateLimits?.[queue]) {
+          const limit = this.options.rateLimits[queue]
+          try {
+            const driver = this.queueManager.getDriver(this.connectionName)
+            if (driver.checkRateLimit) {
+              const allowed = await driver.checkRateLimit(queue, limit)
+              if (!allowed) {
+                // Rate limit exceeded, skip this queue
+                continue
+              }
+            }
+          } catch (err) {
+            console.error(`[Consumer] Error checking rate limit for "${queue}":`, err)
+          }
+        }
+
         try {
           const job = await this.queueManager.pop(queue, this.options.connection)
 

@@ -36,6 +36,7 @@ export class JsonSerializer implements JobSerializer {
       attempts: job.attempts ?? 0,
       ...(job.maxAttempts !== undefined ? { maxAttempts: job.maxAttempts } : {}),
       ...(job.groupId ? { groupId: job.groupId } : {}),
+      ...(job.priority ? { priority: job.priority } : {}),
     }
   }
 
@@ -56,6 +57,9 @@ export class JsonSerializer implements JobSerializer {
     Object.assign(job, parsed.properties)
     if (serialized.groupId) {
       job.groupId = serialized.groupId
+    }
+    if (serialized.priority) {
+      job.priority = serialized.priority
     }
     return job as Job
   }

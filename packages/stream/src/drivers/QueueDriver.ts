@@ -128,4 +128,12 @@ export interface QueueDriver {
    * @param prefix - Optional prefix for monitoring channels/keys
    */
   publishLog?(logPayload: any, prefix?: string): Promise<void>
+
+  /**
+   * Check if a queue is rate limited.
+   * @param queue - Queue name
+   * @param config - Rate limit configuration
+   * @returns true if allowed, false if limited
+   */
+  checkRateLimit?(queue: string, config: { max: number; duration: number }): Promise<boolean>
 }

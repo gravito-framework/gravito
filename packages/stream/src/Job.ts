@@ -62,6 +62,11 @@ export abstract class Job implements Queueable {
   groupId?: string
 
   /**
+   * Job priority.
+   */
+  priority?: string | number
+
+  /**
    * Initial retry delay (seconds).
    */
   retryAfterSeconds?: number
@@ -84,6 +89,15 @@ export abstract class Job implements Queueable {
    */
   onConnection(connection: string): this {
     this.connectionName = connection
+    return this
+  }
+
+  /**
+   * Set job priority.
+   * @param priority - 'high', 'low', or number
+   */
+  withPriority(priority: string | number): this {
+    this.priority = priority
     return this
   }
 
