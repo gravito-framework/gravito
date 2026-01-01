@@ -15,7 +15,7 @@
     "paths": {
       "@gravito/ripple-client": ["../ripple-client/src/index.ts"]
     },
-    "types": ["vite/client"]
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
