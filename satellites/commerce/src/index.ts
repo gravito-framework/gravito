@@ -1,9 +1,13 @@
+import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { type Container, ServiceProvider } from '@gravito/core'
 import { RewardSubscriber } from './Application/Subscribers/RewardSubscriber'
 import { AdminListOrders } from './Application/UseCases/AdminListOrders'
 import { PlaceOrder } from './Application/UseCases/PlaceOrder'
 import { AdminOrderController } from './Interface/Http/Controllers/AdminOrderController'
 import { CheckoutController } from './Interface/Http/Controllers/CheckoutController'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export class CommerceServiceProvider extends ServiceProvider {
   register(container: Container): void {
@@ -16,7 +20,7 @@ export class CommerceServiceProvider extends ServiceProvider {
   }
 
   getMigrationsPath(): string {
-    return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
+    return `${__dirname}/Infrastructure/Persistence/Migrations`
   }
 
   override async boot(): Promise<void> {

@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { type Container, ServiceProvider } from '@gravito/core'
 import { auth } from '@gravito/sentinel'
 import { ForgotPasswordMail } from './Application/Mail/ForgotPasswordMail'
@@ -16,6 +18,8 @@ import { SentinelMemberProvider } from './Infrastructure/Auth/SentinelMemberProv
 import { AtlasMemberPasskeyRepository } from './Infrastructure/Persistence/AtlasMemberPasskeyRepository'
 import { AtlasMemberRepository } from './Infrastructure/Persistence/AtlasMemberRepository'
 import { PasskeyController } from './Interface/Http/Controllers/PasskeyController'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 /**
  * Membership Satellite Service Provider
@@ -91,10 +95,10 @@ export class MembershipServiceProvider extends ServiceProvider {
   }
 
   /**
-   * Expose migration path using Bun-native import.meta.dir
+   * Expose migration path using Bun-native __dirname
    */
   getMigrationsPath(): string {
-    return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
+    return `${__dirname}/Infrastructure/Persistence/Migrations`
   }
 
   /**
@@ -108,8 +112,8 @@ export class MembershipServiceProvider extends ServiceProvider {
     if (i18n) {
       try {
         // Bun-native JSON loading
-        const en = await Bun.file(`${import.meta.dir}/../locales/en.json`).json()
-        const zhTW = await Bun.file(`${import.meta.dir}/../locales/zh-TW.json`).json()
+        const en = await Bun.file(`${__dirname}/../locales/en.json`).json()
+        const zhTW = await Bun.file(`${__dirname}/../locales/zh-TW.json`).json()
 
         i18n.addResource('en', 'membership', en)
         i18n.addResource('zh-TW', 'membership', zhTW)

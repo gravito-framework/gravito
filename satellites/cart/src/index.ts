@@ -1,9 +1,13 @@
+import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import type { Container, GravitoContext, PlanetCore } from '@gravito/core'
 import { ServiceProvider } from '@gravito/core'
 import { AddToCart } from './Application/UseCases/AddToCart'
 import { MergeCart } from './Application/UseCases/MergeCart'
 import { AtlasCartRepository } from './Infrastructure/Persistence/Repositories/AtlasCartRepository'
 import { CartController } from './Interface/Http/Controllers/CartController'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export class CartServiceProvider extends ServiceProvider {
   register(container: Container): void {
@@ -21,7 +25,7 @@ export class CartServiceProvider extends ServiceProvider {
   }
 
   getMigrationsPath(): string {
-    return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
+    return `${__dirname}/Infrastructure/Persistence/Migrations`
   }
 
   override async boot(core: PlanetCore): Promise<void> {

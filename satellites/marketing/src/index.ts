@@ -1,8 +1,12 @@
 import { type Container, ServiceProvider } from '@gravito/core'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { CouponService } from './Application/Services/CouponService'
 import { PromotionEngine } from './Application/Services/PromotionEngine'
 import { AdminListCoupons } from './Application/UseCases/AdminListCoupons'
 import { AdminMarketingController } from './Interface/Http/Controllers/AdminMarketingController'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export class MarketingServiceProvider extends ServiceProvider {
   register(container: Container): void {
@@ -20,7 +24,7 @@ export class MarketingServiceProvider extends ServiceProvider {
   }
 
   getMigrationsPath(): string {
-    return `${import.meta.dir}/Infrastructure/Persistence/Migrations`
+    return join(__dirname, 'Infrastructure/Persistence/Migrations')
   }
 
   override async boot(): Promise<void> {
