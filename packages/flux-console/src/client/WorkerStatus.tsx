@@ -1,5 +1,11 @@
 import { Cpu } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs))
+}
 
 export function WorkerStatus() {
     const { data: workerData } = useQuery<{ workers: any[] }>({
@@ -36,20 +42,41 @@ export function WorkerStatus() {
                                 <p className="text-[10px] text-muted-foreground uppercase">{worker.status} • PID {worker.pid}</p>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
+                        <div className="flex flex-col items-end gap-2 shrink-0">
                             {worker.metrics && (
-                                <div className="flex gap-2">
-                                    <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded text-muted-foreground flex items-center gap-1">
-                                        CPU: {(worker.metrics.cpu * 100).toFixed(0)}%
-                                    </span>
-                                    <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded text-muted-foreground flex items-center gap-1">
-                                        RAM: {worker.metrics.ram.rss}MB
-                                    </span>
+                                <div className="space-y-1.5 w-24">
+                                    <div className="space-y-0.5">
+                                        <div className="flex justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">
+                                            <span>CPU</span>
+                                            <span>{(worker.metrics.cpu * 100).toFixed(0)}%</span>
+                                        </div>
+                                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                                            <div
+                                                className={cn(
+                                                    "h-full transition-all duration-500",
+                                                    worker.metrics.cpu > 0.8 ? "bg-red-500" : worker.metrics.cpu > 0.5 ? "bg-amber-500" : "bg-green-500"
+                                                )}
+                                                style={{ width: `${Math.min(100, worker.metrics.cpu * 100)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        <div className="flex justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">
+                                            <span>RAM</span>
+                                            <span>{worker.metrics.ram.rss}MB</span>
+                                        </div>
+                                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-indigo-500 transition-all duration-500"
+                                                style={{ width: `${Math.min(100, (worker.metrics.ram.rss / 1024) * 100)}%` }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                             <div className="text-right">
-                                <p className="text-xs font-black">{worker.uptime}s</p>
-                                <p className="text-[10px] text-muted-foreground uppercase">UPTIME</p>
+                                <p className="text-[11px] font-black">{worker.uptime}s</p>
+                                <p className="text-[8px] text-muted-foreground uppercase font-bold">UPTIME</p>
                             </div>
                         </div>
                     </div>

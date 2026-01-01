@@ -148,6 +148,50 @@ export class QueueService {
   }
 
   /**
+   * Records a snapshot of current global statistics for sparklines.
+   */
+  async recordStatusMetrics(): Promise<void> {
+    const stats = await this.listQueues()
+    const totals = stats.reduce(
+      (acc, q) => {
+        acc.waiting += q.waiting
+        acc.delayed += q.delayed
+        acc.failed += q.failed
+        return acc
+      },
+      { waiting: 0, delayed: 0, failed: 0 }
+    )
+
+    const now = Math.floor(Date.now() / 60000)
+    const pipe = this.redis.pipeline()
+
+    // Store snapshots for last 60 minutes
+    pipe.set(`flux_console:metrics:waiting:${now}`, totals.waiting, 'EX', 3600)
+    pipe.set(`flux_console:metrics:delayed:${now}`, totals.delayed, 'EX', 3600)
+    pipe.set(`flux_console:metrics:failed:${now}`, totals.failed, 'EX', 3600)
+
+    // Also record worker count
+    const workers = await this.listWorkers()
+    pipe.set(`flux_console:metrics:workers:${now}`, workers.length, 'EX', 3600)
+
+    await pipe.exec()
+  }
+
+  /**
+   * Gets historical data for a specific metric.
+   */
+  async getMetricHistory(metric: string, limit = 15): Promise<number[]> {
+    const now = Math.floor(Date.now() / 60000)
+    const keys = []
+    for (let i = limit - 1; i >= 0; i--) {
+      keys.push(`flux_console:metrics:${metric}:${now - i}`)
+    }
+
+    const values = await this.redis.mget(...keys)
+    return values.map((v) => parseInt(v || '0'))
+  }
+
+  /**
    * Retrieves throughput data for the last 15 minutes.
    */
   async getThroughputData(): Promise<{ timestamp: string; count: number }[]> {

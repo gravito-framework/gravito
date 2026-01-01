@@ -17,6 +17,12 @@ queueService
   .connect()
   .then(() => {
     console.log(`[FluxConsole] Connected to Redis at ${REDIS_URL}`)
+    // Start background metrics recording
+    setInterval(() => {
+      queueService.recordStatusMetrics().catch(console.error)
+    }, 60000)
+    // Record initial snapshot
+    queueService.recordStatusMetrics().catch(console.error)
   })
   .catch((err) => {
     console.error('[FluxConsole] Failed to connect to Redis', err)
@@ -83,6 +89,23 @@ api.get('/workers', async (c) => {
     return c.json({ workers })
   } catch (err) {
     return c.json({ error: 'Failed to fetch workers' }, 500)
+  }
+})
+
+api.get('/metrics/history', async (c) => {
+  try {
+    const metrics = ['waiting', 'delayed', 'failed', 'workers']
+    const history: Record<string, number[]> = {}
+
+    await Promise.all(
+      metrics.map(async (m) => {
+        history[m] = await queueService.getMetricHistory(m)
+      })
+    )
+
+    return c.json({ history })
+  } catch (err) {
+    return c.json({ error: 'Failed to fetch metrics history' }, 500)
   }
 })
 
