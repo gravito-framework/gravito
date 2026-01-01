@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { AlertCircle, Clock, Cpu, Gauge, MemoryStick, RefreshCcw, Server, Zap } from 'lucide-react'
+import React, { useEffect } from 'react'
 import { cn } from '../utils'
 
 interface Worker {
@@ -21,14 +22,27 @@ interface Worker {
 }
 
 export function WorkersPage() {
+  const queryClient = useQueryClient()
   const { isPending, error, data } = useQuery<{ workers: Worker[] }>({
     queryKey: ['workers'],
     queryFn: async () => {
       const res = await fetch('/api/workers')
       return res.json()
     },
-    refetchInterval: 3000,
+    refetchInterval: 5000,
   })
+
+  // Listen to real-time stats updates from SSE
+  useEffect(() => {
+    const handler = (e: any) => {
+      if (e.detail?.workers) {
+        // Optimistically update the query cache with fresh worker data from SSE
+        queryClient.setQueryData(['workers'], { workers: e.detail.workers })
+      }
+    }
+    window.addEventListener('flux-stats-update', handler)
+    return () => window.removeEventListener('flux-stats-update', handler)
+  }, [queryClient])
 
   const workers = data?.workers || []
   const onlineWorkers = workers.filter((w) => w.status === 'online')

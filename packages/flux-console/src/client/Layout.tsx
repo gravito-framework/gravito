@@ -21,6 +21,7 @@ import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NotificationBell } from './components/NotificationBell'
+import { Toaster } from './components/Toaster'
 import { UserProfileDropdown } from './components/UserProfileDropdown'
 import { useAuth } from './contexts/AuthContext'
 import { Sidebar } from './Sidebar'
@@ -609,6 +610,7 @@ export function Layout({ children }: LayoutProps) {
           </div>
         )}
       </AnimatePresence>
+      <Toaster />
     </div>
   )
 }

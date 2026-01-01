@@ -175,6 +175,39 @@ export interface PersistenceAdapter {
    * Count jobs in the archive.
    */
   count(queue: string, options?: { status?: 'completed' | 'failed' }): Promise<number>
+
+  /**
+   * Archive a system log message.
+   */
+  archiveLog(log: {
+    level: string
+    message: string
+    workerId: string
+    queue?: string
+    timestamp: Date
+  }): Promise<void>
+
+  /**
+   * List system logs from the archive.
+   */
+  listLogs(options?: {
+    limit?: number
+    offset?: number
+    level?: string
+    workerId?: string
+    queue?: string
+    search?: string
+  }): Promise<any[]>
+
+  /**
+   * Count system logs in the archive.
+   */
+  countLogs(options?: {
+    level?: string
+    workerId?: string
+    queue?: string
+    search?: string
+  }): Promise<number>
 }
 
 /**

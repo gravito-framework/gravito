@@ -35,7 +35,7 @@ export interface JobInspectorProps {
 export function JobInspector({ queueName, onClose }: JobInspectorProps) {
     const [view, setView] = React.useState<'waiting' | 'delayed' | 'failed' | 'archive'>('waiting')
     const [page, setPage] = React.useState(1)
-    const [selectedRaws, setSelectedRaws] = React.useState<Set<string>>(new Set())
+    const [selectedIndices, setSelectedIndices] = React.useState<Set<number>>(new Set())
     const [totalCount, setTotalCount] = React.useState<number>(0)
     const [isProcessing, setIsProcessing] = React.useState(false)
     const [confirmDialog, setConfirmDialog] = React.useState<{
@@ -73,7 +73,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
 
     // Reset selection when view changes
     React.useEffect(() => {
-        setSelectedRaws(new Set())
+        setSelectedIndices(new Set())
         setPage(1)
     }, [view])
 
@@ -87,8 +87,8 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
             if (e.key === 'Escape') {
                 if (confirmDialog?.open) {
                     setConfirmDialog(null)
-                } else if (selectedRaws.size > 0) {
-                    setSelectedRaws(new Set())
+                } else if (selectedIndices.size > 0) {
+                    setSelectedIndices(new Set())
                 } else {
                     onClose()
                 }
@@ -97,7 +97,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [selectedRaws, confirmDialog, data])
+    }, [selectedIndices, confirmDialog, data])
 
     // Lock body scroll when modal opens
     React.useEffect(() => {
@@ -114,25 +114,27 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
         }
     }, [])
 
-    const toggleSelection = (raw?: string) => {
-        if (!raw) return
-        const next = new Set(selectedRaws)
-        if (next.has(raw)) {
-            next.delete(raw)
+    const toggleSelection = (index: number) => {
+        const next = new Set(selectedIndices)
+        if (next.has(index)) {
+            next.delete(index)
         } else {
-            next.add(raw)
+            next.add(index)
         }
-        setSelectedRaws(next)
+        setSelectedIndices(next)
     }
 
     const toggleSelectAll = () => {
         if (!data?.jobs) return
-        const availableJobs = data.jobs.filter((j) => j._raw && !j._archived)
-        if (selectedRaws.size === availableJobs.length && availableJobs.length > 0) {
-            setSelectedRaws(new Set())
+        const availableCount = data.jobs.filter((j) => j._raw && !j._archived).length
+        if (selectedIndices.size === availableCount && availableCount > 0) {
+            setSelectedIndices(new Set())
         } else {
-            const all = new Set(availableJobs.map((j) => j._raw) as string[])
-            setSelectedRaws(all)
+            const indices = new Set<number>()
+            data.jobs.forEach((j, i) => {
+                if (j._raw && !j._archived) indices.add(i)
+            })
+            setSelectedIndices(indices)
         }
     }
 
@@ -153,18 +155,21 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
     }
 
     const handleBulkAction = async (action: 'delete' | 'retry') => {
-        if (selectedRaws.size === 0) return
+        if (selectedIndices.size === 0 || !data?.jobs) return
 
+        const count = selectedIndices.size
         setConfirmDialog({
             open: true,
-            title: `${action === 'delete' ? 'Delete' : 'Retry'} ${selectedRaws.size} Jobs?`,
-            message: `Are you sure you want to ${action} ${selectedRaws.size} selected ${view} jobs in "${queueName}"?\n\nThis action cannot be undone.`,
+            title: `${action === 'delete' ? 'Delete' : 'Retry'} ${count} Jobs?`,
+            message: `Are you sure you want to ${action} ${count} selected ${view} jobs in "${queueName}"?\n\nThis action cannot be undone.`,
             variant: action === 'delete' ? 'danger' : 'warning',
             action: async () => {
                 setIsProcessing(true)
                 try {
                     const endpoint = action === 'delete' ? 'bulk-delete' : 'bulk-retry'
-                    const raws = Array.from(selectedRaws)
+                    const raws = Array.from(selectedIndices)
+                        .map(i => data?.jobs[i]?._raw)
+                        .filter(Boolean) as string[]
 
                     await fetch(`/api/queues/${queueName}/jobs/${endpoint}`, {
                         method: 'POST',
@@ -172,7 +177,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                         body: JSON.stringify({ type: view, raws }),
                     })
 
-                    setSelectedRaws(new Set())
+                    setSelectedIndices(new Set())
                     queryClient.invalidateQueries({ queryKey: ['jobs', queueName] })
                     queryClient.invalidateQueries({ queryKey: ['queues'] })
                     setConfirmDialog(null)
@@ -203,7 +208,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                         body: JSON.stringify({ type: view }),
                     })
 
-                    setSelectedRaws(new Set())
+                    setSelectedIndices(new Set())
                     queryClient.invalidateQueries({ queryKey: ['jobs', queueName] })
                     queryClient.invalidateQueries({ queryKey: ['queues'] })
                     setConfirmDialog(null)
@@ -226,17 +231,6 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                 onClick={onClose}
             />
 
-            {confirmDialog && (
-                <ConfirmDialog
-                    open={confirmDialog.open}
-                    title={confirmDialog.title}
-                    message={confirmDialog.message}
-                    variant={confirmDialog.variant}
-                    isProcessing={isProcessing}
-                    onConfirm={confirmDialog.action}
-                    onCancel={() => setConfirmDialog(null)}
-                />
-            )}
 
             <motion.div
                 initial={{ x: '100%', opacity: 0 }}
@@ -300,8 +294,8 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                                     type="checkbox"
                                     className="w-4 h-4 rounded border-border"
                                     checked={
-                                        selectedRaws.size === data.jobs.filter((j) => j._raw && !j._archived).length &&
-                                        selectedRaws.size > 0
+                                        selectedIndices.size === data.jobs.filter((j) => j._raw && !j._archived).length &&
+                                        selectedIndices.size > 0
                                     }
                                     onChange={toggleSelectAll}
                                 />
@@ -313,10 +307,10 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                                         {data.jobs.filter((j) => !j._archived).length} of {totalCount} total
                                     </span>
                                 )}
-                                {selectedRaws.size > 0 && (
+                                {selectedIndices.size > 0 && (
                                     <div className="ml-auto flex items-center gap-2">
                                         <span className="text-[10px] font-black uppercase text-primary mr-2">
-                                            {selectedRaws.size} items selected
+                                            {selectedIndices.size} items selected
                                         </span>
                                         <button
                                             onClick={() => handleBulkAction('delete')}
@@ -378,7 +372,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                                     key={i}
                                     className={cn(
                                         'bg-card border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group border-border/50',
-                                        job._raw && selectedRaws.has(job._raw) && 'ring-2 ring-primary border-primary'
+                                        selectedIndices.has(i) && 'ring-2 ring-primary border-primary'
                                     )}
                                 >
                                     <div className="p-4 border-b bg-muted/10 flex justify-between items-center text-[10px]">
@@ -387,8 +381,8 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                                                 <input
                                                     type="checkbox"
                                                     className="w-4 h-4 rounded border-border"
-                                                    checked={selectedRaws.has(job._raw)}
-                                                    onChange={() => toggleSelection(job._raw)}
+                                                    checked={selectedIndices.has(i)}
+                                                    onChange={() => toggleSelection(i)}
                                                 />
                                             )}
                                             <span className="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md font-bold uppercase tracking-wider flex items-center gap-2">
@@ -427,7 +421,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                                         </span>
                                     </div>
                                     <div
-                                        onClick={() => job._raw && !job._archived && toggleSelection(job._raw)}
+                                        onClick={() => job._raw && !job._archived && toggleSelection(i)}
                                         className="cursor-pointer"
                                     >
                                         {job.error && (
@@ -502,6 +496,18 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                     </button>
                 </div>
             </motion.div>
+
+            {confirmDialog && (
+                <ConfirmDialog
+                    open={confirmDialog.open}
+                    title={confirmDialog.title}
+                    message={confirmDialog.message}
+                    variant={confirmDialog.variant}
+                    isProcessing={isProcessing}
+                    onConfirm={confirmDialog.action}
+                    onCancel={() => setConfirmDialog(null)}
+                />
+            )}
         </div>,
         document.body
     )

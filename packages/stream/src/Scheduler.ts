@@ -1,4 +1,4 @@
-import * as parser from 'cron-parser'
+import parser from 'cron-parser'
 import type { QueueManager } from './QueueManager'
 import type { SerializedJob } from './types'
 
@@ -36,7 +36,7 @@ export class Scheduler {
    * Register a scheduled job.
    */
   async register(config: Omit<ScheduledJobConfig, 'nextRun' | 'enabled'>): Promise<void> {
-    const nextRun = (parser as any).parseExpression(config.cron).next().getTime()
+    const nextRun = (parser as any).parse(config.cron).next().getTime()
     const fullConfig: ScheduledJobConfig = {
       ...config,
       nextRun,
@@ -119,24 +119,30 @@ export class Scheduler {
       if (lock === 'OK') {
         const data = await this.client.hgetall(`${this.prefix}schedule:${id}`)
         if (data?.id && data.enabled === 'true') {
-          const serialized = JSON.parse(data.job)
-          const job = serializer.deserialize(serialized) as any
+          try {
+            const serializedJob = JSON.parse(data.job) as SerializedJob
+            const connection = data.connection || this.manager.getDefaultConnection()
+            const driver = this.manager.getDriver(connection)
 
-          // 1. Push to queue
-          await this.manager.push(job)
+            // 1. Push to queue directly (relaying the serialized blob)
+            // This avoids the need to have job classes registered in the scheduler process
+            await driver.push(data.queue, serializedJob)
 
-          // 2. Schedule next run
-          const nextRun = (parser as any).parseExpression(data.cron).next().getTime()
+            // 2. Schedule next run
+            const nextRun = (parser as any).parse(data.cron).next().getTime()
 
-          const pipe = this.client.pipeline()
-          pipe.hset(`${this.prefix}schedule:${id}`, {
-            lastRun: now,
-            nextRun: nextRun,
-          })
-          pipe.zadd(`${this.prefix}schedules`, nextRun, id)
-          await pipe.exec()
+            const pipe = this.client.pipeline()
+            pipe.hset(`${this.prefix}schedule:${id}`, {
+              lastRun: now,
+              nextRun: nextRun,
+            })
+            pipe.zadd(`${this.prefix}schedules`, nextRun, id)
+            await pipe.exec()
 
-          fired++
+            fired++
+          } catch (err) {
+            console.error(`[Scheduler] Failed to process schedule ${id}:`, err)
+          }
         }
       }
     }

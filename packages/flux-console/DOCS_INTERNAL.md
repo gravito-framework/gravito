@@ -54,3 +54,20 @@ end
 redis.call('DEL', KEYS[1])
 return #jobs
 ```
+
+---
+
+## 4. System Logs & Archiving
+
+To maintain a permanent record of system events while keeping Redis memory usage low, Flux Console uses an asynchronous archiving pattern.
+
+### Live Logs (Redis)
+* **Key**: `flux_console:logs:system` (List)
+* **Strategy**: LILO (Last-In-Last-Out) capped at 100 items.
+* **Update**: Every `publishLog` call pushes to this list and trims it.
+
+### Persistent Archiving (SQL)
+* **Trigger**: Every `QueueService.publishLog` call asynchronously sends the log to the configured `PersistenceAdapter`.
+* **Table**: `flux_system_logs` (MySQL or SQLite).
+* **Search**: The `/api/logs/archive` endpoint performs direct SQL queries with filters on `level`, `worker_id`, `queue`, and `message` content.
+* **Retention**: Cleanup is handled via `PersistenceAdapter.cleanup`, removing logs older than the configured threshold (default: 30 days).

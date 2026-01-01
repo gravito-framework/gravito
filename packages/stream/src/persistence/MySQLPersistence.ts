@@ -12,7 +12,8 @@ export class MySQLPersistence implements PersistenceAdapter {
    */
   constructor(
     private db: any,
-    private table = 'flux_job_archive'
+    private table = 'flux_job_archive',
+    private logsTable = 'flux_system_logs'
   ) {}
 
   /**
@@ -122,15 +123,89 @@ export class MySQLPersistence implements PersistenceAdapter {
   }
 
   /**
+   * Archive a system log message.
+   */
+  async archiveLog(log: {
+    level: string
+    message: string
+    workerId: string
+    queue?: string
+    timestamp: Date
+  }): Promise<void> {
+    try {
+      await this.db.table(this.logsTable).insert({
+        level: log.level,
+        message: log.message,
+        worker_id: log.workerId,
+        queue: log.queue || null,
+        timestamp: log.timestamp,
+      })
+    } catch (err: any) {
+      console.error(`[MySQLPersistence] Failed to archive log:`, err.message)
+    }
+  }
+
+  /**
+   * List system logs from the archive.
+   */
+  async listLogs(
+    options: {
+      limit?: number
+      offset?: number
+      level?: string
+      workerId?: string
+      queue?: string
+      search?: string
+    } = {}
+  ): Promise<any[]> {
+    let query = this.db.table(this.logsTable)
+
+    if (options.level) query = query.where('level', options.level)
+    if (options.workerId) query = query.where('worker_id', options.workerId)
+    if (options.queue) query = query.where('queue', options.queue)
+    if (options.search) {
+      query = query.where('message', 'like', `%${options.search}%`)
+    }
+
+    return await query
+      .orderBy('timestamp', 'desc')
+      .limit(options.limit ?? 50)
+      .offset(options.offset ?? 0)
+      .get()
+  }
+
+  /**
+   * Count system logs in the archive.
+   */
+  async countLogs(
+    options: { level?: string; workerId?: string; queue?: string; search?: string } = {}
+  ): Promise<number> {
+    let query = this.db.table(this.logsTable)
+
+    if (options.level) query = query.where('level', options.level)
+    if (options.workerId) query = query.where('worker_id', options.workerId)
+    if (options.queue) query = query.where('queue', options.queue)
+    if (options.search) {
+      query = query.where('message', 'like', `%${options.search}%`)
+    }
+
+    const result = await query.count('id as total').first()
+    return result?.total || 0
+  }
+
+  /**
    * Remove old records from the archive.
    */
   async cleanup(days: number): Promise<number> {
     const threshold = new Date()
     threshold.setDate(threshold.getDate() - days)
 
-    const result = await this.db.table(this.table).where('archived_at', '<', threshold).delete()
+    const [jobsDeleted, logsDeleted] = await Promise.all([
+      this.db.table(this.table).where('archived_at', '<', threshold).delete(),
+      this.db.table(this.logsTable).where('timestamp', '<', threshold).delete(),
+    ])
 
-    return result
+    return (jobsDeleted || 0) + (logsDeleted || 0)
   }
 
   /**
@@ -151,10 +226,12 @@ export class MySQLPersistence implements PersistenceAdapter {
    * Help script to create the necessary table.
    */
   async setupTable(): Promise<void> {
+    await Promise.all([this.setupJobsTable(), this.setupLogsTable()])
+  }
+
+  private async setupJobsTable(): Promise<void> {
     const exists = await Schema.hasTable(this.table)
-    if (exists) {
-      return
-    }
+    if (exists) return
 
     await Schema.create(this.table, (table) => {
       table.id()
@@ -166,13 +243,31 @@ export class MySQLPersistence implements PersistenceAdapter {
       table.timestamp('created_at').nullable()
       table.timestamp('archived_at').default(DB.raw('CURRENT_TIMESTAMP'))
 
-      // Optimized Indexes
-      table.index(['queue', 'archived_at']) // Efficient for listing/pagination
-      table.index(['queue', 'job_id']) // Efficient for finding specific jobs
-      table.index(['status', 'archived_at']) // Efficient for status-based cleanup/view
-      table.index(['archived_at']) // Critical for cleanup by date
+      table.index(['queue', 'archived_at'])
+      table.index(['queue', 'job_id'])
+      table.index(['status', 'archived_at'])
+      table.index(['archived_at'])
     })
+    console.log(`[MySQLPersistence] Created jobs archive table: ${this.table}`)
+  }
 
-    console.log(`[MySQLPersistence] Created archive table: ${this.table}`)
+  private async setupLogsTable(): Promise<void> {
+    const exists = await Schema.hasTable(this.logsTable)
+    if (exists) return
+
+    await Schema.create(this.logsTable, (table) => {
+      table.id()
+      table.string('level', 20)
+      table.text('message')
+      table.string('worker_id', 128)
+      table.string('queue', 128).nullable()
+      table.timestamp('timestamp').default(DB.raw('CURRENT_TIMESTAMP'))
+
+      table.index(['worker_id'])
+      table.index(['queue'])
+      table.index(['level'])
+      table.index(['timestamp'])
+    })
+    console.log(`[MySQLPersistence] Created logs archive table: ${this.logsTable}`)
   }
 }

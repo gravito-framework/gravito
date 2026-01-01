@@ -159,3 +159,16 @@
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   fill-mode: forwards;
 }
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.animate-toast-progress {
+  animation: toast-progress 5s linear forwards;
+}

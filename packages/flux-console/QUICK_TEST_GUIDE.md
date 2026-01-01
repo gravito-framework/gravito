@@ -1,125 +1,72 @@
-# 🎯 批次處理功能 - 快速測試指南
+# 🎯 Flux Console 統一測試指南
 
-## ✅ 已創建測試資料
+## 🚀 快速開始
 
-```
-✓ test-batch          → 100 個 waiting 工作
-✓ test-batch-fail     → 50 個 waiting + 25 個 failed 工作
-✓ test-batch-delayed  → 30 個 delayed 工作
-```
+我們已經將所有測試腳本整合為 `seed.ts` 與 `worker.ts`，以下是常用的測試流程。
 
----
+### 1. 初始化資料 (Seeding)
 
-## 🚀 立即開始測試
-
-### 1. 打開 Flux Console
-```
-http://localhost:3000
-```
-
-### 2. 快速測試流程
-
-#### 測試 1: 批次刪除 (2 分鐘)
-1. 點擊 `test-batch` 佇列的 "Inspect"
-2. 勾選 10 個工作
-3. 點擊 "Delete Selected"
-4. 確認對話框 → Confirm
-5. ✅ 工作被刪除
-
-#### 測試 2: 刪除全部 (1 分鐘)
-1. 在 `test-batch` 佇列中
-2. 看到警告橫幅："Showing 50 of 90 total"
-3. 點擊 "Delete All 90"
-4. 確認警告對話框 → Confirm
-5. ✅ 所有工作被刪除
-
-#### 測試 3: 批次重試失敗工作 (2 分鐘)
-1. 點擊 `test-batch-fail` 佇列的 "Inspect"
-2. 切換到 "Failed" 標籤
-3. 看到 25 個失敗工作
-4. 選擇 5 個工作
-5. 點擊 "Retry Selected"
-6. ✅ 工作移至 waiting
-
-#### 測試 4: 重試所有失敗工作 (1 分鐘)
-1. 在 `test-batch-fail` 的 "Failed" 標籤
-2. 點擊 "Retry All 20" (剩餘的)
-3. 確認對話框 → Confirm
-4. ✅ 所有失敗工作被重試
-
-#### 測試 5: 批次處理延遲工作 (2 分鐘)
-1. 點擊 `test-batch-delayed` 佇列的 "Inspect"
-2. 切換到 "Delayed" 標籤
-3. 看到 30 個延遲工作（顯示排程時間）
-4. 選擇 10 個工作
-5. 點擊 "Retry Selected"（立即處理）
-6. ✅ 工作移至 waiting
-
-#### 測試 6: 鍵盤快捷鍵 (1 分鐘)
-1. 在任何佇列檢查器中
-2. 按 **Ctrl+A** (Mac: Cmd+A)
-3. ✅ 所有可見工作被選中
-4. 按 **Escape**
-5. ✅ 選擇被清除
-6. 再按 **Escape**
-7. ✅ 檢查器關閉
-
----
-
-## 🎨 UI 功能檢查
-
-### 視覺元素
-- [ ] 核取方塊顯示正常
-- [ ] 選中的工作有藍色光環
-- [ ] 顯示 "X items selected"
-- [ ] 琥珀色警告橫幅顯示總數
-- [ ] "Delete All X" 和 "Retry All X" 按鈕
-
-### 確認對話框
-- [ ] 動畫流暢（Framer Motion）
-- [ ] 顯示工作數量和佇列名稱
-- [ ] "Delete All" 顯示 ⚠️ 警告符號
-- [ ] 載入時顯示轉圈動畫
-- [ ] 按鈕在處理中被禁用
-
-### 互動行為
-- [ ] 點擊核取方塊選擇/取消選擇
-- [ ] 點擊工作卡片區域也可選擇
-- [ ] "Select All (Page)" 正常運作
-- [ ] 切換標籤時選擇被清除
-- [ ] 封存工作沒有核取方塊
-
----
-
-## 🧹 測試完成後清理
+根據測試需求選擇模式：
 
 ```bash
-bun scripts/test-batch-operations.ts cleanup
+# 基本資料（Waiting, Delayed, Failed）
+bun scripts/seed.ts standard
+
+# 壓力測試（建立 15 個佇列，每個佇列有大量資料）
+bun scripts/seed.ts stress
+
+# 批次操作測試（專用大量資料）
+bun scripts/seed.ts batch
+
+# 註冊排程管理 (Cron Jobs)
+bun scripts/seed.ts cron
+
+# 懶人包：一次執行以上所有模式
+bun scripts/seed.ts all
+
+# 清理所有資料
+bun scripts/seed.ts cleanup
+```
+
+### 2. 啟動背景處理 (Workers)
+
+模擬工作正在被處理、成功或失敗的過程：
+
+```bash
+# 啟動預設佇列的處理
+bun scripts/worker.ts
+
+# 模擬高失敗率與處理延遲
+bun scripts/worker.ts orders,reports --fail=0.3 --delay=500
 ```
 
 ---
 
-## 📊 預期結果
+## 🧪 核心測試情境
 
-所有測試案例應該：
-- ✅ 無錯誤訊息
-- ✅ UI 即時更新
-- ✅ 確認對話框正常顯示
-- ✅ 載入狀態正確顯示
-- ✅ 鍵盤快捷鍵正常運作
-- ✅ 佇列統計即時更新
+### 測試 1：排程管理 (Schedules)
+1. 執行 `bun scripts/seed.ts cron`。
+2. 在 UI 點擊側邊欄的 **"Schedules"**。
+3. 檢查是否顯示 `cleanup-tmp`, `daily-report` 等排程。
+4. 點擊 "Run Now" 檢查工作是否立即進入 `system` 或 `reports` 佇列。
+
+### 測試 2：批次操作 (Batch Operations)
+1. 執行 `bun scripts/seed.ts batch`。
+2. 進入 `test-batch` 佇列。
+3. 使用 **Cmd+A** 全選，然後點擊 "Delete Selected"。
+4. 測試頁面底部的「刪除所有 X 個工作」警告橫幅。
+
+### 測試 3：排版與搜尋
+1. 執行 `bun scripts/seed.ts stress`。
+2. 檢查側邊欄的佇列列表是否正確收合/捲動。
+3. 使用 **Cmd+K** 開啟命令列，輸入 `billing` 跳轉至該佇列。
 
 ---
 
-## 🐛 如果遇到問題
+## 🧹 清理空間
 
-1. 檢查瀏覽器控制台是否有錯誤
-2. 檢查後端終端是否有錯誤
-3. 重新整理頁面
-4. 清理測試資料後重新創建
-
----
-
-**預計測試時間**: 10-15 分鐘  
-**難度**: 簡單  
-**狀態**: ✅ 測試資料已就緒
+測試完成後，建議執行：
+```bash
+bun scripts/seed.ts cleanup
+```
+這會清除 Redis 中所有帶有 `queue:` 前綴的 Key，以及 Console 的日誌快取。

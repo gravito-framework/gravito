@@ -99,7 +99,19 @@ export class QueueService {
           // Emit only if under limit
           if (this.logThrottleCount < this.MAX_LOGS_PER_SEC) {
             this.logThrottleCount++
-            this.logEmitter.emit('log', JSON.parse(message))
+            const log = JSON.parse(message)
+            this.logEmitter.emit('log', log)
+
+            // Increment throughput counter if it's a job final status
+            if (log.level === 'success' || log.level === 'error') {
+              const minute = Math.floor(Date.now() / 60000)
+              this.redis
+                .incr(`flux_console:throughput:${minute}`)
+                .then(() => {
+                  this.redis.expire(`flux_console:throughput:${minute}`, 3600)
+                })
+                .catch(() => {})
+            }
           }
         } catch (_e) {
           // Ignore
@@ -136,8 +148,13 @@ export class QueueService {
         const relative = key.slice(this.prefix.length)
         const parts = relative.split(':')
         const candidateName = parts[0]
-
-        if (candidateName && candidateName !== 'active') {
+        if (
+          candidateName &&
+          candidateName !== 'active' &&
+          candidateName !== 'schedules' &&
+          candidateName !== 'schedule' &&
+          candidateName !== 'lock'
+        ) {
           queues.add(candidateName)
         }
       }
@@ -522,7 +539,7 @@ export class QueueService {
       if (type === 'delayed') {
         pipe.zrem(key, raw)
       } else {
-        pipe.lrem(key, 0, raw)
+        pipe.lrem(key, 1, raw)
       }
     }
     const results = await pipe.exec()
@@ -546,7 +563,7 @@ export class QueueService {
         pipe.zrem(sourceKey, raw)
         pipe.lpush(key, raw)
       } else {
-        pipe.lrem(sourceKey, 0, raw)
+        pipe.lrem(sourceKey, 1, raw)
         pipe.lpush(key, raw)
       }
     }
@@ -586,6 +603,17 @@ export class QueueService {
     pipe.expire(`flux_console:throughput:${now}`, 3600) // Keep for 1 hour
 
     await pipe.exec()
+
+    // NEW: Archive to persistence if enabled
+    const persistence = this.manager.getPersistence()
+    if (persistence) {
+      persistence
+        .archiveLog({
+          ...log,
+          timestamp: new Date(),
+        })
+        .catch((err: any) => console.error('[QueueService] Log Archive Error:', err))
+    }
   }
 
   /**
@@ -707,6 +735,35 @@ export class QueueService {
       jobs: jobs.map((j: any) => ({ ...j, _archived: true })),
       total: jobs.length === limit ? limit * page + 1 : (page - 1) * limit + jobs.length,
     }
+  }
+
+  /**
+   * List logs from the SQL archive.
+   */
+  async getArchivedLogs(
+    options: {
+      page?: number
+      limit?: number
+      level?: string
+      workerId?: string
+      queue?: string
+      search?: string
+    } = {}
+  ): Promise<{ logs: any[]; total: number }> {
+    const persistence = this.manager.getPersistence()
+    if (!persistence) {
+      return { logs: [], total: 0 }
+    }
+
+    const { page = 1, limit = 50, ...filters } = options
+    const offset = (page - 1) * limit
+
+    const [logs, total] = await Promise.all([
+      persistence.listLogs({ limit, offset, ...filters }),
+      persistence.countLogs(filters),
+    ])
+
+    return { logs, total }
   }
 
   /**

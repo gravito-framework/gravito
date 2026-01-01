@@ -160,8 +160,12 @@ export class Consumer {
       }
 
       // Wait and poll again
-      if (!this.stopRequested) {
+      // Optimization: If we just processed a job, don't wait, poll again immediately!
+      if (!this.stopRequested && !processed) {
         await new Promise((resolve) => setTimeout(resolve, pollInterval))
+      } else if (!this.stopRequested && processed) {
+        // Optional: brief micro-task yield to prevent CPU pegging in very fast loops
+        await new Promise((resolve) => setTimeout(resolve, 0))
       }
     }
 

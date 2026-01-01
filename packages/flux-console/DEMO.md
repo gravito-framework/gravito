@@ -14,7 +14,7 @@ In this demo, we will run three components locally:
 
 ## 🏛️ Persistence & History (Optional)
 
-To test the **Job Archive** and **Search** features, you need a database. Flux Console supports two modes:
+To test the **Job Archive**, **Operational Logs**, and **Search** features, you need a database. Flux Console supports two modes:
 
 ### A. Zero-Config (SQLite) - **Recommended for Quick Tests**
 Simply set the `DB_DRIVER` and `DB_NAME` environment variables. It will create a local `.sqlite` file.
@@ -123,6 +123,7 @@ Now, switch to the browser window and walk through these views:
 - **Throughput Chart**: You will see a sudden spike in the green line (Processed/min).
 - **Active Queues**: You'll see numbers jumping in `Waiting` and `Active` columns.
 - **Top Right Live Logs**: Watch the logs stream in real-time as the worker processes jobs.
+- **Log Search**: Click on **"Search Archive"** in the logs panel to open the historical log browser. This allows querying through millions of past events stored in SQL.
 
 #### 2. 🧱 Queues Page
 - Navigate to the **Queues** tab.

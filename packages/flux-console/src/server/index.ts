@@ -60,15 +60,15 @@ queueService
   .connect()
   .then(() => {
     console.log(`[FluxConsole] Connected to Redis at ${REDIS_URL}`)
-    // Start background metrics recording
+    // Start background metrics recording (Reduced from 5s to 2s for better real-time feel)
     setInterval(() => {
       queueService.recordStatusMetrics().catch(console.error)
-    }, 5000)
+    }, 2000)
 
-    // Start Scheduler Tick (every 10 seconds)
+    // Start Scheduler Tick (Reduced from 10s to 5s)
     setInterval(() => {
       queueService.tickScheduler().catch(console.error)
-    }, 10000)
+    }, 5000)
 
     // Record initial snapshot
     queueService.recordStatusMetrics().catch(console.error)
@@ -159,6 +159,30 @@ api.get('/archive/search', async (c) => {
   } catch (err) {
     console.error(err)
     return c.json({ error: 'Archive search failed' }, 500)
+  }
+})
+
+api.get('/logs/archive', async (c) => {
+  const level = c.req.query('level')
+  const workerId = c.req.query('workerId')
+  const queue = c.req.query('queue')
+  const search = c.req.query('search')
+  const page = parseInt(c.req.query('page') || '1', 10)
+  const limit = parseInt(c.req.query('limit') || '50', 10)
+
+  try {
+    const results = await queueService.getArchivedLogs({
+      level,
+      workerId,
+      queue,
+      search,
+      page,
+      limit,
+    })
+    return c.json(results)
+  } catch (err) {
+    console.error(err)
+    return c.json({ error: 'Failed to fetch archived logs' }, 500)
   }
 })
 

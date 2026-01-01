@@ -68,43 +68,21 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     setNotifications((prev) => prev.filter((n) => n.id !== id))
   }, [])
 
-  // Subscribe to SSE log stream for real-time notifications
+  // Listen to the global log update event dispatched by Layout's SSE stream
   useEffect(() => {
-    let eventSource: EventSource | null = null
-
-    const connect = () => {
-      eventSource = new EventSource('/api/logs/stream')
-
-      eventSource.addEventListener('log', (event) => {
-        try {
-          const log = JSON.parse(event.data)
-
-          // Generate notifications for important events
-          if (log.level === 'error' || log.level === 'warn') {
-            addNotification({
-              type: log.level === 'error' ? 'error' : 'warning',
-              title: log.level === 'error' ? 'Job Failed' : 'Warning',
-              message: log.message || 'An event occurred',
-              source: log.queue || log.source,
-            })
-          }
-        } catch (_e) {
-          // Ignore parse errors
-        }
-      })
-
-      eventSource.onerror = () => {
-        eventSource?.close()
-        // Reconnect after 5 seconds
-        setTimeout(connect, 5000)
+    const handler = (e: any) => {
+      const log = e.detail
+      if (log.level === 'error' || log.level === 'warn') {
+        addNotification({
+          type: log.level === 'error' ? 'error' : 'warning',
+          title: log.level === 'error' ? 'Job Failed' : 'Warning',
+          message: log.message || 'An event occurred',
+          source: log.queue || log.source,
+        })
       }
     }
-
-    connect()
-
-    return () => {
-      eventSource?.close()
-    }
+    window.addEventListener('flux-log-update', handler)
+    return () => window.removeEventListener('flux-log-update', handler)
   }, [addNotification])
 
   return (

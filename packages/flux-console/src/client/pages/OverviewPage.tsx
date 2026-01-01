@@ -10,11 +10,14 @@ import {
   Hourglass,
   ListTree,
   RefreshCcw,
+  Search,
   Terminal,
   Trash2,
 } from 'lucide-react'
 import React from 'react'
 import { JobInspector } from '../components/JobInspector'
+import { useNavigate } from 'react-router-dom'
+import { LogArchiveModal } from '../components/LogArchiveModal'
 import { ThroughputChart } from '../ThroughputChart'
 import { cn } from '../utils'
 import { WorkerStatus } from '../WorkerStatus'
@@ -27,123 +30,108 @@ interface QueueStats {
   failed: number
 }
 
-function LiveLogs({ onWorkerHover }: { onWorkerHover?: (id: string | null) => void }) {
-  const [logs, setLogs] = React.useState<Record<string, any>[]>([])
-  const logEndRef = React.useRef<HTMLDivElement>(null)
+interface SystemLog {
+  timestamp: string
+  level: 'error' | 'warn' | 'success' | 'info'
+  workerId: string
+  queue?: string
+  message: string
+}
+
+interface FluxStats {
+  queues: QueueStats[]
+  workers: any[]
+}
+
+const DEFAULT_STATS: FluxStats = {
+  queues: [],
+  workers: [],
+}
+
+function LiveLogs({ logs, onSearchArchive, onWorkerHover }: { logs: SystemLog[], onSearchArchive: () => void, onWorkerHover?: (id: string | null) => void }) {
+  const scrollRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    const handler = (e: CustomEvent) => {
-      const data = e.detail
-      setLogs((prev) => [...prev.slice(-99), data])
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-    window.addEventListener('flux-log-update', handler as EventListener)
-    return () => window.removeEventListener('flux-log-update', handler as EventListener)
-  }, [])
-
-  React.useEffect(() => {
-    const handler = () => setLogs([])
-    window.addEventListener('clear-logs', handler)
-    return () => window.removeEventListener('clear-logs', handler)
-  }, [])
-
-  React.useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
+  }, [logs])
 
   return (
-    <div className="card-premium h-[350px] flex flex-col relative group">
-      <div className="p-4 border-b bg-muted/10 flex justify-between items-center backdrop-blur-sm sticky top-0 z-10 border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <Terminal size={18} />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold leading-none">Operational Logs</h3>
-            <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-bold opacity-60">
-              Live worker events
-            </p>
-          </div>
-        </div>
+    <div className="card-premium h-full flex flex-col overflow-hidden group">
+      <div className="p-4 border-b bg-muted/5 flex justify-between items-center">
         <div className="flex items-center gap-2">
+          <Terminal size={14} className="text-primary" />
+          <h2 className="text-xs font-black uppercase tracking-widest opacity-70">
+            Operational Logs
+          </h2>
+        </div>
+        <div className="flex items-center gap-3">
           <button
-            type="button"
-            onClick={() => setLogs([])}
-            className="p-1.5 hover:bg-muted rounded-md text-muted-foreground transition-colors"
-            title="Clear Logs"
+            onClick={onSearchArchive}
+            className="flex items-center gap-1.5 px-2 py-1 hover:bg-muted rounded-md text-[10px] font-black uppercase tracking-tighter text-muted-foreground transition-all"
           >
-            <Trash2 size={14} />
+            <Search size={12} />
+            Search Archive
           </button>
-          <span className="text-[9px] font-black bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20 animate-pulse uppercase tracking-tighter">
-            Live
-          </span>
+          <div className="flex gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500/40"></div>
+          </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-2 selection:bg-primary/30 scrollbar-thin">
-        {logs.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-muted-foreground/40 gap-3">
-            <Activity size={24} className="animate-pulse opacity-20" />
-            <p className="italic text-[10px] font-bold uppercase tracking-widest">
-              Awaiting system messages...
-            </p>
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-2.5 scrollbar-thin scroll-smooth"
+      >
+        {logs.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground/30 gap-2 opacity-50">
+            <Activity size={24} className="animate-pulse" />
+            <p className="font-bold uppercase tracking-widest text-[9px]">Awaiting signals...</p>
           </div>
-        )}
-        {logs.map((log, i) => (
-          <div
-            key={i}
-            className="flex gap-4 animate-in fade-in slide-in-from-left-2 duration-300 hover:bg-muted/30 p-1.5 rounded-lg transition-colors group/item cursor-default"
-            onMouseEnter={() => onWorkerHover?.(log.workerId)}
-            onMouseLeave={() => onWorkerHover?.(null)}
-          >
-            <span className="text-muted-foreground/50 shrink-0 w-16 text-[10px] font-bold">
-              {new Date(log.timestamp).toLocaleTimeString([], {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-              })}
-            </span>
-            <div className="flex items-center gap-2 shrink-0">
-              <div
-                className={cn(
-                  'w-1.5 h-1.5 rounded-full',
-                  log.level === 'error'
-                    ? 'bg-red-500'
-                    : log.level === 'warn'
-                      ? 'bg-amber-500'
-                      : log.level === 'success'
-                        ? 'bg-green-500'
-                        : 'bg-blue-500'
-                )}
-              />
-              <span
-                className={cn(
-                  'font-bold uppercase tracking-tighter w-14',
-                  log.level === 'error'
-                    ? 'text-red-500'
-                    : log.level === 'warn'
-                      ? 'text-amber-500'
-                      : log.level === 'success'
-                        ? 'text-green-500'
-                        : 'text-primary'
-                )}
-              >
-                {log.level}
+        ) : (
+          logs.map((log, i) => (
+            <div
+              key={i}
+              onMouseEnter={() => onWorkerHover?.(log.workerId)}
+              onMouseLeave={() => onWorkerHover?.(null)}
+              className="group flex gap-3 hover:bg-primary/[0.02] -mx-2 px-2 py-0.5 rounded transition-all animate-in fade-in slide-in-from-left-2 duration-300 cursor-default"
+            >
+              <span className="text-muted-foreground/40 shrink-0 tabular-nums select-none opacity-0 group-hover:opacity-100 transition-opacity">
+                {new Date(log.timestamp).toLocaleTimeString([], {
+                  hour12: false,
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}
               </span>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-0.5 text-[9px] font-black uppercase tracking-tighter">
-                <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground/70">
-                  {log.workerId}
-                </span>
-                {log.queue && <span className="text-primary/70">@{log.queue}</span>}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span
+                    className={cn(
+                      'text-[9px] font-black uppercase tracking-tighter',
+                      log.level === 'error'
+                        ? 'text-red-500'
+                        : log.level === 'warn'
+                          ? 'text-amber-500'
+                          : log.level === 'success'
+                            ? 'text-green-500'
+                            : 'text-blue-500'
+                    )}
+                  >
+                    [{log.level}]
+                  </span>
+                  <span className="text-[9px] font-black text-muted-foreground/40 uppercase opacity-0 group-hover:opacity-100 transition-all">
+                    {log.workerId}
+                  </span>
+                </div>
+                <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap break-all">
+                  {log.message}
+                </p>
               </div>
-              <p className="text-foreground/90 break-all leading-relaxed whitespace-pre-wrap">
-                {log.message}
-              </p>
             </div>
-          </div>
-        ))}
-        <div ref={logEndRef} />
+          ))
+        )}
       </div>
     </div>
   )
@@ -195,15 +183,6 @@ function QueueHeatmap({ queues }: { queues: any[] }) {
   )
 }
 
-interface MetricCardProps {
-  title: string
-  value: number
-  icon: React.ReactNode
-  color: string
-  trend?: string
-  data?: number[]
-}
-
 function AnimatedNumber({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = React.useState(value)
 
@@ -219,13 +198,21 @@ function AnimatedNumber({ value }: { value: number }) {
   return <span>{displayValue.toLocaleString()}</span>
 }
 
+interface MetricCardProps {
+  title: string
+  value: number
+  icon: React.ReactNode
+  color: string
+  trend?: string
+  data?: number[]
+}
+
 function MetricCard({ title, value, icon, color, trend, data }: MetricCardProps) {
   const displayData = data && data.length > 0 ? data : [20, 30, 25, 40, 35, 50, 45, 60, 55, 70]
   const max = Math.max(...displayData, 10)
 
   return (
     <div className="card-premium p-8 hover:shadow-2xl transform hover:-translate-y-2 group relative overflow-hidden">
-      {/* Subtle Scanline for Card */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none scanline z-0"></div>
 
       <div className="flex justify-between items-start mb-6 z-10 relative">
@@ -266,7 +253,6 @@ function MetricCard({ title, value, icon, color, trend, data }: MetricCardProps)
         </div>
       </div>
 
-      {/* Real or Pseudo Sparkline */}
       <div className="mt-8 flex items-end gap-1.5 h-16 opacity-5 group-hover:opacity-20 transition-all duration-700 absolute bottom-0 left-0 right-0 p-1.5 pointer-events-none">
         {displayData.map((v, i) => (
           <div
@@ -287,10 +273,72 @@ function MetricCard({ title, value, icon, color, trend, data }: MetricCardProps)
   )
 }
 
+function QueueList({ queues, setSelectedQueue }: { queues: QueueStats[], setSelectedQueue: (name: string | null) => void }) {
+  const queryClient = useQueryClient()
+
+  return (
+    <div className="card-premium h-full flex flex-col overflow-hidden">
+      <div className="p-4 border-b bg-muted/5 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <ListTree size={14} className="text-primary" />
+          <h2 className="text-xs font-black uppercase tracking-widest opacity-70">
+            Processing Pipelines
+          </h2>
+        </div>
+        <button className="text-[10px] font-black text-primary hover:underline flex items-center gap-2 uppercase tracking-widest transition-opacity">
+          Stats <ChevronRight size={12} />
+        </button>
+      </div>
+      <div className="flex-1 overflow-auto scrollbar-thin">
+        <table className="w-full text-left">
+          <thead className="bg-muted/10 text-muted-foreground uppercase text-[9px] font-black tracking-widest sticky top-0">
+            <tr>
+              <th className="px-4 py-3">Queue</th>
+              <th className="px-4 py-3">Waiting</th>
+              <th className="px-4 py-3 text-right">Ops</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/30 text-xs">
+            {queues.map((queue) => (
+              <tr key={queue.name} className="hover:bg-muted/5 transition-colors group">
+                <td className="px-4 py-4">
+                  <div className="flex flex-col">
+                    <span className="font-black text-foreground">{queue.name}</span>
+                    {queue.failed > 0 && <span className="text-[9px] text-red-500 font-bold uppercase">{queue.failed} FAILED</span>}
+                  </div>
+                </td>
+                <td className="px-4 py-4 font-mono font-black">
+                  {queue.waiting.toLocaleString()}
+                </td>
+                <td className="px-4 py-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setSelectedQueue(queue.name)}
+                      className="p-1.5 bg-muted hover:bg-primary/20 hover:text-primary rounded text-muted-foreground transition-all active:scale-90"
+                      title="Inspect"
+                    >
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function OverviewPage() {
+  const navigate = useNavigate()
   const [selectedQueue, setSelectedQueue] = React.useState<string | null>(null)
   const [hoveredWorkerId, setHoveredWorkerId] = React.useState<string | null>(null)
   const queryClient = useQueryClient()
+
+  const [logs, setLogs] = React.useState<SystemLog[]>([])
+  const [stats, setStats] = React.useState<FluxStats>(DEFAULT_STATS)
+  const [isLogArchiveOpen, setIsLogArchiveOpen] = React.useState(false)
 
   React.useEffect(() => {
     const handler = (e: any) => setSelectedQueue(e.detail)
@@ -298,58 +346,65 @@ export function OverviewPage() {
     return () => window.removeEventListener('select-queue', handler)
   }, [])
 
-  // State management for real-time data
-  const [queues, setQueues] = React.useState<QueueStats[]>([])
-  const [workers, setWorkers] = React.useState<any[]>([])
-  // const [history, setHistory] = React.useState<Record<string, number[]>>({}) // Keep using useQuery for heavy history for now? No, let's sync.
-
-  // Initial fetch manually to avoid any React Query background behavior
+  // Initial fetch
   React.useEffect(() => {
     fetch('/api/queues')
       .then((res) => res.json())
       .then((data) => {
         if (data.queues) {
-          setQueues(data.queues)
+          setStats((prev) => ({ ...prev, queues: data.queues }))
         }
       })
     fetch('/api/workers')
       .then((res) => res.json())
       .then((data) => {
         if (data.workers) {
-          setWorkers(data.workers)
+          setStats((prev) => ({ ...prev, workers: data.workers }))
         }
       })
   }, [])
 
-  // Unified Event Listener for all metrics
+  // Stats update listener
   React.useEffect(() => {
-    // We use a custom event dispatched by the LiveLogs component (or a global manager if we had one)
-    // For now, let's just listen to the global window event we dispatch from the main stream
     const handler = (e: any) => {
-      const stats = e.detail
-      if (stats) {
-        if (stats.queues) {
-          setQueues(stats.queues)
-        }
-        if (stats.workers) {
-          setWorkers(stats.workers)
-        }
-        // History updates could be merged here if we sent delta updates
+      const newStats = e.detail
+      if (newStats) {
+        setStats((prev) => ({
+          queues: newStats.queues || prev.queues,
+          workers: newStats.workers || prev.workers,
+        }))
       }
     }
     window.addEventListener('flux-stats-update', handler)
     return () => window.removeEventListener('flux-stats-update', handler)
   }, [])
 
+  // Live log listener
+  React.useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const data = e.detail
+      setLogs((prev) => [...prev.slice(-99), data])
+    }
+    window.addEventListener('flux-log-update', handler as EventListener)
+    return () => window.removeEventListener('flux-log-update', handler as EventListener)
+  }, [])
+
+  // Clear logs listener
+  React.useEffect(() => {
+    const handler = () => setLogs([])
+    window.addEventListener('clear-logs', handler)
+    return () => window.removeEventListener('clear-logs', handler)
+  }, [])
+
   const { data: historyData } = useQuery<{ history: Record<string, number[]> }>({
     queryKey: ['metrics-history'],
     queryFn: () => fetch('/api/metrics/history').then((res) => res.json()),
-    refetchInterval: 30000, // History is heavy, keep polling for now or accept slightly stale lines
+    refetchInterval: 30000,
   })
 
   const history = historyData?.history || {}
+  const { queues, workers } = stats
 
-  // Calculation derived from state
   const totalWaiting = queues.reduce((acc, q) => acc + q.waiting, 0)
   const totalDelayed = queues.reduce((acc, q) => acc + q.delayed, 0)
   const totalFailed = queues.reduce((acc, q) => acc + q.failed, 0)
@@ -357,6 +412,7 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-12">
+      <LogArchiveModal isOpen={isLogArchiveOpen} onClose={() => setIsLogArchiveOpen(false)} />
       <AnimatePresence>
         {selectedQueue && (
           <JobInspector queueName={selectedQueue} onClose={() => setSelectedQueue(null)} />
@@ -376,7 +432,6 @@ export function OverviewPage() {
         </div>
       </div>
 
-      {/* KPI Header Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="Waiting Jobs"
@@ -416,141 +471,17 @@ export function OverviewPage() {
 
       <QueueHeatmap queues={queues} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[600px]">
+        <div className="lg:col-span-1 h-full">
           <WorkerStatus highlightedWorkerId={hoveredWorkerId} workers={workers} />
         </div>
-        <div className="lg:col-span-2">
-          <LiveLogs onWorkerHover={setHoveredWorkerId} />
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-black tracking-tight">Processing Queues</h2>
-          <button className="text-[10px] font-black text-primary hover:underline flex items-center gap-2 uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity">
-            View All Pipelines <ChevronRight size={14} />
-          </button>
-        </div>
-        <div className="card-premium overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-muted/10 text-muted-foreground uppercase text-[10px] font-black tracking-[0.2em]">
-                <tr>
-                  <th className="px-8 py-6">Pipeline Name</th>
-                  <th className="px-8 py-6">Waiting</th>
-                  <th className="px-8 py-6">Delayed</th>
-                  <th className="px-8 py-6">Failed</th>
-                  <th className="px-8 py-6">Status</th>
-                  <th className="px-8 py-6 text-right">Operations</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30 text-sm">
-                {queues.map((queue) => (
-                  <tr key={queue.name} className="hover:bg-muted/5 transition-colors group">
-                    <td className="px-8 py-6 font-black text-foreground flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-primary/10">
-                        <ListTree size={22} />
-                      </div>
-                      <span className="text-base tracking-tight">{queue.name}</span>
-                    </td>
-                    <td className="px-8 py-6 font-mono font-black text-lg">
-                      {queue.waiting.toLocaleString()}
-                    </td>
-                    <td className="px-8 py-6 text-muted-foreground/80 font-bold">
-                      {queue.delayed}
-                    </td>
-                    <td className="px-8 py-6">
-                      <span
-                        className={cn(
-                          'font-mono font-black',
-                          queue.failed > 0 ? 'text-red-500' : 'text-muted-foreground/40'
-                        )}
-                      >
-                        {queue.failed}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span
-                        className={cn(
-                          'px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm',
-                          queue.failed > 0
-                            ? 'bg-red-500 text-white border-red-600'
-                            : queue.active > 0
-                              ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                              : 'bg-muted/40 text-muted-foreground border-transparent'
-                        )}
-                      >
-                        {queue.failed > 0 ? 'Critical' : queue.active > 0 ? 'Active' : 'Idle'}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <div className="flex justify-end gap-3 items-center">
-                        {queue.delayed > 0 && (
-                          <button
-                            onClick={() =>
-                              fetch(`/api/queues/${queue.name}/retry-all`, { method: 'POST' }).then(
-                                () => queryClient.invalidateQueries({ queryKey: ['queues'] })
-                              )
-                            }
-                            className="p-2.5 text-amber-500 hover:bg-amber-500/10 rounded-xl transition-all hover:scale-110 active:scale-90"
-                            title="Retry All Delayed"
-                          >
-                            <RefreshCcw size={18} />
-                          </button>
-                        )}
-                        {queue.failed > 0 && (
-                          <button
-                            onClick={() =>
-                              fetch(`/api/queues/${queue.name}/retry-all-failed`, {
-                                method: 'POST',
-                              }).then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))
-                            }
-                            className="p-2.5 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all hover:scale-110 active:scale-90"
-                            title="Retry All Failed"
-                          >
-                            <RefreshCcw size={18} />
-                          </button>
-                        )}
-                        <button
-                          onClick={async () => {
-                            if (
-                              confirm(
-                                `Are you sure you want to purge all jobs in queue "${queue.name}"?`
-                              )
-                            ) {
-                              await fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
-                              queryClient.invalidateQueries({ queryKey: ['queues'] })
-                            }
-                          }}
-                          className="p-2.5 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-all hover:scale-110 active:scale-90"
-                          title="Purge Queue"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => setSelectedQueue(queue.name)}
-                          className="px-5 py-2.5 bg-muted text-foreground rounded-xl transition-all flex items-center gap-2 text-[11px] font-black uppercase tracking-widest border border-border/50 hover:border-primary/50 hover:bg-background shadow-sm active:scale-95"
-                        >
-                          Inspect <ArrowRight size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {queues.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-8 py-32 text-center text-muted-foreground">
-                      <Activity size={48} className="mx-auto mb-4 opacity-10 animate-pulse" />
-                      <p className="text-lg font-bold opacity-30 italic uppercase tracking-widest">
-                        Waiting for bus activity...
-                      </p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="lg:col-span-2 grid grid-rows-2 gap-6 h-full">
+          <LiveLogs
+            logs={logs}
+            onSearchArchive={() => setIsLogArchiveOpen(true)}
+            onWorkerHover={setHoveredWorkerId}
+          />
+          <QueueList queues={queues} setSelectedQueue={setSelectedQueue} />
         </div>
       </div>
     </div>

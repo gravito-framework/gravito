@@ -13,7 +13,9 @@
         "dev:client": "vite",
         "build": "vite build && bun build ./src/server/index.ts ./src/bin.ts --outdir ./dist --target bun",
         "start": "bun ./dist/bin.js",
-        "test": "bun test"
+        "test": "bun test",
+        "seed": "bun scripts/seed.ts",
+        "worker": "bun scripts/worker.ts"
     },
     "dependencies": {
         "@gravito/atlas": "workspace:*",

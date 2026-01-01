@@ -15,19 +15,25 @@ import {
   Search,
   Trash2,
   X,
+  RefreshCcw,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useNotifications } from '../contexts/NotificationContext'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 
+// Update interface to match actual API response
 interface ScheduleInfo {
   id: string
   cron: string
   queue: string
   job: {
-    className: string
-    payload: any
+    className?: string
+    name?: string
+    data?: any
+    payload?: any
   }
-  lastRun?: string
-  nextRun?: string
+  lastRun?: number | string
+  nextRun?: number | string
 }
 
 interface QueueListItem {
@@ -50,6 +56,11 @@ export function SchedulesPage() {
     payload: '{}',
   })
 
+  const [confirmRunId, setConfirmRunId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
+  const { addNotification } = useNotifications()
+
   const { data: queueData } = useQuery<{ queues: QueueListItem[] }>({
     queryKey: ['queues'],
     queryFn: () => fetch('/api/queues').then((res) => res.json()),
@@ -62,15 +73,35 @@ export function SchedulesPage() {
 
   const runMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/schedules/run/${id}`, { method: 'POST' }),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['queues'] })
+      addNotification({
+        type: 'success',
+        title: 'Schedule Triggered',
+        message: `Job ${id} has been manually pushed to the queue.`,
+      })
+      setConfirmRunId(null)
+    },
+    onError: (err: any) => {
+      addNotification({
+        type: 'error',
+        title: 'Trigger Failed',
+        message: err.message || 'Failed to run schedule manually.',
+      })
+      setConfirmRunId(null)
     },
   })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/schedules/${id}`, { method: 'DELETE' }),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      addNotification({
+        type: 'info',
+        title: 'Schedule Deleted',
+        message: `Schedule ${id} was removed.`,
+      })
+      setConfirmDeleteId(null)
     },
   })
 
@@ -85,6 +116,11 @@ export function SchedulesPage() {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
       setIsModalOpen(false)
       setFormData({ id: '', cron: '', queue: 'default', className: '', payload: '{}' })
+      addNotification({
+        type: 'success',
+        title: 'Schedule Registered',
+        message: 'New recurring task is now active.',
+      })
     },
   })
 
@@ -115,7 +151,7 @@ export function SchedulesPage() {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-black tracking-tighter">Schedules</h1>
-          <p className="text-muted-foreground mt-2 text-sm font-bold opacity-60 uppercase tracking-widest">
+          <p className="text-muted-foreground mt-2 text-sm font-bold opacity-60 uppercase tracking-widest text-[10px]">
             Manage recurring tasks and cron workflows.
           </p>
         </div>
@@ -139,7 +175,7 @@ export function SchedulesPage() {
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
               Active Schedules
             </p>
-            <p className="text-2xl font-black">{schedules.length}</p>
+            <p className="text-2xl font-black">{isLoading ? '...' : schedules.length}</p>
           </div>
         </div>
         <div className="card-premium p-6 flex items-center gap-4">
@@ -186,6 +222,15 @@ export function SchedulesPage() {
           <Filter size={18} />
         </button>
       </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="card-premium p-6 h-32 animate-pulse bg-muted/20" />
+          ))}
+        </div>
+      )}
 
       {/* Implementation Empty State if zero */}
       {schedules.length === 0 && !isLoading && (
@@ -236,10 +281,18 @@ export function SchedulesPage() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => runMutation.mutate(schedule.id)}
-                  className="px-4 py-2 bg-muted hover:bg-primary hover:text-primary-foreground rounded-lg text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                  disabled={runMutation.isPending}
+                  onClick={() => setConfirmRunId(schedule.id)}
+                  className="px-4 py-2 bg-muted hover:bg-primary hover:text-primary-foreground rounded-lg text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
                 >
-                  Run Now
+                  {runMutation.isPending && runMutation.variables === schedule.id ? (
+                    <>
+                      <RefreshCcw size={12} className="animate-spin" />
+                      Running...
+                    </>
+                  ) : (
+                    'Run Now'
+                  )}
                 </button>
                 <button
                   type="button"
@@ -249,7 +302,7 @@ export function SchedulesPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteMutation.mutate(schedule.id)}
+                  onClick={() => setConfirmDeleteId(schedule.id)}
                   className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all text-muted-foreground"
                 >
                   <Trash2 size={18} />
@@ -431,6 +484,28 @@ export function SchedulesPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog
+        open={!!confirmRunId}
+        title="Manual trigger confirmation"
+        message={`Are you sure you want to run "${confirmRunId}" immediately?\nThis will bypass the next scheduled time and push a job to the "${schedules.find(s => s.id === confirmRunId)?.queue}" queue.`}
+        confirmText="Run Now"
+        variant="info"
+        isProcessing={runMutation.isPending}
+        onConfirm={() => confirmRunId && runMutation.mutate(confirmRunId)}
+        onCancel={() => setConfirmRunId(null)}
+      />
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        title="Delete Schedule"
+        message={`Are you sure you want to delete "${confirmDeleteId}"?\nThis action cannot be undone and recurring jobs for this schedule will stop.`}
+        confirmText="Delete"
+        variant="danger"
+        isProcessing={deleteMutation.isPending}
+        onConfirm={() => confirmDeleteId && deleteMutation.mutate(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   )
 }

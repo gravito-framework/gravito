@@ -61,6 +61,7 @@ graph TD
 
 ### D. Persistence & Auditing
 - **Job Archive**: Completed and Failed jobs move to SQL storage.
+- **Operational Log Archiving**: Persistent storage for system events and worker activities with history search.
 - **Hybrid Search**: Query both Redis (Live) and SQL (Archive) simultaneously.
 - **Retention Management**: Configurable auto-cleanup for historical data.
 
