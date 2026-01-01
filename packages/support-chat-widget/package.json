@@ -19,6 +19,6 @@
   },
   "scripts": {
     "build": "tsup src/index.tsx --format esm --dts",
-    "typecheck": "node --max-old-space-size=4096 node_modules/.bin/tsc --noEmit --skipLibCheck"
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit --skipLibCheck"
   }
 }
