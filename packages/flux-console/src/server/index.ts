@@ -1,6 +1,14 @@
 import { Photon } from '@gravito/photon'
 import { serveStatic } from 'hono/bun'
+import { getCookie } from 'hono/cookie'
 import { streamSSE } from 'hono/streaming'
+import {
+  authMiddleware,
+  createSession,
+  destroySession,
+  isAuthEnabled,
+  verifyPassword,
+} from './middleware/auth'
 import { QueueService } from './services/QueueService'
 
 const app = new Photon()
@@ -31,6 +39,40 @@ queueService
 const api = new Photon()
 
 api.get('/health', (c) => c.json({ status: 'ok', time: new Date().toISOString() }))
+
+// Auth endpoints (no middleware protection)
+api.get('/auth/status', (c) => {
+  const token = getCookie(c, 'flux_session')
+  const isAuthenticated =
+    !isAuthEnabled() || (token && require('./middleware/auth').validateSession(token))
+  return c.json({
+    enabled: isAuthEnabled(),
+    authenticated: !!isAuthenticated,
+  })
+})
+
+api.post('/auth/login', async (c) => {
+  try {
+    const { password } = await c.req.json()
+
+    if (!verifyPassword(password)) {
+      return c.json({ success: false, error: 'Invalid password' }, 401)
+    }
+
+    createSession(c)
+    return c.json({ success: true })
+  } catch (err) {
+    return c.json({ success: false, error: 'Login failed' }, 500)
+  }
+})
+
+api.post('/auth/logout', (c) => {
+  destroySession(c)
+  return c.json({ success: true })
+})
+
+// Apply auth middleware to all other API routes
+api.use('/*', authMiddleware)
 
 api.get('/queues', async (c) => {
   try {

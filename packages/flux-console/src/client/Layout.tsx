@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
-import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3 } from 'lucide-react'
+import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from './utils'
+import { useAuth } from './contexts/AuthContext'
 
 interface LayoutProps {
     children: React.ReactNode
@@ -22,6 +23,7 @@ interface CommandItem {
 export function Layout({ children }: LayoutProps) {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const { isAuthEnabled, logout } = useAuth()
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
         if (typeof window !== 'undefined') {
             return (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
@@ -135,7 +137,15 @@ export function Layout({ children }: LayoutProps) {
             icon: theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />,
             category: 'System',
             action: toggleTheme
-        }
+        },
+        ...(isAuthEnabled ? [{
+            id: 'sys-logout',
+            title: 'Logout',
+            description: 'Sign out from the console',
+            icon: <LogOut size={18} />,
+            category: 'System' as const,
+            action: logout
+        }] : [])
     ]
 
     const queueCommands: CommandItem[] = (queueData?.queues || []).map((q: any) => ({

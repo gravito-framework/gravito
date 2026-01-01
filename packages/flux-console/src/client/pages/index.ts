@@ -1,3 +1,4 @@
+export { LoginPage } from './LoginPage'
 export { MetricsPage } from './MetricsPage'
 export { OverviewPage } from './OverviewPage'
 export { QueuesPage } from './QueuesPage'
