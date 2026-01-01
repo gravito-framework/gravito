@@ -1,5 +1,6 @@
 import { Photon } from '@gravito/photon'
 import { serveStatic } from 'hono/bun'
+import { streamSSE } from 'hono/streaming'
 import { QueueService } from './services/QueueService'
 
 const app = new Photon()
@@ -73,6 +74,65 @@ api.get('/workers', async (c) => {
   } catch (err) {
     return c.json({ error: 'Failed to fetch workers' }, 500)
   }
+})
+
+api.post('/queues/:name/jobs/delete', async (c) => {
+  const queueName = c.req.param('name')
+  const { type, raw } = await c.req.json()
+  try {
+    const success = await queueService.deleteJob(queueName, type, raw)
+    return c.json({ success })
+  } catch (err) {
+    return c.json({ error: 'Failed to delete job' }, 500)
+  }
+})
+
+api.post('/queues/:name/jobs/retry', async (c) => {
+  const queueName = c.req.param('name')
+  const { raw } = await c.req.json()
+  try {
+    const success = await queueService.retryJob(queueName, raw)
+    return c.json({ success })
+  } catch (err) {
+    return c.json({ error: 'Failed to retry job' }, 500)
+  }
+})
+
+api.post('/queues/:name/purge', async (c) => {
+  const name = c.req.param('name')
+  try {
+    await queueService.purgeQueue(name)
+    return c.json({ success: true })
+  } catch (err) {
+    return c.json({ error: 'Failed to purge queue' }, 500)
+  }
+})
+
+api.get('/logs/stream', async (c) => {
+  return streamSSE(c, async (stream) => {
+    // 1. Send history first
+    const history = await queueService.getLogHistory()
+    for (const log of history) {
+      await stream.writeSSE({
+        data: JSON.stringify(log),
+        event: 'log',
+      })
+    }
+
+    // 2. Subscribe to new logs
+    await queueService.subscribeLogs(async (msg) => {
+      await stream.writeSSE({
+        data: JSON.stringify(msg),
+        event: 'log',
+      })
+    })
+
+    // Keep alive
+    while (true) {
+      await stream.sleep(30000)
+      await stream.writeSSE({ data: 'heartbeat', event: 'ping' })
+    }
+  })
 })
 
 app.route('/api', api)

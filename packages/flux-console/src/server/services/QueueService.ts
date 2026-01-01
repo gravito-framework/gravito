@@ -11,10 +11,14 @@ export interface QueueStats {
 
 export class QueueService {
   private redis: Redis
+  private subRedis: Redis
   private prefix: string
 
   constructor(redisUrl: string, prefix = 'queue:') {
     this.redis = new Redis(redisUrl, {
+      lazyConnect: true,
+    })
+    this.subRedis = new Redis(redisUrl, {
       lazyConnect: true,
     })
     this.prefix = prefix
@@ -33,7 +37,7 @@ export class QueueService {
   }
 
   async connect() {
-    await this.redis.connect()
+    await Promise.all([this.redis.connect(), this.subRedis.connect()])
   }
 
   /**
@@ -119,9 +123,10 @@ export class QueueService {
 
     return rawJobs.map((jobStr) => {
       try {
-        return JSON.parse(jobStr)
+        const parsed = JSON.parse(jobStr)
+        return { ...parsed, _raw: jobStr }
       } catch (e) {
-        return { raw: jobStr, error: 'Failed to parse JSON' }
+        return { _raw: jobStr, _error: 'Failed to parse JSON' }
       }
     })
   }
@@ -172,5 +177,97 @@ export class QueueService {
     } while (cursor !== '0')
 
     return workers
+  }
+
+  /**
+   * Deletes a specific job from a queue or delayed pool.
+   */
+  async deleteJob(
+    queueName: string,
+    type: 'waiting' | 'delayed',
+    jobRaw: string
+  ): Promise<boolean> {
+    const key =
+      type === 'delayed' ? `${this.prefix}${queueName}:delayed` : `${this.prefix}${queueName}`
+    const result =
+      type === 'delayed'
+        ? await this.redis.zrem(key, jobRaw)
+        : await this.redis.lrem(key, 0, jobRaw)
+    return result > 0
+  }
+
+  /**
+   * Retries a specific delayed job by moving it back to the waiting queue.
+   */
+  async retryJob(queueName: string, jobRaw: string): Promise<boolean> {
+    const key = `${this.prefix}${queueName}`
+    const delayKey = `${key}:delayed`
+
+    // Atomically move from ZSET to LIST
+    const script = `
+      local delayKey = KEYS[1]
+      local queueKey = KEYS[2]
+      local jobRaw = ARGV[1]
+      
+      local removed = redis.call('ZREM', delayKey, jobRaw)
+      if removed > 0 then
+        redis.call('LPUSH', queueKey, jobRaw)
+        return 1
+      end
+      return 0
+    `
+    const result = await this.redis.eval(script, 2, delayKey, key, jobRaw)
+    return result === 1
+  }
+
+  /**
+   * Purges all jobs from a queue.
+   */
+  async purgeQueue(queueName: string): Promise<void> {
+    const pipe = this.redis.pipeline()
+    pipe.del(`${this.prefix}${queueName}`)
+    pipe.del(`${this.prefix}${queueName}:delayed`)
+    pipe.del(`${this.prefix}${queueName}:active`) // just in case
+    await pipe.exec()
+  }
+
+  /**
+   * Subscribes to the live log stream.
+   */
+  async subscribeLogs(onMessage: (msg: any) => void) {
+    await this.subRedis.subscribe('flux_console:logs')
+    this.subRedis.on('message', (channel, message) => {
+      if (channel === 'flux_console:logs') {
+        try {
+          onMessage(JSON.parse(message))
+        } catch (e) {
+          // Ignore
+        }
+      }
+    })
+  }
+
+  /**
+   * Publishes a log message (used by workers).
+   */
+  async publishLog(log: { level: string; message: string; workerId: string; queue?: string }) {
+    const payload = {
+      ...log,
+      timestamp: new Date().toISOString(),
+    }
+    await this.redis.publish('flux_console:logs', JSON.stringify(payload))
+    // Also store in a capped list for history (last 100 logs)
+    const pipe = this.redis.pipeline()
+    pipe.lpush('flux_console:logs:history', JSON.stringify(payload))
+    pipe.ltrim('flux_console:logs:history', 0, 99)
+    await pipe.exec()
+  }
+
+  /**
+   * Gets recent log history.
+   */
+  async getLogHistory(): Promise<any[]> {
+    const logs = await this.redis.lrange('flux_console:logs:history', 0, -1)
+    return logs.map((l) => JSON.parse(l)).reverse()
   }
 }
