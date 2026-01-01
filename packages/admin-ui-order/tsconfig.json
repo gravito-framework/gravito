@@ -1,20 +1,6 @@
 {
+  "extends": "../../tsconfig.frontend.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -22,12 +8,11 @@
       ],
       "@gravito/admin-shell-react": [
         "../admin-shell-react/src/index.ts"
+      ],
+      "@gravito/admin-sdk": [
+        "../admin-sdk/src/index.ts"
       ]
-    },
-    "typeRoots": [
-      "./node_modules/@types",
-      "../../node_modules/@types"
-    ]
+    }
   },
   "include": [
     "src/**/*.ts",
