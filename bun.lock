@@ -351,7 +351,7 @@
       "version": "0.1.0",
       "devDependencies": {
         "tsup": "^8.3.5",
-        "typescript": "^5.7.2",
+        "typescript": "^5.9.3",
       },
     },
     "packages/admin-shell-react": {
@@ -370,7 +370,7 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "tsup": "^8.3.5",
-        "typescript": "^5.7.2",
+        "typescript": "^5.9.3",
         "vite": "^6.0.3",
       },
     },
@@ -928,7 +928,7 @@
         "autoprefixer": "^10.4.16",
         "postcss": "^8.4.32",
         "tailwindcss": "^3.4.0",
-        "typescript": "^5.2.2",
+        "typescript": "^5.9.3",
         "vite": "^6.4.1",
       },
     },
@@ -1322,7 +1322,7 @@
       "devDependencies": {
         "@types/react": "^19.0.0",
         "tsup": "^8.3.5",
-        "typescript": "^5.7.2",
+        "typescript": "^5.9.3",
       },
     },
     "satellites/ad": {
