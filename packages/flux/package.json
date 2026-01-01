@@ -73,5 +73,8 @@
     "type": "git",
     "url": "https://github.com/gravito-framework/gravito.git",
     "directory": "packages/flux"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

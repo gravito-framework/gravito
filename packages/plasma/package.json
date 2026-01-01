@@ -44,5 +44,13 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "bun-types": "latest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/plasma"
   }
 }

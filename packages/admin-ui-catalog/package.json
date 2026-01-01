@@ -15,5 +15,13 @@
     "@types/react": "^19.0.0",
     "tsup": "^8.3.5",
     "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/admin-ui-catalog"
   }
 }

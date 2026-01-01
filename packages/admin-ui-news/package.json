@@ -21,5 +21,13 @@
   "scripts": {
     "build": "tsup src/index.tsx --format esm --dts",
     "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gravito-framework/gravito.git",
+    "directory": "packages/admin-ui-news"
   }
 }
