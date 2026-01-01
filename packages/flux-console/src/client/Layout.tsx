@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { NotificationBell } from './components/NotificationBell'
-import { Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut } from 'lucide-react'
+import { UserProfileDropdown } from './components/UserProfileDropdown'
+import { Search, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from './utils'
@@ -255,15 +256,7 @@ export function Layout({ children }: LayoutProps) {
 
                         <div className="h-8 w-[1px] bg-border/50"></div>
 
-                        <div className="flex items-center gap-3 cursor-pointer group">
-                            <div className="text-right hidden sm:block">
-                                <p className="text-sm font-black tracking-tight group-hover:text-primary transition-colors">Admin User</p>
-                                <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Architect</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-primary-foreground font-black shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-                                <User size={20} />
-                            </div>
-                        </div>
+                        <UserProfileDropdown />
                     </div>
                 </header>
 
