@@ -18,6 +18,27 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
+interface ScheduleInfo {
+  id: string
+  cron: string
+  queue: string
+  job: {
+    className: string
+    payload: any
+  }
+  lastRun?: string
+  nextRun?: string
+}
+
+interface QueueListItem {
+  name: string
+  waiting: number
+  delayed: number
+  failed: number
+  active: number
+  paused: boolean
+}
+
 export function SchedulesPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -29,12 +50,12 @@ export function SchedulesPage() {
     payload: '{}',
   })
 
-  const { data: queueData } = useQuery<any>({
+  const { data: queueData } = useQuery<{ queues: QueueListItem[] }>({
     queryKey: ['queues'],
     queryFn: () => fetch('/api/queues').then((res) => res.json()),
   })
 
-  const { data, isLoading } = useQuery<any>({
+  const { data, isLoading } = useQuery<{ schedules: ScheduleInfo[] }>({
     queryKey: ['schedules'],
     queryFn: () => fetch('/api/schedules').then((res) => res.json()),
   })
@@ -181,7 +202,7 @@ export function SchedulesPage() {
 
       {/* Schedules Grid */}
       <div className="grid grid-cols-1 gap-4">
-        {schedules.map((schedule: any) => (
+        {schedules.map((schedule: ScheduleInfo) => (
           <div
             key={schedule.id}
             className="card-premium p-6 group hover:border-primary/30 transition-all"

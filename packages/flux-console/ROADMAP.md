@@ -10,42 +10,38 @@ This document outlines the future development plan for Flux Console, moving from
 - **Tasks**:
 - [x] Fix `Dockerfile` dependency resolution (via multi-stage builds).
 - [x] Create `docker-compose.yml` for a full stack setup (Console + Redis + Demo Worker).
-- [ ] (Optional) Create a Helm Chart for K8s deployment.
+- [x] Implementation of Scheduled Jobs (Cron) Management.
 
-### 2. History Persistence (SQL Archive) (P1)
+### 2. History Persistence (SQL Archive) (Completed ✅)
 **Goal**: Store job history permanently for auditing and long-term analysis.
-- **Problem**: Redis data is ephemeral and sets a TTL. History is lost after a few days.
-- **Solution**: "Framework-Level Auto-Persistence".
-    - [x] Implement a `PersistenceAdapter` in `@gravito/stream`.
-    - [x] Automatically archive completed/failed jobs to a SQL database (MySQL/PostgreSQL via Atlas).
-    - [x] **Fallback Query**: If Redis query returns null, automatically fallback to query the SQL archive.
-- **Value**: Allows developers to trace "What happened to that order 3 months ago?" without writing custom logging code.
+- [x] Implement a `PersistenceAdapter` in `@gravito/stream`.
+- [x] Automatically archive completed/failed jobs to a SQL database.
+- [x] **Zero-Config (SQLite)**: Integrated support for local testing.
+- [x] **Fallback Query**: Integrated archive search into UI and command palette.
 
 ## ✨ Feature Enhancements (Mid-Term)
 
-### 3. Alerting & Notifications (P2)
+### 3. Alerting & Notifications (Completed ✅)
 **Goal**: Proactive issue notification system.
-- **Problem**: Operations team must stare at the dashboard to spot issues.
-- **Features**:
-    - Configurable Rules: "Alert if `failed_rate` > 10%" or "Alert if `queue_length` > 1000".
-    - Channels: Slack Webhook, Email, Discord, PagerDuty.
-    - Silence/Ack mechanism.
+- [x] **AlertService**: Lightweight rules for failure spikes, backlog, and worker loss.
+- [x] **Cooldown Mechanism**: Prevents alerting storms.
+- [x] **Slack Integration**: Webhook support with test notification UI.
+- [x] **Real-time Monitoring**: Integrated directly into server metrics loop.
 
-### 4. Scheduled Jobs (Cron) Management
+### 4. Scheduled Jobs (Cron) Management (Completed ✅)
 **Goal**: UI-based management for recurring tasks.
-- **Problem**: Currently, recurring jobs are defined in code and invisible in the UI until they trigger.
-- **Features**:
-    - Dashboard to view all registered Cron jobs.
-    - Ability to "Trigger Now" manually.
-    - Ability to Pause/Resume specific Cron schedules.
+- [x] Dashboard to view all registered Cron jobs.
+- [x] Ability to "Trigger Now" manually.
+- [x] Ability to Pause/Resume (Delete/Register) specific Cron schedules.
+- [x] Real-time ticking via the Console server.
 
-### 5. Batch Operations
+### 4. Batch Operations (P1)
 **Goal**: Bulk management actions.
 - **Problem**: Can only retry/delete one job or "all" jobs. Hard to handle "the 50 jobs that failed due to the bug yesterday".
-- **Features**:
-    - Multi-select checkboxes in job lists.
-    - "Select Visible" or "Select All Matching Query".
-    - Bulk Retry / Bulk Delete / Bulk Promote.
+- **Tasks**:
+    - [ ] Multi-select checkboxes in job lists.
+    - [ ] Bulk Retry / Bulk Delete.
+    - [ ] Select All Matching Query.
 
 ## 🔮 Enterprise Features (Long-Term)
 

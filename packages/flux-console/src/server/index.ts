@@ -1,6 +1,6 @@
 import { DB } from '@gravito/atlas'
 import { Photon } from '@gravito/photon'
-import { MySQLPersistence } from '@gravito/stream'
+import { MySQLPersistence, SQLitePersistence } from '@gravito/stream'
 import { serveStatic } from 'hono/bun'
 import { getCookie } from 'hono/cookie'
 import { streamSSE } from 'hono/streaming'
@@ -21,20 +21,28 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 const QUEUE_PREFIX = process.env.QUEUE_PREFIX || 'queue:'
 
 // Persistence Initialize
-let persistence:
-  | { adapter: MySQLPersistence; archiveCompleted: boolean; archiveFailed: boolean }
-  | undefined
-if (process.env.DB_HOST) {
-  DB.addConnection('default', {
-    driver: (process.env.DB_DRIVER as any) || 'mysql',
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || '3306', 10),
-    database: process.env.DB_NAME || 'flux',
-    username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-  })
+let persistence: { adapter: any; archiveCompleted: boolean; archiveFailed: boolean } | undefined
 
-  const adapter = new MySQLPersistence(DB)
+const dbDriver = process.env.DB_DRIVER || 'mysql'
+
+if (dbDriver === 'sqlite' || process.env.DB_HOST) {
+  if (dbDriver === 'sqlite') {
+    DB.addConnection('default', {
+      driver: 'sqlite',
+      database: process.env.DB_NAME || 'flux.sqlite',
+    })
+  } else {
+    DB.addConnection('default', {
+      driver: dbDriver as any,
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || '3306', 10),
+      database: process.env.DB_NAME || 'flux',
+      username: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+    })
+  }
+
+  const adapter = dbDriver === 'sqlite' ? new SQLitePersistence(DB) : new MySQLPersistence(DB)
   adapter.setupTable().catch((err) => console.error('[FluxConsole] SQL Archive Setup Error:', err))
 
   persistence = {
@@ -42,7 +50,7 @@ if (process.env.DB_HOST) {
     archiveCompleted: process.env.PERSIST_ARCHIVE_COMPLETED === 'true',
     archiveFailed: process.env.PERSIST_ARCHIVE_FAILED !== 'false',
   }
-  console.log('[FluxConsole] SQL Archive enabled via', process.env.DB_DRIVER || 'mysql')
+  console.log(`[FluxConsole] SQL Archive enabled via ${dbDriver}`)
 }
 
 // Service Initialization
@@ -412,6 +420,36 @@ api.delete('/schedules/:id', async (c) => {
     return c.json({ success: true })
   } catch (_err) {
     return c.json({ error: 'Failed to remove schedule' }, 500)
+  }
+})
+
+// --- Alerting ---
+api.get('/alerts/config', (c) => {
+  return c.json({
+    rules: queueService.alerts.getRules(),
+    webhookEnabled: !!process.env.SLACK_WEBHOOK_URL,
+  })
+})
+
+api.post('/alerts/test', async (c) => {
+  try {
+    queueService.alerts.check({
+      queues: [],
+      workers: [
+        {
+          id: 'test-node',
+          hostname: 'localhost',
+          pid: 0,
+          uptime: 0,
+          memory: { rss: '0', heapTotal: '0', heapUsed: '0' },
+          queues: [],
+        },
+      ] as any,
+      totals: { waiting: 9999, delayed: 0, failed: 9999 },
+    })
+    return c.json({ success: true, message: 'Test alert dispatched' })
+  } catch (_err) {
+    return c.json({ error: 'Test failed' }, 500)
   }
 })
 

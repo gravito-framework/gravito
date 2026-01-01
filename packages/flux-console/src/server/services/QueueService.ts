@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events'
 import { type MySQLPersistence, QueueManager } from '@gravito/stream'
 import { Redis } from 'ioredis'
+import { AlertService } from './AlertService'
 
 export interface QueueStats {
   name: string
@@ -50,6 +51,7 @@ export class QueueService {
   private logThrottleReset = Date.now()
   private readonly MAX_LOGS_PER_SEC = 50
   private manager: QueueManager
+  public alerts = new AlertService()
 
   constructor(
     redisUrl: string,
@@ -299,6 +301,15 @@ export class QueueService {
       throughput: await this.getThroughputData(),
       workers,
     })
+
+    // Evaluate Alert Rules (Near Zero Overhead)
+    this.alerts
+      .check({
+        queues: stats,
+        workers,
+        totals,
+      })
+      .catch((err) => console.error('[AlertService] Rule Evaluation Error:', err))
   }
 
   /**

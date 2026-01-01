@@ -42,6 +42,7 @@ export { Job } from './Job'
 export type { OrbitStreamOptions } from './OrbitStream'
 export { OrbitStream } from './OrbitStream'
 export { MySQLPersistence } from './persistence/MySQLPersistence'
+export { SQLitePersistence } from './persistence/SQLitePersistence'
 // Core interfaces & types
 export type { Queueable } from './Queueable'
 export { QueueManager } from './QueueManager'

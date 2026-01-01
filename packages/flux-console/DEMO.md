@@ -12,6 +12,34 @@ In this demo, we will run three components locally:
 
 ---
 
+## 🏛️ Persistence & History (Optional)
+
+To test the **Job Archive** and **Search** features, you need a database. Flux Console supports two modes:
+
+### A. Zero-Config (SQLite) - **Recommended for Quick Tests**
+Simply set the `DB_DRIVER` and `DB_NAME` environment variables. It will create a local `.sqlite` file.
+```bash
+export DB_DRIVER=sqlite
+export DB_NAME=flux.sqlite
+export PERSIST_ARCHIVE_COMPLETED=true # Archive successful jobs too
+```
+
+### B. Full Stack (MySQL + Redis) - **Using Docker**
+If you have Docker installed, you can spin up a production-ready environment:
+```bash
+cd packages/flux-console
+docker-compose up -d
+```
+Then set your env variables to match:
+```bash
+export DB_HOST=localhost
+export DB_USER=root
+export DB_PASSWORD=root
+export DB_NAME=flux
+```
+
+---
+
 ## 🎬 Step-by-Step Demo Script
 
 ### Step 1: Start the Flux Console 🖥️

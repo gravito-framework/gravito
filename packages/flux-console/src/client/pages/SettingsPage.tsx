@@ -12,6 +12,7 @@ import {
   Shield,
   Sun,
   Trash2,
+  Bell,
 } from 'lucide-react'
 import React from 'react'
 import { cn } from '../utils'
@@ -31,6 +32,11 @@ export function SettingsPage() {
     queryKey: ['system-status'],
     queryFn: () => fetch('/api/system/status').then((res) => res.json()),
     refetchInterval: 30000,
+  })
+
+  const { data: alertConfig } = useQuery<any>({
+    queryKey: ['alerts-config'],
+    queryFn: () => fetch('/api/alerts/config').then((res) => res.json()),
   })
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
@@ -200,6 +206,83 @@ export function SettingsPage() {
               Heap Used
             </p>
             <p className="text-lg font-mono font-bold">{systemStatus?.memory?.heapUsed || '...'}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Alerting Section */}
+      <section className="card-premium p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+            <Bell size={20} />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Alerting & Notifications</h2>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+              System health and failure monitoring
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex items-center justify-between py-3 border-b border-border/30">
+            <div>
+              <h3 className="text-sm font-bold">Slack Webhook</h3>
+              <p className="text-xs text-muted-foreground">
+                Current status of notification integration.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "w-2 h-2 rounded-full",
+                alertConfig?.webhookEnabled ? "bg-green-500 animate-pulse" : "bg-muted-foreground/30"
+              )}></span>
+              <span className={cn(
+                "text-sm font-bold",
+                alertConfig?.webhookEnabled ? "text-green-500" : "text-muted-foreground"
+              )}>
+                {alertConfig?.webhookEnabled ? "Enabled" : "Not Configured"}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-3">Active Rules</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {alertConfig?.rules?.map((rule: any) => (
+                <div key={rule.id} className="p-3 bg-muted/20 border border-border/10 rounded-xl flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-tight">{rule.name}</p>
+                    <p className="text-[10px] text-muted-foreground opacity-70">
+                      {rule.type === 'backlog' ? `Waiting > ${rule.threshold}` :
+                        rule.type === 'failure' ? `Failed > ${rule.threshold}` :
+                          `Workers < ${rule.threshold}`}
+                    </p>
+                  </div>
+                  <div className="px-2 py-0.5 bg-muted rounded text-[9px] font-bold text-muted-foreground">
+                    {rule.cooldownMinutes}m cooldown
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/30">
+            <p className="text-xs text-muted-foreground max-w-md">
+              Configure <code>SLACK_WEBHOOK_URL</code> in your environment variables to receive notifications.
+            </p>
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/alerts/test', { method: 'POST' }).then(r => r.json())
+                if (res.success) {
+                  alert('Test alert dispatched to server processing loop.')
+                }
+              }}
+              disabled={!alertConfig?.webhookEnabled}
+              className="w-full sm:w-auto px-4 py-2 border border-primary/20 hover:bg-primary/5 text-primary rounded-lg text-xs font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+            >
+              Test Notification
+            </button>
           </div>
         </div>
       </section>

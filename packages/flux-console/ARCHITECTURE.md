@@ -36,6 +36,7 @@ graph TD
 - **Runtime**: Bun / Node.js (Compat)
 - **Framework**: **`@gravito/photon`** (Hono wrapper)
 - **Data Access**: **`@gravito/stream`** (Directly uses QueueDrivers)
+- **Persistence**: **`MySQLPersistence`** / **`SQLitePersistence`** for long-term auditing.
 
 ### Frontend
 - **Framework**: React 19
@@ -57,6 +58,16 @@ graph TD
 ### C. Actions
 - **Retry Job**: Move job from `failed` to `waiting`.
 - **Delete Job**: Remove job permanently.
+
+### D. Persistence & Auditing
+- **Job Archive**: Completed and Failed jobs move to SQL storage.
+- **Hybrid Search**: Query both Redis (Live) and SQL (Archive) simultaneously.
+- **Retention Management**: Configurable auto-cleanup for historical data.
+
+### E. Alerting System
+- **Real-time Checks**: Monitoring for failure spikes and worker loss.
+- **Notifications**: Slack integration via Webhooks.
+- **Cool-down Logic**: Prevents duplicated alerts for the same event.
 
 ## 5. Deployment Strategy
 
