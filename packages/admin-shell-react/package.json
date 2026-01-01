@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsup src/index.ts --format esm --dts",
-    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit --skipLibCheck"
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@gravito/admin-sdk": "workspace:*",
