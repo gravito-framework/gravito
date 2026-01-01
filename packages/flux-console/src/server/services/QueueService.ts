@@ -11,6 +11,36 @@ export interface QueueStats {
   paused: boolean
 }
 
+export interface WorkerReport {
+  id: string
+  hostname: string
+  pid: number
+  uptime: number
+  memory: {
+    rss: string
+    heapTotal: string
+    heapUsed: string
+  }
+  queues: string[]
+  concurrency: number
+  timestamp: string
+  loadAvg: number[]
+}
+
+export interface SystemLog {
+  level: 'info' | 'warn' | 'error' | 'success'
+  message: string
+  workerId: string
+  queue?: string
+  timestamp: string
+}
+
+export interface GlobalStats {
+  queues: QueueStats[]
+  throughput: { timestamp: string; count: number }[]
+  workers: WorkerReport[]
+}
+
 export class QueueService {
   private redis: Redis
   private subRedis: Redis
@@ -80,7 +110,7 @@ export class QueueService {
    * Subscribes to the live log stream.
    * Returns a cleanup function.
    */
-  onLog(callback: (msg: any) => void): () => void {
+  onLog(callback: (msg: SystemLog) => void): () => void {
     this.logEmitter.on('log', callback)
     return () => {
       this.logEmitter.off('log', callback)
@@ -274,7 +304,7 @@ export class QueueService {
   /**
    * Subscribes to real-time stats updates.
    */
-  onStats(callback: (stats: any) => void): () => void {
+  onStats(callback: (stats: GlobalStats) => void): () => void {
     this.logEmitter.on('stats', callback)
     return () => {
       this.logEmitter.off('stats', callback)
@@ -318,8 +348,8 @@ export class QueueService {
   /**
    * Lists all active workers by scanning heartbeat keys.
    */
-  async listWorkers(): Promise<any[]> {
-    const workers: any[] = []
+  async listWorkers(): Promise<WorkerReport[]> {
+    const workers: WorkerReport[] = []
     let cursor = '0'
 
     do {
@@ -575,6 +605,56 @@ export class QueueService {
     }
 
     return results
+  }
+
+  /**
+   * List jobs from the SQL archive.
+   */
+  async getArchiveJobs(
+    queue: string,
+    page = 1,
+    limit = 50,
+    status?: 'completed' | 'failed'
+  ): Promise<{ jobs: any[]; total: number }> {
+    const persistence = this.manager.getPersistence()
+    if (!persistence) {
+      return { jobs: [], total: 0 }
+    }
+
+    const offset = (page - 1) * limit
+    const [jobs, total] = await Promise.all([
+      persistence.list(queue, { limit, offset, status }),
+      persistence.count(queue, { status }),
+    ])
+
+    return {
+      jobs: jobs.map((j: any) => ({ ...j, _archived: true })),
+      total,
+    }
+  }
+
+  /**
+   * Search jobs from the SQL archive.
+   */
+  async searchArchive(
+    query: string,
+    options: { limit?: number; page?: number; queue?: string } = {}
+  ): Promise<{ jobs: any[]; total: number }> {
+    const persistence = this.manager.getPersistence() as any
+    if (!persistence || typeof persistence.search !== 'function') {
+      return { jobs: [], total: 0 }
+    }
+
+    const { limit = 50, page = 1, queue } = options
+    const offset = (page - 1) * limit
+
+    const jobs = await persistence.search(query, { limit, offset, queue })
+    // For search, precise total count is harder without a dedicated search count method,
+    // so we'll return the results length or a hypothetical high number if results match the limit.
+    return {
+      jobs: jobs.map((j: any) => ({ ...j, _archived: true })),
+      total: jobs.length === limit ? limit * page + 1 : (page - 1) * limit + jobs.length,
+    }
   }
 
   /**

@@ -21,7 +21,9 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 const QUEUE_PREFIX = process.env.QUEUE_PREFIX || 'queue:'
 
 // Persistence Initialize
-let persistence: { adapter: MySQLPersistence; archiveCompleted: boolean; archiveFailed: boolean } | undefined
+let persistence:
+  | { adapter: MySQLPersistence; archiveCompleted: boolean; archiveFailed: boolean }
+  | undefined
 if (process.env.DB_HOST) {
   DB.addConnection('default', {
     driver: (process.env.DB_DRIVER as any) || 'mysql',
@@ -133,6 +135,25 @@ api.get('/search', async (c) => {
   }
 })
 
+api.get('/archive/search', async (c) => {
+  const query = c.req.query('q') || ''
+  const queue = c.req.query('queue')
+  const page = parseInt(c.req.query('page') || '1', 10)
+  const limit = parseInt(c.req.query('limit') || '50', 10)
+
+  if (!query) {
+    return c.json({ results: [] })
+  }
+
+  try {
+    const { jobs, total } = await queueService.searchArchive(query, { queue, page, limit })
+    return c.json({ results: jobs, query, count: total })
+  } catch (err) {
+    console.error(err)
+    return c.json({ error: 'Archive search failed' }, 500)
+  }
+})
+
 api.post('/queues/:name/retry-all', async (c) => {
   const name = c.req.param('name')
   try {
@@ -182,6 +203,21 @@ api.get('/queues/:name/jobs', async (c) => {
   } catch (err) {
     console.error(err)
     return c.json({ error: 'Failed to fetch jobs' }, 500)
+  }
+})
+
+api.get('/queues/:name/archive', async (c) => {
+  const name = c.req.param('name')
+  const page = parseInt(c.req.query('page') || '1', 10)
+  const limit = parseInt(c.req.query('limit') || '50', 10)
+  const status = c.req.query('status') as 'completed' | 'failed' | undefined
+
+  try {
+    const { jobs, total } = await queueService.getArchiveJobs(name, page, limit, status)
+    return c.json({ jobs, total })
+  } catch (err) {
+    console.error(err)
+    return c.json({ error: 'Failed to fetch archived jobs' }, 500)
   }
 })
 
@@ -286,20 +322,6 @@ api.post('/maintenance/cleanup-archive', async (c) => {
     return c.json({ success: true, deleted })
   } catch (_err) {
     return c.json({ error: 'Failed to cleanup archive' }, 500)
-  }
-})
-
-api.get('/search', async (c) => {
-  const query = c.req.query('q') || ''
-  if (!query) {
-    return c.json({ results: [] })
-  }
-
-  try {
-    const results = await queueService.searchJobs(query)
-    return c.json({ results })
-  } catch (_err) {
-    return c.json({ error: 'Search failed' }, 500)
   }
 })
 

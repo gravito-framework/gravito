@@ -170,6 +170,11 @@ export interface PersistenceAdapter {
    * Remove old data from the archive.
    */
   cleanup(days: number): Promise<number>
+
+  /**
+   * Count jobs in the archive.
+   */
+  count(queue: string, options?: { status?: 'completed' | 'failed' }): Promise<number>
 }
 
 /**

@@ -37,22 +37,32 @@ interface Job {
   failedAt?: number
   _raw?: string
   _archived?: boolean
+  _status?: 'completed' | 'failed'
+  _archivedAt?: string
 }
 
 function JobInspector({ queueName, onClose }: { queueName: string; onClose: () => void }) {
-  const [view, setView] = React.useState<'waiting' | 'delayed' | 'failed'>('waiting')
+  const [view, setView] = React.useState<'waiting' | 'delayed' | 'failed' | 'archive'>('waiting')
+  const [page, setPage] = React.useState(1)
   const [selectedRaws, setSelectedRaws] = React.useState<Set<string>>(new Set())
   const queryClient = useQueryClient()
 
-  const { isPending, error, data } = useQuery<{ jobs: Job[] }>({
-    queryKey: ['jobs', queueName, view],
-    queryFn: () => fetch(`/api/queues/${queueName}/jobs?type=${view}`).then((res) => res.json()),
+  const { isPending, error, data } = useQuery<{ jobs: Job[]; total?: number }>({
+    queryKey: ['jobs', queueName, view, page],
+    queryFn: () => {
+      const url =
+        view === 'archive'
+          ? `/api/queues/${queueName}/archive?page=${page}&limit=50`
+          : `/api/queues/${queueName}/jobs?type=${view}`
+      return fetch(url).then((res) => res.json())
+    },
   })
 
   // Reset selection when view changes
   React.useEffect(() => {
     setSelectedRaws(new Set())
-  }, [])
+    setPage(1)
+  }, [view])
 
   const toggleSelection = (raw?: string) => {
     if (!raw) {
@@ -120,8 +130,9 @@ function JobInspector({ queueName, onClose }: { queueName: string; onClose: () =
 
   return (
     <AnimatePresence>
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-end z-[100]"
+      <button
+        type="button"
+        className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-end z-[100] w-full h-full border-none outline-none appearance-none cursor-default"
         onClick={onClose}
       >
         <motion.div
@@ -139,18 +150,20 @@ function JobInspector({ queueName, onClose }: { queueName: string; onClose: () =
                 Queue Insight: <span className="text-primary">{queueName}</span>
               </h2>
               <div className="flex items-center gap-4 mt-2">
-                {(['waiting', 'delayed', 'failed'] as const).map((v) => (
+                {(['waiting', 'delayed', 'failed', 'archive'] as const).map((v) => (
                   <button
                     key={v}
                     onClick={() => setView(v)}
                     className={cn(
-                      'text-xs font-bold px-3 py-1 rounded-full transition-all border shrink-0 uppercase tracking-widest',
+                      'text-[9px] font-black px-3 py-1 rounded-sm transition-all border shrink-0 uppercase tracking-widest',
                       view === v
                         ? v === 'failed'
-                          ? 'bg-red-500 text-white border-red-500'
+                          ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/20'
                           : v === 'delayed'
-                            ? 'bg-amber-500 text-white border-amber-500'
-                            : 'bg-primary text-primary-foreground border-primary'
+                            ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20'
+                            : v === 'archive'
+                              ? 'bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
+                              : 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
                         : 'bg-muted text-muted-foreground border-transparent hover:bg-muted/80'
                     )}
                   >
@@ -247,8 +260,15 @@ function JobInspector({ queueName, onClose }: { queueName: string; onClose: () =
                         <span className="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md font-bold uppercase tracking-wider flex items-center gap-2">
                           ID: {job.id || 'N/A'}
                           {job._archived && (
-                            <span className="bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded text-[8px] border border-amber-500/20">
-                              Archived
+                            <span
+                              className={cn(
+                                'px-1.5 py-0.5 rounded text-[8px] border',
+                                job._status === 'completed'
+                                  ? 'bg-green-500/20 text-green-500 border-green-500/20'
+                                  : 'bg-red-500/20 text-red-500 border-red-500/20'
+                              )}
+                            >
+                              Archive: {job._status}
                             </span>
                           )}
                         </span>
@@ -264,7 +284,12 @@ function JobInspector({ queueName, onClose }: { queueName: string; onClose: () =
                             <AlertCircle size={12} /> {new Date(job.failedAt).toLocaleString()}
                           </span>
                         )}
-                        {job.timestamp && new Date(job.timestamp).toLocaleString()}
+                        {job._archivedAt && (
+                          <span className="text-indigo-400 flex items-center gap-1 font-bold">
+                            <ArrowRight size={12} /> {new Date(job._archivedAt).toLocaleString()}
+                          </span>
+                        )}
+                        {job.timestamp && !job._archivedAt && new Date(job.timestamp).toLocaleString()}
                       </span>
                     </div>
                     <div
@@ -306,6 +331,31 @@ function JobInspector({ queueName, onClose }: { queueName: string; onClose: () =
                     </div>
                   </div>
                 ))}
+
+                {view === 'archive' && data?.total && data.total > 50 && (
+                  <div className="flex items-center justify-between py-6 border-t border-border/30">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                      Total {data.total} archived jobs
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="p-2 rounded-lg bg-muted text-muted-foreground disabled:opacity-30 hover:bg-primary hover:text-white transition-all"
+                      >
+                        ←
+                      </button>
+                      <span className="text-xs font-bold px-4">{page}</span>
+                      <button
+                        onClick={() => setPage((p) => p + 1)}
+                        disabled={page * 50 >= (data.total || 0)}
+                        className="p-2 rounded-lg bg-muted text-muted-foreground disabled:opacity-30 hover:bg-primary hover:text-white transition-all"
+                      >
+                        →
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -318,7 +368,7 @@ function JobInspector({ queueName, onClose }: { queueName: string; onClose: () =
             </button>
           </div>
         </motion.div>
-      </div>
+      </button>
     </AnimatePresence>
   )
 }

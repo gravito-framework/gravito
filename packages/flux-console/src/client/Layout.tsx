@@ -61,7 +61,7 @@ export function Layout({ children }: LayoutProps) {
     fetch('/api/system/status')
       .then((res) => res.json())
       .then(setSystemStatus)
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   // Global SSE Stream Manager
@@ -105,7 +105,7 @@ export function Layout({ children }: LayoutProps) {
     fetch('/api/queues')
       .then((res) => res.json())
       .then(setQueueData)
-      .catch(() => {})
+      .catch(() => { })
 
     // Optional: Listen to global stats if available (from OverviewPage) to keep queue stats fresh in command palette
     const handler = (e: Event) => {
@@ -132,13 +132,23 @@ export function Layout({ children }: LayoutProps) {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Search jobs dynamically
-  const { data: searchResults } = useQuery<{ results: any[] }>({
+  // Search jobs (Real-time and Archive)
+  const { data: searchResults } = useQuery<{ results: any[]; archiveResults?: any[] }>({
     queryKey: ['job-search', debouncedQuery],
-    queryFn: () =>
-      fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&limit=10`).then((res) =>
-        res.json()
-      ),
+    queryFn: async () => {
+      const [realtime, archive] = await Promise.all([
+        fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&limit=10`).then((res) =>
+          res.json()
+        ),
+        fetch(`/api/archive/search?q=${encodeURIComponent(debouncedQuery)}&limit=10`).then((res) =>
+          res.json()
+        ),
+      ])
+      return {
+        results: realtime.results || [],
+        archiveResults: archive.results || [],
+      }
+    },
     enabled: debouncedQuery.length >= 2,
     staleTime: 5000,
   })
@@ -234,15 +244,15 @@ export function Layout({ children }: LayoutProps) {
     },
     ...(isAuthEnabled
       ? [
-          {
-            id: 'sys-logout',
-            title: 'Logout',
-            description: 'Sign out from the console',
-            icon: <LogOut size={18} />,
-            category: 'System' as const,
-            action: logout,
-          },
-        ]
+        {
+          id: 'sys-logout',
+          title: 'Logout',
+          description: 'Sign out from the console',
+          icon: <LogOut size={18} />,
+          category: 'System' as const,
+          action: logout,
+        },
+      ]
       : []),
   ]
 
@@ -275,19 +285,31 @@ export function Layout({ children }: LayoutProps) {
 
   // Dynamic job search results
   const jobCommands: CommandItem[] = useMemo(() => {
-    if (!searchResults?.results?.length) {
+    const combined = [
+      ...(searchResults?.results || []),
+      ...(searchResults?.archiveResults || []).map((j: any) => ({ ...j, _archived: true })),
+    ]
+
+    if (!combined.length) {
       return []
     }
-    return searchResults.results.map((job: any) => ({
-      id: `job-${job._queue}-${job.id}`,
+
+    return combined.slice(0, 15).map((job: any) => ({
+      id: `job-${job._queue}-${job.id}-${job._archived ? 'arch' : 'live'}`,
       title: `Job: ${job.id || 'Unknown'}`,
-      description: `${job._queue} • ${job._type}${job._archived ? ' • ARCHIVED' : ''} • ${job.name || 'No name'}`,
-      icon: <Briefcase size={18} />,
+      description: `${job._queue} • ${job.status || job._type}${job._archived ? ' • ARCHIVED' : ''} • ${job.name || 'No name'}`,
+      icon: job._archived ? <HardDrive size={18} /> : <Briefcase size={18} />,
       category: 'Action' as const,
       action: () => {
         navigate('/queues')
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('select-queue', { detail: job._queue }))
+          if (job._archived) {
+            // Future-proof: trigger archive view opening
+            window.dispatchEvent(
+              new CustomEvent('inspect-job', { detail: { queue: job._queue, job } })
+            )
+          }
         }, 100)
       },
     }))

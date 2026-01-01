@@ -75,7 +75,45 @@ export class MySQLPersistence implements PersistenceAdapter {
     return rows
       .map((r: any) => {
         try {
-          return typeof r.payload === 'string' ? JSON.parse(r.payload) : r.payload
+          const job = typeof r.payload === 'string' ? JSON.parse(r.payload) : r.payload
+          return { ...job, _status: r.status, _archivedAt: r.archived_at }
+        } catch (_e) {
+          return null
+        }
+      })
+      .filter(Boolean)
+  }
+
+  /**
+   * Search jobs from the archive.
+   */
+  async search(
+    query: string,
+    options: { limit?: number; offset?: number; queue?: string } = {}
+  ): Promise<SerializedJob[]> {
+    let q = this.db.table(this.table)
+
+    if (options.queue) {
+      q = q.where('queue', options.queue)
+    }
+
+    const rows = await q
+      .where((sub: any) => {
+        sub
+          .where('job_id', 'like', `%${query}%`)
+          .orWhere('payload', 'like', `%${query}%`)
+          .orWhere('error', 'like', `%${query}%`)
+      })
+      .orderBy('archived_at', 'desc')
+      .limit(options.limit ?? 50)
+      .offset(options.offset ?? 0)
+      .get()
+
+    return rows
+      .map((r: any) => {
+        try {
+          const job = typeof r.payload === 'string' ? JSON.parse(r.payload) : r.payload
+          return { ...job, _status: r.status, _archivedAt: r.archived_at }
         } catch (_e) {
           return null
         }
@@ -93,6 +131,20 @@ export class MySQLPersistence implements PersistenceAdapter {
     const result = await this.db.table(this.table).where('archived_at', '<', threshold).delete()
 
     return result
+  }
+
+  /**
+   * Count jobs in the archive.
+   */
+  async count(queue: string, options: { status?: 'completed' | 'failed' } = {}): Promise<number> {
+    let query = this.db.table(this.table).where('queue', queue)
+
+    if (options.status) {
+      query = query.where('status', options.status)
+    }
+
+    const result = await query.count('id as total').first()
+    return result?.total || 0
   }
 
   /**
