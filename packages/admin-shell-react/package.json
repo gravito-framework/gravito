@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsup src/index.ts --format esm --dts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@gravito/admin-sdk": "workspace:*",
