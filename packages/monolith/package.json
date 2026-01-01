@@ -10,7 +10,7 @@
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
-    "typecheck": "bun tsc --noEmit --skipLibCheck"
+    "typecheck": "bun tsc --noEmit --skipLibCheck --incremental false"
   },
   "keywords": [
     "gravito",

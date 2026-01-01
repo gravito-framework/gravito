@@ -41,11 +41,11 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
       typecheckScript = pkg.scripts.typecheck
 
       // 檢查是否使用正確的命令
-      const isStdTsc = typecheckScript === 'bun tsc --noEmit --skipLibCheck'
-      const isNodeTsc = typecheckScript?.includes('node --max-old-space-size') && typecheckScript?.includes('tsc')
+      const isStdTsc = typecheckScript?.includes('tsc') && typecheckScript?.includes('--noEmit')
+      const hasIncrementalFalse = typecheckScript?.includes('--incremental false')
       
-      if (!isStdTsc && !isNodeTsc) {
-        issues.push(`⚠️  typecheck 腳本建議標準化為 'bun tsc --noEmit --skipLibCheck' 或指定記憶體限制（當前: ${typecheckScript}）`)
+      if (!isStdTsc || !hasIncrementalFalse) {
+        issues.push(`⚠️  typecheck 腳本建議標準化並包含 '--incremental false'（當前: ${typecheckScript}）`)
       }
 
       // 檢查是否有 --skipLibCheck
