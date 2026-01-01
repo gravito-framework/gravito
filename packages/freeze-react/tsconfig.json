@@ -11,7 +11,10 @@
             "@gravito/*": [
                 "../../packages/*/src/index.ts"
             ]
-        }
+        },
+        "types": [
+            "bun-types"
+        ]
     },
     "include": [
         "src/**/*"
