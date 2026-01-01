@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from './Layout'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { NotificationProvider } from './contexts/NotificationContext'
 import {
     OverviewPage,
     QueuesPage,
@@ -38,15 +39,17 @@ function AuthenticatedRoutes() {
 
     // Otherwise, show the main app
     return (
-        <Layout>
-            <Routes>
-                <Route path="/" element={<OverviewPage />} />
-                <Route path="/queues" element={<QueuesPage />} />
-                <Route path="/workers" element={<WorkersPage />} />
-                <Route path="/metrics" element={<MetricsPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
-        </Layout>
+        <NotificationProvider>
+            <Layout>
+                <Routes>
+                    <Route path="/" element={<OverviewPage />} />
+                    <Route path="/queues" element={<QueuesPage />} />
+                    <Route path="/workers" element={<WorkersPage />} />
+                    <Route path="/metrics" element={<MetricsPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                </Routes>
+            </Layout>
+        </NotificationProvider>
     )
 }
 

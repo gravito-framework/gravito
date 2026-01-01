@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
-import { Bell, Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut } from 'lucide-react'
+import { NotificationBell } from './components/NotificationBell'
+import { Search, User, Sun, Moon, ShieldCheck, Command, LayoutDashboard, ListTree, HardDrive, Activity, RefreshCcw, Trash2, Settings, BarChart3, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn } from './utils'
@@ -250,10 +251,7 @@ export function Layout({ children }: LayoutProps) {
                             )}
                         </button>
 
-                        <button className="text-muted-foreground hover:text-foreground transition-all relative p-2 hover:bg-muted rounded-xl">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
-                        </button>
+                        <NotificationBell />
 
                         <div className="h-8 w-[1px] bg-border/50"></div>
 
