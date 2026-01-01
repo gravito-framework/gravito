@@ -152,6 +152,8 @@ export default {
     home: '首頁',
     lux: 'Luminosity (Lux)',
     lux_note: 'Luminosity (Lux) — 基於 Gravito Core 的 Sitemap 引擎。',
+    atlas: 'Atlas (ORM)',
+    atlas_note: 'Atlas (ORM) — 高性能 Bun 原生 ORM。',
     connect: '社群',
     copyright: 'Gravito Framework. 採用 MIT 授權。',
   },

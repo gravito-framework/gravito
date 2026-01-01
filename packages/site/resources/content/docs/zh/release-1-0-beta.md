@@ -14,6 +14,7 @@ Gravito 1.0 Beta 以 Bun 原生效能為核心，提供完整的全端開發體�
 - Bun-native 架構：極快啟動與高效能執行
 - 全端生態：一致的開發流程與工具鏈
 - 原生 ORM：吸收 Prisma/Drizzle 的設計優勢，提供現代化資料模型
+- **Atlas 官網上線**：前往 [atlas.gravito.dev](https://atlas.gravito.dev) 探索 Atlas ORM 的完整功能與即時演示。
 - 企業級架構：可擴充、可演進的分層設計
 - 可觀測性：標準化健康檢查、監控與追蹤能力
 
