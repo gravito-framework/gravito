@@ -1,25 +1,16 @@
-# Use the official Bun image
-FROM oven/bun:1 as base
+FROM oven/bun:1
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lockb ./
-COPY packages/flux-console/package.json ./packages/flux-console/
-COPY packages/stream/package.json ./packages/stream/
-COPY packages/photon/package.json ./packages/photon/
+# Copy built artifacts and package files
+COPY package.json .
+COPY dist ./dist
+COPY src/client ./src/client
 
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy source code
-COPY . .
-
-# Build Flux Console
-WORKDIR /app/packages/flux-console
-RUN bun run build
+# Install only production dependencies
+RUN bun install --production
 
 # Expose port
 EXPOSE 3000
 
-# Start the server
-CMD ["bun", "dist/bin.js"]
+# Start command
+CMD ["bun", "run", "dist/bin.js"]

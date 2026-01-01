@@ -1,5 +1,4 @@
 import { Cpu, Activity } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -7,17 +6,13 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-export function WorkerStatus({ highlightedWorkerId }: { highlightedWorkerId?: string | null }) {
-    const { data: workerData } = useQuery<{ workers: any[] }>({
-        queryKey: ['workers'],
-        queryFn: async () => {
-            const res = await fetch('/api/workers')
-            return res.json()
-        },
-        refetchInterval: 5000
-    })
+export function WorkerStatus({ highlightedWorkerId, workers = [] }: { highlightedWorkerId?: string | null, workers?: any[] }) {
+    // Legacy polling removed, now using passed props
+    // const { data: workerData } = useQuery<{ workers: any[] }>({ ... })
 
-    const workers = workerData?.workers || []
+    // Fallback if not passed (though it should be)
+    // const workers = workerData?.workers || []
+
     const onlineCount = workers.filter(w => w.status === 'online').length
 
     return (
@@ -78,18 +73,20 @@ export function WorkerStatus({ highlightedWorkerId }: { highlightedWorkerId?: st
                         <div className="flex items-center gap-6">
                             {worker.metrics && (
                                 <div className="flex gap-4">
-                                    <div className="space-y-1.5 w-16">
+                                    <div className="space-y-1.5 w-20">
                                         <div className="flex justify-between text-[8px] font-black text-muted-foreground uppercase tracking-tighter">
-                                            <span>CPU</span>
-                                            <span className={cn(worker.metrics.cpu > 0.8 && "text-red-500")}>{(worker.metrics.cpu * 100).toFixed(0)}%</span>
+                                            <span>LOAD ({worker.metrics.cores || '-'})</span>
+                                            <span className={cn(worker.metrics.cpu > (worker.metrics.cores || 4) && "text-red-500")}>
+                                                {worker.metrics.cpu.toFixed(2)}
+                                            </span>
                                         </div>
                                         <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                                             <div
                                                 className={cn(
                                                     "h-full transition-all duration-700",
-                                                    worker.metrics.cpu > 0.8 ? "bg-red-500" : worker.metrics.cpu > 0.5 ? "bg-amber-500" : "bg-green-500"
+                                                    worker.metrics.cpu > (worker.metrics.cores || 4) ? "bg-red-500" : worker.metrics.cpu > (worker.metrics.cores || 4) * 0.7 ? "bg-amber-500" : "bg-green-500"
                                                 )}
-                                                style={{ width: `${Math.min(100, worker.metrics.cpu * 100)}%` }}
+                                                style={{ width: `${Math.min(100, (worker.metrics.cpu / (worker.metrics.cores || 1)) * 100)}%` }}
                                             />
                                         </div>
                                     </div>

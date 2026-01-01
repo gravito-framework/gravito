@@ -19,9 +19,11 @@ interface Worker {
     uptime: number
     metrics?: {
         cpu: number
+        cores?: number
         ram: {
             rss: number
             heapUsed: number
+            total?: number
         }
     }
     queues?: string[]
@@ -44,6 +46,7 @@ export function WorkersPage() {
     const totalCpu = workers.reduce((acc, w) => acc + (w.metrics?.cpu || 0), 0)
     const avgCpu = workers.length > 0 ? totalCpu / workers.length : 0
     const totalRam = workers.reduce((acc, w) => acc + (w.metrics?.ram?.rss || 0), 0)
+    const totalCapacity = workers.reduce((acc, w) => acc + (w.metrics?.ram?.total || 0), 0)
 
     if (isPending) return (
         <div className="flex flex-col items-center justify-center p-20 space-y-6">
@@ -103,9 +106,9 @@ export function WorkersPage() {
                     <div className="relative">
                         <div className="flex items-center gap-2 mb-2">
                             <Gauge size={16} className="text-primary" />
-                            <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">Avg CPU Load</p>
+                            <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">Avg Load</p>
                         </div>
-                        <p className="text-3xl font-black">{(avgCpu * 100).toFixed(1)}%</p>
+                        <p className="text-3xl font-black">{avgCpu.toFixed(2)}</p>
                     </div>
                 </div>
                 <div className="card-premium p-6 relative overflow-hidden group">
@@ -113,9 +116,12 @@ export function WorkersPage() {
                     <div className="relative">
                         <div className="flex items-center gap-2 mb-2">
                             <MemoryStick size={16} className="text-indigo-500" />
-                            <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">Total RAM</p>
+                            <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">Cluster RAM</p>
                         </div>
-                        <p className="text-3xl font-black text-indigo-500">{(totalRam / 1024).toFixed(1)} GB</p>
+                        <div className="flex items-baseline gap-1">
+                            <p className="text-3xl font-black text-indigo-500">{(totalRam / 1024).toFixed(2)}</p>
+                            {totalCapacity > 0 && <span className="text-sm font-bold text-muted-foreground opacity-50">/ {(totalCapacity / 1024).toFixed(0)} GB</span>}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -177,21 +183,21 @@ export function WorkersPage() {
                                 {/* CPU */}
                                 <div>
                                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
-                                        <span className="text-muted-foreground">CPU Usage</span>
+                                        <span className="text-muted-foreground">Load (Cap: {worker.metrics.cores || '-'})</span>
                                         <span className={cn(
-                                            worker.metrics.cpu > 0.8 ? "text-red-500" : worker.metrics.cpu > 0.5 ? "text-amber-500" : "text-green-500"
+                                            worker.metrics.cpu > (worker.metrics.cores || 4) ? "text-red-500" : worker.metrics.cpu > (worker.metrics.cores || 4) * 0.7 ? "text-amber-500" : "text-green-500"
                                         )}>
-                                            {(worker.metrics.cpu * 100).toFixed(1)}%
+                                            {worker.metrics.cpu.toFixed(2)}
                                         </span>
                                     </div>
                                     <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min(100, worker.metrics.cpu * 100)}%` }}
+                                            animate={{ width: `${Math.min(100, (worker.metrics.cpu / (worker.metrics.cores || 1)) * 100)}%` }}
                                             transition={{ duration: 0.5 }}
                                             className={cn(
                                                 "h-full transition-colors",
-                                                worker.metrics.cpu > 0.8 ? "bg-red-500" : worker.metrics.cpu > 0.5 ? "bg-amber-500" : "bg-green-500"
+                                                worker.metrics.cpu > (worker.metrics.cores || 4) ? "bg-red-500" : worker.metrics.cpu > (worker.metrics.cores || 4) * 0.7 ? "bg-amber-500" : "bg-green-500"
                                             )}
                                         />
                                     </div>
@@ -200,13 +206,15 @@ export function WorkersPage() {
                                 {/* RAM */}
                                 <div>
                                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
-                                        <span className="text-muted-foreground">Memory (RSS)</span>
-                                        <span className="text-indigo-500">{(worker.metrics.ram.rss / 1024).toFixed(2)} GB</span>
+                                        <span className="text-muted-foreground">Memory (RSS / Total)</span>
+                                        <span className="text-indigo-500">
+                                            {(worker.metrics.ram.rss / 1024).toFixed(2)} GB / {worker.metrics.ram.total ? (worker.metrics.ram.total / 1024).toFixed(0) : '-'} GB
+                                        </span>
                                     </div>
                                     <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min(100, (worker.metrics.ram.rss / 2048) * 100)}%` }}
+                                            animate={{ width: `${Math.min(100, (worker.metrics.ram.rss / (worker.metrics.ram.total || 2048)) * 100)}%` }}
                                             transition={{ duration: 0.5 }}
                                             className="h-full bg-indigo-500"
                                         />

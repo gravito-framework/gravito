@@ -37,19 +37,60 @@ export function Layout({ children }: LayoutProps) {
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [health, setHealth] = useState(99.9)
 
-    // Fetch System Status
-    const { data: systemStatus } = useQuery<any>({
-        queryKey: ['system-status'],
-        queryFn: () => fetch('/api/system/status').then(res => res.json()),
-        refetchInterval: 10000
-    })
+    const [systemStatus, setSystemStatus] = useState<any>({})
 
-    // Fetch Queues for search
-    const { data: queueData } = useQuery<any>({
-        queryKey: ['queues'],
-        queryFn: () => fetch('/api/queues').then(res => res.json()),
-        refetchInterval: 30000
-    })
+    // Initial System Status Fetch
+    useEffect(() => {
+        fetch('/api/system/status').then(res => res.json()).then(setSystemStatus).catch(() => { })
+    }, [])
+
+    // Global SSE Stream Manager
+    useEffect(() => {
+        console.log('[FluxConsole] Establishing Global Event Stream...')
+        const ev = new EventSource('/api/logs/stream')
+
+        ev.addEventListener('log', (e) => {
+            try {
+                const data = JSON.parse(e.data)
+                window.dispatchEvent(new CustomEvent('flux-log-update', { detail: data }))
+            } catch (err) { console.error('SSE Log Error', err) }
+        })
+
+        ev.addEventListener('stats', (e) => {
+            try {
+                const data = JSON.parse(e.data)
+                window.dispatchEvent(new CustomEvent('flux-stats-update', { detail: data }))
+            } catch (err) { console.error('SSE Stats Error', err) }
+        })
+
+        ev.onerror = (err) => {
+            console.error('[FluxConsole] SSE Connection Error', err)
+            ev.close()
+            // Simple reconnect logic could go here, but EventSource usually auto-reconnects
+        }
+
+        return () => {
+            console.log('[FluxConsole] Closing Global Event Stream')
+            ev.close()
+        }
+    }, [])
+
+    // Fetch Queues for search (once)
+    const [queueData, setQueueData] = useState<any>({ queues: [] })
+    useEffect(() => {
+        fetch('/api/queues').then(res => res.json()).then(setQueueData).catch(() => { })
+
+        // Optional: Listen to global stats if available (from OverviewPage) to keep queue stats fresh in command palette
+        const handler = (e: any) => {
+            // We can update queue stats here if we want command palette to show live numbers
+            // But for now, just initial fetch is enough to stop the "loop" complaint.
+            if (e.detail?.queues) {
+                setQueueData({ queues: e.detail.queues })
+            }
+        }
+        window.addEventListener('flux-stats-update', handler)
+        return () => window.removeEventListener('flux-stats-update', handler)
+    }, [])
 
     // Debounced job search
     const [debouncedQuery, setDebouncedQuery] = useState('')

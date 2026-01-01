@@ -187,8 +187,19 @@ export function QueuesPage() {
     const { isPending, error, data } = useQuery<{ queues: QueueStats[] }>({
         queryKey: ['queues'],
         queryFn: () => fetch('/api/queues').then((res) => res.json()),
-        refetchInterval: 2000,
+        staleTime: Infinity, // No auto refetch
     })
+
+    // Listen for real-time updates from Layout's global stream
+    React.useEffect(() => {
+        const handler = (e: CustomEvent) => {
+            if (e.detail?.queues) {
+                queryClient.setQueryData(['queues'], { queues: e.detail.queues })
+            }
+        }
+        window.addEventListener('flux-stats-update', handler as EventListener)
+        return () => window.removeEventListener('flux-stats-update', handler as EventListener)
+    }, [queryClient])
 
     const queues = data?.queues || []
 

@@ -1,4 +1,5 @@
 import { QueueManager } from '@gravito/stream'
+import { EventEmitter } from 'events'
 import { Redis } from 'ioredis'
 
 export interface QueueStats {
@@ -6,12 +7,18 @@ export interface QueueStats {
   waiting: number
   delayed: number
   failed: number
+  active: number
+  paused: boolean
 }
 
 export class QueueService {
   private redis: Redis
   private subRedis: Redis
   private prefix: string
+  private logEmitter = new EventEmitter()
+  private logThrottleCount = 0
+  private logThrottleReset = Date.now()
+  private readonly MAX_LOGS_PER_SEC = 50
 
   constructor(redisUrl: string, prefix = 'queue:') {
     this.redis = new Redis(redisUrl, {
@@ -21,6 +28,7 @@ export class QueueService {
       lazyConnect: true,
     })
     this.prefix = prefix
+    this.logEmitter.setMaxListeners(1000)
 
     // Initialized for potential use
     new QueueManager({
@@ -37,6 +45,40 @@ export class QueueService {
 
   async connect() {
     await Promise.all([this.redis.connect(), this.subRedis.connect()])
+
+    // Setup single Redis subscription
+    await this.subRedis.subscribe('flux_console:logs')
+    this.subRedis.on('message', (channel, message) => {
+      if (channel === 'flux_console:logs') {
+        try {
+          // Throttling: Reset counter every second
+          const now = Date.now()
+          if (now - this.logThrottleReset > 1000) {
+            this.logThrottleReset = now
+            this.logThrottleCount = 0
+          }
+
+          // Emit only if under limit
+          if (this.logThrottleCount < this.MAX_LOGS_PER_SEC) {
+            this.logThrottleCount++
+            this.logEmitter.emit('log', JSON.parse(message))
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
+    })
+  }
+
+  /**
+   * Subscribes to the live log stream.
+   * Returns a cleanup function.
+   */
+  onLog(callback: (msg: any) => void): () => void {
+    this.logEmitter.on('log', callback)
+    return () => {
+      this.logEmitter.off('log', callback)
+    }
   }
 
   /**
@@ -201,6 +243,23 @@ export class QueueService {
     pipe.set(`flux_console:metrics:workers:${now}`, workers.length, 'EX', 3600)
 
     await pipe.exec()
+
+    // Real-time Broadcast
+    this.logEmitter.emit('stats', {
+      queues: stats,
+      throughput: await this.getThroughputData(),
+      workers,
+    })
+  }
+
+  /**
+   * Subscribes to real-time stats updates.
+   */
+  onStats(callback: (stats: any) => void): () => void {
+    this.logEmitter.on('stats', callback)
+    return () => {
+      this.logEmitter.off('stats', callback)
+    }
   }
 
   /**
@@ -334,28 +393,12 @@ export class QueueService {
         local queueKey = KEYS[2]
         local jobs = redis.call('LRANGE', failedKey, 0, -1)
         if #jobs > 0 then
-          redis.call('LPUSH', queueKey, unpack(jobs))
-          redis.call('DEL', failedKey)
+            redis.call('LPUSH', queueKey, unpack(jobs))
+            redis.call('DEL', failedKey)
         end
         return #jobs
       `
     return (await this.redis.eval(script, 2, failedKey, queueKey)) as number
-  }
-
-  /**
-   * Subscribes to the live log stream.
-   */
-  async subscribeLogs(onMessage: (msg: any) => void) {
-    await this.subRedis.subscribe('flux_console:logs')
-    this.subRedis.on('message', (channel, message) => {
-      if (channel === 'flux_console:logs') {
-        try {
-          onMessage(JSON.parse(message))
-        } catch (e) {
-          // Ignore
-        }
-      }
-    })
   }
 
   /**
@@ -367,10 +410,17 @@ export class QueueService {
       timestamp: new Date().toISOString(),
     }
     await this.redis.publish('flux_console:logs', JSON.stringify(payload))
+
     // Also store in a capped list for history (last 100 logs)
     const pipe = this.redis.pipeline()
     pipe.lpush('flux_console:logs:history', JSON.stringify(payload))
     pipe.ltrim('flux_console:logs:history', 0, 99)
+
+    // Increment throughput counter for this minute
+    const now = Math.floor(Date.now() / 60000)
+    pipe.incr(`flux_console:throughput:${now}`)
+    pipe.expire(`flux_console:throughput:${now}`, 3600) // Keep for 1 hour
+
     await pipe.exec()
   }
 

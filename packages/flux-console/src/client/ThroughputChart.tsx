@@ -1,3 +1,4 @@
+import React from 'react'
 import {
     AreaChart,
     Area,
@@ -11,15 +12,36 @@ import {
 import { useQuery } from '@tanstack/react-query'
 
 export function ThroughputChart() {
-    const { data: throughputData } = useQuery({
+    // Initial fetch via React Query
+    const { data: initialData } = useQuery({
         queryKey: ['throughput'],
         queryFn: async () => {
             const res = await fetch('/api/throughput')
             const json = await res.json()
             return json.data || []
         },
-        refetchInterval: 5000
+        staleTime: Infinity // Don't refetch automatically
     })
+
+    const [throughputData, setThroughputData] = React.useState<any[]>([])
+
+    // Sync with initial data
+    React.useEffect(() => {
+        if (initialData) {
+            setThroughputData(initialData)
+        }
+    }, [initialData])
+
+    // Listen for live updates
+    React.useEffect(() => {
+        const handler = (e: any) => {
+            if (e.detail?.throughput) {
+                setThroughputData(e.detail.throughput)
+            }
+        }
+        window.addEventListener('flux-stats-update', handler)
+        return () => window.removeEventListener('flux-stats-update', handler)
+    }, [])
 
     const chartData = throughputData?.map((d: any) => ({
         time: d.timestamp,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
     Activity,
     RefreshCcw,
@@ -35,7 +35,7 @@ export function MetricsPage() {
             const json = await res.json()
             return json.data || []
         },
-        refetchInterval: 5000
+        staleTime: Infinity
     })
 
     const { data: historyData } = useQuery<{ history: Record<string, number[]> }>({
@@ -47,14 +47,28 @@ export function MetricsPage() {
     const { isPending, data: queueData } = useQuery<{ queues: any[] }>({
         queryKey: ['queues'],
         queryFn: () => fetch('/api/queues').then(res => res.json()),
-        refetchInterval: 5000,
+        staleTime: Infinity
     })
 
     const { data: workerData } = useQuery<{ workers: any[] }>({
         queryKey: ['workers'],
         queryFn: () => fetch('/api/workers').then(res => res.json()),
-        refetchInterval: 5000,
+        staleTime: Infinity
     })
+
+    const queryClient = useQueryClient()
+    // Live update from global stream
+    React.useEffect(() => {
+        const handler = (e: CustomEvent) => {
+            const stats = e.detail
+            if (!stats) return
+            if (stats.queues) queryClient.setQueryData(['queues'], { queues: stats.queues })
+            if (stats.workers) queryClient.setQueryData(['workers'], { workers: stats.workers })
+            if (stats.throughput) queryClient.setQueryData(['throughput'], stats.throughput)
+        }
+        window.addEventListener('flux-stats-update', handler as EventListener)
+        return () => window.removeEventListener('flux-stats-update', handler as EventListener)
+    }, [queryClient])
 
     const history = historyData?.history || {}
     const queues = queueData?.queues || []

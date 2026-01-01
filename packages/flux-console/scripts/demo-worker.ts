@@ -24,7 +24,7 @@ class TestJob extends Job {
     await redis.incr(`flux_console:throughput:${now}`)
     await redis.expire(`flux_console:throughput:${now}`, 86400) // 24h
 
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 50))
   }
 }
 

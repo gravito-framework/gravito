@@ -188,9 +188,11 @@ export class Consumer {
           const mem = process.memoryUsage()
           const metrics = {
             cpu: os.loadavg()[0], // 1m load avg
+            cores: os.cpus().length,
             ram: {
               rss: Math.floor(mem.rss / 1024 / 1024),
               heapUsed: Math.floor(mem.heapUsed / 1024 / 1024),
+              total: Math.floor(os.totalmem() / 1024 / 1024),
             },
           }
 

@@ -185,12 +185,12 @@ function LiveLogs({ onWorkerHover }: { onWorkerHover?: (id: string | null) => vo
     const logEndRef = React.useRef<HTMLDivElement>(null)
 
     React.useEffect(() => {
-        const ev = new EventSource('/api/logs/stream')
-        ev.addEventListener('log', (e) => {
-            const data = JSON.parse(e.data)
+        const handler = (e: CustomEvent) => {
+            const data = e.detail
             setLogs(prev => [...prev.slice(-99), data])
-        })
-        return () => ev.close()
+        }
+        window.addEventListener('flux-log-update', handler as EventListener)
+        return () => window.removeEventListener('flux-log-update', handler as EventListener)
     }, [])
 
     React.useEffect(() => {
@@ -396,55 +396,50 @@ export function OverviewPage() {
         return () => window.removeEventListener('select-queue', handler)
     }, [])
 
-    const { isPending, error, data } = useQuery<{ queues: QueueStats[] }>({
-        queryKey: ['queues'],
-        queryFn: () => fetch('/api/queues').then((res) => res.json()),
-        refetchInterval: 2000,
-    })
+    // State management for real-time data
+    const [queues, setQueues] = React.useState<QueueStats[]>([])
+    const [workers, setWorkers] = React.useState<any[]>([])
+    // const [history, setHistory] = React.useState<Record<string, number[]>>({}) // Keep using useQuery for heavy history for now? No, let's sync.
 
-    const { data: workerData } = useQuery<any>({
-        queryKey: ['workers'],
-        queryFn: async () => {
-            const res = await fetch('/api/workers')
-            return res.json()
-        },
-        refetchInterval: 5000
-    })
+    // Initial fetch manually to avoid any React Query background behavior
+    React.useEffect(() => {
+        fetch('/api/queues').then(res => res.json()).then(data => {
+            if (data.queues) setQueues(data.queues)
+        })
+        fetch('/api/workers').then(res => res.json()).then(data => {
+            if (data.workers) setWorkers(data.workers)
+        })
+    }, [])
+
+    // Unified Event Listener for all metrics
+    React.useEffect(() => {
+        // We use a custom event dispatched by the LiveLogs component (or a global manager if we had one)
+        // For now, let's just listen to the global window event we dispatch from the main stream
+        const handler = (e: any) => {
+            const stats = e.detail
+            if (stats) {
+                if (stats.queues) setQueues(stats.queues)
+                if (stats.workers) setWorkers(stats.workers)
+                // History updates could be merged here if we sent delta updates
+            }
+        }
+        window.addEventListener('flux-stats-update', handler)
+        return () => window.removeEventListener('flux-stats-update', handler)
+    }, [])
 
     const { data: historyData } = useQuery<{ history: Record<string, number[]> }>({
         queryKey: ['metrics-history'],
         queryFn: () => fetch('/api/metrics/history').then(res => res.json()),
-        refetchInterval: 30000,
+        refetchInterval: 30000, // History is heavy, keep polling for now or accept slightly stale lines
     })
 
     const history = historyData?.history || {}
 
-    if (isPending) return (
-        <div className="flex flex-col items-center justify-center p-20 space-y-6">
-            <div className="relative">
-                <RefreshCcw className="animate-spin text-primary" size={48} />
-                <div className="absolute inset-0 animate-ping bg-primary/20 rounded-full scale-150 opacity-0 group-hover:opacity-100" />
-            </div>
-            <p className="text-muted-foreground font-bold uppercase tracking-[0.3em] text-xs">Synchronizing system bus...</p>
-        </div>
-    )
-
-    if (error) return (
-        <div className="text-center p-20">
-            <div className="bg-red-500/10 text-red-500 p-10 rounded-3xl border border-red-500/20 max-w-md mx-auto shadow-2xl">
-                <AlertCircle size={56} className="mx-auto mb-6 opacity-80" />
-                <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Bus Connection Lost</h3>
-                <p className="text-sm font-medium opacity-70 mb-8">{error.message}</p>
-                <button onClick={() => window.location.reload()} className="w-full py-4 bg-red-500 text-white rounded-xl font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg active:scale-95">Recheck Connection</button>
-            </div>
-        </div>
-    )
-
-    const queues = data?.queues || []
+    // Calculation derived from state
     const totalWaiting = queues.reduce((acc, q) => acc + q.waiting, 0)
     const totalDelayed = queues.reduce((acc, q) => acc + q.delayed, 0)
     const totalFailed = queues.reduce((acc, q) => acc + q.failed, 0)
-    const activeWorkers = workerData?.workers?.length || 0
+    const activeWorkers = workers.length
 
     return (
         <div className="space-y-12">
@@ -474,7 +469,7 @@ export function OverviewPage() {
             <QueueHeatmap queues={queues} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1"><WorkerStatus highlightedWorkerId={hoveredWorkerId} /></div>
+                <div className="lg:col-span-1"><WorkerStatus highlightedWorkerId={hoveredWorkerId} workers={workers} /></div>
                 <div className="lg:col-span-2"><LiveLogs onWorkerHover={setHoveredWorkerId} /></div>
             </div>
 

@@ -28,7 +28,7 @@ queueService
     // Start background metrics recording
     setInterval(() => {
       queueService.recordStatusMetrics().catch(console.error)
-    }, 60000)
+    }, 5000)
     // Record initial snapshot
     queueService.recordStatusMetrics().catch(console.error)
   })
@@ -248,16 +248,29 @@ api.get('/logs/stream', async (c) => {
     }
 
     // 2. Subscribe to new logs
-    await queueService.subscribeLogs(async (msg) => {
+    const unsubscribeLogs = queueService.onLog(async (msg) => {
       await stream.writeSSE({
         data: JSON.stringify(msg),
         event: 'log',
       })
     })
 
+    // 3. Subscribe to real-time stats
+    const unsubscribeStats = queueService.onStats(async (stats) => {
+      await stream.writeSSE({
+        data: JSON.stringify(stats),
+        event: 'stats',
+      })
+    })
+
+    stream.onAbort(() => {
+      unsubscribeLogs()
+      unsubscribeStats()
+    })
+
     // Keep alive
     while (true) {
-      await stream.sleep(30000)
+      await stream.sleep(5000)
       await stream.writeSSE({ data: 'heartbeat', event: 'ping' })
     }
   })
