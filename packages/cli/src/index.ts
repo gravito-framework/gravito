@@ -684,17 +684,10 @@ cli.command('doctor', 'Diagnose project issues').action(async () => {
   await cmd.doctor()
 })
 
-cli
-  .command('add <feature>', 'Add a feature to the project')
-  .action(async (feature) => {
-    const cmd = new MaintenanceCommand()
-    await cmd.addFeature(feature)
-  })
-
-  .action(async (feature) => {
-    const cmd = new MaintenanceCommand()
-    await cmd.addFeature(feature)
-  })
+cli.command('add <feature>', 'Add a feature to the project').action(async (feature) => {
+  const cmd = new MaintenanceCommand()
+  await cmd.addFeature(feature)
+})
 
 cli.command('dev', 'Start development server with health checks').action(async () => {
   // 1. Run Doctor Check
