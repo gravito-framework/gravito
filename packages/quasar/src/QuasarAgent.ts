@@ -4,6 +4,7 @@ import type { Probe } from './types'
 
 export interface QuasarOptions {
   service: string
+  name?: string
   redisUrl?: string
   interval?: number
   probe?: Probe
@@ -12,13 +13,15 @@ export interface QuasarOptions {
 export class QuasarAgent {
   private redis: Redis
   private service: string
+  private name?: string
   private interval: number
   private probe: Probe
   private timer: Timer | null = null
-  private prefix = 'pulse:' // TODO: Migrate to gravito:quasar: later
+  private prefix = 'gravito:quasar:node:'
 
   constructor(options: QuasarOptions) {
     this.service = options.service
+    this.name = options.name
     this.redis = new Redis(options.redisUrl || 'redis://localhost:6379', {
       lazyConnect: true,
     })
@@ -47,15 +50,16 @@ export class QuasarAgent {
   private async tick() {
     try {
       const metrics = await this.probe.getMetrics()
-      const id = `${metrics.hostname}-${metrics.pid}`
+      const hostname = this.name || metrics.hostname
+      const id = `${hostname}-${metrics.pid}`
 
       const payload = {
         id,
         service: this.service,
-        language: 'node',
+        language: metrics.language || 'node',
         version: metrics.runtime.version,
         pid: metrics.pid,
-        hostname: metrics.hostname,
+        hostname: hostname,
         platform: metrics.runtime.platform,
         cpu: metrics.cpu,
         memory: metrics.memory,

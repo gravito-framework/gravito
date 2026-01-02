@@ -1,13 +1,20 @@
 export interface PulseCpu {
-  usage: number // Percentage 0-100
+  system: number // Percentage 0-100
+  process: number // Percentage 0-100
   cores: number
 }
 
 export interface PulseMemory {
-  rss: number // bytes
-  heapUsed: number // bytes
-  total: number // bytes
-  free: number // bytes
+  system: {
+    total: number // bytes
+    free: number // bytes
+    used: number // bytes
+  }
+  process: {
+    rss: number // bytes
+    heapTotal: number // bytes
+    heapUsed: number // bytes
+  }
 }
 
 export interface PulseRuntime {
@@ -18,7 +25,7 @@ export interface PulseRuntime {
 export interface PulseNode {
   id: string // Unique Instance ID
   service: string // Group name
-  language: 'node' | 'php' | 'go' | 'python' | 'other'
+  language: 'node' | 'bun' | 'deno' | 'php' | 'go' | 'python' | 'other'
   version: string // App Version
   pid: number
   hostname: string

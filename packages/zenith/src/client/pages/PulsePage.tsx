@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Activity, Cpu, Database, Laptop, Server } from 'lucide-react'
+import { Activity, Cpu, Database, Laptop, Server, HelpCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { PulseNode } from '../../shared/types'
 import { PageHeader } from '../components/PageHeader'
 import { cn } from '../utils'
+import { BunIcon, DenoIcon, GoIcon, NodeIcon, PhpIcon, PythonIcon } from '../components/BrandIcons'
 
 // Helper to format bytes
 const formatBytes = (bytes: number) => {
@@ -18,6 +19,18 @@ const formatBytes = (bytes: number) => {
 function NodeCard({ node }: { node: PulseNode }) {
     const isHealthy = Date.now() - node.timestamp < 30000 // 30s threshold
     const isWarning = !isHealthy && Date.now() - node.timestamp < 60000 // 60s warning
+
+    const renderIcon = () => {
+        switch (node.language) {
+            case 'node': return <NodeIcon className="w-6 h-6" />
+            case 'bun': return <BunIcon className="w-6 h-6 text-black" />
+            case 'deno': return <DenoIcon className="w-6 h-6" />
+            case 'php': return <PhpIcon className="w-6 h-6" />
+            case 'go': return <GoIcon className="w-6 h-6" />
+            case 'python': return <PythonIcon className="w-6 h-6" />
+            default: return <HelpCircle className="w-6 h-6 text-white" />
+        }
+    }
 
     return (
         <motion.div
@@ -33,17 +46,8 @@ function NodeCard({ node }: { node: PulseNode }) {
 
             <div className="flex items-start justify-between mb-4 relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg",
-                        node.language === 'node' ? 'bg-[#339933]' :
-                            node.language === 'php' ? 'bg-[#777BB4]' :
-                                node.language === 'go' ? 'bg-[#00ADD8]' :
-                                    node.language === 'python' ? 'bg-[#3776AB]' : 'bg-gray-500'
-                    )}>
-                        {node.language === 'node' && <span className="font-bold text-xs">JS</span>}
-                        {node.language === 'php' && <span className="font-bold text-xs">PHP</span>}
-                        {node.language === 'go' && <span className="font-bold text-xs">GO</span>}
-                        {node.language !== 'node' && node.language !== 'php' && node.language !== 'go' && <span className="font-bold text-xs">?</span>}
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white dark:bg-card border border-border/20 shadow-sm shrink-0">
+                        {renderIcon()}
                     </div>
                     <div>
                         <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
@@ -61,36 +65,70 @@ function NodeCard({ node }: { node: PulseNode }) {
                 )} />
             </div>
 
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Metrics Grid - Vertical Stack */}
+            <div className="space-y-3">
                 {/* CPU */}
                 <div className="bg-muted/30 rounded-lg p-2.5 border border-border/50">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                        <Cpu size={12} /> CPU Usage
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                        <div className="flex items-center gap-2"><Cpu size={12} /> CPU Usage</div>
+                        <span className="text-[10px]">{node.cpu.cores} cores</span>
                     </div>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-bold text-foreground">{node.cpu.usage}%</span>
-                        <span className="text-[10px] text-muted-foreground">/ {node.cpu.cores} cores</span>
+                        <span className="text-xl font-bold text-foreground">{node.cpu.process}%</span>
+                        <span className="text-xs text-muted-foreground ml-1">proc</span>
                     </div>
                     {/* Mini Bar */}
-                    <div className="h-1 w-full bg-muted rounded-full mt-2 overflow-hidden">
+                    <div className="h-2 w-full bg-muted rounded-full mt-2 overflow-hidden relative">
+                        {/* Process Usage */}
                         <div
-                            className={cn("h-full rounded-full transition-all duration-500", node.cpu.usage > 80 ? 'bg-red-500' : 'bg-primary')}
-                            style={{ width: `${Math.min(node.cpu.usage, 100)}%` }}
+                            className={cn("h-full rounded-full transition-all duration-500 absolute top-0 left-0 z-20 shadow-sm", node.cpu.process > 80 ? 'bg-red-500' : 'bg-primary')}
+                            style={{ width: `${Math.min(node.cpu.process, 100)}%` }}
                         />
+                        {/* System Load Background (Darker) */}
+                        <div
+                            className="h-full rounded-full transition-all duration-500 absolute top-0 left-0 bg-muted-foreground/30 z-10"
+                            style={{ width: `${Math.min(node.cpu.system, 100)}%` }}
+                        />
+                    </div>
+                    <div className="flex justify-between text-[9px] text-muted-foreground mt-1 font-mono">
+                        <span className="text-primary font-bold">Proc: {node.cpu.process}%</span>
+                        <span>Sys: {node.cpu.system}%</span>
                     </div>
                 </div>
 
                 {/* Memory */}
                 <div className="bg-muted/30 rounded-lg p-2.5 border border-border/50">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                        <Database size={12} /> RAM Usage
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                        <div className="flex items-center gap-2"><Database size={12} /> RAM Usage</div>
                     </div>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-bold text-foreground">{formatBytes(node.memory.rss)}</span>
+                        <span className="text-xl font-bold text-foreground">{formatBytes(node.memory.process.rss)}</span>
+                        <span className="text-xs text-muted-foreground ml-1">RSS</span>
                     </div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
-                        Heap: {formatBytes(node.memory.heapUsed)}
+
+                    {/* RAM Bar */}
+                    <div className="h-2 w-full bg-muted rounded-full mt-2 overflow-hidden relative">
+                        {/* Process Usage */}
+                        <div
+                            className="h-full rounded-full transition-all duration-500 absolute top-0 left-0 z-20 shadow-sm bg-indigo-500"
+                            style={{ width: `${Math.min((node.memory.process.rss / node.memory.system.total) * 100, 100)}%` }}
+                        />
+                        {/* System Usage */}
+                        <div
+                            className="h-full rounded-full transition-all duration-500 absolute top-0 left-0 bg-muted-foreground/30 z-10"
+                            style={{ width: `${Math.min((node.memory.system.used / node.memory.system.total) * 100, 100)}%` }}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground mt-3 border-t border-border/30 pt-2 font-mono">
+                        <div className="flex flex-col">
+                            <span className="opacity-70">Heap</span>
+                            <span className="font-bold">{formatBytes(node.memory.process.heapUsed)}</span>
+                        </div>
+                        <div className="flex flex-col text-right">
+                            <span className="opacity-70">Sys Free</span>
+                            <span className="">{formatBytes(node.memory.system.free)}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -107,20 +145,24 @@ function NodeCard({ node }: { node: PulseNode }) {
     )
 }
 
+// Compact Service Group Component
 function ServiceGroup({ service, nodes }: { service: string, nodes: PulseNode[] }) {
+    const isSingle = nodes.length === 1
+
     return (
-        <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-                <div className="h-px flex-1 bg-border/50" />
-                <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
+        <div className="bg-card/50 border border-border/40 rounded-xl p-4 flex flex-col h-full">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/40">
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex-1">
                     {service}
-                    <span className="bg-muted text-foreground px-2 py-0.5 rounded-md text-xs">{nodes.length}</span>
                 </h2>
-                <div className="h-px flex-1 bg-border/50" />
+                <span className="bg-muted text-foreground px-2 py-0.5 rounded-md text-xs font-mono">{nodes.length}</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className={cn(
+                "grid gap-3",
+                isSingle ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-2"
+            )}>
                 {nodes.map(node => (
                     <NodeCard key={node.id} node={node} />
                 ))}
@@ -199,7 +241,7 @@ export function PulsePage() {
                         </p>
                     </div>
                 ) : (
-                    <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                         {services.map(([service, nodes]) => (
                             <ServiceGroup key={service} service={service} nodes={nodes} />
                         ))}

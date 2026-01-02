@@ -8,7 +8,7 @@ Gravito Pulse is a lightweight APM (Application Performance Monitoring) system i
 ### Data Structure
 Pulse uses Redis keys with specific TTLs to represent live services.
 
-- **Key Pattern**: `pulse:{service}:{node_id}`
+- **Key Pattern**: `gravito:quasar:node:{service}:{node_id}`
 - **TTL**: 30 seconds (Agents should heartbeat every 10-15s).
 - **Data Type**: String (JSON)
 
@@ -17,24 +17,31 @@ Pulse uses Redis keys with specific TTLs to represent live services.
 {
   "id": "string",          // Unique Instance ID (e.g., UUID or Hostname-PID)
   "service": "string",     // Group name (e.g., "worker-billing", "api-gateway")
-  "language": "string",    // "node", "php", "go", "python"
-  "version": "string",     // App Version
+  "language": "string",    // "node" | "bun" | "deno" | "php" | "go" | "python" | "other"
+  "version": "string",     // Language/Runtime Version
   "pid": "number",         // Process ID
-  "hostname": "string",    // Machine Hostname
+  "hostname": "string",    // Machine Hostname or Custom Name
   "platform": "string",    // OS Platform (linux, darwin, win32)
   "cpu": {
-    "usage": "number",     // Percentage (0-100)
-    "cores": "number"      // Core count
+     "system": "number",   // System Load % (0-100)
+     "process": "number",  // Process Usage % (0-100)
+     "cores": "number"     // Core count
   },
   "memory": {
-    "rss": "number",       // Resident Set Size (bytes)
-    "heapUsed": "number",  // Heap Used (bytes) - Node/Runtime specific
-    "total": "number",     // System Total Memory (bytes)
-    "free": "number"       // System Free Memory (bytes)
+    "system": {
+        "total": "number", // System Total Memory (bytes)
+        "free": "number",  // System Free Memory (bytes)
+        "used": "number"   // System Used Memory (bytes)
+    },
+    "process": {
+        "rss": "number",      // Resident Set Size (bytes)
+        "heapTotal": "number",// Heap Total (bytes)
+        "heapUsed": "number"  // Heap Used (bytes)
+    }
   },
   "runtime": {
     "uptime": "number",    // Process uptime in seconds
-     "framework_version": "string" // e.g. "Laravel 10.0" or "Node 20.1"
+    "framework": "string"  // Optional framework info
   },
   "timestamp": "number"    // Unix Ms Timestamp
 }

@@ -1,13 +1,21 @@
 export interface SystemMetrics {
+  language?: 'node' | 'bun' | 'deno'
   cpu: {
-    usage: number
+    system: number // System-wide load %
+    process: number // Process-specific load %
     cores: number
   }
   memory: {
-    rss: number
-    heapUsed: number
-    total: number
-    free: number
+    system: {
+      total: number
+      free: number
+      used: number
+    }
+    process: {
+      rss: number
+      heapTotal: number
+      heapUsed: number
+    }
   }
   runtime: {
     uptime: number

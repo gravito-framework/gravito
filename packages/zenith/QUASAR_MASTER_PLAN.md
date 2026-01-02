@@ -60,16 +60,23 @@ All agents/SDKs report to Redis using this unified schema.
 
 ## 4. Execution Roadmap
 
-### Phase 1: SDK Foundation (Node/Bun) - **In Progress** 🟡
-*   **Goal**: Establish the SDK and integrate it into Zenith (Dogfooding).
-*   [x] Create `@gravito/quasar` package.
-*   [x] Implement `QuasarAgent` (Basic Heartbeat).
-*   [x] Switch Protocol to SSE.
-*   [ ] **Refinement**: Update Probe to split `system_cpu` vs `process_cpu`.
-*   [ ] **Refinement**: Migrate Redis keys to `gravito:quasar:*` namespace.
+### Phase 1: Foundation & Application Monitoring (Pulse Node)
+**Goal**: Establish the basic dashboard and Node.js SDK for monitoring application health (CPU/RAM).
 
-### Phase 2: Application Insights (Queues) - **Next** 📅
-*   **Goal**: Let Zenith monitor queues from other systems (e.g., Laravel).
+- [x] **Define Schema**: Update `PULSE_SPEC.md` with new Redis key patterns (`gravito:quasar:node:*`) and payload structure.
+- [x] **SDK Update**: Refactor `@gravito/quasar` (formerly pulse-node) to support:
+    - [x] Automatic runtime detection (Node, Bun, Deno).
+    - [x] System/Process split metrics.
+    - [x] Correct Redis namespacing.
+- [x] **Server Update**: Update Zenith's `PulseService` to scan new key patterns.
+- [x] **UI Overhaul**: Redesign `PulsePage` in Zenith:
+    - [x] Implement "Card" layout for nodes.
+    - [x] Rich metrics visualization (CPU/RAM split bars).
+    - [x] Add brand icons for runtimes (Node, Bun, Deno, PHP, Go, Python).
+    - [x] **Layout Optimization**: Compact Grid for Service Groups (Full width for single nodes).
+
+### Phase 2: Application Insights (Queues)
+**Goal**: Monitor queue health (Redis/Queue count, throughput) without needing full Queue Inspector.om other systems (e.g., Laravel).
 *   [ ] **Protocol**: Define `QueueSnapshot` interface in `packages/quasar`.
 *   [ ] **SDK**: Add `.monitorQueues()` capabilities to Quasar SDK.
 *   [ ] **UI**: Update `PulsePage` (or `QueuesPage`) to visualize these external queues.

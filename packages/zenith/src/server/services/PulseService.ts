@@ -3,7 +3,7 @@ import type { PulseNode } from '../../shared/types'
 
 export class PulseService {
   private redis: Redis
-  private prefix = 'pulse:'
+  private prefix = 'gravito:quasar:node:'
 
   constructor(redisUrl: string) {
     this.redis = new Redis(redisUrl, {
