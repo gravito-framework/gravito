@@ -57,7 +57,7 @@ interface QueueSnapshot {
 - [ ] **Task 1.2: Create `packages/pulse-node`**
     - Implement System Recorder (CPU/RAM).
 
-### Phase 2: Universal Queue Adapters
+### Phase 2: Universal Queue Adapters (v1.0 Beta Target)
 **Goal**: Enable "One Dashboard, Any Queue".
 
 - [ ] **Task 2.1: Laravel Adapter Specification (Concept)**
@@ -83,6 +83,26 @@ interface QueueSnapshot {
     - Update `QueuesPage` to support "External Queues".
     - External queues might be "Read-Only" initially (Metrics only, no Retry controls yet).
     - Add visuals to distinguish Gravito Queues vs. External Queues.
+
+---
+
+## 🔮 Future Roadmap (v2.0)
+
+### Phase 4: Full Application Monitoring (Pulse)
+**Goal**: Catch the "bad" requests and visualize deep application health.
+
+- [ ] **Task 4.1: Slow Request Interceptor**
+    - Add `httpMiddleware` to `pulse-node`.
+    - Tracks request start/end time.
+    - If > threshold (default 1s), XADD to `pulse:slow:{app}`.
+
+- [ ] **Task 4.2: Exception Tracking**
+    - Aggregated 5xx error tracking via ZSET.
+
+- [ ] **Task 4.3: Cross-Language SDKs**
+    - Python (Django/FastAPI) and Go Recorders.
+    - GPU Monitoring for AI workloads.
+
 
 ---
 
