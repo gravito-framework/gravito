@@ -109,8 +109,6 @@ export class Scheduler {
     const dueIds = await this.client.zrangebyscore(`${this.prefix}schedules`, 0, now)
     let fired = 0
 
-    const serializer = this.manager.getSerializer()
-
     for (const id of dueIds) {
       // Use a lock to ensure only one worker processes this tick for this schedule
       const lockKey = `${this.prefix}lock:schedule:${id}:${Math.floor(now / 1000)}`

@@ -452,7 +452,6 @@ export class RedisDriver implements QueueDriver {
    */
   async retryFailed(queue: string, count = 1): Promise<number> {
     const failedKey = `${this.getKey(queue)}:failed`
-    const queueKey = this.getKey(queue)
     let retried = 0
 
     for (let i = 0; i < count; i++) {

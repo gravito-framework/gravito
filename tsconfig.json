@@ -18,7 +18,8 @@
       "@gravito/atlas": ["packages/atlas/src/index.ts"],
       "@gravito/mass": ["packages/mass/src/index.ts"],
       "@gravito/enterprise": ["packages/enterprise/src/index.ts"],
-      "@gravito/stasis": ["packages/stasis/src/index.ts"]
+      "@gravito/stasis": ["packages/stasis/src/index.ts"],
+      "@gravito/stream": ["packages/stream/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "**/dist/**"]
