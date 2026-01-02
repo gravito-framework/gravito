@@ -19,6 +19,16 @@ This document outlines the future development plan for **Gravito Zenith**, movin
 - [x] Create `docker-compose.yml` for a full stack setup (Console + Redis + Demo Worker).
 - [x] Implementation of Scheduled Jobs (Cron) Management.
 
+### 3. System Pulse Monitoring (Lightweight APM) (P0 - NEW)
+**Goal**: Application-Aware lightweight resource monitoring and alerting.
+**Philosophy**: "If you can connect to Redis, you are monitored." No extra agents, no Prometheus config.
+- **Features**:
+    - **Live Resource Cards**: CPU / RAM / Disk Usage per service (Node.js, PHP, Python).
+    - **Health Heartbeats**: Auto-discovery of active services via `pulse:{service}:{id}` keys.
+    - **Proactive Alerting**: Slack notifications for Disk Space < 10% or High CPU Load.
+    - **Protocol-Based**: Language-agnostic design (Gravito Pulse Protocol).
+
+
 ### 3. History Persistence (SQL Archive) (Completed ✅)
 **Goal**: Store job history permanently for auditing and long-term analysis.
 - [x] Implement a `PersistenceAdapter` in `@gravito/stream`.
