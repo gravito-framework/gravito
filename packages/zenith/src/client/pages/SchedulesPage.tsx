@@ -12,14 +12,14 @@ import {
   Filter,
   Play,
   Plus,
+  RefreshCcw,
   Search,
   Trash2,
   X,
-  RefreshCcw,
 } from 'lucide-react'
 import { useState } from 'react'
-import { useNotifications } from '../contexts/NotificationContext'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useNotifications } from '../contexts/NotificationContext'
 
 // Update interface to match actual API response
 interface ScheduleInfo {
@@ -488,7 +488,7 @@ export function SchedulesPage() {
       <ConfirmDialog
         open={!!confirmRunId}
         title="Manual trigger confirmation"
-        message={`Are you sure you want to run "${confirmRunId}" immediately?\nThis will bypass the next scheduled time and push a job to the "${schedules.find(s => s.id === confirmRunId)?.queue}" queue.`}
+        message={`Are you sure you want to run "${confirmRunId}" immediately?\nThis will bypass the next scheduled time and push a job to the "${schedules.find((s) => s.id === confirmRunId)?.queue}" queue.`}
         confirmText="Run Now"
         variant="info"
         isProcessing={runMutation.isPending}

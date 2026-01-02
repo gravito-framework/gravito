@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import {
+  Bell,
   Clock,
   Database,
   ExternalLink,
@@ -12,7 +13,6 @@ import {
   Shield,
   Sun,
   Trash2,
-  Bell,
 } from 'lucide-react'
 import React from 'react'
 import { cn } from '../utils'
@@ -233,30 +233,43 @@ export function SettingsPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className={cn(
-                "w-2 h-2 rounded-full",
-                alertConfig?.webhookEnabled ? "bg-green-500 animate-pulse" : "bg-muted-foreground/30"
-              )}></span>
-              <span className={cn(
-                "text-sm font-bold",
-                alertConfig?.webhookEnabled ? "text-green-500" : "text-muted-foreground"
-              )}>
-                {alertConfig?.webhookEnabled ? "Enabled" : "Not Configured"}
+              <span
+                className={cn(
+                  'w-2 h-2 rounded-full',
+                  alertConfig?.webhookEnabled
+                    ? 'bg-green-500 animate-pulse'
+                    : 'bg-muted-foreground/30'
+                )}
+              ></span>
+              <span
+                className={cn(
+                  'text-sm font-bold',
+                  alertConfig?.webhookEnabled ? 'text-green-500' : 'text-muted-foreground'
+                )}
+              >
+                {alertConfig?.webhookEnabled ? 'Enabled' : 'Not Configured'}
               </span>
             </div>
           </div>
 
           <div>
-            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-3">Active Rules</h3>
+            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-3">
+              Active Rules
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {alertConfig?.rules?.map((rule: any) => (
-                <div key={rule.id} className="p-3 bg-muted/20 border border-border/10 rounded-xl flex items-center justify-between">
+                <div
+                  key={rule.id}
+                  className="p-3 bg-muted/20 border border-border/10 rounded-xl flex items-center justify-between"
+                >
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-tight">{rule.name}</p>
                     <p className="text-[10px] text-muted-foreground opacity-70">
-                      {rule.type === 'backlog' ? `Waiting > ${rule.threshold}` :
-                        rule.type === 'failure' ? `Failed > ${rule.threshold}` :
-                          `Workers < ${rule.threshold}`}
+                      {rule.type === 'backlog'
+                        ? `Waiting > ${rule.threshold}`
+                        : rule.type === 'failure'
+                          ? `Failed > ${rule.threshold}`
+                          : `Workers < ${rule.threshold}`}
                     </p>
                   </div>
                   <div className="px-2 py-0.5 bg-muted rounded text-[9px] font-bold text-muted-foreground">
@@ -269,11 +282,14 @@ export function SettingsPage() {
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/30">
             <p className="text-xs text-muted-foreground max-w-md">
-              Configure <code>SLACK_WEBHOOK_URL</code> in your environment variables to receive notifications.
+              Configure <code>SLACK_WEBHOOK_URL</code> in your environment variables to receive
+              notifications.
             </p>
             <button
               onClick={async () => {
-                const res = await fetch('/api/alerts/test', { method: 'POST' }).then(r => r.json())
+                const res = await fetch('/api/alerts/test', { method: 'POST' }).then((r) =>
+                  r.json()
+                )
                 if (res.success) {
                   alert('Test alert dispatched to server processing loop.')
                 }

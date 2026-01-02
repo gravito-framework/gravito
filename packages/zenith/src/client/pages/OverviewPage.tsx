@@ -15,8 +15,8 @@ import {
   Trash2,
 } from 'lucide-react'
 import React from 'react'
-import { JobInspector } from '../components/JobInspector'
 import { useNavigate } from 'react-router-dom'
+import { JobInspector } from '../components/JobInspector'
 import { LogArchiveModal } from '../components/LogArchiveModal'
 import { ThroughputChart } from '../ThroughputChart'
 import { cn } from '../utils'
@@ -48,7 +48,15 @@ const DEFAULT_STATS: FluxStats = {
   workers: [],
 }
 
-function LiveLogs({ logs, onSearchArchive, onWorkerHover }: { logs: SystemLog[], onSearchArchive: () => void, onWorkerHover?: (id: string | null) => void }) {
+function LiveLogs({
+  logs,
+  onSearchArchive,
+  onWorkerHover,
+}: {
+  logs: SystemLog[]
+  onSearchArchive: () => void
+  onWorkerHover?: (id: string | null) => void
+}) {
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
@@ -273,7 +281,13 @@ function MetricCard({ title, value, icon, color, trend, data }: MetricCardProps)
   )
 }
 
-function QueueList({ queues, setSelectedQueue }: { queues: QueueStats[], setSelectedQueue: (name: string | null) => void }) {
+function QueueList({
+  queues,
+  setSelectedQueue,
+}: {
+  queues: QueueStats[]
+  setSelectedQueue: (name: string | null) => void
+}) {
   const queryClient = useQueryClient()
 
   return (
@@ -304,12 +318,14 @@ function QueueList({ queues, setSelectedQueue }: { queues: QueueStats[], setSele
                 <td className="px-4 py-4">
                   <div className="flex flex-col">
                     <span className="font-black text-foreground">{queue.name}</span>
-                    {queue.failed > 0 && <span className="text-[9px] text-red-500 font-bold uppercase">{queue.failed} FAILED</span>}
+                    {queue.failed > 0 && (
+                      <span className="text-[9px] text-red-500 font-bold uppercase">
+                        {queue.failed} FAILED
+                      </span>
+                    )}
                   </div>
                 </td>
-                <td className="px-4 py-4 font-mono font-black">
-                  {queue.waiting.toLocaleString()}
-                </td>
+                <td className="px-4 py-4 font-mono font-black">{queue.waiting.toLocaleString()}</td>
                 <td className="px-4 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <button

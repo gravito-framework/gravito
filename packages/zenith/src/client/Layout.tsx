@@ -19,7 +19,7 @@ import {
   Trash2,
   Zap,
 } from 'lucide-react'
-import * as React from 'react'
+import type * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NotificationBell } from './components/NotificationBell'
@@ -59,13 +59,12 @@ export function Layout({ children }: LayoutProps) {
   const [systemStatus, setSystemStatus] = useState<Record<string, any>>({})
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
-
   // Initial System Status Fetch
   useEffect(() => {
     fetch('/api/system/status')
       .then((res) => res.json())
       .then(setSystemStatus)
-      .catch(() => { })
+      .catch(() => {})
   }, [])
 
   // Global SSE Stream Manager
@@ -108,7 +107,7 @@ export function Layout({ children }: LayoutProps) {
     fetch('/api/queues')
       .then((res) => res.json())
       .then(setQueueData)
-      .catch(() => { })
+      .catch(() => {})
 
     // Optional: Listen to global stats if available (from OverviewPage) to keep queue stats fresh in command palette
     const handler = (e: Event) => {
@@ -247,15 +246,15 @@ export function Layout({ children }: LayoutProps) {
     },
     ...(isAuthEnabled
       ? [
-        {
-          id: 'sys-logout',
-          title: 'Logout',
-          description: 'Sign out from the console',
-          icon: <LogOut size={18} />,
-          category: 'System' as const,
-          action: logout,
-        },
-      ]
+          {
+            id: 'sys-logout',
+            title: 'Logout',
+            description: 'Sign out from the console',
+            icon: <LogOut size={18} />,
+            category: 'System' as const,
+            action: logout,
+          },
+        ]
       : []),
   ]
 

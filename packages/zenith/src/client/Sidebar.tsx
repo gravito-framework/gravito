@@ -63,7 +63,7 @@ export function Sidebar({ className, collapsed, toggleCollapse }: SidebarProps) 
                 initial={false}
                 animate={{
                   opacity: collapsed ? 0 : 1,
-                  display: collapsed ? 'none' : 'block'
+                  display: collapsed ? 'none' : 'block',
                 }}
                 className="font-semibold whitespace-nowrap tracking-tight"
               >
@@ -100,4 +100,3 @@ export function Sidebar({ className, collapsed, toggleCollapse }: SidebarProps) 
     </div>
   )
 }
-
