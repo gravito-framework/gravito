@@ -73,18 +73,39 @@ All agents/SDKs report to Redis using this unified schema.
     - [x] Implement "Card" layout for nodes.
     - [x] Rich metrics visualization (CPU/RAM split bars).
     - [x] Add brand icons for runtimes (Node, Bun, Deno, PHP, Go, Python).
-    - [x] **Layout Optimization**: Compact Grid for Service Groups (Full width for single nodes).
+    - [x] **Layout Optimization**: Compact Grid for Service Groups.
 
-### Phase 2: Application Insights (Queues) - **In Progress** 🟡
-**Goal**: Monitor queue health (Redis/Queue count, throughput) without needing full Queue Inspector.
+---
 
-- [ ] **Protocol**: Define `QueueSnapshot` interface in `packages/quasar` and `packages/zenith`.
-- [ ] **SDK**: Add `.monitorQueues()` capabilities to Quasar SDK to fetch metrics from local Redis/Queues.
-- [ ] **Server**: Ensure PulseService passes this data through to frontend.
-- [ ] **UI**: Update `PulsePage` (or specific `NodeCard`) to show queue metrics if present.
+### Phase 2: Architecture Evolution - "The Brain-Hand Model" 🧠 🖐️
+To support advanced features like **Queue Insights** (Phase 2) and **Remote Control** (Phase 3), we are adopting a bidirectional architecture.
 
-### Phase 3: The Go Agent (Sidecar) - **Future** 🔮
-*   **Goal**: Monitor non-Node environments (Laravel, Python).
+*   **Metric Transport (The Mouth)**: Agent sends metrics to Zenith (via shared Redis).
+*   **Local Insight (The Eyes)**: Agent inspects *its own* environment (Local Redis, Local Queue) to gather data. Zenith doesn't need to connect to the App DB directly.
+*   **Command execution (The Hand)**: Zenith publishes commands (Retry/Delete), and Agent listens and executes them locally.
+
+#### Revised Phase 2: Application Insights (Queues) - **In Progress** 🟡
+**Goal**: Enable Quasar Agent to "see" local queues and report their status.
+
+- [x] **SDK Architecture**: Update `QuasarAgent` to handle **Dual Connections**:
+    - `transport`: Connection to Zenith (for sending heartbeat).
+    - `app`: Connection to Local App (for inspecting queues/bull/laravel).
+- [x] **Probe Implementation**: Create `QueueProbe` interface and implementations:
+    - `RedisListProbe`: Simple `LLEN` checks.
+    - [ ] `BullProbe` (Future): Check `bull:*:waiting`, etc.
+    - [ ] `LaravelProbe` (Future): Check `queues:default`, `queues:failed`.
+- [x] **SDK API**: Expose `.monitorQueue(name, type)` method.
+- [ ] **UI Update**: Update `NodeCard` to render a "Queues" section if queue data is present in payload.
+
+### Phase 3: Remote Control (Command & Control) - **Future** 🔮
+**Goal**: Allow Zenith to instruct Quasar to perform actions (Retry Job, Delete Job).
+
+- [ ] **Protocol**: Define Command Protocol (Redis Pub/Sub: `gravito:quasar:cmd:{node_id}`).
+- [ ] **Agent**: Implement `CommandListener` in SDK.
+- [ ] **Security (ACL Strategy)**:
+    - [ ] Use **Redis ACL** (v6+) to restrict Agent's `transport` connection to ONLY Pub/Sub and specific Key prefixes.
+    - [ ] Implement **Command Allowlist** inside Agent code (e.g., only allow `RETRY_KNOWN_QUEUE`).
+- [ ] **UI**: Add "Retry/Delete" buttons in Zenith UI that trigger these commands.
 *   [ ] Create `gravito-framework/quasar` repo.
 *   [ ] Develop Go Agent (utilizing `gopsutil`).
 *   [ ] Implement "Laravel Adapter" inside the Go Agent (reading Redis/DB).

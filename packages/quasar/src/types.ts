@@ -43,3 +43,7 @@ export interface SystemMetrics {
 export interface Probe {
   getMetrics(): Promise<SystemMetrics> | SystemMetrics
 }
+
+export interface QueueProbe {
+  getSnapshot(): Promise<QueueSnapshot>
+}
