@@ -31,7 +31,7 @@
     },
     "examples/atlas-site": {
       "name": "atlas-site",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.1",
       "dependencies": {
         "@gravito/atlas": "workspace:*",
         "@gravito/photon": "workspace:*",
@@ -733,7 +733,7 @@
     },
     "packages/flux": {
       "name": "@gravito/flux",
-      "version": "1.0.0-beta.2",
+      "version": "1.0.0-beta.4",
       "bin": {
         "flux": "./bin/flux.js",
       },
@@ -1297,7 +1297,7 @@
     },
     "packages/stream": {
       "name": "@gravito/stream",
-      "version": "1.0.0-beta.1",
+      "version": "1.0.0-beta.3",
       "dependencies": {
         "@aws-sdk/client-sqs": "^3.955.0",
         "@gravito/atlas": "workspace:*",
@@ -1358,7 +1358,7 @@
         "autoprefixer": "^10.4.0",
         "postcss": "^8.4.0",
         "tailwindcss": "^3.4.0",
-        "typescript": "^5.0.0",
+        "typescript": "^5.9.3",
         "vite": "^6.0.0",
       },
     },
