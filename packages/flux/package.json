@@ -28,7 +28,7 @@
     }
   },
   "bin": {
-    "flux": "./bin/flux.js"
+    "flux": "bin/flux.js"
   },
   "files": [
     "dist",

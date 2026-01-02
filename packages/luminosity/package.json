@@ -7,7 +7,7 @@
   "module": "./dist/index.js",
   "type": "module",
   "bin": {
-    "lux": "./dist/cli.js"
+    "lux": "dist/cli.js"
   },
   "exports": {
     ".": {

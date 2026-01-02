@@ -13,7 +13,7 @@
     }
   },
   "bin": {
-    "orbit": "./src/cli.ts"
+    "orbit": "src/cli.ts"
   },
   "scripts": {
     "build": "bun run build.ts",
