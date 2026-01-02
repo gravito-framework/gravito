@@ -65,20 +65,6 @@ export type ErrorHandlerContext = {
 type RouteParams = Record<string, string | number>
 type RouteQuery = Record<string, string | number | boolean | null | undefined>
 
-type Variables = {
-  core: PlanetCore
-  logger: Logger
-  config: ConfigManager
-  cookieJar: CookieJar
-  route: (name: string, params?: RouteParams, query?: RouteQuery) => string
-  // Optional orbit-injected variables
-  cache?: CacheService
-  view?: ViewService
-  i18n?: unknown
-  session?: unknown
-  routeModels?: Record<string, unknown>
-}
-
 export interface GravitoOrbit {
   install(core: PlanetCore): void | Promise<void>
 }

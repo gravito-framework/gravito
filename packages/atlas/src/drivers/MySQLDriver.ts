@@ -4,13 +4,11 @@
  */
 
 import type {
-  Connection,
   FieldPacket,
   Pool,
   PoolConnection,
   PoolOptions,
   ResultSetHeader,
-  RowDataPacket,
 } from 'mysql2/promise'
 import {
   ConnectionError,

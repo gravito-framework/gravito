@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, animate, motion } from 'framer-motion'
 import {
   Activity,
@@ -13,7 +13,6 @@ import {
   Terminal,
 } from 'lucide-react'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
 import { JobInspector } from '../components/JobInspector'
 import { LogArchiveModal } from '../components/LogArchiveModal'
 import { ThroughputChart } from '../ThroughputChart'
