@@ -54,6 +54,10 @@ examples/*/dist/
 
 # Databases
 *.db
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
 
 # Test temp artifacts
 packages/*/tests/.tmp-*

@@ -31,8 +31,11 @@ export class QueueManager {
   private serializers = new Map<string, JobSerializer>()
   private defaultConnection: string
   private defaultSerializer: JobSerializer
+  private persistence?: QueueConfig['persistence']
+  private scheduler?: any // Using any to avoid circular dependency or import issues for now
 
   constructor(config: QueueConfig = {}) {
+    this.persistence = config.persistence
     this.defaultConnection = config.default ?? 'default'
 
     // Initialize default serializer
@@ -201,6 +204,14 @@ export class QueueManager {
   }
 
   /**
+   * Get the default connection name.
+   * @returns Default connection name
+   */
+  getDefaultConnection(): string {
+    return this.defaultConnection
+  }
+
+  /**
    * Get a serializer.
    * @param type - Serializer type
    * @returns Serializer instance
@@ -249,7 +260,18 @@ export class QueueManager {
     const serialized = serializer.serialize(job)
 
     // Push to queue
-    await driver.push(queue, serialized, options)
+    const pushOptions = { ...options }
+    if (job.priority) {
+      pushOptions.priority = job.priority
+    }
+    await driver.push(queue, serialized, pushOptions)
+
+    // Auto-archive (Audit Mode) - Fire and forget
+    if (this.persistence?.archiveEnqueued) {
+      this.persistence.adapter.archive(queue, serialized, 'waiting').catch((err) => {
+        console.error('[QueueManager] Persistence archive failed (waiting):', err)
+      })
+    }
 
     return job
   }
@@ -372,6 +394,98 @@ export class QueueManager {
     if (driver.complete) {
       const serialized = serializer.serialize(job)
       await driver.complete(queue, serialized)
+
+      // Auto-archive
+      if (this.persistence?.archiveCompleted) {
+        await this.persistence.adapter.archive(queue, serialized, 'completed').catch((err) => {
+          console.error('[QueueManager] Persistence archive failed (completed):', err)
+        })
+      }
+    }
+  }
+
+  /**
+   * Mark a job as permanently failed.
+   * @param job - Job instance
+   * @param error - Error object
+   */
+  async fail<T extends Job & Queueable>(job: T, error: Error): Promise<void> {
+    const connection = job.connectionName ?? this.defaultConnection
+    const queue = job.queueName ?? 'default'
+    const driver = this.getDriver(connection)
+    const serializer = this.getSerializer()
+
+    if (driver.fail) {
+      const serialized = serializer.serialize(job)
+      serialized.error = error.message
+      serialized.failedAt = Date.now()
+      await driver.fail(queue, serialized)
+
+      // Auto-archive
+      if (this.persistence?.archiveFailed) {
+        await this.persistence.adapter.archive(queue, serialized, 'failed').catch((err) => {
+          console.error('[QueueManager] Persistence archive failed (failed):', err)
+        })
+      }
+    }
+  }
+
+  /**
+   * Get the persistence adapter if configured.
+   */
+  getPersistence(): any {
+    return this.persistence?.adapter
+  }
+
+  /**
+   * Get the scheduler if configured.
+   */
+  getScheduler(): any {
+    if (!this.scheduler) {
+      const { Scheduler } = require('./Scheduler')
+      this.scheduler = new Scheduler(this)
+    }
+    return this.scheduler
+  }
+
+  /**
+   * Get failed jobs from DLQ (if driver supports it).
+   */
+  async getFailed(
+    queue: string,
+    start = 0,
+    end = -1,
+    connection: string = this.defaultConnection
+  ): Promise<SerializedJob[]> {
+    const driver = this.getDriver(connection)
+    if (driver.getFailed) {
+      return driver.getFailed(queue, start, end)
+    }
+    return []
+  }
+
+  /**
+   * Retry failed jobs from DLQ (if driver supports it).
+   */
+  async retryFailed(
+    queue: string,
+    count = 1,
+    connection: string = this.defaultConnection
+  ): Promise<number> {
+    const driver = this.getDriver(connection)
+    if (driver.retryFailed) {
+      return driver.retryFailed(queue, count)
+    }
+    return 0
+  }
+
+  /**
+   * Clear failed jobs from DLQ (if driver supports it).
+   */
+  async clearFailed(queue: string, connection: string = this.defaultConnection): Promise<void> {
+    const driver = this.getDriver(connection)
+    if (driver.clearFailed) {
+      await driver.clearFailed(queue)
     }
   }
 }

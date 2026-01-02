@@ -11,6 +11,10 @@ Lightweight, high-performance queueing for Gravito. Supports multiple storage dr
 - **Modular**: Install only the driver you need (core < 50KB)
 - **Embedded or standalone workers**: Run in-process during development or standalone in production
 - **AI-friendly**: Strong typing, clear JSDoc, and predictable APIs
+- **Custom Retry Strategies**: Built-in exponential backoff with per-job overrides
+- **Dead Letter Queue (DLQ)**: Automatic handling of permanently failed jobs, with retry and clear operations
+- **Priority Queues**: Assign priority (critical, high, low) to any job
+- **Rate Limiting**: Control job consumption rate per queue (requires Redis)
 
 ## Installation
 
@@ -35,6 +39,24 @@ export class SendWelcomeEmail extends Job {
     await mail.send(new WelcomeEmail(user))
   }
 }
+```
+
+### 3. Rate Limit & Priority (Optional)
+
+```typescript
+const queue = c.get('queue')
+
+// High priority job
+await queue.push(new SendWelcomeEmail(user.id))
+  .onQueue('emails')
+  .withPriority('high') // 'critical' | 'high' | 'default' | 'low'
+
+// Configure rate limits in Consumer
+const consumer = new Consumer(manager, {
+  rateLimits: {
+    emails: { limit: 10, window: 60 } // Max 10 jobs per minute
+  }
+})
 ```
 
 ### 2. Enqueue a job
@@ -135,7 +157,34 @@ CREATE TABLE jobs (
 
 CREATE INDEX idx_jobs_queue_available ON jobs(queue, available_at);
 CREATE INDEX idx_jobs_reserved ON jobs(reserved_at);
+CREATE INDEX idx_jobs_queue_available ON jobs(queue, available_at);
+CREATE INDEX idx_jobs_reserved ON jobs(reserved_at);
 ```
+
+## Persistence and Audit Mode
+
+The `@gravito/stream` package supports an optional persistence layer (using SQLite or MySQL) for archiving job history and providing an audit trail.
+
+### Configuration
+
+```typescript
+OrbitStream.configure({
+  // ... other config
+  persistence: {
+    adapter: new SQLitePersistence(DB), // or MySQLPersistence
+    archiveCompleted: true, // Archive jobs when they complete successfully
+    archiveFailed: true,    // Archive jobs when they fail permanently
+    archiveEnqueued: true   // (Audit Mode) Archive jobs immediately when pushed
+  }
+})
+```
+
+### Audit Mode (`archiveEnqueued: true`)
+
+When Audit Mode is enabled, every job pushed to the queue is immediately written to the SQL archive with a `waiting` status. This happens in parallel with the main queue operation (Fire-and-Forget).
+
+- **Benefit**: Provides a complete audit trail. Even if the queue driver (e.g., Redis) crashes and loses data, the SQL archive will contain the record of the job being enqueued.
+- **Performance**: Designed to be non-blocking. The SQL write happens asynchronously and does not delay the `push()` operation.
 
 ## Standalone Worker
 
@@ -158,6 +207,13 @@ abstract class Job implements Queueable {
   onQueue(queue: string): this
   onConnection(connection: string): this
   delay(seconds: number): this
+  
+  /**
+   * Set retry backoff strategy.
+   * @param seconds - Initial delay in seconds
+   * @param multiplier - Multiplier for each subsequent attempt (default: 2)
+   */
+  backoff(seconds: number, multiplier = 2): this
 }
 ```
 
@@ -170,6 +226,8 @@ class QueueManager {
   async pop(queue?: string, connection?: string): Promise<Job | null>
   async size(queue?: string, connection?: string): Promise<number>
   async clear(queue?: string, connection?: string): Promise<void>
+  async complete(job: Job): Promise<void>
+  async fail(job: Job, error: Error): Promise<void>
   registerJobClasses(jobClasses: Array<new (...args: unknown[]) => Job>): void
 }
 ```
@@ -178,7 +236,7 @@ class QueueManager {
 
 - **MemoryDriver** - in-memory (development)
 - **DatabaseDriver** - PostgreSQL/MySQL/SQLite
-- **RedisDriver** - delayed jobs supported
+- **RedisDriver** - delayed jobs, priority queues, rate limiting, and DLQ support
 - **KafkaDriver** - topics and consumer groups
 - **SQSDriver** - standard/FIFO queues and long polling
 - **RabbitMQDriver** - exchanges, queues, and advanced confirm mode

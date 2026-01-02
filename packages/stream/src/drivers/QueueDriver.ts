@@ -68,6 +68,13 @@ export interface QueueDriver {
   clear(queue: string): Promise<void>
 
   /**
+   * Mark a job as permanently failed (move to DLQ).
+   * @param queue - Queue name
+   * @param job - Serialized job with error info
+   */
+  fail?(queue: string, job: SerializedJob): Promise<void>
+
+  /**
    * Push multiple jobs (optional, higher throughput).
    * @param queue - Queue name
    * @param jobs - Serialized job array
@@ -107,4 +114,49 @@ export interface QueueDriver {
    * @param topic - Topic name
    */
   deleteTopic?(topic: string): Promise<void>
+
+  /**
+   * Report worker heartbeat for monitoring.
+   * @param workerInfo - Worker information
+   * @param prefix - Optional prefix for monitoring keys
+   */
+  reportHeartbeat?(workerInfo: any, prefix?: string): Promise<void>
+
+  /**
+   * Publish a log message for monitoring.
+   * @param logPayload - Log payload
+   * @param prefix - Optional prefix for monitoring channels/keys
+   */
+  publishLog?(logPayload: any, prefix?: string): Promise<void>
+
+  /**
+   * Check if a queue is rate limited.
+   * @param queue - Queue name
+   * @param config - Rate limit configuration
+   * @returns true if allowed, false if limited
+   */
+  checkRateLimit?(queue: string, config: { max: number; duration: number }): Promise<boolean>
+
+  /**
+   * Retry failed jobs from DLQ.
+   * @param queue - Queue name
+   * @param count - Optional count (default: all)
+   * @returns Number of jobs retried
+   */
+  retryFailed?(queue: string, count?: number): Promise<number>
+
+  /**
+   * Get failed jobs from DLQ.
+   * @param queue - Queue name
+   * @param start - Start index
+   * @param end - End index
+   * @returns Array of failed jobs
+   */
+  getFailed?(queue: string, start?: number, end?: number): Promise<SerializedJob[]>
+
+  /**
+   * Clear failed jobs from DLQ.
+   * @param queue - Queue name
+   */
+  clearFailed?(queue: string): Promise<void>
 }
