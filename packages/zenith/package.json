@@ -15,6 +15,7 @@
         "build": "vite build && bun build ./src/server/index.ts ./src/bin.ts --outdir ./dist --target bun",
         "start": "bun ./dist/bin.js",
         "test": "bun test",
+        "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck",
         "seed": "bun scripts/seed.ts",
         "worker": "bun scripts/worker.ts"
     },

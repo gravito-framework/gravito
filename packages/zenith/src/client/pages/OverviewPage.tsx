@@ -9,10 +9,8 @@ import {
   Cpu,
   Hourglass,
   ListTree,
-  RefreshCcw,
   Search,
   Terminal,
-  Trash2,
 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -57,7 +55,7 @@ function LiveLogs({
   onSearchArchive: () => void
   onWorkerHover?: (id: string | null) => void
 }) {
-  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const scrollRef = React.useRef<HTMLUListElement>(null)
 
   React.useEffect(() => {
     // Access logs to satisfy dependency check (and trigger on update)
@@ -290,8 +288,6 @@ function QueueList({
   queues: QueueStats[]
   setSelectedQueue: (name: string | null) => void
 }) {
-  const queryClient = useQueryClient()
-
   return (
     <div className="card-premium h-full flex flex-col overflow-hidden">
       <div className="p-4 border-b bg-muted/5 flex justify-between items-center">
@@ -353,10 +349,8 @@ function QueueList({
 }
 
 export function OverviewPage() {
-  const navigate = useNavigate()
   const [selectedQueue, setSelectedQueue] = React.useState<string | null>(null)
   const [hoveredWorkerId, setHoveredWorkerId] = React.useState<string | null>(null)
-  const queryClient = useQueryClient()
 
   const [logs, setLogs] = React.useState<SystemLog[]>([])
   const [stats, setStats] = React.useState<FluxStats>(DEFAULT_STATS)

@@ -4,6 +4,7 @@
  */
 
 import type {
+  Connection,
   FieldPacket,
   Pool,
   PoolConnection,

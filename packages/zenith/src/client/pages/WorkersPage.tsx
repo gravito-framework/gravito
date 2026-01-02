@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { AlertCircle, Clock, Cpu, Gauge, MemoryStick, RefreshCcw, Server, Zap } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { cn } from '../utils'
 
 interface Worker {

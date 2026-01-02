@@ -1,11 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import {
   Activity,
   AlertCircle,
   ArrowRight,
-  CheckCircle2,
-  Clock,
   Filter,
   ListTree,
   Pause,
