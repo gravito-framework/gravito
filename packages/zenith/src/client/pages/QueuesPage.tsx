@@ -13,6 +13,7 @@ import {
   RefreshCcw,
   Search,
   Trash2,
+  XCircle,
 } from 'lucide-react'
 import React from 'react'
 import { JobInspector } from '../components/JobInspector'
@@ -276,63 +277,88 @@ export function QueuesPage() {
                               <RefreshCcw size={16} />
                             </button>
                           )}
-                          {queue.failed > 0 && (
+                        </button>
+                          )}
+                        {queue.failed > 0 && (
+                          <>
                             <button
                               onClick={() =>
                                 fetch(`/api/queues/${queue.name}/retry-all-failed`, {
                                   method: 'POST',
-                                }).then(() => queryClient.invalidateQueries({ queryKey: ['queues'] }))
+                                }).then(() =>
+                                  queryClient.invalidateQueries({ queryKey: ['queues'] })
+                                )
                               }
                               className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
                               title="Retry All Failed"
                             >
                               <RefreshCcw size={16} />
                             </button>
-                          )}
-                          <button
-                            onClick={async () => {
-                              if (
-                                confirm(
-                                  `Are you sure you want to purge all jobs in queue "${queue.name}"?`
-                                )
-                              ) {
-                                await fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
-                                queryClient.invalidateQueries({ queryKey: ['queues'] })
-                              }
-                            }}
-                            className="p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
-                            title="Purge Queue"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => setSelectedQueue(queue.name)}
-                            className="px-4 py-1.5 bg-muted text-foreground rounded-lg transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border border-border/50 hover:border-primary/50 hover:bg-background"
-                          >
-                            Inspect <ArrowRight size={12} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-                {filteredQueues.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-20 text-center text-muted-foreground">
-                      <Activity size={40} className="mx-auto mb-4 opacity-10 animate-pulse" />
-                      <p className="text-sm font-bold opacity-30 italic uppercase tracking-widest">
-                        {searchQuery || statusFilter !== 'all'
-                          ? 'No queues match your filters'
-                          : 'No queues available'}
-                      </p>
+                            <button
+                              onClick={() => {
+                                if (
+                                  confirm(
+                                    `Are you sure you want to clear all failed jobs in queue "${queue.name}"?`
+                                  )
+                                ) {
+                                  fetch(`/api/queues/${queue.name}/clear-failed`, {
+                                    method: 'POST',
+                                  }).then(() =>
+                                    queryClient.invalidateQueries({ queryKey: ['queues'] })
+                                  )
+                                }
+                              }}
+                              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                              title="Clear Failed Jobs"
+                            >
+                              <XCircle size={16} />
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={async () => {
+                            if (
+                              confirm(
+                                `Are you sure you want to purge all jobs in queue "${queue.name}"?`
+                              )
+                            ) {
+                              await fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
+                              queryClient.invalidateQueries({ queryKey: ['queues'] })
+                            }
+                          }}
+                          className="p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                          title="Purge Queue"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => setSelectedQueue(queue.name)}
+                          className="px-4 py-1.5 bg-muted text-foreground rounded-lg transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border border-border/50 hover:border-primary/50 hover:bg-background"
+                        >
+                          Inspect <ArrowRight size={12} />
+                        </button>
+                      </div>
                     </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </tr>
+              )
+                })}
+              {filteredQueues.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-20 text-center text-muted-foreground">
+                    <Activity size={40} className="mx-auto mb-4 opacity-10 animate-pulse" />
+                    <p className="text-sm font-bold opacity-30 italic uppercase tracking-widest">
+                      {searchQuery || statusFilter !== 'all'
+                        ? 'No queues match your filters'
+                        : 'No queues available'}
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+    </div >
     </>
   )
 }
