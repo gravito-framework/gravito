@@ -47,3 +47,49 @@ export interface Probe {
 export interface QueueProbe {
   getSnapshot(): Promise<QueueSnapshot>
 }
+
+// ============================================
+// Phase 3: Remote Control Types
+// ============================================
+
+/**
+ * Command types that Zenith can send to Quasar agents.
+ * Scope is intentionally limited for security.
+ */
+export type CommandType = 'RETRY_JOB' | 'DELETE_JOB'
+
+/**
+ * A command sent from Zenith to a Quasar agent.
+ */
+export interface QuasarCommand {
+  id: string // Unique command ID (UUID)
+  type: CommandType
+  targetNodeId: string // Target agent's ID (e.g., "hostname-12345")
+  payload: {
+    queue: string // Queue name
+    jobId?: string // Optional job identifier
+    jobKey?: string // Redis key for the job (for direct access)
+    driver?: 'redis' | 'laravel' // Queue driver type
+  }
+  timestamp: number
+  issuer: string // Who sent this (e.g., "zenith")
+}
+
+/**
+ * Result of a command execution (for logging/debugging).
+ * Note: We use async state observation, so this is internal only.
+ */
+export interface CommandResult {
+  commandId: string
+  status: 'success' | 'failed' | 'not_allowed'
+  message?: string
+  timestamp: number
+}
+
+/**
+ * Handler interface for command execution.
+ */
+export interface CommandExecutor {
+  readonly supportedType: CommandType
+  execute(command: QuasarCommand, redis: import('ioredis').Redis): Promise<CommandResult>
+}

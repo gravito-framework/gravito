@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis'
+import { CommandListener } from './CommandListener'
 import { LaravelProbe } from './probes/LaravelProbe'
 import { NodeProbe } from './probes/NodeProbe'
 import { RedisListProbe } from './probes/RedisListProbe'
@@ -28,6 +29,8 @@ export interface QuasarOptions {
 export class QuasarAgent {
   private transportRedis: Redis
   private monitorRedis?: Redis // Optional, only if monitoring queues
+  private subscriberRedis?: Redis // Dedicated connection for Pub/Sub
+  private commandListener?: CommandListener
 
   private service: string
   private name?: string
@@ -36,6 +39,9 @@ export class QuasarAgent {
   private queueProbes: QueueProbe[] = []
   private timer: Timer | null = null
   private prefix = 'gravito:quasar:node:'
+
+  // Cached node ID (computed on first tick)
+  private nodeId?: string
 
   constructor(options: QuasarOptions) {
     this.service = options.service
@@ -68,6 +74,14 @@ export class QuasarAgent {
     this.probe = options.probe || new NodeProbe()
   }
 
+  /**
+   * Get the current node ID.
+   * Only available after first tick.
+   */
+  getNodeId(): string | undefined {
+    return this.nodeId
+  }
+
   async start() {
     // Connect transport
     if (this.transportRedis.status !== 'ready' && this.transportRedis.status !== 'connecting') {
@@ -96,10 +110,20 @@ export class QuasarAgent {
       this.timer = null
     }
 
+    // Stop command listener if active
+    if (this.commandListener) {
+      await this.commandListener.stop()
+      this.commandListener = undefined
+    }
+
     try {
       await this.transportRedis.quit()
       if (this.monitorRedis) {
         await this.monitorRedis.quit()
+      }
+      if (this.subscriberRedis) {
+        await this.subscriberRedis.quit()
+        this.subscriberRedis = undefined
       }
     } catch (e) {
       console.error('[Quasar] Error stopping redis connections', e)
@@ -121,11 +145,68 @@ export class QuasarAgent {
     }
   }
 
+  /**
+   * Enable Remote Control feature.
+   * Allows Zenith to send commands (RETRY_JOB, DELETE_JOB) to this agent.
+   *
+   * Prerequisites:
+   * - Must call after start() (nodeId is required)
+   * - Requires monitor Redis connection for command execution
+   *
+   * @returns true if successfully enabled, false if prerequisites not met
+   */
+  async enableRemoteControl(): Promise<boolean> {
+    if (!this.monitorRedis) {
+      console.warn('[Quasar] Cannot enable remote control: monitor connection required')
+      return false
+    }
+
+    if (!this.nodeId) {
+      console.warn('[Quasar] Cannot enable remote control: agent not started (nodeId unknown)')
+      return false
+    }
+
+    if (this.commandListener) {
+      console.warn('[Quasar] Remote control already enabled')
+      return true
+    }
+
+    // Create a dedicated subscriber connection (clone from transport)
+    // Redis requires a separate connection for SUBSCRIBE
+    const redisUrl = this.transportRedis.options?.host
+      ? `redis://${this.transportRedis.options.host}:${this.transportRedis.options.port || 6379}`
+      : 'redis://localhost:6379'
+
+    this.subscriberRedis = new Redis(redisUrl, {
+      lazyConnect: true,
+    })
+
+    try {
+      await this.subscriberRedis.connect()
+
+      this.commandListener = new CommandListener(this.subscriberRedis, this.service, this.nodeId)
+
+      await this.commandListener.start(this.monitorRedis)
+      console.log(`[Quasar] 🎮 Remote control enabled for node: ${this.nodeId}`)
+      return true
+    } catch (err) {
+      console.error('[Quasar] Failed to enable remote control:', err)
+      if (this.subscriberRedis) {
+        await this.subscriberRedis.quit()
+        this.subscriberRedis = undefined
+      }
+      return false
+    }
+  }
+
   private async tick() {
     try {
       const metrics = await this.probe.getMetrics()
       const hostname = this.name || metrics.hostname
       const id = `${hostname}-${metrics.pid}`
+
+      // Cache nodeId for remote control
+      this.nodeId = id
 
       // Collect queue snapshots
       const queues = await Promise.all(this.queueProbes.map((p) => p.getSnapshot()))

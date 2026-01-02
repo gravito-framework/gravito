@@ -93,19 +93,23 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
 - [x] **Probe Implementation**: Create `QueueProbe` interface and implementations:
     - `RedisListProbe`: Simple `LLEN` checks.
     - [ ] `BullProbe` (Future): Check `bull:*:waiting`, etc.
-    - [ ] `LaravelProbe` (Future): Check `queues:default`, `queues:failed`.
+    - [x] `LaravelProbe`: Check `queues:default`, `queues:reserved`, `queues:delayed`.
 - [x] **SDK API**: Expose `.monitorQueue(name, type)` method.
 - [x] **UI Update**: Update `NodeCard` to render a "Queues" section if queue data is present in payload.
 
-### Phase 3: Remote Control (Command & Control) - **Future** 🔮
+### Phase 3: Remote Control (Command & Control) - **Completed** ✅
 **Goal**: Allow Zenith to instruct Quasar to perform actions (Retry Job, Delete Job).
 
-- [ ] **Protocol**: Define Command Protocol (Redis Pub/Sub: `gravito:quasar:cmd:{node_id}`).
-- [ ] **Agent**: Implement `CommandListener` in SDK.
-- [ ] **Security (ACL Strategy)**:
-    - [ ] Use **Redis ACL** (v6+) to restrict Agent's `transport` connection to ONLY Pub/Sub and specific Key prefixes.
-    - [ ] Implement **Command Allowlist** inside Agent code (e.g., only allow `RETRY_KNOWN_QUEUE`).
-- [ ] **UI**: Add "Retry/Delete" buttons in Zenith UI that trigger these commands.
+- [x] **Protocol**: Define Command Protocol (Redis Pub/Sub: `gravito:quasar:cmd:{service}:{node_id}`).
+- [x] **Agent**: Implement `CommandListener` in SDK.
+- [x] **Command Executors**: Implement `RetryJobExecutor` and `DeleteJobExecutor`.
+- [x] **Security (Allowlist Strategy)**:
+    - [x] Implement **Command Allowlist** inside Agent code (only `RETRY_JOB`, `DELETE_JOB` allowed).
+    - [ ] (Future) Use **Redis ACL** (v6+) to restrict Agent's `transport` connection.
+- [x] **Server**: Add `CommandService` and `/api/pulse/command` endpoint.
+- [x] **UI**: Add "Retry/Delete" buttons in Zenith `PulsePage` for failed queue jobs.
+
+### Phase 4: Polyglot Agent (Future) 🔮
 *   [ ] Create `gravito-framework/quasar` repo.
 *   [ ] Develop Go Agent (utilizing `gopsutil`).
 *   [ ] Implement "Laravel Adapter" inside the Go Agent (reading Redis/DB).

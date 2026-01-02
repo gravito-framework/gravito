@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Activity, Cpu, Database, Laptop, Server, HelpCircle } from 'lucide-react'
+import { Activity, Cpu, Database, Laptop, Server, HelpCircle, RotateCw, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { PulseNode } from '../../shared/types'
 import { PageHeader } from '../components/PageHeader'
@@ -14,6 +14,40 @@ const formatBytes = (bytes: number) => {
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// Helper to send remote commands to Quasar agents
+const sendCommand = async (
+    service: string,
+    nodeId: string,
+    type: 'RETRY_JOB' | 'DELETE_JOB',
+    queue: string
+) => {
+    try {
+        const response = await fetch('/api/pulse/command', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                service,
+                nodeId,
+                type,
+                queue,
+                // For now, we send a wildcard jobKey to indicate "all failed jobs"
+                // The agent will interpret this appropriately
+                jobKey: '*',
+                driver: 'redis', // Default to redis, could be detected from queue config
+            }),
+        })
+
+        const result = await response.json()
+        if (result.success) {
+            console.log(`[Pulse] ${type} command sent:`, result.message)
+        } else {
+            console.error(`[Pulse] Command failed:`, result.error)
+        }
+    } catch (err) {
+        console.error('[Pulse] Failed to send command:', err)
+    }
 }
 
 function NodeCard({ node }: { node: PulseNode }) {
@@ -81,9 +115,28 @@ function NodeCard({ node }: { node: PulseNode }) {
                                 <div key={q.name} className="flex flex-col gap-1 text-xs">
                                     <div className="flex justify-between items-center">
                                         <span className="font-mono text-muted-foreground">{q.name}</span>
-                                        <div className="flex gap-2 font-mono">
+                                        <div className="flex gap-2 font-mono items-center">
                                             {q.size.failed > 0 && (
-                                                <span className="text-red-500 font-bold">{q.size.failed} fail</span>
+                                                <>
+                                                    <span className="text-red-500 font-bold">{q.size.failed} fail</span>
+                                                    {/* Action Buttons for Failed Jobs */}
+                                                    <div className="flex gap-1 ml-1">
+                                                        <button
+                                                            onClick={() => sendCommand(node.service, node.id, 'RETRY_JOB', q.name)}
+                                                            className="p-1 rounded hover:bg-emerald-500/20 text-emerald-500 transition-colors"
+                                                            title="Retry all failed jobs"
+                                                        >
+                                                            <RotateCw size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => sendCommand(node.service, node.id, 'DELETE_JOB', q.name)}
+                                                            className="p-1 rounded hover:bg-red-500/20 text-red-400 transition-colors"
+                                                            title="Delete all failed jobs"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                </>
                                             )}
                                             {q.size.active > 0 && (
                                                 <span className="text-emerald-500">{q.size.active} act</span>

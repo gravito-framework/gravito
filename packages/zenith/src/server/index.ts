@@ -12,6 +12,7 @@ import {
   isAuthEnabled,
   verifyPassword,
 } from './middleware/auth'
+import { CommandService } from './services/CommandService'
 import { PulseService } from './services/PulseService'
 import { QueueService } from './services/QueueService'
 
@@ -61,10 +62,12 @@ if (dbDriver === 'sqlite' || process.env.DB_HOST) {
 // Service Initialization
 const queueService = new QueueService(REDIS_URL, QUEUE_PREFIX, persistence)
 const pulseService = new PulseService(REDIS_URL)
+const commandService = new CommandService(REDIS_URL)
 
 queueService
   .connect()
   .then(() => pulseService.connect())
+  .then(() => commandService.connect())
   .then(() => {
     // Start Self-Monitoring (Quasar)
     const agent = new QuasarAgent({
@@ -359,6 +362,38 @@ api.get('/pulse/nodes', async (c) => {
     return c.json({ nodes })
   } catch (_err) {
     return c.json({ error: 'Failed to fetch pulse nodes' }, 500)
+  }
+})
+
+// --- Pulse Remote Control (Phase 3) ---
+api.post('/pulse/command', async (c) => {
+  try {
+    const { service, nodeId, type, queue, jobKey, driver } = await c.req.json()
+
+    // Validate required fields
+    if (!service || !nodeId || !type || !queue || !jobKey) {
+      return c.json({ error: 'Missing required fields: service, nodeId, type, queue, jobKey' }, 400)
+    }
+
+    // Validate command type
+    if (type !== 'RETRY_JOB' && type !== 'DELETE_JOB') {
+      return c.json({ error: 'Invalid command type. Allowed: RETRY_JOB, DELETE_JOB' }, 400)
+    }
+
+    const commandId = await commandService.sendCommand(service, nodeId, type, {
+      queue,
+      jobKey,
+      driver: driver || 'redis',
+    })
+
+    return c.json({
+      success: true,
+      commandId,
+      message: `Command ${type} sent to ${nodeId}. Observe job state for result.`,
+    })
+  } catch (err) {
+    console.error('[CommandService] Error:', err)
+    return c.json({ error: 'Failed to send command' }, 500)
   }
 })
 
