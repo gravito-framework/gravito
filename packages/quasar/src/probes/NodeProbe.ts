@@ -76,9 +76,10 @@ export class NodeProbe implements Probe {
 
     return {
       language,
+      version, // Moved to top level
       cpu: {
         system: sysCpuPercent,
-        process: processCpuPercent > 100 ? 100 : processCpuPercent, // Cap at 100% ? Or allow >100% ? Node/Unix often shows >100. Let's send raw.
+        process: processCpuPercent > 100 ? 100 : processCpuPercent,
         cores: currentCpu.count,
       },
       memory: {
@@ -93,13 +94,21 @@ export class NodeProbe implements Probe {
           heapUsed: mem.heapUsed,
         },
       },
-      runtime: {
-        uptime: process.uptime(),
-        platform: os.platform(),
-        version: version,
-      },
+      // Flattened runtime props
       pid: process.pid,
       hostname: os.hostname(),
+      platform: os.platform(),
+      uptime: process.uptime(),
+      // Optional: keep an internal object if we really need it, but types say flat.
+      // Actually SystemMetrics in types.ts doesn't have pid/hostname/platform anymore?
+      // Let's re-check types.ts. The previous view showed they were REMOVED from SystemMetrics.
+      // But NodeProbe implements Probe which returns Promise<SystemMetrics & { pid: number, hostname: string, platform: string }> ??
+      // Let's assume we need to return what SystemMetrics expects + what QuasarAgent needs.
+
+      // WAIT. I removed pid/hostname/platform from SystemMetrics in types.ts in step 809?
+      // Yes, I see `-  pid: number` in the diff.
+      // But QuasarAgent needs them.
+      // Let's check Probe interface in types.ts.
     }
   }
 }

@@ -22,6 +22,21 @@ export interface PulseRuntime {
   framework: string // e.g. "Node 20.1", "Laravel 10.0"
 }
 
+export interface QueueSnapshot {
+  name: string
+  driver: 'redis' | 'sqs' | 'rabbitmq'
+  size: {
+    waiting: number
+    active: number
+    failed: number
+    delayed: number
+  }
+  throughput?: {
+    in: number // jobs/min
+    out: number // jobs/min
+  }
+}
+
 export interface PulseNode {
   id: string // Unique Instance ID
   service: string // Group name
@@ -32,6 +47,7 @@ export interface PulseNode {
   platform: string
   cpu: PulseCpu
   memory: PulseMemory
+  queues?: QueueSnapshot[]
   runtime: PulseRuntime
   timestamp: number // Last heartbeat
 }

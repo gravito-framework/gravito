@@ -75,11 +75,13 @@ All agents/SDKs report to Redis using this unified schema.
     - [x] Add brand icons for runtimes (Node, Bun, Deno, PHP, Go, Python).
     - [x] **Layout Optimization**: Compact Grid for Service Groups (Full width for single nodes).
 
-### Phase 2: Application Insights (Queues)
-**Goal**: Monitor queue health (Redis/Queue count, throughput) without needing full Queue Inspector.om other systems (e.g., Laravel).
-*   [ ] **Protocol**: Define `QueueSnapshot` interface in `packages/quasar`.
-*   [ ] **SDK**: Add `.monitorQueues()` capabilities to Quasar SDK.
-*   [ ] **UI**: Update `PulsePage` (or `QueuesPage`) to visualize these external queues.
+### Phase 2: Application Insights (Queues) - **In Progress** 🟡
+**Goal**: Monitor queue health (Redis/Queue count, throughput) without needing full Queue Inspector.
+
+- [ ] **Protocol**: Define `QueueSnapshot` interface in `packages/quasar` and `packages/zenith`.
+- [ ] **SDK**: Add `.monitorQueues()` capabilities to Quasar SDK to fetch metrics from local Redis/Queues.
+- [ ] **Server**: Ensure PulseService passes this data through to frontend.
+- [ ] **UI**: Update `PulsePage` (or specific `NodeCard`) to show queue metrics if present.
 
 ### Phase 3: The Go Agent (Sidecar) - **Future** 🔮
 *   **Goal**: Monitor non-Node environments (Laravel, Python).

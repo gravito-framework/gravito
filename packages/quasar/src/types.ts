@@ -1,8 +1,22 @@
+export interface QueueSnapshot {
+  name: string
+  driver: 'redis' | 'sqs' | 'rabbitmq'
+  size: {
+    waiting: number
+    active: number
+    failed: number
+    delayed: number
+  }
+  throughput?: {
+    in: number // jobs/min
+    out: number // jobs/min
+  }
+}
+
 export interface SystemMetrics {
-  language?: 'node' | 'bun' | 'deno'
   cpu: {
-    system: number // System-wide load %
-    process: number // Process-specific load %
+    system: number // Percentage 0-100
+    process: number // Percentage 0-100
     cores: number
   }
   memory: {
@@ -17,13 +31,13 @@ export interface SystemMetrics {
       heapUsed: number
     }
   }
-  runtime: {
-    uptime: number
-    platform: string
-    version: string
-  }
+  queues?: QueueSnapshot[]
+  language?: 'node' | 'bun' | 'deno' | 'php' | 'go' | 'python' | 'other'
+  version?: string
   pid: number
   hostname: string
+  platform: string
+  uptime: number
 }
 
 export interface Probe {
