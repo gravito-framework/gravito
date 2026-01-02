@@ -68,7 +68,10 @@ export async function bootstrap(options: { port?: number } = {}) {
     c.set('locale', locale)
     const inertia = c.get('inertia')
     if (inertia) {
-      ;(inertia as any).share({ locale })
+      ;(inertia as any).share({
+        locale,
+        gaId: process.env.GA_MEASUREMENT_ID,
+      })
     }
     return await next()
   }

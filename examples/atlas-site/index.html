@@ -52,6 +52,23 @@
             }
         })();
     </script>
+    <!-- Google Analytics -->
+    <script>
+        (function() {
+            var gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+            if (gaId) {
+                var script = document.createElement('script');
+                script.async = true;
+                script.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', gaId);
+            }
+        })();
+    </script>
 </head>
 
 <body
