@@ -95,7 +95,7 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
     - [ ] `BullProbe` (Future): Check `bull:*:waiting`, etc.
     - [ ] `LaravelProbe` (Future): Check `queues:default`, `queues:failed`.
 - [x] **SDK API**: Expose `.monitorQueue(name, type)` method.
-- [ ] **UI Update**: Update `NodeCard` to render a "Queues" section if queue data is present in payload.
+- [x] **UI Update**: Update `NodeCard` to render a "Queues" section if queue data is present in payload.
 
 ### Phase 3: Remote Control (Command & Control) - **Future** 🔮
 **Goal**: Allow Zenith to instruct Quasar to perform actions (Retry Job, Delete Job).

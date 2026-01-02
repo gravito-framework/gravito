@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis'
+import { LaravelProbe } from './probes/LaravelProbe'
 import { NodeProbe } from './probes/NodeProbe'
 import { RedisListProbe } from './probes/RedisListProbe'
 import type { Probe, QueueProbe } from './types'
@@ -107,7 +108,7 @@ export class QuasarAgent {
     console.log(`[Quasar] Agent stopped`)
   }
 
-  monitorQueue(name: string, type: 'redis' = 'redis') {
+  monitorQueue(name: string, type: 'redis' | 'laravel' = 'redis') {
     if (!this.monitorRedis) {
       console.warn('[Quasar] Cannot monitor queue, no monitor connection provided.')
       return
@@ -115,6 +116,8 @@ export class QuasarAgent {
 
     if (type === 'redis') {
       this.queueProbes.push(new RedisListProbe(this.monitorRedis, name))
+    } else if (type === 'laravel') {
+      this.queueProbes.push(new LaravelProbe(this.monitorRedis, name))
     }
   }
 
