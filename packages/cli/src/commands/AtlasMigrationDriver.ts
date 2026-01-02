@@ -144,7 +144,8 @@ export default class ${className} {
         config.password = decodeURIComponent(parsed.password)
       }
 
-      return config as ConnectionConfig
+      // TODO: Improve config typing for MongoDB
+      return config as unknown as ConnectionConfig
     } catch {
       return {
         driver: 'sqlite',

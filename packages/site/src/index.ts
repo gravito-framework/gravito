@@ -71,7 +71,7 @@ const escapeHtml = (value: string): string =>
 app.router.prefix('/:locale').group((router) => {
   // Landing Page
   router.get('/', async (c) => {
-    const i18n = c.get('i18n')
+    const i18n = c.get('i18n') as any
     const lang = i18n.locale
     const heroTitle = escapeHtml(String(i18n.t('hero.title')))
     const switchLabel = escapeHtml(String(i18n.t('nav.switch')))
@@ -96,8 +96,8 @@ app.router.prefix('/:locale').group((router) => {
 
   // Docs Page with Full SEO
   router.get('/docs/:slug', async (c) => {
-    const content = c.get('content')
-    const i18n = c.get('i18n')
+    const content = c.get('content') as any
+    const i18n = c.get('i18n') as any
     const slug = c.req.param('slug')
     const locale = i18n.locale
 

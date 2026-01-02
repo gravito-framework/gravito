@@ -11,7 +11,8 @@
     "dev": "bun run ./src/index.ts",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
-    "test:ci": "bun test --coverage --coverage-threshold=80"
+    "test:ci": "bun test --coverage --coverage-threshold=80",
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "files": [
     "dist",

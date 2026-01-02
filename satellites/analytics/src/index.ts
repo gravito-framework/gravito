@@ -24,8 +24,12 @@ export class AnalyticsServiceProvider extends ServiceProvider {
 
     core.router.prefix('/api/admin/v1/analytics').group((router) => {
       router.get('/query', async (ctx) => {
-        const metric = ctx.query('metric')
-        const period = (ctx.query('period') as any) || '7d'
+        const metric = ctx.req.query('metric')
+        const period = (ctx.req.query('period') as any) || '7d'
+
+        if (!metric) {
+          return ctx.json({ error: 'Metric is required' }, 400)
+        }
 
         const resolver = this.resolvers.get(metric)
         if (!resolver) {

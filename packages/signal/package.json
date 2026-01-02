@@ -9,7 +9,8 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --external @gravito/core --external @gravito/stream --external @gravito/prism",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-threshold=80",
-    "test:ci": "bun test --coverage --coverage-threshold=80"
+    "test:ci": "bun test --coverage --coverage-threshold=80",
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "keywords": [
     "gravito",

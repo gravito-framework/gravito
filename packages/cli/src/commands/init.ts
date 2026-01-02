@@ -210,6 +210,7 @@ export async function initCommand(options: InitOptions = {}) {
       'enterprise-mvc': '📦 Enterprise MVC',
       clean: '🧅 Clean Architecture',
       ddd: '🏛️ Domain-Driven Design',
+      satellite: '🛰️ Satellite Service',
     }
 
     note(

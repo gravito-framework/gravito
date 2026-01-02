@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "typecheck": "bun tsc -p tsconfig.json --noEmit --skipLibCheck"
+  },
   "types": "dist/index.d.ts",
   "dependencies": {
     "@gravito/core": "workspace:*"

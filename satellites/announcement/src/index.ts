@@ -37,7 +37,7 @@ export class AnnouncementServiceProvider extends ServiceProvider {
       )
 
       router.post('/', async (ctx) => {
-        const body = await ctx.body()
+        const body = await ctx.req.json<Record<string, any>>()
         return ctx.json({ message: 'Created', id: 'new-id', ...body }, 201)
       })
     })

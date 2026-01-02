@@ -42,7 +42,7 @@ export class AdServiceProvider extends ServiceProvider {
 
     // 公開 API: 根據版位獲取隨機廣告
     core.router.get('/api/v1/ads/:slot', (ctx) => {
-      const slot = ctx.param('slot')
+      const slot = ctx.req.param('slot')
       // 模擬隨機投放邏輯 (這裡會根據 Weight 進行隨機抽選)
       return ctx.json({
         id: 'ad-picked',

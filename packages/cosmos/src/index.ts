@@ -23,7 +23,7 @@ export class OrbitCosmos implements GravitoOrbit {
 
     // Inject locale middleware into every request
     // This middleware handles cloning the i18n instance per request
-    core.adapter.use('*', localeMiddleware(i18nManager) as GravitoMiddleware)
+    core.adapter.use('*', localeMiddleware(i18nManager) as unknown as GravitoMiddleware)
 
     core.logger.info(`[OrbitCosmos] I18n initialized with locale: ${this.config.defaultLocale}`)
   }

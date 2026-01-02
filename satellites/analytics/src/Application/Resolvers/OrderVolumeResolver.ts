@@ -2,7 +2,7 @@ import type {
   AnalyticsQuery,
   AnalyticsResponse,
   IAnalyticsResolver,
-} from '../Domain/Contracts/IAnalyticsResolver'
+} from '../../Domain/Contracts/IAnalyticsResolver'
 
 export class OrderVolumeResolver implements IAnalyticsResolver {
   metric = 'order_volume'

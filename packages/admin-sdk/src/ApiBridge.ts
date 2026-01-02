@@ -97,6 +97,14 @@ export class ApiBridge {
     })
   }
 
+  patch<T>(path: string, body?: any, options?: ApiRequestOptions) {
+    return this.request<T>(path, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    })
+  }
+
   delete<T>(path: string, options?: ApiRequestOptions) {
     return this.request<T>(path, { ...options, method: 'DELETE' })
   }
