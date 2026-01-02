@@ -41,7 +41,7 @@ jobs:
           bun run build
         env:
           NODE_ENV: production
-          VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
+          VITE_GA_MEASUREMENT_ID: ${{ vars.GA_ATLAS_MEASUREMENT_ID }}
 
       - name: Synchronize to atlas-site-dist repo
         run: |
