@@ -12,7 +12,9 @@ Lightweight, high-performance queueing for Gravito. Supports multiple storage dr
 - **Embedded or standalone workers**: Run in-process during development or standalone in production
 - **AI-friendly**: Strong typing, clear JSDoc, and predictable APIs
 - **Custom Retry Strategies**: Built-in exponential backoff with per-job overrides
-- **Dead Letter Queue (DLQ)**: Automatic handling of permanently failed jobs
+- **Dead Letter Queue (DLQ)**: Automatic handling of permanently failed jobs, with retry and clear operations
+- **Priority Queues**: Assign priority (critical, high, low) to any job
+- **Rate Limiting**: Control job consumption rate per queue (requires Redis)
 
 ## Installation
 
@@ -37,6 +39,24 @@ export class SendWelcomeEmail extends Job {
     await mail.send(new WelcomeEmail(user))
   }
 }
+```
+
+### 3. Rate Limit & Priority (Optional)
+
+```typescript
+const queue = c.get('queue')
+
+// High priority job
+await queue.push(new SendWelcomeEmail(user.id))
+  .onQueue('emails')
+  .withPriority('high') // 'critical' | 'high' | 'default' | 'low'
+
+// Configure rate limits in Consumer
+const consumer = new Consumer(manager, {
+  rateLimits: {
+    emails: { limit: 10, window: 60 } // Max 10 jobs per minute
+  }
+})
 ```
 
 ### 2. Enqueue a job
@@ -216,7 +236,7 @@ class QueueManager {
 
 - **MemoryDriver** - in-memory (development)
 - **DatabaseDriver** - PostgreSQL/MySQL/SQLite
-- **RedisDriver** - delayed jobs supported
+- **RedisDriver** - delayed jobs, priority queues, rate limiting, and DLQ support
 - **KafkaDriver** - topics and consumer groups
 - **SQSDriver** - standard/FIFO queues and long polling
 - **RabbitMQDriver** - exchanges, queues, and advanced confirm mode

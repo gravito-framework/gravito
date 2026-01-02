@@ -6,11 +6,12 @@ Management and Monitoring UI for Gravito Stream.
 
 - **Real-time Monitoring**: Throughput and error rates.
 - **Worker Health**: Live CPU and RAM metrics.
-- **Queue Management**: Waiting, Delayed, and Failed (DLQ) job inspection.
+- **Queue Management**: Pause/Resume queues, View Waiting/Delayed/Failed jobs.
+- **DLQ Operations**: Batch retry or clear failed jobs directly from the UI.
 - **Job Auditing & Search**: Permanent history via SQL (MySQL/SQLite) with global search.
 - **Operational Log Archiving**: Persistent storage for system events and worker activities with history search.
 - **Automated Alerting**: Slack notifications for failure spikes or backlog issues.
-- **Batch Actions**: Flush delayed jobs, retry all failed jobs.
+- **Batch Actions**: Flush delayed jobs, purge queues, and bulk operations.
 - **Schedule Management**: Full UI for Cron jobs.
 - **Zero-Config**: Built-in SQLite support for local auditing without a DB server.
 
