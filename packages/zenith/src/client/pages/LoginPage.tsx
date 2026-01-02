@@ -107,7 +107,6 @@ export function LoginPage() {
                     'transition-all'
                   )}
                   disabled={isLoading}
-                  autoFocus
                 />
                 <button
                   type="button"

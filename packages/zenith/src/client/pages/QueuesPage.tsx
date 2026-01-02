@@ -167,6 +167,7 @@ export function QueuesPage() {
             <Filter size={16} className="text-muted-foreground" />
             {(['all', 'active', 'idle', 'critical'] as const).map((status) => (
               <button
+                type="button"
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={cn(
@@ -199,7 +200,8 @@ export function QueuesPage() {
               </thead>
               <tbody className="divide-y divide-border/30 text-sm">
                 {filteredQueues.map((queue) => {
-                  const status = queue.failed > 0 ? 'critical' : queue.active > 0 ? 'active' : 'idle'
+                  const status =
+                    queue.failed > 0 ? 'critical' : queue.active > 0 ? 'active' : 'idle'
                   return (
                     <tr key={queue.name} className="hover:bg-muted/5 transition-colors group">
                       <td className="px-6 py-5">
@@ -249,6 +251,7 @@ export function QueuesPage() {
                         <div className="flex justify-end gap-2 items-center">
                           {/* Pause/Resume button */}
                           <button
+                            type="button"
                             onClick={async () => {
                               const action = queue.paused ? 'resume' : 'pause'
                               await fetch(`/api/queues/${queue.name}/${action}`, { method: 'POST' })
@@ -266,9 +269,12 @@ export function QueuesPage() {
                           </button>
                           {queue.delayed > 0 && (
                             <button
+                              type="button"
                               onClick={() =>
-                                fetch(`/api/queues/${queue.name}/retry-all`, { method: 'POST' }).then(
-                                  () => queryClient.invalidateQueries({ queryKey: ['queues'] })
+                                fetch(`/api/queues/${queue.name}/retry-all`, {
+                                  method: 'POST',
+                                }).then(() =>
+                                  queryClient.invalidateQueries({ queryKey: ['queues'] })
                                 )
                               }
                               className="p-2 text-amber-500 hover:bg-amber-500/10 rounded-lg transition-all"
@@ -277,88 +283,90 @@ export function QueuesPage() {
                               <RefreshCcw size={16} />
                             </button>
                           )}
-                        </button>
-                          )}
-                        {queue.failed > 0 && (
-                          <>
-                            <button
-                              onClick={() =>
-                                fetch(`/api/queues/${queue.name}/retry-all-failed`, {
-                                  method: 'POST',
-                                }).then(() =>
-                                  queryClient.invalidateQueries({ queryKey: ['queues'] })
-                                )
-                              }
-                              className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
-                              title="Retry All Failed"
-                            >
-                              <RefreshCcw size={16} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Are you sure you want to clear all failed jobs in queue "${queue.name}"?`
-                                  )
-                                ) {
-                                  fetch(`/api/queues/${queue.name}/clear-failed`, {
+                          {queue.failed > 0 && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  fetch(`/api/queues/${queue.name}/retry-all-failed`, {
                                     method: 'POST',
                                   }).then(() =>
                                     queryClient.invalidateQueries({ queryKey: ['queues'] })
                                   )
                                 }
-                              }}
-                              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                              title="Clear Failed Jobs"
-                            >
-                              <XCircle size={16} />
-                            </button>
-                          </>
-                        )}
-                        <button
-                          onClick={async () => {
-                            if (
-                              confirm(
-                                `Are you sure you want to purge all jobs in queue "${queue.name}"?`
-                              )
-                            ) {
-                              await fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
-                              queryClient.invalidateQueries({ queryKey: ['queues'] })
-                            }
-                          }}
-                          className="p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
-                          title="Purge Queue"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => setSelectedQueue(queue.name)}
-                          className="px-4 py-1.5 bg-muted text-foreground rounded-lg transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border border-border/50 hover:border-primary/50 hover:bg-background"
-                        >
-                          Inspect <ArrowRight size={12} />
-                        </button>
-                      </div>
-                    </td>
+                                className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
+                                title="Retry All Failed"
+                              >
+                                <RefreshCcw size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (
+                                    confirm(
+                                      `Are you sure you want to clear all failed jobs in queue "${queue.name}"?`
+                                    )
+                                  ) {
+                                    fetch(`/api/queues/${queue.name}/clear-failed`, {
+                                      method: 'POST',
+                                    }).then(() =>
+                                      queryClient.invalidateQueries({ queryKey: ['queues'] })
+                                    )
+                                  }
+                                }}
+                                className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                title="Clear Failed Jobs"
+                              >
+                                <XCircle size={16} />
+                              </button>
+                            </>
+                          )}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (
+                                confirm(
+                                  `Are you sure you want to purge all jobs in queue "${queue.name}"?`
+                                )
+                              ) {
+                                await fetch(`/api/queues/${queue.name}/purge`, { method: 'POST' })
+                                queryClient.invalidateQueries({ queryKey: ['queues'] })
+                              }
+                            }}
+                            className="p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                            title="Purge Queue"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedQueue(queue.name)}
+                            className="px-4 py-1.5 bg-muted text-foreground rounded-lg transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border border-border/50 hover:border-primary/50 hover:bg-background"
+                          >
+                            Inspect <ArrowRight size={12} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-              )
+                  )
                 })}
-              {filteredQueues.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-6 py-20 text-center text-muted-foreground">
-                    <Activity size={40} className="mx-auto mb-4 opacity-10 animate-pulse" />
-                    <p className="text-sm font-bold opacity-30 italic uppercase tracking-widest">
-                      {searchQuery || statusFilter !== 'all'
-                        ? 'No queues match your filters'
-                        : 'No queues available'}
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                {filteredQueues.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-20 text-center text-muted-foreground">
+                      <Activity size={40} className="mx-auto mb-4 opacity-10 animate-pulse" />
+                      <p className="text-sm font-bold opacity-30 italic uppercase tracking-widest">
+                        {searchQuery || statusFilter !== 'all'
+                          ? 'No queues match your filters'
+                          : 'No queues available'}
+                      </p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div >
     </>
   )
 }

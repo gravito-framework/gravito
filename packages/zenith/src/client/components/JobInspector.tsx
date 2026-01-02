@@ -66,10 +66,35 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
   }, [queueName, view, data?.total])
 
   // Reset selection when view changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We want to reset when view changes
   React.useEffect(() => {
     setSelectedIndices(new Set())
     setPage(1)
   }, [view])
+
+  const toggleSelection = (index: number) => {
+    const next = new Set(selectedIndices)
+    if (next.has(index)) {
+      next.delete(index)
+    } else {
+      next.add(index)
+    }
+    setSelectedIndices(next)
+  }
+
+  const toggleSelectAll = React.useCallback(() => {
+    if (!data?.jobs) return
+    const availableCount = data.jobs.filter((j) => j._raw && !j._archived).length
+    if (selectedIndices.size === availableCount && availableCount > 0) {
+      setSelectedIndices(new Set())
+    } else {
+      const indices = new Set<number>()
+      data.jobs.forEach((j, i) => {
+        if (j._raw && !j._archived) indices.add(i)
+      })
+      setSelectedIndices(indices)
+    }
+  }, [data?.jobs, selectedIndices])
 
   // Keyboard shortcuts
   React.useEffect(() => {
@@ -91,7 +116,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedIndices, confirmDialog, data])
+  }, [selectedIndices, confirmDialog, toggleSelectAll, onClose])
 
   // Lock body scroll when modal opens
   React.useEffect(() => {
@@ -107,30 +132,6 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
       document.body.style.paddingRight = originalPaddingRight
     }
   }, [])
-
-  const toggleSelection = (index: number) => {
-    const next = new Set(selectedIndices)
-    if (next.has(index)) {
-      next.delete(index)
-    } else {
-      next.add(index)
-    }
-    setSelectedIndices(next)
-  }
-
-  const toggleSelectAll = () => {
-    if (!data?.jobs) return
-    const availableCount = data.jobs.filter((j) => j._raw && !j._archived).length
-    if (selectedIndices.size === availableCount && availableCount > 0) {
-      setSelectedIndices(new Set())
-    } else {
-      const indices = new Set<number>()
-      data.jobs.forEach((j, i) => {
-        if (j._raw && !j._archived) indices.add(i)
-      })
-      setSelectedIndices(indices)
-    }
-  }
 
   const handleAction = async (action: 'delete' | 'retry', job: Job) => {
     if (!job._raw) return
@@ -242,6 +243,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
             <div className="flex items-center gap-4 mt-2">
               {(['waiting', 'delayed', 'failed', 'archive'] as const).map((v) => (
                 <button
+                  type="button"
                   key={v}
                   onClick={() => setView(v)}
                   className={cn(
@@ -263,6 +265,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
           >
@@ -307,6 +310,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                       {selectedIndices.size} items selected
                     </span>
                     <button
+                      type="button"
                       onClick={() => handleBulkAction('delete')}
                       className="px-3 py-1 bg-red-500/10 text-red-500 rounded-md text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all"
                     >
@@ -314,6 +318,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                     </button>
                     {(view === 'delayed' || view === 'failed') && (
                       <button
+                        type="button"
                         onClick={() => handleBulkAction('retry')}
                         className="px-3 py-1 bg-primary/10 text-primary rounded-md text-[10px] font-black uppercase hover:bg-primary hover:text-primary-foreground transition-all"
                       >
@@ -332,6 +337,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                   </span>
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => handleBulkActionAll('delete')}
                       className="px-3 py-1.5 bg-red-500/10 text-red-500 rounded-md text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all"
                     >
@@ -339,6 +345,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                     </button>
                     {(view === 'delayed' || view === 'failed') && (
                       <button
+                        type="button"
                         onClick={() => handleBulkActionAll('retry')}
                         className="px-3 py-1.5 bg-amber-500/10 text-amber-600 rounded-md text-[10px] font-black uppercase hover:bg-amber-500 hover:text-white transition-all"
                       >
@@ -417,9 +424,10 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                         new Date(job.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  <div
+                  <button
+                    type="button"
                     onClick={() => job._raw && !job._archived && toggleSelection(i)}
-                    className="cursor-pointer"
+                    className="w-full text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset"
                   >
                     {job.error && (
                       <div className="p-4 bg-red-500/10 text-red-500 text-xs font-semibold border-b border-red-500/10 flex items-start gap-2">
@@ -430,10 +438,11 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                     <pre className="text-[11px] font-mono p-4 overflow-x-auto text-foreground/80 leading-relaxed bg-muted/5">
                       {JSON.stringify(job, null, 2)}
                     </pre>
-                  </div>
+                  </button>
                   <div className="p-3 bg-muted/5 border-t border-border/50 flex justify-end gap-2">
                     {!job._archived && (
                       <button
+                        type="button"
                         onClick={() => handleAction('delete', job)}
                         className="text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors"
                       >
@@ -442,6 +451,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                     )}
                     {!job._archived && (view === 'delayed' || view === 'failed') && (
                       <button
+                        type="button"
                         onClick={() => handleAction('retry', job)}
                         className={cn(
                           'text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg text-white shadow-sm transition-all',
@@ -464,6 +474,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                   </p>
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="p-2 rounded-lg bg-muted text-muted-foreground disabled:opacity-30 hover:bg-primary hover:text-white transition-all"
@@ -472,6 +483,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
                     </button>
                     <span className="text-xs font-bold px-4">{page}</span>
                     <button
+                      type="button"
                       onClick={() => setPage((p) => p + 1)}
                       disabled={page * 50 >= (data.total || 0)}
                       className="p-2 rounded-lg bg-muted text-muted-foreground disabled:opacity-30 hover:bg-primary hover:text-white transition-all"
@@ -486,6 +498,7 @@ export function JobInspector({ queueName, onClose }: JobInspectorProps) {
         </div>
         <div className="p-4 border-t bg-card text-right flex-shrink-0">
           <button
+            type="button"
             onClick={onClose}
             className="px-8 py-3 bg-muted text-foreground rounded-xl hover:bg-muted/80 text-sm font-bold transition-all active:scale-95 uppercase tracking-widest"
           >

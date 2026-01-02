@@ -386,10 +386,14 @@ export function SchedulesPage() {
 
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  <label
+                    htmlFor="schedule-id"
+                    className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                  >
                     Schedule Identifier (ID)
                   </label>
                   <input
+                    id="schedule-id"
                     required
                     type="text"
                     placeholder="daily-cleanup-job"
@@ -401,10 +405,14 @@ export function SchedulesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    <label
+                      htmlFor="cron-expression"
+                      className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                    >
                       Cron Expression
                     </label>
                     <input
+                      id="cron-expression"
                       required
                       type="text"
                       placeholder="* * * * *"
@@ -414,11 +422,15 @@ export function SchedulesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    <label
+                      htmlFor="target-queue"
+                      className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                    >
                       Target Queue
                     </label>
                     <div className="relative">
                       <select
+                        id="target-queue"
                         className="w-full bg-muted/40 border-border/50 rounded-xl px-4 py-3 text-sm focus:ring-1 focus:ring-primary/30 outline-none transition-all appearance-none cursor-pointer"
                         value={formData.queue}
                         onChange={(e) => setFormData({ ...formData, queue: e.target.value })}
@@ -438,10 +450,14 @@ export function SchedulesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  <label
+                    htmlFor="job-class-name"
+                    className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                  >
                     Job Class Name
                   </label>
                   <input
+                    id="job-class-name"
                     required
                     type="text"
                     placeholder="CleanupJob"
@@ -452,10 +468,14 @@ export function SchedulesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  <label
+                    htmlFor="job-payload"
+                    className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                  >
                     Job Payload (JSON)
                   </label>
                   <textarea
+                    id="job-payload"
                     rows={3}
                     className="w-full bg-muted/40 border-border/50 rounded-xl px-4 py-3 text-sm font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all resize-none"
                     value={formData.payload}

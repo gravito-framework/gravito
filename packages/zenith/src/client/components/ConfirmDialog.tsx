@@ -28,10 +28,14 @@ export function ConfirmDialog({
   return createPortal(
     <AnimatePresence>
       {open && (
+        // biome-ignore lint/a11y/noStaticElementInteractions: Backdrop needs click handler to stop propagation
         <div
+          role="presentation"
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[5000] pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
         >
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: Modal content needs to stop propagation */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -69,7 +73,8 @@ export function ConfirmDialog({
                 )}
               >
                 {isProcessing && (
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" aria-label="Loading">
+                    <title>Loading</title>
                     <circle
                       className="opacity-25"
                       cx="12"

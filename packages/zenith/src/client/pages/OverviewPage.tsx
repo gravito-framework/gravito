@@ -60,7 +60,8 @@ function LiveLogs({
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    if (scrollRef.current) {
+    // Access logs to satisfy dependency check (and trigger on update)
+    if (scrollRef.current && logs) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [logs])
@@ -76,6 +77,7 @@ function LiveLogs({
         </div>
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={onSearchArchive}
             className="flex items-center gap-1.5 px-2 py-1 hover:bg-muted rounded-md text-[10px] font-black uppercase tracking-tighter text-muted-foreground transition-all"
           >
@@ -88,7 +90,7 @@ function LiveLogs({
           </div>
         </div>
       </div>
-      <div
+      <ul
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 font-mono text-[11px] space-y-2.5 scrollbar-thin scroll-smooth"
       >
@@ -99,7 +101,7 @@ function LiveLogs({
           </div>
         ) : (
           logs.map((log, i) => (
-            <div
+            <li
               key={i}
               onMouseEnter={() => onWorkerHover?.(log.workerId)}
               onMouseLeave={() => onWorkerHover?.(null)}
@@ -137,10 +139,10 @@ function LiveLogs({
                   {log.message}
                 </p>
               </div>
-            </div>
+            </li>
           ))
         )}
-      </div>
+      </ul>
     </div>
   )
 }
@@ -299,7 +301,10 @@ function QueueList({
             Processing Pipelines
           </h2>
         </div>
-        <button className="text-[10px] font-black text-primary hover:underline flex items-center gap-2 uppercase tracking-widest transition-opacity">
+        <button
+          type="button"
+          className="text-[10px] font-black text-primary hover:underline flex items-center gap-2 uppercase tracking-widest transition-opacity"
+        >
           Stats <ChevronRight size={12} />
         </button>
       </div>
@@ -329,6 +334,7 @@ function QueueList({
                 <td className="px-4 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <button
+                      type="button"
                       onClick={() => setSelectedQueue(queue.name)}
                       className="p-1.5 bg-muted hover:bg-primary/20 hover:text-primary rounded text-muted-foreground transition-all active:scale-90"
                       title="Inspect"

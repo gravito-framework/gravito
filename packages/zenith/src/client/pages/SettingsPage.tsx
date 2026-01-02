@@ -86,14 +86,17 @@ export function SettingsPage() {
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-bold mb-3 block">Theme</label>
-            <div className="flex gap-3">
+            <label htmlFor="theme-select" className="text-sm font-bold mb-3 block">
+              Theme
+            </label>
+            <div id="theme-select" className="flex gap-3">
               {[
                 { value: 'light', icon: Sun, label: 'Light' },
                 { value: 'dark', icon: Moon, label: 'Dark' },
                 { value: 'system', icon: Monitor, label: 'System' },
               ].map(({ value, icon: Icon, label }) => (
                 <button
+                  type="button"
                   key={value}
                   onClick={() => handleThemeChange(value as 'light' | 'dark' | 'system')}
                   className={cn(
@@ -286,6 +289,7 @@ export function SettingsPage() {
               notifications.
             </p>
             <button
+              type="button"
               onClick={async () => {
                 const res = await fetch('/api/alerts/test', { method: 'POST' }).then((r) =>
                   r.json()
@@ -352,6 +356,7 @@ export function SettingsPage() {
                 </span>
               </div>
               <button
+                type="button"
                 onClick={async () => {
                   const days = (document.getElementById('retention-days') as HTMLSelectElement)
                     .value

@@ -65,6 +65,7 @@ export function Toaster() {
               )}
             </div>
             <button
+              type="button"
               onClick={() => removeNotification(n.id)}
               className="mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded-lg"
             >

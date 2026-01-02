@@ -92,7 +92,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
     if (isOpen) {
       fetchLogs()
     }
-  }, [isOpen, page, status, dateRange])
+  }, [isOpen, fetchLogs])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -133,6 +133,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="p-2 hover:bg-muted rounded-xl text-muted-foreground transition-colors"
               >
@@ -143,7 +144,10 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
             {/* Advanced Filters */}
             <div className="p-4 bg-muted/5 border-b grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <form onSubmit={handleSearch} className="md:col-span-2 relative">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1">
+                <label
+                  htmlFor="log-search"
+                  className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1"
+                >
                   Search Query
                 </label>
                 <div className="relative">
@@ -152,6 +156,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                     size={16}
                   />
                   <input
+                    id="log-search"
                     type="text"
                     placeholder="Search message..."
                     className="w-full bg-background border border-border/50 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium outline-none focus:ring-1 focus:ring-primary/30 transition-all font-mono"
@@ -162,12 +167,16 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
               </form>
 
               <div className="relative">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1">
+                <label
+                  htmlFor="start-time"
+                  className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1"
+                >
                   Time Range
                 </label>
                 <div className="flex items-center gap-2 bg-background border border-border/50 rounded-xl px-3 py-2.5">
                   <Calendar size={14} className="text-muted-foreground/50" />
                   <input
+                    id="start-time"
                     type="datetime-local"
                     className="bg-transparent text-[10px] font-mono outline-none w-full"
                     onChange={(e) => {
@@ -180,6 +189,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                   />
                   <span className="text-muted-foreground/30 text-[10px]">to</span>
                   <input
+                    aria-label="End Time"
                     type="datetime-local"
                     className="bg-transparent text-[10px] font-mono outline-none w-full"
                     onChange={(e) => {
@@ -194,7 +204,10 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
               </div>
 
               <div className="relative">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1">
+                <label
+                  htmlFor="log-level"
+                  className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block ml-1"
+                >
                   Level / Status
                 </label>
                 <div className="relative">
@@ -203,6 +216,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                     size={14}
                   />
                   <select
+                    id="log-level"
                     className="w-full bg-background border border-border/50 rounded-xl py-2.5 pl-9 pr-4 text-sm font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all appearance-none"
                     value={status}
                     onChange={(e) => {
@@ -320,6 +334,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   disabled={page === 1 || isLoading}
                   onClick={() => setPage((p) => p - 1)}
                   className="p-2 border rounded-xl hover:bg-muted disabled:opacity-30 transition-all active:scale-95"
@@ -327,6 +342,7 @@ export function LogArchiveModal({ isOpen, onClose }: LogArchiveModalProps) {
                   <ChevronLeft size={16} />
                 </button>
                 <button
+                  type="button"
                   disabled={page >= totalPages || isLoading}
                   onClick={() => setPage((p) => p + 1)}
                   className="p-2 border rounded-xl hover:bg-muted disabled:opacity-30 transition-all active:scale-95"
@@ -355,7 +371,9 @@ function RefreshCwIcon({ className, size }: { className?: string; size?: number 
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      aria-label="Refreshing"
     >
+      <title>Refreshing</title>
       <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
       <path d="M21 3v5h-5" />
       <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
