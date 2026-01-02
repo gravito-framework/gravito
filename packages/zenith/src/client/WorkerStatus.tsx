@@ -36,23 +36,25 @@ export function WorkerStatus({
   const onlineCount = workers.filter((w) => w.status === 'online').length
 
   return (
-    <div className="card-premium p-6 h-full">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h3 className="text-lg font-black flex items-center gap-2 tracking-tight">
-            <Cpu size={20} className="text-primary" />
-            Cluster Nodes
-          </h3>
-          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
-            Real-time load
-          </p>
+    <div className="card-premium h-full flex flex-col overflow-hidden">
+      <div className="p-6 pb-0 flex-none">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-lg font-black flex items-center gap-2 tracking-tight">
+              <Cpu size={20} className="text-primary" />
+              Cluster Nodes
+            </h3>
+            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
+              Real-time load
+            </p>
+          </div>
+          <span className="text-[10px] font-black text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase tracking-widest border border-green-500/20">
+            {onlineCount} ACTIVE
+          </span>
         </div>
-        <span className="text-[10px] font-black text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase tracking-widest border border-green-500/20">
-          {onlineCount} ACTIVE
-        </span>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex-1 overflow-y-auto min-h-0 px-6 space-y-3 scrollbar-thin pb-6">
         {workers.length === 0 && (
           <div className="py-12 text-center text-muted-foreground/30 flex flex-col items-center gap-2">
             <Activity size={24} className="opacity-20 animate-pulse" />
@@ -64,7 +66,7 @@ export function WorkerStatus({
           <div
             key={worker.id}
             className={cn(
-              'flex items-center justify-between p-4 rounded-2xl bg-muted/10 border transition-all group overflow-hidden relative',
+              'flex items-center justify-between p-4 rounded-2xl bg-muted/10 border transition-all group overflow-hidden relative shrink-0',
               worker.id === highlightedWorkerId
                 ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)] -translate-y-1 scale-[1.02] z-10'
                 : 'border-transparent hover:border-primary/20 hover:bg-muted/20'
@@ -159,12 +161,14 @@ export function WorkerStatus({
         ))}
       </div>
 
-      <button
-        type="button"
-        className="w-full mt-8 py-3 bg-muted text-[10px] font-black rounded-xl hover:bg-primary hover:text-primary-foreground transition-all uppercase tracking-[0.2em] opacity-60 hover:opacity-100 active:scale-95 shadow-lg shadow-transparent hover:shadow-primary/20"
-      >
-        Manage Nodes
-      </button>
+      <div className="p-6 pt-0 flex-none">
+        <button
+          type="button"
+          className="w-full py-3 bg-muted text-[10px] font-black rounded-xl hover:bg-primary hover:text-primary-foreground transition-all uppercase tracking-[0.2em] opacity-60 hover:opacity-100 active:scale-95 shadow-lg shadow-transparent hover:shadow-primary/20"
+        >
+          Manage Nodes
+        </button>
+      </div>
     </div>
   )
 }

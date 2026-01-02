@@ -12,6 +12,7 @@ import {
   SchedulesPage,
   SettingsPage,
   WorkersPage,
+  PulsePage,
 } from './pages'
 
 const queryClient = new QueryClient()
@@ -48,6 +49,7 @@ function AuthenticatedRoutes() {
           <Route path="/schedules" element={<SchedulesPage />} />
           <Route path="/workers" element={<WorkersPage />} />
           <Route path="/metrics" element={<MetricsPage />} />
+          <Route path="/pulse" element={<PulsePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Layout>

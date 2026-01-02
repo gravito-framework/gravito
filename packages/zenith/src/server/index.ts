@@ -11,7 +11,9 @@ import {
   isAuthEnabled,
   verifyPassword,
 } from './middleware/auth'
+import { PulseService } from './services/PulseService'
 import { QueueService } from './services/QueueService'
+import { startAgent } from './utils/agent'
 
 const app = new Photon()
 
@@ -58,10 +60,15 @@ if (dbDriver === 'sqlite' || process.env.DB_HOST) {
 
 // Service Initialization
 const queueService = new QueueService(REDIS_URL, QUEUE_PREFIX, persistence)
+const pulseService = new PulseService(REDIS_URL)
 
 queueService
   .connect()
+  .then(() => pulseService.connect())
   .then(() => {
+    // Start Self-Monitoring
+    startAgent('flux-console', pulseService)
+
     console.log(`[FluxConsole] Connected to Redis at ${REDIS_URL}`)
     // Start background metrics recording (Reduced from 5s to 2s for better real-time feel)
     setInterval(() => {
@@ -339,6 +346,16 @@ api.get('/system/status', (c) => {
     uptime: process.uptime(),
     env: process.env.NODE_ENV || 'production-east-1',
   })
+})
+
+// --- Pulse Monitoring ---
+api.get('/pulse/nodes', async (c) => {
+  try {
+    const nodes = await pulseService.getNodes()
+    return c.json({ nodes })
+  } catch (_err) {
+    return c.json({ error: 'Failed to fetch pulse nodes' }, 500)
+  }
 })
 
 api.post('/queues/:name/jobs/delete', async (c) => {
