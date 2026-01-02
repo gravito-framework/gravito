@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { Activity, Cpu, Database, Laptop, Server } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { PulseNode } from '../../shared/types'
@@ -129,17 +130,38 @@ function ServiceGroup({ service, nodes }: { service: string, nodes: PulseNode[] 
 }
 
 export function PulsePage() {
-    const { data, isLoading } = useQuery<{ nodes: Record<string, PulseNode[]> }>({
+    const { data: initialData, isLoading } = useQuery<{ nodes: Record<string, PulseNode[]> }>({
         queryKey: ['pulse-nodes'],
         queryFn: async () => {
             const res = await fetch('/api/pulse/nodes')
             return res.json()
         },
-        refetchInterval: 2000 // Fast polling for real-time feel
+        // Remove polling
     })
 
+    const [nodes, setNodes] = useState<Record<string, PulseNode[]>>({})
+
+    // Hydrate initial data
+    useEffect(() => {
+        if (initialData?.nodes) {
+            setNodes(initialData.nodes)
+        }
+    }, [initialData])
+
+    // Listen for SSE updates
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const customEvent = e as CustomEvent
+            if (customEvent.detail?.nodes) {
+                setNodes(customEvent.detail.nodes)
+            }
+        }
+        window.addEventListener('flux-pulse-update', handler)
+        return () => window.removeEventListener('flux-pulse-update', handler)
+    }, [])
+
     // Loading Skeleton
-    if (isLoading || !data) {
+    if (isLoading && Object.keys(nodes).length === 0) {
         return (
             <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-pulse">
                 <div className="h-8 w-48 bg-muted rounded-lg" />
@@ -150,7 +172,7 @@ export function PulsePage() {
         )
     }
 
-    const services = Object.entries(data.nodes || {})
+    const services = Object.entries(nodes)
 
     return (
         <div className="min-h-screen bg-background text-foreground pb-20">

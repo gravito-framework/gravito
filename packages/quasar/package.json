@@ -1,0 +1,16 @@
+{
+    "name": "@gravito/quasar",
+    "version": "0.1.0",
+    "description": "Universal system monitoring agent for Gravito Zenith",
+    "main": "src/index.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "ioredis": "^5.4.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "bun-types": "latest"
+    }
+}

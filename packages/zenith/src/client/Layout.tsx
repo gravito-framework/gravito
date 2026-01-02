@@ -90,6 +90,15 @@ export function Layout({ children }: LayoutProps) {
       }
     })
 
+    ev.addEventListener('pulse', (e) => {
+      try {
+        const data = JSON.parse(e.data)
+        window.dispatchEvent(new CustomEvent('flux-pulse-update', { detail: data }))
+      } catch (err) {
+        console.error('SSE Pulse Error', err)
+      }
+    })
+
     ev.onerror = (err) => {
       console.error('[Zenith] SSE Connection Error', err)
       ev.close()

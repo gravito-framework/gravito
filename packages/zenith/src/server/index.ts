@@ -471,9 +471,23 @@ api.get('/logs/stream', async (c) => {
       })
     })
 
+    // 4. Poll Pulse Nodes per client (simple polling for now)
+    const pulseInterval = setInterval(async () => {
+      try {
+        const nodes = await pulseService.getNodes()
+        await stream.writeSSE({
+          data: JSON.stringify({ nodes }),
+          event: 'pulse',
+        })
+      } catch (err) {
+        // ignore errors
+      }
+    }, 2000)
+
     stream.onAbort(() => {
       unsubscribeLogs()
       unsubscribeStats()
+      clearInterval(pulseInterval)
     })
 
     // Keep alive
