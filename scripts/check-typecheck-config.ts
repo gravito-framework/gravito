@@ -42,7 +42,9 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
 
       // 檢查是否使用正確的命令
       if (typecheckScript !== 'bun tsc -p tsconfig.json --noEmit --skipLibCheck') {
-        issues.push(`⚠️  typecheck 腳本建議標準化為 'bun tsc -p tsconfig.json --noEmit --skipLibCheck'（當前: ${typecheckScript}）`)
+        issues.push(
+          `⚠️  typecheck 腳本建議標準化為 'bun tsc -p tsconfig.json --noEmit --skipLibCheck'（當前: ${typecheckScript}）`
+        )
       }
 
       // 檢查是否有 --skipLibCheck
@@ -52,7 +54,6 @@ async function checkPackage(packagePath: string, packageName: string): Promise<P
       } else {
         hasSkipLibCheck = true
       }
-
     } else {
       issues.push(`⚠️  缺少 typecheck 腳本`)
     }
@@ -167,7 +168,9 @@ async function checkAllPackages() {
   if (typecheckPatterns.size > 3) {
     console.log('⚠️  發現多種 typecheck 配置模式，建議統一:\n')
     for (const pattern of typecheckPatterns) {
-      const count = packages.filter((p) => p.typecheckScript?.replace(/\s+/g, ' ').trim() === pattern).length
+      const count = packages.filter(
+        (p) => p.typecheckScript?.replace(/\s+/g, ' ').trim() === pattern
+      ).length
       console.log(`   ${pattern} (${count} 個套件)`)
     }
     console.log()
@@ -196,4 +199,3 @@ checkAllPackages().catch((error) => {
   console.error('❌ 檢查過程發生錯誤:', error)
   process.exit(1)
 })
-

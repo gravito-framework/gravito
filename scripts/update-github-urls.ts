@@ -2,15 +2,15 @@
 
 /**
  * 更新所有檔案中的 GitHub URL
- * 
+ *
  * 使用方法：
  * bun run scripts/update-github-urls.ts <組織名稱> <repository名稱>
- * 
+ *
  * 範例：
  * bun run scripts/update-github-urls.ts gravito-org @gravito/core
  */
 
-import { readdir, readFile, writeFile, stat } from 'node:fs/promises'
+import { readdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const OLD_ORG = 'CarlLee1983'
@@ -42,16 +42,16 @@ const EXCLUDE_DIRS = ['node_modules', '.git', 'dist', '.next', 'coverage', 'tmp'
 const URL_PATTERNS = [
   {
     old: new RegExp(`github\\.com/${OLD_ORG}/${OLD_REPO}`, 'g'),
-    new: `github.com/${NEW_ORG}/${NEW_REPO}`
+    new: `github.com/${NEW_ORG}/${NEW_REPO}`,
   },
   {
     old: new RegExp(`github\\.com/${OLD_ORG}/${OLD_REPO_FULL}`, 'g'),
-    new: `github.com/${NEW_ORG}/${NEW_REPO}`
+    new: `github.com/${NEW_ORG}/${NEW_REPO}`,
   },
   {
     old: new RegExp(`github:${OLD_ORG}/${OLD_REPO}`, 'g'),
-    new: `github:${NEW_ORG}/${NEW_REPO}`
-  }
+    new: `github:${NEW_ORG}/${NEW_REPO}`,
+  },
 ]
 
 let updatedFiles = 0
@@ -141,9 +141,16 @@ async function main() {
   console.log('')
   console.log('📋 下一步：')
   console.log('   1. 檢查變更: git diff')
-  console.log('   2. 確認無誤後提交: git add . && git commit -m "chore: update GitHub URLs to organization"')
-  console.log('   3. 更新 Git remote: git remote set-url origin https://github.com/' + NEW_ORG + '/' + NEW_REPO + '.git')
+  console.log(
+    '   2. 確認無誤後提交: git add . && git commit -m "chore: update GitHub URLs to organization"'
+  )
+  console.log(
+    '   3. 更新 Git remote: git remote set-url origin https://github.com/' +
+      NEW_ORG +
+      '/' +
+      NEW_REPO +
+      '.git'
+  )
 }
 
 main().catch(console.error)
-

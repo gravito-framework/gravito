@@ -76,7 +76,9 @@ async function findPackagesWithTypecheck(): Promise<PackageInfo[]> {
   return packages
 }
 
-async function verifyPackageTypecheck(pkg: PackageInfo): Promise<{ success: boolean; error?: string }> {
+async function verifyPackageTypecheck(
+  pkg: PackageInfo
+): Promise<{ success: boolean; error?: string }> {
   console.log(`🔍 驗證 ${pkg.name}...`)
 
   try {
@@ -131,4 +133,3 @@ main().catch((error) => {
   console.error('❌ 驗證過程發生錯誤:', error)
   process.exit(1)
 })
-

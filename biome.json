@@ -131,9 +131,7 @@
     "attributePosition": "auto"
   },
   "javascript": {
-    "globals": [
-      "Bun"
-    ],
+    "globals": ["Bun"],
     "formatter": {
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",

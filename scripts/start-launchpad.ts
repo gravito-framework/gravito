@@ -7,7 +7,7 @@ const backend = spawn(['bun', 'server.ts'], {
   cwd: 'packages/launchpad',
   stdout: 'pipe',
   stderr: 'pipe',
-  env: { ...process.env, FORCE_COLOR: '1' } // 保持顏色輸出
+  env: { ...process.env, FORCE_COLOR: '1' }, // 保持顏色輸出
 })
 
 console.log('✅ 後端服務啟動中...')
@@ -17,7 +17,7 @@ const frontend = spawn(['bun', 'dev'], {
   cwd: 'packages/launchpad-dashboard',
   stdout: 'pipe',
   stderr: 'pipe',
-  env: { ...process.env, FORCE_COLOR: '1' }
+  env: { ...process.env, FORCE_COLOR: '1' },
 })
 
 console.log('✅ 前端儀表板啟動中...')
@@ -26,14 +26,14 @@ console.log('✅ 前端儀表板啟動中...')
 const pipeLog = (stream: ReadableStream, prefix: string, color: string) => {
   const reader = stream.getReader()
   const decoder = new TextDecoder()
-  
+
   const read = async () => {
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
       const text = decoder.decode(value)
       // 簡單的行處理，加上前綴
-      text.split('\n').forEach(line => {
+      text.split('\n').forEach((line) => {
         if (line.trim()) {
           console.log(`${color}[${prefix}] \x1b[0m${line}`)
         }
