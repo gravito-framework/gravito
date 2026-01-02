@@ -1343,12 +1343,13 @@
       "name": "@gravito/zenith",
       "version": "0.1.0-beta.1",
       "bin": {
-        "zenith": "./dist/bin.js",
-        "flux-console": "./dist/bin.js",
+        "zenith": "dist/bin.js",
+        "flux-console": "dist/bin.js",
       },
       "dependencies": {
         "@gravito/atlas": "workspace:*",
         "@gravito/photon": "workspace:*",
+        "@gravito/quasar": "workspace:*",
         "@gravito/stream": "workspace:*",
         "@tanstack/react-query": "^5.0.0",
         "clsx": "^2.1.1",

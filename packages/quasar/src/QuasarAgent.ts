@@ -52,8 +52,17 @@ export class QuasarAgent {
       const payload = {
         id,
         service: this.service,
-        language: 'node', // TODO: Detect form runtime
-        ...metrics,
+        language: 'node',
+        version: metrics.runtime.version,
+        pid: metrics.pid,
+        hostname: metrics.hostname,
+        platform: metrics.runtime.platform,
+        cpu: metrics.cpu,
+        memory: metrics.memory,
+        runtime: {
+          uptime: metrics.runtime.uptime,
+          framework: 'Quasar',
+        },
         timestamp: Date.now(),
       }
 

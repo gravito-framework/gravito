@@ -1,5 +1,6 @@
 import { DB } from '@gravito/atlas'
 import { Photon } from '@gravito/photon'
+import { QuasarAgent } from '@gravito/quasar'
 import { MySQLPersistence, SQLitePersistence } from '@gravito/stream'
 import { serveStatic } from 'hono/bun'
 import { getCookie } from 'hono/cookie'
@@ -13,7 +14,6 @@ import {
 } from './middleware/auth'
 import { PulseService } from './services/PulseService'
 import { QueueService } from './services/QueueService'
-import { startAgent } from './utils/agent'
 
 const app = new Photon()
 
@@ -66,8 +66,12 @@ queueService
   .connect()
   .then(() => pulseService.connect())
   .then(() => {
-    // Start Self-Monitoring
-    startAgent('flux-console', pulseService)
+    // Start Self-Monitoring (Quasar)
+    const agent = new QuasarAgent({
+      service: 'flux-console',
+      redisUrl: REDIS_URL,
+    })
+    agent.start().catch((err) => console.error('[FluxConsole] Quasar Agent Error:', err))
 
     console.log(`[FluxConsole] Connected to Redis at ${REDIS_URL}`)
     // Start background metrics recording (Reduced from 5s to 2s for better real-time feel)
