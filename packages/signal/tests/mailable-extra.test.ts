@@ -12,9 +12,8 @@ class DemoMail extends Mailable {
       .bcc('bcc@example.com')
       .replyTo('reply@example.com')
       .subject('Hello')
-      .priority('high')
-      .attach({ filename: 'file.txt', content: 'hi' })
-      .html('<p>Hi</p>')
+      .emailPriority('high')
+      .html('<p>Hello World</p>')
   }
 }
 
@@ -32,8 +31,8 @@ describe('Mailable', () => {
     expect(envelope.replyTo?.address).toBe('reply@example.com')
 
     const content = await mail.renderContent()
-    expect(content.html).toContain('<p>Hi</p>')
-    expect(content.text).toBe('Hi')
+    expect(content.html).toContain('<p>Hello World</p>')
+    expect(content.text).toBe('Hello World')
     expect(mail.t('hello')).toBe('t:hello')
   })
 

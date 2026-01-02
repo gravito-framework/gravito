@@ -47,7 +47,7 @@ export abstract class Mailable implements Queueable {
     return this
   }
 
-  priority(level: 'high' | 'normal' | 'low'): this {
+  emailPriority(level: 'high' | 'normal' | 'low'): this {
     this.envelope.priority = level
     return this
   }
@@ -130,6 +130,7 @@ export abstract class Mailable implements Queueable {
   queueName?: string
   connectionName?: string
   delaySeconds?: number
+  priority?: number | string
 
   onQueue(queue: string): this {
     this.queueName = queue
@@ -143,6 +144,11 @@ export abstract class Mailable implements Queueable {
 
   delay(seconds: number): this {
     this.delaySeconds = seconds
+    return this
+  }
+
+  withPriority(priority: string | number): this {
+    this.priority = priority
     return this
   }
 
