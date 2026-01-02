@@ -90,7 +90,7 @@ Zenith is designed to provide real-time insights without degrading the performan
 
 ## 4. UI/UX Architecture
 *   **Feature**: Premium, App-Like Experience.
-*   **Technology**: React 18, TailwindCSS, Framer Motion, Lucide Icons.
+*   **Technology**: React 19, TailwindCSS, Framer Motion, Lucide Icons.
 *   **Implementation**:
     *   **Optimistic UI**: Buttons (Pause/Resume, Retry) update the UI state immediately while the API call happens in the background.
     *   **Virtualization**: Lists can render thousands of job rows smoothly.

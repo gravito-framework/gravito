@@ -90,7 +90,7 @@ Zenith 旨在提供即時洞察，同時絕不降低隊列引擎的效能。
 
 ## 4. UI/UX 架構
 *   **功能**：頂級的應用程式體驗。
-*   **技術**：React 18, TailwindCSS, Framer Motion, Lucide Icons。
+*   **技術**：React 19, TailwindCSS, Framer Motion, Lucide Icons。
 *   **實作細節**：
     *   **樂觀 UI (Optimistic UI)**：按鈕（暫停/恢復、重試）會立即更新 UI 狀態，而 API 呼叫在背景進行。
     *   **虛擬化**：列表可以流暢地渲染成千上萬行任務。
