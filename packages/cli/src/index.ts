@@ -711,7 +711,7 @@ cli.command('dev', 'Start development server with health checks').action(async (
 
 cli.help()
 
-cli.version('1.0.0-beta.4')
+cli.version('1.0.0-beta.6')
 
 try {
   cli.parse()
