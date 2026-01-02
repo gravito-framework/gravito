@@ -70,7 +70,7 @@ export async function bootstrap(options: { port?: number } = {}) {
     if (inertia) {
       ;(inertia as any).share({
         locale,
-        gaId: process.env.GA_MEASUREMENT_ID,
+        gaId: process.env.VITE_GA_MEASUREMENT_ID,
       })
     }
     return await next()
