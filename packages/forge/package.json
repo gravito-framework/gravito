@@ -5,25 +5,22 @@
     "access": "public"
   },
   "description": "File Processing Orbit for Gravito - Video and Image Processing with Real-time Status Tracking",
-  "module": "./dist/index.mjs",
   "main": "./dist/index.cjs",
-  "type": "module",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./react": {
+    "./components": {
       "types": "./dist/components/index.d.ts",
-      "import": "./dist/components/index.mjs",
-      "require": "./dist/components/index.cjs"
+      "import": "./dist/components/index.js"
     },
     "./vue": {
       "types": "./dist/vue/index.d.ts",
-      "import": "./dist/vue/index.mjs",
-      "require": "./dist/vue/index.cjs"
+      "import": "./dist/vue/index.js"
     }
   },
   "files": [

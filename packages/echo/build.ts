@@ -14,7 +14,7 @@ await Bun.build({
 
 // Generate .cjs version
 const cjsCode = `"use strict";
-module.exports = require("./index.mjs");
+module.exports = require("./index.js");
 `
 await Bun.write('./dist/index.cjs', cjsCode)
 
