@@ -163,7 +163,7 @@ export {
  *     APP_NAME: 'My App',
  *     PORT: 3000,
  *   },
- *   orbits: [OrbitCache, OrbitPulsar],
+ *   orbits: [], // Add your orbits here
  * })
  *
  * const core = await PlanetCore.boot(config)
