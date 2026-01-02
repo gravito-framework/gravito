@@ -67,6 +67,44 @@ function NodeCard({ node }: { node: PulseNode }) {
 
             {/* Metrics Grid - Vertical Stack */}
             <div className="space-y-3">
+                {/* Queues Section (if present) */}
+                {node.queues && node.queues.length > 0 && (
+                    <div className="bg-muted/30 rounded-lg p-2.5 border border-border/50">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                            <div className="flex items-center gap-2 font-bold text-foreground">
+                                <span className={cn("w-1.5 h-1.5 rounded-full", node.queues.some(q => q.size.failed > 0) ? "bg-red-500 animate-pulse" : "bg-emerald-500")} />
+                                Queues ({node.queues.length})
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            {node.queues.map(q => (
+                                <div key={q.name} className="flex flex-col gap-1 text-xs">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-mono text-muted-foreground">{q.name}</span>
+                                        <div className="flex gap-2 font-mono">
+                                            {q.size.failed > 0 && (
+                                                <span className="text-red-500 font-bold">{q.size.failed} fail</span>
+                                            )}
+                                            {q.size.active > 0 && (
+                                                <span className="text-emerald-500">{q.size.active} act</span>
+                                            )}
+                                            <span className={cn(q.size.waiting > 100 ? "text-yellow-500" : "text-muted-foreground")}>{q.size.waiting} wait</span>
+                                        </div>
+                                    </div>
+                                    {/* Mini Progress bar for Queue Health (Failed vs Total) */}
+                                    {(q.size.waiting + q.size.active + q.size.failed) > 0 && (
+                                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden flex">
+                                            <div className="bg-red-500 h-full transition-all" style={{ width: `${(q.size.failed / (q.size.waiting + q.size.active + q.size.failed)) * 100}%` }} />
+                                            <div className="bg-yellow-500 h-full transition-all" style={{ width: `${(q.size.waiting / (q.size.waiting + q.size.active + q.size.failed)) * 100}%` }} />
+                                            <div className="bg-emerald-500 h-full transition-all" style={{ width: `${(q.size.active / (q.size.waiting + q.size.active + q.size.failed)) * 100}%` }} />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* CPU */}
                 <div className="bg-muted/30 rounded-lg p-2.5 border border-border/50">
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
