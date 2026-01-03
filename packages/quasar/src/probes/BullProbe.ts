@@ -37,10 +37,10 @@ export class BullProbe implements QueueProbe {
 
     // Parse results
     // Each result is [err, value]
-    const [waitingErr, waiting] = results[0]
-    const [activeErr, active] = results[1]
-    const [delayedErr, delayed] = results[2]
-    const [failedErr, failed] = results[3]
+    const [_waitingErr, waiting] = results[0]
+    const [_activeErr, active] = results[1]
+    const [_delayedErr, delayed] = results[2]
+    const [_failedErr, failed] = results[3]
 
     return {
       name: this.queueName,
