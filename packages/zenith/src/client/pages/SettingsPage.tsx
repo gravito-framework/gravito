@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Bell,
   Clock,
@@ -18,6 +18,8 @@ import React from 'react'
 import { cn } from '../utils'
 
 export function SettingsPage() {
+  const queryClient = useQueryClient()
+  const [showAddRule, setShowAddRule] = React.useState(false)
   const [theme, setTheme] = React.useState<'light' | 'dark' | 'system'>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme')
@@ -147,14 +149,14 @@ export function SettingsPage() {
               <span className="font-medium">Redis URL</span>
             </div>
             <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
-              {process.env.REDIS_URL || 'redis://localhost:6379'}
+              {systemStatus?.redisUrl || 'redis://localhost:6379'}
             </code>
           </div>
 
           <div className="flex items-center justify-between py-3 border-b border-border/30">
             <div className="flex items-center gap-3">
               <Clock size={16} className="text-muted-foreground" />
-              <span className="font-medium">Server Uptime</span>
+              <span className="font-medium">Service Uptime</span>
             </div>
             <span className="text-sm font-mono font-bold">
               {systemStatus?.uptime ? formatUptime(systemStatus.uptime) : 'Loading...'}
@@ -210,6 +212,12 @@ export function SettingsPage() {
             </p>
             <p className="text-lg font-mono font-bold">{systemStatus?.memory?.heapUsed || '...'}</p>
           </div>
+          <div className="bg-muted/20 rounded-xl p-4">
+            <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest mb-1">
+              Total System RAM
+            </p>
+            <p className="text-lg font-mono font-bold">{systemStatus?.memory?.total || '...'}</p>
+          </div>
         </div>
       </section>
 
@@ -255,32 +263,159 @@ export function SettingsPage() {
             </div>
           </div>
 
-          <div>
-            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-3">
+          <div className="flex items-center justify-between mb-3 mt-8">
+            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
               Active Rules
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {alertConfig?.rules?.map((rule: any) => (
-                <div
-                  key={rule.id}
-                  className="p-3 bg-muted/20 border border-border/10 rounded-xl flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-[11px] font-black uppercase tracking-tight">{rule.name}</p>
-                    <p className="text-[10px] text-muted-foreground opacity-70">
-                      {rule.type === 'backlog'
-                        ? `Waiting > ${rule.threshold}`
-                        : rule.type === 'failure'
-                          ? `Failed > ${rule.threshold}`
-                          : `Workers < ${rule.threshold}`}
-                    </p>
-                  </div>
-                  <div className="px-2 py-0.5 bg-muted rounded text-[9px] font-bold text-muted-foreground">
-                    {rule.cooldownMinutes}m cooldown
-                  </div>
+            <button
+              onClick={() => setShowAddRule(!showAddRule)}
+              className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline border-none bg-transparent cursor-pointer"
+            >
+              {showAddRule ? 'Cancel' : '+ Add Rule'}
+            </button>
+          </div>
+
+          {showAddRule && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                const rule = {
+                  id: Math.random().toString(36).substring(7),
+                  name: formData.get('name'),
+                  type: formData.get('type'),
+                  threshold: parseInt(formData.get('threshold') as string, 10),
+                  cooldownMinutes: parseInt(formData.get('cooldown') as string, 10),
+                  queue: formData.get('queue') || undefined,
+                }
+                await fetch('/api/alerts/rules', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(rule),
+                })
+                setShowAddRule(false)
+                queryClient.invalidateQueries({ queryKey: ['alerts-config'] })
+              }}
+              className="p-4 bg-muted/40 rounded-xl border border-primary/20 space-y-4 mb-6"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                    Rule Name
+                  </label>
+                  <input
+                    name="name"
+                    required
+                    placeholder="High CPU"
+                    className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary/30"
+                  />
                 </div>
-              ))}
-            </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                    Type
+                  </label>
+                  <select
+                    name="type"
+                    className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none cursor-pointer"
+                  >
+                    <option value="backlog">Queue Backlog</option>
+                    <option value="failure">High Failure Count</option>
+                    <option value="worker_lost">Worker Loss</option>
+                    <option value="node_cpu">Node CPU (%)</option>
+                    <option value="node_ram">Node RAM (%)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                    Threshold
+                  </label>
+                  <input
+                    name="threshold"
+                    type="number"
+                    required
+                    defaultValue="80"
+                    className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                    Cooldown (Min)
+                  </label>
+                  <input
+                    name="cooldown"
+                    type="number"
+                    required
+                    defaultValue="30"
+                    className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                    Queue (Optional)
+                  </label>
+                  <input
+                    name="queue"
+                    placeholder="default"
+                    className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full py-2 bg-primary text-primary-foreground rounded-lg text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20 cursor-pointer"
+              >
+                Save Alert Rule
+              </button>
+            </form>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {alertConfig?.rules?.map((rule: any) => (
+              <div
+                key={rule.id}
+                className="p-3 bg-muted/20 border border-border/10 rounded-xl flex items-center justify-between group"
+              >
+                <div className="flex-1">
+                  <p className="text-[11px] font-black uppercase tracking-tight flex items-center gap-2">
+                    {rule.name}
+                    {rule.queue && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                        {rule.queue}
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground opacity-70">
+                    {rule.type === 'backlog'
+                      ? `Waiting > ${rule.threshold}`
+                      : rule.type === 'failure'
+                        ? `Failed > ${rule.threshold}`
+                        : rule.type === 'worker_lost'
+                          ? `Workers < ${rule.threshold}`
+                          : rule.type === 'node_cpu'
+                            ? `CPU > ${rule.threshold}%`
+                            : `RAM > ${rule.threshold}%`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="px-2 py-0.5 bg-muted rounded text-[9px] font-bold text-muted-foreground">
+                    {rule.cooldownMinutes}m
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (confirm('Delete this alert rule?')) {
+                        await fetch(`/api/alerts/rules/${rule.id}`, { method: 'DELETE' })
+                        queryClient.invalidateQueries({ queryKey: ['alerts-config'] })
+                      }
+                    }}
+                    className="p-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/30">
@@ -409,12 +544,12 @@ export function SettingsPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between py-3 border-b border-border/30">
             <span className="font-medium">Version</span>
-            <span className="text-sm font-bold">0.1.0-alpha.1</span>
+            <span className="text-sm font-bold">{systemStatus?.version || '0.1.0-alpha.1'}</span>
           </div>
           <div className="flex items-center justify-between py-3 border-b border-border/30">
             <span className="font-medium">Package</span>
             <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
-              @gravito/flux-console
+              {systemStatus?.package || '@gravito/flux-console'}
             </code>
           </div>
           <div className="flex items-center justify-between py-3">

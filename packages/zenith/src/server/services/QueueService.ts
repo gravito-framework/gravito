@@ -51,7 +51,7 @@ export class QueueService {
   private logThrottleReset = Date.now()
   private readonly MAX_LOGS_PER_SEC = 50
   private manager: QueueManager
-  public alerts = new AlertService()
+  public alerts: AlertService
 
   constructor(
     redisUrl: string,
@@ -84,10 +84,11 @@ export class QueueService {
       },
       persistence,
     })
+    this.alerts = new AlertService(redisUrl)
   }
 
   async connect() {
-    await Promise.all([this.redis.connect(), this.subRedis.connect()])
+    await Promise.all([this.redis.connect(), this.subRedis.connect(), this.alerts.connect()])
 
     // Setup single Redis subscription
     await this.subRedis.subscribe('flux_console:logs')
@@ -291,7 +292,7 @@ export class QueueService {
   /**
    * Records a snapshot of current global statistics for sparklines.
    */
-  async recordStatusMetrics(): Promise<void> {
+  async recordStatusMetrics(nodes: Record<string, any> = {}): Promise<void> {
     const stats = await this.listQueues()
     const totals = stats.reduce(
       (acc, q) => {
@@ -328,6 +329,7 @@ export class QueueService {
     this.alerts
       .check({
         queues: stats,
+        nodes: nodes as any,
         workers,
         totals,
       })

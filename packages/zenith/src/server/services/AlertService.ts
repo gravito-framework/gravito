@@ -1,53 +1,79 @@
 import { EventEmitter } from 'events'
+import { Redis } from 'ioredis'
+import type { AlertEvent, AlertRule, PulseNode } from '../../shared/types'
 import type { WorkerReport } from './QueueService'
 
-export interface AlertRule {
-  id: string
-  name: string
-  type: 'backlog' | 'failure' | 'worker_lost'
-  threshold: number
-  queue?: string // Optional: specific queue or all
-  cooldownMinutes: number
-}
-
-export interface AlertEvent {
-  ruleId: string
-  timestamp: number
-  message: string
-  severity: 'warning' | 'critical'
-}
-
 export class AlertService {
+  private redis: Redis
   private rules: AlertRule[] = []
   private cooldowns: Map<string, number> = new Map()
   private webhookUrl: string | null = process.env.SLACK_WEBHOOK_URL || null
   private emitter = new EventEmitter()
+  private readonly RULES_KEY = 'gravito:zenith:alerts:rules'
 
-  constructor() {
-    // Default Rules
+  constructor(redisUrl: string) {
+    this.redis = new Redis(redisUrl, {
+      lazyConnect: true,
+    })
+
+    // Initial default rules
     this.rules = [
       {
         id: 'global_failure_spike',
         name: 'High Failure Rate',
         type: 'failure',
-        threshold: 50, // More than 50 failed jobs
+        threshold: 50,
         cooldownMinutes: 30,
       },
       {
         id: 'global_backlog_critical',
         name: 'Queue Backlog Warning',
         type: 'backlog',
-        threshold: 1000, // More than 1000 waiting jobs
+        threshold: 1000,
         cooldownMinutes: 60,
       },
       {
         id: 'no_workers_online',
         name: 'All Workers Offline',
         type: 'worker_lost',
-        threshold: 1, // < 1 worker
+        threshold: 1,
         cooldownMinutes: 15,
       },
     ]
+
+    this.loadRules().catch((err) => console.error('[AlertService] Failed to load rules:', err))
+  }
+
+  async connect() {
+    if (this.redis.status === 'wait') {
+      await this.redis.connect()
+    }
+  }
+
+  async loadRules() {
+    try {
+      const data = await this.redis.get(this.RULES_KEY)
+      if (data) {
+        this.rules = JSON.parse(data)
+      }
+    } catch (err) {
+      console.error('[AlertService] Error loading rules from Redis:', err)
+    }
+  }
+
+  async saveRules(rules: AlertRule[]) {
+    this.rules = rules
+    await this.redis.set(this.RULES_KEY, JSON.stringify(rules))
+  }
+
+  async addRule(rule: AlertRule) {
+    this.rules.push(rule)
+    await this.saveRules(this.rules)
+  }
+
+  async deleteRule(id: string) {
+    this.rules = this.rules.filter((r) => r.id !== id)
+    await this.saveRules(this.rules)
   }
 
   setWebhook(url: string | null) {
@@ -61,10 +87,10 @@ export class AlertService {
 
   /**
    * Evaluates rules against provided data.
-   * Extremely lightweight: only uses existing metrics data.
    */
   async check(data: {
     queues: any[]
+    nodes: Record<string, PulseNode[]>
     workers: WorkerReport[]
     totals: { waiting: number; delayed: number; failed: number }
   }) {
@@ -83,27 +109,71 @@ export class AlertService {
 
       // 2. Evaluate Rule
       switch (rule.type) {
-        case 'backlog':
-          if (data.totals.waiting >= rule.threshold) {
+        case 'backlog': {
+          const targetValue = rule.queue
+            ? data.queues.find((q) => q.name === rule.queue)?.waiting || 0
+            : data.totals.waiting
+
+          if (targetValue >= rule.threshold) {
             fired = true
             severity = 'critical'
-            message = `Queue backlog detected: ${data.totals.waiting} jobs waiting across all queues.`
+            message = rule.queue
+              ? `Queue backlog on ${rule.queue}: ${targetValue} jobs waiting.`
+              : `Queue backlog detected: ${targetValue} jobs waiting across all queues.`
           }
           break
+        }
 
-        case 'failure':
-          if (data.totals.failed >= rule.threshold) {
+        case 'failure': {
+          const targetValue = rule.queue
+            ? data.queues.find((q) => q.name === rule.queue)?.failed || 0
+            : data.totals.failed
+
+          if (targetValue >= rule.threshold) {
             fired = true
             severity = 'warning'
-            message = `High failure count: ${data.totals.failed} jobs are currently in failed state.`
+            message = rule.queue
+              ? `High failure count on ${rule.queue}: ${targetValue} jobs failed.`
+              : `High failure count: ${targetValue} jobs are currently in failed state.`
           }
           break
+        }
 
         case 'worker_lost':
           if (data.workers.length < rule.threshold) {
             fired = true
             severity = 'critical'
             message = `System Incident: Zero worker nodes detected! Jobs will not be processed.`
+          }
+          break
+
+        case 'node_cpu':
+          // Check all pulse nodes
+          for (const serviceNodes of Object.values(data.nodes)) {
+            for (const node of serviceNodes) {
+              if (node.cpu.process >= rule.threshold) {
+                fired = true
+                severity = 'warning'
+                message = `High CPU Usage on ${node.service} (${node.id}): ${node.cpu.process}%`
+                break
+              }
+            }
+            if (fired) break
+          }
+          break
+
+        case 'node_ram':
+          for (const serviceNodes of Object.values(data.nodes)) {
+            for (const node of serviceNodes) {
+              const usagePercent = (node.memory.process.rss / node.memory.system.total) * 100
+              if (usagePercent >= rule.threshold) {
+                fired = true
+                severity = 'warning'
+                message = `High RAM Usage on ${node.service} (${node.id}): ${usagePercent.toFixed(1)}%`
+                break
+              }
+            }
+            if (fired) break
           }
           break
       }
@@ -124,14 +194,9 @@ export class AlertService {
     }
   }
 
-  /**
-   * Send notification to external channels.
-   * Fire-and-forget to ensure zero impact on main loop latency.
-   */
   private notify(event: AlertEvent) {
     if (!this.webhookUrl) return
 
-    // Simple Slack formatting
     const payload = {
       text: `*Flux Console Alert [${event.severity.toUpperCase()}]*\n${event.message}\n_Time: ${new Date(event.timestamp).toISOString()}_`,
       attachments: [

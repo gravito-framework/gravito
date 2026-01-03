@@ -108,6 +108,7 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
     - [ ] (Future) Use **Redis ACL** (v6+) to restrict Agent's `transport` connection.
 - [x] **Server**: Add `CommandService` and `/api/pulse/command` endpoint.
 - [x] **UI**: Add "Retry/Delete" buttons in Zenith `PulsePage` for failed queue jobs.
+- [x] **Documentation**: Created `ALERTING_GUIDE.md` for configuration best practices.
 
 ### Phase 4: Polyglot Agent - **In Progress** 🟡
 *   [x] Create `gravito-framework/quasar` repo (`quasar-go`).

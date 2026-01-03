@@ -51,3 +51,18 @@ export interface PulseNode {
   runtime: PulseRuntime
   timestamp: number // Last heartbeat
 }
+export interface AlertRule {
+  id: string
+  name: string
+  type: 'backlog' | 'failure' | 'worker_lost' | 'node_cpu' | 'node_ram'
+  threshold: number
+  queue?: string // Optional: specific queue or all
+  cooldownMinutes: number
+}
+
+export interface AlertEvent {
+  ruleId: string
+  timestamp: number
+  message: string
+  severity: 'warning' | 'critical'
+}
