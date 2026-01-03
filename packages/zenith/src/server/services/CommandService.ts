@@ -114,6 +114,23 @@ export class CommandService {
     return this.deleteJob(service, '*', queue, jobKey, driver)
   }
 
+  /**
+   * Send a Laravel-specific action (retry-all, restart) to a node.
+   */
+  async laravelAction(
+    service: string,
+    nodeId: string,
+    action: 'retry-all' | 'restart' | 'retry',
+    jobId?: string
+  ): Promise<string> {
+    return this.sendCommand(service, nodeId, 'LARAVEL_ACTION', {
+      queue: 'default',
+      jobKey: '*',
+      action,
+      jobId,
+    })
+  }
+
   async disconnect(): Promise<void> {
     await this.redis.quit()
   }

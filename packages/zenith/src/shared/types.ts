@@ -49,6 +49,7 @@ export interface PulseNode {
   memory: PulseMemory
   queues?: QueueSnapshot[]
   runtime: PulseRuntime
+  meta?: any // Extra metadata like Laravel workers
   timestamp: number // Last heartbeat
 }
 export interface AlertRule {

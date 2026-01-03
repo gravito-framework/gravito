@@ -56,7 +56,7 @@ export interface QueueProbe {
  * Command types that Zenith can send to Quasar agents.
  * Scope is intentionally limited for security.
  */
-export type CommandType = 'RETRY_JOB' | 'DELETE_JOB'
+export type CommandType = 'RETRY_JOB' | 'DELETE_JOB' | 'LARAVEL_ACTION'
 
 /**
  * A command sent from Zenith to a Quasar agent.
@@ -70,6 +70,7 @@ export interface QuasarCommand {
     jobId?: string // Optional job identifier
     jobKey?: string // Redis key for the job (for direct access)
     driver?: 'redis' | 'laravel' // Queue driver type
+    action?: string // For LARAVEL_ACTION (e.g., 'retry-all', 'restart')
   }
   timestamp: number
   issuer: string // Who sent this (e.g., "zenith")

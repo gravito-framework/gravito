@@ -394,7 +394,7 @@ api.get('/pulse/nodes', async (c) => {
 // --- Pulse Remote Control (Phase 3) ---
 api.post('/pulse/command', async (c) => {
   try {
-    const { service, nodeId, type, queue, jobKey, driver } = await c.req.json()
+    const { service, nodeId, type, queue, jobKey, driver, action } = await c.req.json()
 
     // Validate required fields
     if (!service || !nodeId || !type || !queue || !jobKey) {
@@ -402,14 +402,18 @@ api.post('/pulse/command', async (c) => {
     }
 
     // Validate command type
-    if (type !== 'RETRY_JOB' && type !== 'DELETE_JOB') {
-      return c.json({ error: 'Invalid command type. Allowed: RETRY_JOB, DELETE_JOB' }, 400)
+    if (type !== 'RETRY_JOB' && type !== 'DELETE_JOB' && type !== 'LARAVEL_ACTION') {
+      return c.json(
+        { error: 'Invalid command type. Allowed: RETRY_JOB, DELETE_JOB, LARAVEL_ACTION' },
+        400
+      )
     }
 
     const commandId = await commandService.sendCommand(service, nodeId, type, {
       queue,
       jobKey,
       driver: driver || 'redis',
+      action,
     })
 
     return c.json({
