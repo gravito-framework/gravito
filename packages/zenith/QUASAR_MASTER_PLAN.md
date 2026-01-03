@@ -92,7 +92,7 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
     - `app`: Connection to Local App (for inspecting queues/bull/laravel).
 - [x] **Probe Implementation**: Create `QueueProbe` interface and implementations:
     - `RedisListProbe`: Simple `LLEN` checks.
-    - [ ] `BullProbe` (Future): Check `bull:*:waiting`, etc.
+    - [x] `BullProbe` (Future): Check `bull:*:waiting`, etc.
     - [x] `LaravelProbe`: Check `queues:default`, `queues:reserved`, `queues:delayed`.
 - [x] **SDK API**: Expose `.monitorQueue(name, type)` method.
 - [x] **UI Update**: Update `NodeCard` to render a "Queues" section if queue data is present in payload.
@@ -122,9 +122,13 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
 *   [x] Implement Remote Control in Go Agent:
     *   [x] Command Listener (Pub/Sub)
     *   [x] RETRY_JOB / DELETE_JOB Executors
+    *   [x] **Laravel Deep Integration**:
+        *   [x] `LARAVEL_ACTION` Executor (runs `artisan` safely).
+        *   [x] Auto-discovery of Laravel project root via process inspection.
+        *   [x] Support for `retry-all`, `retry {id}`, and `restart` (graceful worker reload).
 *   [x] Docker & Makefile setup.
 *   [x] Binary Release pipeline (GitHub Actions).
-*   [ ] Publish to Docker Hub (`carllee/quasar-go-agent`).
+*   [x] Publish to Docker Hub (`carllee/quasar-go-agent`).
 
 ---
 

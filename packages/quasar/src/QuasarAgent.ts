@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis'
 import { CommandListener } from './CommandListener'
+import { BullProbe } from './probes/BullProbe'
 import { LaravelProbe } from './probes/LaravelProbe'
 import { NodeProbe } from './probes/NodeProbe'
 import { RedisListProbe } from './probes/RedisListProbe'
@@ -132,7 +133,7 @@ export class QuasarAgent {
     console.log(`[Quasar] Agent stopped`)
   }
 
-  monitorQueue(name: string, type: 'redis' | 'laravel' = 'redis') {
+  monitorQueue(name: string, type: 'redis' | 'laravel' | 'bull' = 'redis') {
     if (!this.monitorRedis) {
       console.warn('[Quasar] Cannot monitor queue, no monitor connection provided.')
       return
@@ -142,6 +143,8 @@ export class QuasarAgent {
       this.queueProbes.push(new RedisListProbe(this.monitorRedis, name))
     } else if (type === 'laravel') {
       this.queueProbes.push(new LaravelProbe(this.monitorRedis, name))
+    } else if (type === 'bull') {
+      this.queueProbes.push(new BullProbe(this.monitorRedis, name))
     }
   }
 
