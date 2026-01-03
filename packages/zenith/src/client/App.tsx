@@ -8,11 +8,11 @@ import {
   LoginPage,
   MetricsPage,
   OverviewPage,
+  PulsePage,
   QueuesPage,
   SchedulesPage,
   SettingsPage,
   WorkersPage,
-  PulsePage,
 } from './pages'
 
 const queryClient = new QueryClient()

@@ -506,4 +506,3 @@ export function OverviewPage() {
     </div>
   )
 }
-

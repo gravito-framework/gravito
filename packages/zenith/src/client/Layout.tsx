@@ -64,7 +64,7 @@ export function Layout({ children }: LayoutProps) {
     fetch('/api/system/status')
       .then((res) => res.json())
       .then(setSystemStatus)
-      .catch(() => { })
+      .catch(() => {})
   }, [])
 
   // Global SSE Stream Manager
@@ -116,7 +116,7 @@ export function Layout({ children }: LayoutProps) {
     fetch('/api/queues')
       .then((res) => res.json())
       .then(setQueueData)
-      .catch(() => { })
+      .catch(() => {})
 
     // Optional: Listen to global stats if available (from OverviewPage) to keep queue stats fresh in command palette
     const handler = (e: Event) => {
@@ -255,15 +255,15 @@ export function Layout({ children }: LayoutProps) {
     },
     ...(isAuthEnabled
       ? [
-        {
-          id: 'sys-logout',
-          title: 'Logout',
-          description: 'Sign out from the console',
-          icon: <LogOut size={18} />,
-          category: 'System' as const,
-          action: logout,
-        },
-      ]
+          {
+            id: 'sys-logout',
+            title: 'Logout',
+            description: 'Sign out from the console',
+            icon: <LogOut size={18} />,
+            category: 'System' as const,
+            action: logout,
+          },
+        ]
       : []),
   ]
 
@@ -537,7 +537,6 @@ export function Layout({ children }: LayoutProps) {
               <div className="p-6 border-b flex items-center gap-4 bg-muted/5">
                 <Command className="text-primary animate-pulse" size={24} />
                 <input
-                  autoFocus
                   type="text"
                   placeholder="Execute command or navigate..."
                   className="flex-1 bg-transparent border-none outline-none text-lg font-bold placeholder:text-muted-foreground/30"

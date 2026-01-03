@@ -291,7 +291,9 @@ export function SettingsPage() {
                   defaultValue={alertConfig?.config?.channels?.slack?.webhookUrl || ''}
                   onBlur={async (e) => {
                     const val = e.target.value
-                    if (val === alertConfig?.config?.channels?.slack?.webhookUrl) return
+                    if (val === alertConfig?.config?.channels?.slack?.webhookUrl) {
+                      return
+                    }
                     await fetch('/api/alerts/config', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -362,7 +364,9 @@ export function SettingsPage() {
                   defaultValue={alertConfig?.config?.channels?.discord?.webhookUrl || ''}
                   onBlur={async (e) => {
                     const val = e.target.value
-                    if (val === alertConfig?.config?.channels?.discord?.webhookUrl) return
+                    if (val === alertConfig?.config?.channels?.discord?.webhookUrl) {
+                      return
+                    }
                     await fetch('/api/alerts/config', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -430,10 +434,14 @@ export function SettingsPage() {
               {alertConfig?.config?.channels?.email?.enabled && (
                 <div className="grid grid-cols-2 gap-3 mt-4 animate-in fade-in slide-in-from-top-2">
                   <div className="col-span-2 space-y-1">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground/60">
+                    <label
+                      htmlFor="email-to"
+                      className="text-[9px] font-black uppercase text-muted-foreground/60"
+                    >
                       Destination Address
                     </label>
                     <input
+                      id="email-to"
                       placeholder="admin@example.com"
                       defaultValue={alertConfig?.config?.channels?.email?.to || ''}
                       onBlur={async (e) => {
@@ -457,10 +465,14 @@ export function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground/60">
+                    <label
+                      htmlFor="smtp-host"
+                      className="text-[9px] font-black uppercase text-muted-foreground/60"
+                    >
                       SMTP Host
                     </label>
                     <input
+                      id="smtp-host"
                       placeholder="smtp.gmail.com"
                       defaultValue={alertConfig?.config?.channels?.email?.smtpHost || ''}
                       onBlur={async (e) => {
@@ -483,10 +495,14 @@ export function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground/60">
+                    <label
+                      htmlFor="smtp-port"
+                      className="text-[9px] font-black uppercase text-muted-foreground/60"
+                    >
                       Port
                     </label>
                     <input
+                      id="smtp-port"
                       type="number"
                       placeholder="465"
                       defaultValue={alertConfig?.config?.channels?.email?.smtpPort || 465}
@@ -510,10 +526,14 @@ export function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground/60">
+                    <label
+                      htmlFor="smtp-user"
+                      className="text-[9px] font-black uppercase text-muted-foreground/60"
+                    >
                       Username
                     </label>
                     <input
+                      id="smtp-user"
                       placeholder="user@example.com"
                       defaultValue={alertConfig?.config?.channels?.email?.smtpUser || ''}
                       onBlur={async (e) => {
@@ -536,10 +556,14 @@ export function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground/60">
+                    <label
+                      htmlFor="smtp-pass"
+                      className="text-[9px] font-black uppercase text-muted-foreground/60"
+                    >
                       Password
                     </label>
                     <input
+                      id="smtp-pass"
                       type="password"
                       placeholder="••••••••"
                       defaultValue={alertConfig?.config?.channels?.email?.smtpPass || ''}
@@ -563,10 +587,14 @@ export function SettingsPage() {
                     />
                   </div>
                   <div className="col-span-2 space-y-1">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground/60">
+                    <label
+                      htmlFor="email-from"
+                      className="text-[9px] font-black uppercase text-muted-foreground/60"
+                    >
                       From Address
                     </label>
                     <input
+                      id="email-from"
                       placeholder="Zenith Monitor <noreply@example.com>"
                       defaultValue={alertConfig?.config?.channels?.email?.from || ''}
                       onBlur={async (e) => {
@@ -598,6 +626,7 @@ export function SettingsPage() {
               Active Rules
             </h3>
             <button
+              type="button"
               onClick={() => setShowAddRule(!showAddRule)}
               className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline border-none bg-transparent cursor-pointer"
             >
@@ -630,10 +659,14 @@ export function SettingsPage() {
             >
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                  <label
+                    htmlFor="rule-name"
+                    className="text-[10px] font-black uppercase text-muted-foreground"
+                  >
                     Rule Name
                   </label>
                   <input
+                    id="rule-name"
                     name="name"
                     required
                     placeholder="High CPU"
@@ -641,10 +674,14 @@ export function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                  <label
+                    htmlFor="rule-type"
+                    className="text-[10px] font-black uppercase text-muted-foreground"
+                  >
                     Type
                   </label>
                   <select
+                    id="rule-type"
                     name="type"
                     className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none cursor-pointer"
                   >
@@ -658,10 +695,14 @@ export function SettingsPage() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                  <label
+                    htmlFor="rule-threshold"
+                    className="text-[10px] font-black uppercase text-muted-foreground"
+                  >
                     Threshold
                   </label>
                   <input
+                    id="rule-threshold"
                     name="threshold"
                     type="number"
                     required
@@ -670,10 +711,14 @@ export function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                  <label
+                    htmlFor="rule-cooldown"
+                    className="text-[10px] font-black uppercase text-muted-foreground"
+                  >
                     Cooldown (Min)
                   </label>
                   <input
+                    id="rule-cooldown"
                     name="cooldown"
                     type="number"
                     required
@@ -682,10 +727,14 @@ export function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground">
+                  <label
+                    htmlFor="rule-queue"
+                    className="text-[10px] font-black uppercase text-muted-foreground"
+                  >
                     Queue (Optional)
                   </label>
                   <input
+                    id="rule-queue"
                     name="queue"
                     placeholder="default"
                     className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none"
@@ -733,6 +782,7 @@ export function SettingsPage() {
                     {rule.cooldownMinutes}m
                   </div>
                   <button
+                    type="button"
                     onClick={async () => {
                       if (confirm('Delete this alert rule?')) {
                         await fetch(`/api/alerts/rules/${rule.id}`, { method: 'DELETE' })
@@ -799,6 +849,7 @@ export function SettingsPage() {
                     Auto-Cleanup
                   </span>
                   <button
+                    type="button"
                     onClick={async () => {
                       const enabled = !alertConfig?.maintenance?.autoCleanup
                       await fetch('/api/maintenance/config', {
@@ -813,7 +864,9 @@ export function SettingsPage() {
                     }}
                     className={cn(
                       'w-10 h-5 rounded-full p-1 transition-all flex items-center',
-                      alertConfig?.maintenance?.autoCleanup ? 'bg-green-500 justify-end' : 'bg-muted justify-start'
+                      alertConfig?.maintenance?.autoCleanup
+                        ? 'bg-green-500 justify-end'
+                        : 'bg-muted justify-start'
                     )}
                   >
                     <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
@@ -859,7 +912,8 @@ export function SettingsPage() {
                   </span>
                   {alertConfig?.maintenance?.lastRun && (
                     <span className="text-[10px] text-muted-foreground/60">
-                      Last auto-cleanup run: {new Date(alertConfig.maintenance.lastRun).toLocaleString()}
+                      Last auto-cleanup run:{' '}
+                      {new Date(alertConfig.maintenance.lastRun).toLocaleString()}
                     </span>
                   )}
                 </div>
