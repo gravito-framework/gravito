@@ -604,11 +604,32 @@ api.delete('/schedules/:id', async (c) => {
 })
 
 // --- Alerting ---
-api.get('/alerts/config', (c) => {
+api.get('/alerts/config', async (c) => {
   return c.json({
     rules: queueService.alerts.getRules(),
-    webhookEnabled: !!process.env.SLACK_WEBHOOK_URL,
+    config: queueService.alerts.getConfig(),
+    maintenance: await queueService.getMaintenanceConfig(),
   })
+})
+
+api.post('/maintenance/config', async (c) => {
+  const config = await c.req.json()
+  try {
+    await queueService.saveMaintenanceConfig(config)
+    return c.json({ success: true })
+  } catch (err) {
+    return c.json({ error: 'Failed to save maintenance config' }, 500)
+  }
+})
+
+api.post('/alerts/config', async (c) => {
+  const config = await c.req.json()
+  try {
+    await queueService.alerts.saveConfig(config)
+    return c.json({ success: true })
+  } catch (err) {
+    return c.json({ error: 'Failed to save alert config' }, 500)
+  }
 })
 
 api.post('/alerts/rules', async (c) => {

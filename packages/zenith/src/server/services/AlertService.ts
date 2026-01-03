@@ -1,15 +1,17 @@
 import { EventEmitter } from 'events'
 import { Redis } from 'ioredis'
-import type { AlertEvent, AlertRule, PulseNode } from '../../shared/types'
+import nodemailer from 'nodemailer'
+import type { AlertConfig, AlertEvent, AlertRule, PulseNode } from '../../shared/types'
 import type { WorkerReport } from './QueueService'
 
 export class AlertService {
   private redis: Redis
   private rules: AlertRule[] = []
+  private config: AlertConfig = { channels: {} }
   private cooldowns: Map<string, number> = new Map()
-  private webhookUrl: string | null = process.env.SLACK_WEBHOOK_URL || null
   private emitter = new EventEmitter()
   private readonly RULES_KEY = 'gravito:zenith:alerts:rules'
+  private readonly CONFIG_KEY = 'gravito:zenith:alerts:config'
 
   constructor(redisUrl: string) {
     this.redis = new Redis(redisUrl, {
@@ -41,13 +43,26 @@ export class AlertService {
       },
     ]
 
-    this.loadRules().catch((err) => console.error('[AlertService] Failed to load rules:', err))
+    // Default configuration (with env fallback for Slack)
+    if (process.env.SLACK_WEBHOOK_URL) {
+      this.config.channels.slack = {
+        enabled: true,
+        webhookUrl: process.env.SLACK_WEBHOOK_URL,
+      }
+    }
+
+    this.init().catch((err) => console.error('[AlertService] Failed to initialize:', err))
   }
 
   async connect() {
     if (this.redis.status === 'wait') {
       await this.redis.connect()
     }
+  }
+
+  private async init() {
+    await this.loadRules()
+    await this.loadConfig()
   }
 
   async loadRules() {
@@ -61,9 +76,25 @@ export class AlertService {
     }
   }
 
+  async loadConfig() {
+    try {
+      const data = await this.redis.get(this.CONFIG_KEY)
+      if (data) {
+        this.config = JSON.parse(data)
+      }
+    } catch (err) {
+      console.error('[AlertService] Error loading config from Redis:', err)
+    }
+  }
+
   async saveRules(rules: AlertRule[]) {
     this.rules = rules
     await this.redis.set(this.RULES_KEY, JSON.stringify(rules))
+  }
+
+  async saveConfig(config: AlertConfig) {
+    this.config = config
+    await this.redis.set(this.CONFIG_KEY, JSON.stringify(config))
   }
 
   async addRule(rule: AlertRule) {
@@ -74,10 +105,6 @@ export class AlertService {
   async deleteRule(id: string) {
     this.rules = this.rules.filter((r) => r.id !== id)
     await this.saveRules(this.rules)
-  }
-
-  setWebhook(url: string | null) {
-    this.webhookUrl = url
   }
 
   onAlert(callback: (event: AlertEvent) => void) {
@@ -194,9 +221,26 @@ export class AlertService {
     }
   }
 
-  private notify(event: AlertEvent) {
-    if (!this.webhookUrl) return
+  private async notify(event: AlertEvent) {
+    const { slack, discord, email } = this.config.channels
 
+    // 1. Notify Slack
+    if (slack?.enabled && slack.webhookUrl) {
+      this.sendToWebhook(slack.webhookUrl, 'Slack', event).catch(console.error)
+    }
+
+    // 2. Notify Discord
+    if (discord?.enabled && discord.webhookUrl) {
+      this.sendToWebhook(discord.webhookUrl, 'Discord', event).catch(console.error)
+    }
+
+    // 3. Notify Email
+    if (email?.enabled) {
+      this.sendEmail(email, event).catch(console.error)
+    }
+  }
+
+  private async sendToWebhook(url: string, platform: string, event: AlertEvent) {
     const payload = {
       text: `*Flux Console Alert [${event.severity.toUpperCase()}]*\n${event.message}\n_Time: ${new Date(event.timestamp).toISOString()}_`,
       attachments: [
@@ -205,21 +249,60 @@ export class AlertService {
           fields: [
             { title: 'Rule', value: event.ruleId, short: true },
             { title: 'Severity', value: event.severity, short: true },
+            { title: 'Platform', value: platform, short: true },
           ],
         },
       ],
     }
 
-    fetch(this.webhookUrl, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    }).catch((err) => {
-      console.error('[AlertService] Failed to send notification:', err.message)
+    })
+
+    if (!res.ok) {
+      throw new Error(`Failed to send to ${platform}: ${await res.text()}`)
+    }
+  }
+
+  private async sendEmail(config: any, event: AlertEvent) {
+    const transporter = nodemailer.createTransport({
+      host: config.smtpHost,
+      port: config.smtpPort,
+      secure: config.smtpPort === 465,
+      auth: {
+        user: config.smtpUser,
+        pass: config.smtpPass,
+      },
+    })
+
+    await transporter.sendMail({
+      from: config.from,
+      to: config.to,
+      subject: `[Zenith Alert] ${event.severity.toUpperCase()}: ${event.ruleId}`,
+      text: `${event.message}\n\nTimestamp: ${new Date(event.timestamp).toISOString()}\nSeverity: ${event.severity}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: ${event.severity === 'critical' ? '#ef4444' : '#f59e0b'}">
+            Zenith Alert: ${event.severity.toUpperCase()}
+          </h2>
+          <p style="font-size: 16px;">${event.message}</p>
+          <hr />
+          <p style="font-size: 12px; color: #666;">
+            Rule ID: ${event.ruleId}<br />
+            Time: ${new Date(event.timestamp).toISOString()}
+          </p>
+        </div>
+      `,
     })
   }
 
   getRules() {
     return this.rules
+  }
+
+  getConfig() {
+    return this.config
   }
 }

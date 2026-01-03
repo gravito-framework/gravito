@@ -66,3 +66,31 @@ export interface AlertEvent {
   message: string
   severity: 'warning' | 'critical'
 }
+
+export interface AlertConfig {
+  channels: {
+    slack?: {
+      enabled: boolean
+      webhookUrl: string
+    }
+    discord?: {
+      enabled: boolean
+      webhookUrl: string
+    }
+    email?: {
+      enabled: boolean
+      smtpHost: string
+      smtpPort: number
+      smtpUser: string
+      smtpPass: string
+      from: string
+      to: string // Comma separated list
+    }
+  }
+}
+
+export interface MaintenanceConfig {
+  autoCleanup: boolean
+  retentionDays: number
+  lastRun?: number // Timestamp
+}

@@ -124,6 +124,58 @@ export class QueueService {
         }
       }
     })
+
+    // Start Maintenance Loop
+    this.runMaintenanceLoop()
+  }
+
+  private async runMaintenanceLoop() {
+    // Initial delay to avoid startup congestion
+    setTimeout(() => {
+      const loop = async () => {
+        try {
+          await this.checkMaintenance()
+        } catch (err) {
+          console.error('[Maintenance] Task Error:', err)
+        }
+        // Check every hour (3600000 ms)
+        setTimeout(loop, 3600000)
+      }
+      loop()
+    }, 1000 * 30) // 30 seconds after boot
+  }
+
+  private async checkMaintenance() {
+    const config = await this.getMaintenanceConfig()
+    if (!config.autoCleanup) return
+
+    const now = Date.now()
+    const lastRun = config.lastRun || 0
+    const ONE_DAY = 24 * 60 * 60 * 1000
+
+    if (now - lastRun >= ONE_DAY) {
+      console.log(
+        `[Maintenance] Starting Auto-Cleanup (Retention: ${config.retentionDays} days)...`
+      )
+      const deleted = await this.cleanupArchive(config.retentionDays)
+      console.log(`[Maintenance] Cleanup Complete. Removed ${deleted} records.`)
+
+      // Update Last Run
+      await this.saveMaintenanceConfig({
+        ...config,
+        lastRun: now,
+      })
+    }
+  }
+
+  async getMaintenanceConfig(): Promise<any> {
+    const data = await this.redis.get('gravito:zenith:maintenance:config')
+    if (data) return JSON.parse(data)
+    return { autoCleanup: false, retentionDays: 30 }
+  }
+
+  async saveMaintenanceConfig(config: any): Promise<void> {
+    await this.redis.set('gravito:zenith:maintenance:config', JSON.stringify(config))
   }
 
   /**
