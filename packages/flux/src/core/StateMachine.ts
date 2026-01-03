@@ -13,8 +13,9 @@ import type { WorkflowStatus } from '../types'
  */
 const TRANSITIONS: Record<WorkflowStatus, WorkflowStatus[]> = {
   pending: ['running', 'failed'],
-  running: ['paused', 'completed', 'failed'],
+  running: ['paused', 'completed', 'failed', 'suspended'],
   paused: ['running', 'failed'],
+  suspended: ['running', 'failed'],
   completed: [], // terminal state
   failed: ['pending'], // allow retry
 }
