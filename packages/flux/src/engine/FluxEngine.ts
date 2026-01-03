@@ -145,6 +145,66 @@ export class FluxEngine {
   }
 
   /**
+   * Send a signal to a suspended workflow
+   */
+  async signal<TInput, TData = any>(
+    workflow: WorkflowBuilder<TInput, TData> | WorkflowDefinition<TInput, TData>,
+    workflowId: string,
+    signalName: string,
+    payload?: any
+  ): Promise<FluxResult<TData>> {
+    const definition = this.resolveDefinition(workflow)
+    const state = await this.storage.load(workflowId)
+    if (!state) {
+      throw new Error('Workflow not found')
+    }
+    if (state.status !== 'suspended') {
+      throw new Error(`Workflow is not suspended (status: ${state.status})`)
+    }
+
+    const ctx = this.contextManager.restore<TInput, TData>(state)
+    const currentStep = ctx.history[ctx.currentStep]
+
+    if (!currentStep || currentStep.status !== 'suspended') {
+      throw new Error('Workflow state invalid: no suspended step found')
+    }
+    if (currentStep.waitingFor !== signalName) {
+      throw new Error(
+        `Workflow waiting for signal "${currentStep.waitingFor}", received "${signalName}"`
+      )
+    }
+
+    // Complete the suspended step
+    currentStep.status = 'completed'
+    currentStep.completedAt = new Date()
+    currentStep.output = payload
+    // If payload contains data, we might want to merge it?
+    // For now, allow next step to access it via history or we need a cleaner way.
+    // Let's assume user grabs it from history for now or we build a helper later.
+
+    const stateMachine = new StateMachine()
+    stateMachine.forceStatus('suspended')
+    // ctx status will be updated to 'running' in runFrom
+
+    await this.emitTrace({
+      type: 'signal:received',
+      timestamp: Date.now(),
+      workflowId: ctx.id,
+      workflowName: ctx.name,
+      status: 'suspended',
+      input: payload,
+    })
+
+    // Resume from NEXT step
+    const nextStepIndex = ctx.currentStep + 1
+
+    return this.runFrom(definition, ctx, stateMachine, Date.now(), nextStepIndex, {
+      resume: true,
+      fromStep: nextStepIndex,
+    })
+  }
+
+  /**
    * Retry a specific step (replays from that step onward)
    */
   async retryStep<TInput, TData = any>(
@@ -274,15 +334,17 @@ export class FluxEngine {
       // Transition to running
       stateMachine.transition('running')
       Object.assign(ctx, { status: 'running' })
-      await this.emitTrace({
-        type: 'workflow:start',
-        timestamp: Date.now(),
-        workflowId: ctx.id,
-        workflowName: ctx.name,
-        status: ctx.status,
-        input: ctx.input,
-        meta,
-      })
+      if (!meta?.resume) {
+        await this.emitTrace({
+          type: 'workflow:start',
+          timestamp: Date.now(),
+          workflowId: ctx.id,
+          workflowName: ctx.name,
+          status: ctx.status,
+          input: ctx.input,
+          meta,
+        })
+      }
 
       // Execute steps
       for (let i = startIndex; i < definition.steps.length; i++) {
@@ -312,6 +374,32 @@ export class FluxEngine {
         const result = await this.executor.execute(step, ctx, execution)
 
         if (result.success) {
+          if (result.suspended) {
+            // Handle suspension
+            stateMachine.transition('suspended')
+            Object.assign(ctx, { status: 'suspended' })
+
+            await this.emitTrace({
+              type: 'step:suspend',
+              timestamp: Date.now(),
+              workflowId: ctx.id,
+              workflowName: ctx.name,
+              stepName: step.name,
+              stepIndex: i,
+              meta: { signal: result.waitingFor },
+            })
+
+            await this.storage.save(this.contextManager.toState<TInput, TData>(ctx))
+
+            return {
+              id: ctx.id,
+              status: 'suspended',
+              data: ctx.data as TData,
+              history: ctx.history,
+              duration: Date.now() - startTime,
+            }
+          }
+
           // Emit step complete event
           this.config.on?.stepComplete?.(step.name, ctx as any, result)
           if (execution.status === 'skipped') {
