@@ -403,7 +403,7 @@ export class QueueService {
       }
     } while (cursor !== '0')
 
-    return workers
+    return workers.sort((a, b) => a.id.localeCompare(b.id))
   }
 
   /**

@@ -109,11 +109,21 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
 - [x] **Server**: Add `CommandService` and `/api/pulse/command` endpoint.
 - [x] **UI**: Add "Retry/Delete" buttons in Zenith `PulsePage` for failed queue jobs.
 
-### Phase 4: Polyglot Agent (Future) 🔮
-*   [ ] Create `gravito-framework/quasar` repo.
-*   [ ] Develop Go Agent (utilizing `gopsutil`).
-*   [ ] Implement "Laravel Adapter" inside the Go Agent (reading Redis/DB).
-*   [ ] Docker & Binary Release pipeline.
+### Phase 4: Polyglot Agent - **In Progress** 🟡
+*   [x] Create `gravito-framework/quasar` repo (`quasar-go`).
+*   [x] Develop Go Agent core (utilizing `gopsutil`).
+    *   [x] System Probe (CPU/RAM)
+    *   [x] Agent heartbeat loop
+    *   [x] Config management (env vars)
+*   [x] Implement Queue Monitoring in Go Agent:
+    *   [x] Redis List Probe
+    *   [x] Laravel Queue Probe
+*   [x] Implement Remote Control in Go Agent:
+    *   [x] Command Listener (Pub/Sub)
+    *   [x] RETRY_JOB / DELETE_JOB Executors
+*   [x] Docker & Makefile setup.
+*   [x] Binary Release pipeline (GitHub Actions).
+*   [ ] Publish to Docker Hub (`carllee/quasar-go-agent`).
 
 ---
 

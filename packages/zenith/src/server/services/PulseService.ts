@@ -52,7 +52,12 @@ export class PulseService {
     // Group by service
     const grouped: Record<string, PulseNode[]> = {}
 
-    nodes.sort((a, b) => b.timestamp - a.timestamp) // Newest first
+    // Sort nodes by service name, then by node id for stable UI positions
+    nodes.sort((a, b) => {
+      const sComp = a.service.localeCompare(b.service)
+      if (sComp !== 0) return sComp
+      return a.id.localeCompare(b.id)
+    })
 
     for (const node of nodes) {
       if (!grouped[node.service]) {

@@ -305,7 +305,7 @@ export function PulsePage() {
         )
     }
 
-    const services = Object.entries(nodes)
+    const services = Object.entries(nodes).sort(([a], [b]) => a.localeCompare(b))
 
     return (
         <div className="min-h-screen bg-background text-foreground pb-20">
