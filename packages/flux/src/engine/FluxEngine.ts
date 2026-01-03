@@ -342,12 +342,14 @@ export class FluxEngine {
       error: originalError.message,
     })
 
+    let compensatedCount = 0
+
     // Iterate backwards from the step BEFORE the failed one
     for (let i = failedAtIndex - 1; i >= 0; i--) {
       const step = definition.steps[i]
       const execution = ctx.history[i]
 
-      // Only compensate completed steps
+      // Only compensate completed steps with compensation handler
       if (!step || !step.compensate || !execution || execution.status !== 'completed') {
         continue
       }
@@ -360,6 +362,7 @@ export class FluxEngine {
 
         execution.status = 'compensated'
         execution.compensatedAt = new Date()
+        compensatedCount++
 
         await this.emitTrace({
           type: 'step:compensate',
@@ -389,14 +392,19 @@ export class FluxEngine {
       await this.storage.save(this.contextManager.toState<TInput, TData>(ctx))
     }
 
-    Object.assign(ctx, { status: 'rolled_back' })
-    await this.emitTrace({
-      type: 'workflow:rollback_complete',
-      timestamp: Date.now(),
-      workflowId: ctx.id,
-      workflowName: ctx.name,
-      status: 'rolled_back',
-    })
+    if (compensatedCount > 0) {
+      Object.assign(ctx, { status: 'rolled_back' })
+      await this.emitTrace({
+        type: 'workflow:rollback_complete',
+        timestamp: Date.now(),
+        workflowId: ctx.id,
+        workflowName: ctx.name,
+        status: 'rolled_back',
+      })
+    } else {
+      // No compensation occurred, revert to failed status
+      Object.assign(ctx, { status: 'failed' })
+    }
   }
 
   private async runFrom<TInput, TData = any>(
