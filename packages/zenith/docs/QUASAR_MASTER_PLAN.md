@@ -77,14 +77,14 @@ All agents/SDKs report to Redis using this unified schema.
 
 ---
 
-### Phase 2: Architecture Evolution - "The Brain-Hand Model" 🧠 🖐️
+### Phase 2: Architecture Evolution - "The Brain-Hand Model" 🧠 🖐️ - **Completed** ✅
 To support advanced features like **Queue Insights** (Phase 2) and **Remote Control** (Phase 3), we are adopting a bidirectional architecture.
 
 *   **Metric Transport (The Mouth)**: Agent sends metrics to Zenith (via shared Redis).
 *   **Local Insight (The Eyes)**: Agent inspects *its own* environment (Local Redis, Local Queue) to gather data. Zenith doesn't need to connect to the App DB directly.
 *   **Command execution (The Hand)**: Zenith publishes commands (Retry/Delete), and Agent listens and executes them locally.
 
-#### Revised Phase 2: Application Insights (Queues) - **In Progress** 🟡
+#### Revised Phase 2: Application Insights (Queues) - **Completed** ✅
 **Goal**: Enable Quasar Agent to "see" local queues and report their status.
 
 - [x] **SDK Architecture**: Update `QuasarAgent` to handle **Dual Connections**:
@@ -110,7 +110,7 @@ To support advanced features like **Queue Insights** (Phase 2) and **Remote Cont
 - [x] **UI**: Add "Retry/Delete" buttons in Zenith `PulsePage` for failed queue jobs.
 - [x] **Documentation**: Created `ALERTING_GUIDE.md` for configuration best practices.
 
-### Phase 4: Polyglot Agent - **In Progress** 🟡
+### Phase 4: Polyglot Agent - **Completed** ✅
 *   [x] Create `gravito-framework/quasar` repo (`quasar-go`).
 *   [x] Develop Go Agent core (utilizing `gopsutil`).
     *   [x] System Probe (CPU/RAM)
